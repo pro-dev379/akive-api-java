@@ -1,0 +1,14 @@
+spring:
+  config:
+    import: aws-secretsmanager:/secrets/akive/prod/db
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+  data:
+    redis:
+      host: master.akive-redis-prod.3ay8cv.apn2.cache.amazonaws.com
+logging:
+  level:
+    org.hibernate.SQL: info
+    org.hibernate.orm.jdbc.bind: off

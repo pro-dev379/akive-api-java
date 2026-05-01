@@ -1,0 +1,4 @@
+spring:
+  data:
+    redis:
+      host: master.akive-redis-dev.3ay8cv.apn2.cache.amazonaws.com

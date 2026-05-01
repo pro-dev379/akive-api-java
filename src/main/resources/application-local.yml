@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/akive?characterEncoding=UTF-8
+  data:
+    redis:
+      host: localhost
