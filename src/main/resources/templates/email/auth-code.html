@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AKIVE 이메일 인증</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f7fb; font-family: Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; color: #001054;">
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f5f7fb; margin: 0; padding: 24px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+
+                <tr>
+                    <td style="padding: 32px 32px 20px; background-color: #001054;">
+                        <div style="font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px;">
+                            AKIVE
+                        </div>
+                        <div style="margin-top: 8px; font-size: 14px; color: #d1d5db;">
+                            이메일 인증 코드 안내
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 32px;">
+                        <p style="margin: 0 0 12px; font-size: 16px; line-height: 1.6;">
+                            안녕하세요, AKIVE입니다.
+                        </p>
+
+                        <p style="margin: 0 0 20px; font-size: 15px; line-height: 1.8; color: #374151;">
+                            이메일 인증을 위한 인증 코드를 보내드려요.<br />
+                            아래 인증 코드를 입력해 인증을 완료해 주세요.
+                        </p>
+
+                        <div style="margin: 28px 0; text-align: center;">
+                            <div style="display: inline-block; padding: 18px 28px; background-color: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 14px;">
+                                <span th:text="${authCode}"
+                                      style="font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #001054;">
+                                    123456
+                                </span>
+                            </div>
+                        </div>
+
+                        <p style="margin: 0 0 10px; font-size: 14px; line-height: 1.7; color: #4b5563;">
+                            인증 코드 유효시간은
+                            <strong th:text="|${expireMin}분|">5분</strong>
+                            입니다.
+                        </p>
+
+                        <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #4b5563;">
+                            본인이 요청하지 않았다면 이 이메일을 무시해 주세요.
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 20px 32px 32px; border-top: 1px solid #f3f4f6;">
+                        <p style="margin: 0 0 8px; font-size: 12px; line-height: 1.6; color: #9ca3af;">
+                            본 메일은 발신 전용입니다.
+                        </p>
+                        <p style="margin: 0; font-size: 12px; line-height: 1.6; color: #9ca3af;">
+                            © AKIVE. All rights reserved.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
