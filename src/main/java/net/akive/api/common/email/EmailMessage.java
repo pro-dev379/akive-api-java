@@ -1,9 +1,21 @@
 package net.akive.api.common.email;
 
-import lombok.Builder;
-
 import java.util.List;
 
-@Builder
-public record EmailMessage(String from, List<String> to, String subject, String content) {
+public record EmailMessage(
+        String from,
+        List<String> to,
+        String subject,
+        String content
+) {
+
+    private final static String DEFAULT_FROM = "akive@akive.net";
+
+    public static EmailMessage of(
+            List<String> to,
+            String subject,
+            String content
+    ) {
+        return new EmailMessage(DEFAULT_FROM, to, subject, content);
+    }
 }

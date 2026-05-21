@@ -13,30 +13,34 @@ public class EmailSender {
     private static final String DEFAULT_CHARSET = "UTF-8";
 
     public void sendHtml(EmailMessage emailMessage) {
-        SendEmailRequest request = createSendEmailRequest(emailMessage);
-        sesClient.sendEmail(request);
+        sesClient.sendEmail(toSendEmailRequest(emailMessage));
     }
 
-    private SendEmailRequest createSendEmailRequest(EmailMessage emailMessage) {
-        Destination destination = Destination.builder()
+    private SendEmailRequest toSendEmailRequest(EmailMessage emailMessage) {
+        return SendEmailRequest.builder()
+                .source(emailMessage.from())
+                .destination(toDestination(emailMessage))
+                .message(toSesMessage(emailMessage))
+                .build();
+    }
+
+    private Destination toDestination(EmailMessage emailMessage) {
+        return Destination.builder()
                 .toAddresses(emailMessage.to())
                 .build();
 
-        Message message = Message.builder()
-                .subject(createContent(emailMessage.subject()))
-                .body(Body.builder()
-                        .html(createContent(emailMessage.content()))
-                        .build())
-                .build();
+    }
 
-        return SendEmailRequest.builder()
-                .source(emailMessage.from())
-                .destination(destination)
-                .message(message)
+    private Message toSesMessage(EmailMessage emailMessage) {
+        return Message.builder()
+                .subject(toContent(emailMessage.subject()))
+                .body(Body.builder()
+                        .html(toContent(emailMessage.content()))
+                        .build())
                 .build();
     }
 
-    private Content createContent(String value) {
+    private Content toContent(String value) {
         return Content.builder()
                 .charset(DEFAULT_CHARSET)
                 .data(value)

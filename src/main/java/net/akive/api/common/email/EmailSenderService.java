@@ -8,15 +8,10 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class EmailService {
+public class EmailSenderService {
 
     private final EmailSender emailSender;
     private final EmailTemplateRenderer emailTemplateRenderer;
-    private final static String FROM = "akive@akive.net";
-
-    public void sendHtml(EmailMessage emailMessage) {
-        emailSender.sendHtml(emailMessage);
-    }
 
     public void sendTemplateHtml(
             List<String> to,
@@ -25,14 +20,7 @@ public class EmailService {
             Map<String, Object> variables
     ) {
         String content = emailTemplateRenderer.render(templatePath, variables);
-
-        EmailMessage emailMessage = EmailMessage.builder()
-                .from(FROM)
-                .to(to)
-                .subject(subject)
-                .content(content)
-                .build();
-
+        EmailMessage emailMessage = EmailMessage.of(to, subject, content);
         emailSender.sendHtml(emailMessage);
     }
 }
