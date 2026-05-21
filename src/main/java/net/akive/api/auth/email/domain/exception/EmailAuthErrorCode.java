@@ -1,4 +1,4 @@
-package net.akive.api.auth.email.exception;
+package net.akive.api.auth.email.domain.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

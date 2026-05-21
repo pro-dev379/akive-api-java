@@ -1,6 +1,7 @@
-package net.akive.api.auth.email.repository;
+package net.akive.api.auth.email.infrastructure;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.auth.email.application.port.out.EmailAuthRepository;
 import net.akive.api.auth.email.domain.EmailAuth;
 import net.akive.api.auth.email.domain.EmailAuthPurpose;
 import net.akive.api.common.cache.CacheKeyProvider;
@@ -12,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class EmailAuthCacheRepository {
+public class EmailAuthCacheRepository implements EmailAuthRepository {
 
     private final RedisTemplateClient redisTemplateClient;
 
@@ -20,8 +21,8 @@ public class EmailAuthCacheRepository {
         return redisTemplateClient.get(createKey(authPurpose, email), EmailAuth.class);
     }
 
-    public void save(EmailAuthPurpose authPurpose, String email, EmailAuth emailAuth, Duration ttl) {
-        redisTemplateClient.set(createKey(authPurpose, email), emailAuth, ttl);
+    public void save(EmailAuthPurpose authPurpose, String email, EmailAuth emailAuth, Duration expireDuration) {
+        redisTemplateClient.set(createKey(authPurpose, email), emailAuth, expireDuration);
     }
 
     public void delete(EmailAuthPurpose authPurpose, String email) {
