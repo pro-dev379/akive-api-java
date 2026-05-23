@@ -1,11 +1,11 @@
 package net.akive.api.auth.email.domain;
 
 import lombok.*;
-import net.akive.api.auth.email.domain.exception.EmailAuthResendLimitExceededException;
-import net.akive.api.auth.email.domain.exception.EmailAuthResendTooSoonException;
+import net.akive.api.auth.email.domain.exception.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static net.akive.api.auth.email.domain.EmailAuthPolicy.*;
 
@@ -46,6 +46,22 @@ public class EmailAuth {
         this.verified = false;
         this.expiredAt = requestedAt.plus(EXPIRE_DURATION);
         this.lastSentAt = requestedAt;
+    }
+
+    public void verify(String inputAuthCode, LocalDateTime requestedAt) {
+        if (this.verified) {
+            throw new EmailAuthAlreadyVerifiedException();
+        }
+
+        if (this.expiredAt.isBefore(requestedAt)) {
+            throw new EmailAuthExpiredException();
+        }
+
+        if (!Objects.equals(this.authCode, inputAuthCode)) {
+            throw new EmailAuthCodeMismatchException();
+        }
+
+        this.verified = true;
     }
 
     private void validateResendAvailable(LocalDateTime requestedAt) {

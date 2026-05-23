@@ -7,8 +7,7 @@ import net.akive.api.auth.email.application.port.out.EmailAuthRepository;
 import net.akive.api.auth.email.application.port.out.EmailAuthUserValidator;
 import net.akive.api.auth.email.domain.EmailAuth;
 import net.akive.api.auth.email.domain.EmailAuthPurpose;
-import net.akive.api.auth.email.domain.exception.EmailAuthResendLimitExceededException;
-import net.akive.api.auth.email.domain.exception.EmailAuthResendTooSoonException;
+import net.akive.api.auth.email.domain.exception.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.*;
 import java.util.Optional;
 
+import static net.akive.api.auth.email.domain.EmailAuthPolicy.EXPIRE_DURATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -161,7 +161,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 인증번호_재전송_가능_시간_이전이면_예외가_발생하고_저장하지_않는다() {
+    void 인증_번호_재전송_가능_시간_이전이면_예외가_발생하고_저장하지_않는다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -187,7 +187,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 인증번호_재전송_횟수를_초과하면_메일을_전송하지_않고_저장하지_않는다() {
+    void 인증_번호_재전송_횟수를_초과하면_메일을_전송하지_않고_저장하지_않는다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -209,6 +209,141 @@ class EmailAuthServiceTest {
         then(emailAuthMailSender)
                 .should(never())
                 .sendAuthCode(any(), any(), any());
+
+        then(emailAuthRepository)
+                .should(never())
+                .save(any(), any());
+    }
+
+    @Test
+    void 이메일_인증번호를_검증한다() {
+        // given
+        String email = "test@test.com";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
+        String authCode = "123456";
+
+        LocalDateTime requestedAt = LocalDateTime.now(clock).minusMinutes(1);
+        EmailAuth emailAuth = EmailAuth.create(
+                email,
+                authPurpose,
+                authCode,
+                requestedAt
+        );
+
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
+                .willReturn(Optional.of(emailAuth));
+
+        // when
+        emailAuthService.verifyAuthCode(email, authPurpose, authCode);
+
+        // then
+        then(emailAuthRepository)
+                .should()
+                .save(
+                        argThat(savedEmailAuth ->
+                                savedEmailAuth.isVerified()
+                                        && savedEmailAuth.getEmail().equals(email)
+                                        && savedEmailAuth.getAuthPurpose() == authPurpose
+                        ),
+                        eq(Duration.ofMinutes(15))
+                );
+    }
+
+    @Test
+    void 이메일_인증_정보가_없으면_예외가_발생한다() {
+        // given
+        String email = "test@test.com";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
+        String authCode = "123456";
+
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() ->
+                emailAuthService.verifyAuthCode(email, authPurpose, authCode)
+        ).isInstanceOf(EmailAuthNotFoundException.class);
+
+        then(emailAuthRepository)
+                .should(never())
+                .save(any(), any());
+    }
+
+    @Test
+    void 이메일_인증번호가_일치하지_않으면_예외가_발생하고_저장하지_않는다() {
+        // given
+        String email = "test@test.com";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
+
+        EmailAuth emailAuth = EmailAuth.create(
+                email,
+                authPurpose,
+                "123456",
+                LocalDateTime.now(clock).minusMinutes(1)
+        );
+
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
+                .willReturn(Optional.of(emailAuth));
+
+        // when & then
+        assertThatThrownBy(() ->
+                emailAuthService.verifyAuthCode(email, authPurpose, "000000")
+        ).isInstanceOf(EmailAuthCodeMismatchException.class);
+
+        then(emailAuthRepository)
+                .should(never())
+                .save(any(), any());
+    }
+
+    @Test
+    void 이메일_인증번호가_만료되면_예외가_발생하고_저장하지_않는다() {
+        // given
+        String email = "test@test.com";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
+        String authCode = "123456";
+
+        EmailAuth emailAuth = EmailAuth.create(
+                email,
+                authPurpose,
+                authCode,
+                LocalDateTime.now(clock).minus(EXPIRE_DURATION).minusSeconds(1)
+        );
+
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
+                .willReturn(Optional.of(emailAuth));
+
+        // when & then
+        assertThatThrownBy(() ->
+                emailAuthService.verifyAuthCode(email, authPurpose, authCode)
+        ).isInstanceOf(EmailAuthExpiredException.class);
+
+        then(emailAuthRepository)
+                .should(never())
+                .save(any(), any());
+    }
+
+    @Test
+    void 이미_인증된_경우_예외가_발생하고_저장하지_않는다() {
+        // given
+        String email = "test@test.com";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
+        String authCode = "123456";
+
+        EmailAuth emailAuth = EmailAuth.create(
+                email,
+                authPurpose,
+                authCode,
+                LocalDateTime.now(clock).minusMinutes(2)
+        );
+        emailAuth.verify(authCode, LocalDateTime.now(clock).minusMinutes(1));
+
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
+                .willReturn(Optional.of(emailAuth));
+
+        // when & then
+        assertThatThrownBy(() ->
+                emailAuthService.verifyAuthCode(email, authPurpose, authCode)
+        ).isInstanceOf(EmailAuthAlreadyVerifiedException.class);
 
         then(emailAuthRepository)
                 .should(never())
