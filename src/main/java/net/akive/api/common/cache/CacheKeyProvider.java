@@ -7,7 +7,7 @@ import net.akive.api.auth.email.domain.EmailAuthPurpose;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CacheKeyProvider {
 
-    public static String emailAuth(EmailAuthPurpose authPurpose, String email) {
-        return "email-auth:%s:%s".formatted(authPurpose.getCode(), email);
+    public static String emailAuth(String email, EmailAuthPurpose authPurpose) {
+        return "email-auth:%s:%s".formatted(email, authPurpose.getCode());
     }
 }

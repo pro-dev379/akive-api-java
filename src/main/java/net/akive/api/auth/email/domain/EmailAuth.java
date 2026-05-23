@@ -10,10 +10,12 @@ import java.time.LocalDateTime;
 import static net.akive.api.auth.email.domain.EmailAuthPolicy.*;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class EmailAuth {
 
+    private String email;
+    private EmailAuthPurpose authPurpose;
     private String authCode;
     private int resendCount;
     private boolean verified;
@@ -21,32 +23,33 @@ public class EmailAuth {
     private LocalDateTime lastSentAt;
     private LocalDateTime createdAt;
 
-    public static EmailAuth create(String authCode, LocalDateTime requestedAt) {
-        return new EmailAuth(
-                authCode,
-                0,
-                false,
-                requestedAt.plus(EXPIRE_DURATION),
-                requestedAt,
-                requestedAt
-        );
+    public EmailAuth(String email, EmailAuthPurpose authPurpose, String authCode, LocalDateTime requestedAt) {
+        this.email = email;
+        this.authPurpose = authPurpose;
+        this.authCode = authCode;
+        this.resendCount = 0;
+        this.verified = false;
+        this.expiredAt = requestedAt.plus(EXPIRE_DURATION);
+        this.lastSentAt = requestedAt;
+        this.createdAt = requestedAt;
     }
 
-    public EmailAuth renew(String authCode, LocalDateTime requestedAt) {
+    public static EmailAuth create(String email, EmailAuthPurpose authPurpose, String authCode, LocalDateTime requestedAt) {
+        return new EmailAuth(email, authPurpose, authCode, requestedAt);
+    }
+
+    public void renew(String authCode, LocalDateTime requestedAt) {
         validateResendAvailable(requestedAt);
 
-        return new EmailAuth(
-                authCode,
-                this.resendCount + 1,
-                false,
-                requestedAt.plus(EXPIRE_DURATION),
-                requestedAt,
-                this.createdAt
-        );
+        this.authCode = authCode;
+        this.resendCount++;
+        this.verified = false;
+        this.expiredAt = requestedAt.plus(EXPIRE_DURATION);
+        this.lastSentAt = requestedAt;
     }
 
     private void validateResendAvailable(LocalDateTime requestedAt) {
-        if (this.resendCount >= MAX_RESEND_COUNT) {
+        if (MAX_RESEND_COUNT <= this.resendCount) {
             throw new EmailAuthResendLimitExceededException();
         }
 

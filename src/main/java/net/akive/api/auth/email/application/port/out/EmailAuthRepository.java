@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface EmailAuthRepository {
 
-    Optional<EmailAuth> findByPurposeAndEmail(EmailAuthPurpose authPurpose, String email);
-    void save(EmailAuthPurpose authPurpose, String email, EmailAuth emailAuth, Duration expireDuration);
-    void delete(EmailAuthPurpose authPurpose, String email);
+    Optional<EmailAuth> findByEmailAndPurpose(String email, EmailAuthPurpose authPurpose);
+    void save(EmailAuth emailAuth, Duration expireDuration);
+    void delete(EmailAuth emailAuth);
 }

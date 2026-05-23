@@ -15,11 +15,13 @@ class EmailAuthTest {
     @Test
     void 이메일_인증_정보를_생성한다() {
         // given
+        String email = "test@test.com";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
         String authCode = "123456";
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
 
         // when
-        EmailAuth emailAuth = EmailAuth.create(authCode, requestedAt);
+        EmailAuth emailAuth = EmailAuth.create(email, authPurpose, authCode, requestedAt);
 
         // then
         assertThat(emailAuth.getAuthCode()).isEqualTo(authCode);
@@ -36,25 +38,25 @@ class EmailAuthTest {
         LocalDateTime firstRequestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
         LocalDateTime secondRequestedAt = firstRequestedAt.plus(RESEND_INTERVAL);
 
-        EmailAuth emailAuth = EmailAuth.create("123456", firstRequestedAt);
+        EmailAuth emailAuth = EmailAuth.create("test@test.com", EmailAuthPurpose.JOIN, "123456", firstRequestedAt);
 
         // when
-        EmailAuth renewedEmailAuth = emailAuth.renew("654321", secondRequestedAt);
+        emailAuth.renew("654321", secondRequestedAt);
 
         // then
-        assertThat(renewedEmailAuth.getAuthCode()).isEqualTo("654321");
-        assertThat(renewedEmailAuth.getResendCount()).isEqualTo(1);
-        assertThat(renewedEmailAuth.isVerified()).isFalse();
-        assertThat(renewedEmailAuth.getExpiredAt()).isEqualTo(secondRequestedAt.plus(EXPIRE_DURATION));
-        assertThat(renewedEmailAuth.getLastSentAt()).isEqualTo(secondRequestedAt);
-        assertThat(renewedEmailAuth.getCreatedAt()).isEqualTo(firstRequestedAt);
+        assertThat(emailAuth.getAuthCode()).isEqualTo("654321");
+        assertThat(emailAuth.getResendCount()).isEqualTo(1);
+        assertThat(emailAuth.isVerified()).isFalse();
+        assertThat(emailAuth.getExpiredAt()).isEqualTo(secondRequestedAt.plus(EXPIRE_DURATION));
+        assertThat(emailAuth.getLastSentAt()).isEqualTo(secondRequestedAt);
+        assertThat(emailAuth.getCreatedAt()).isEqualTo(firstRequestedAt);
     }
 
     @Test
     void 재전송_가능_시간_이전에_갱신하면_예외가_발생한다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
-        EmailAuth emailAuth = EmailAuth.create("123456", requestedAt);
+        EmailAuth emailAuth = EmailAuth.create("test@test.com", EmailAuthPurpose.JOIN, "123456", requestedAt);
 
         // when & then
         assertThatThrownBy(() -> emailAuth.renew("654321", requestedAt.plusSeconds(10)))
@@ -65,18 +67,14 @@ class EmailAuthTest {
     void 재전송_최대_횟수를_초과하면_예외가_발생한다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
+        EmailAuth emailAuth = EmailAuth.create("test@test.com", EmailAuthPurpose.JOIN, "123456", requestedAt);
 
-        EmailAuth emailAuth = new EmailAuth(
-                "123456",
-                MAX_RESEND_COUNT,
-                false,
-                requestedAt.plus(EXPIRE_DURATION),
-                requestedAt.minus(RESEND_INTERVAL),
-                requestedAt.minus(RESEND_INTERVAL)
-        );
+        emailAuth.renew("111111", requestedAt.plusMinutes(1));
+        emailAuth.renew("222222", requestedAt.plusMinutes(2));
+        emailAuth.renew("333333", requestedAt.plusMinutes(3));
 
         // when & then
-        assertThatThrownBy(() -> emailAuth.renew("654321", requestedAt))
+        assertThatThrownBy(() -> emailAuth.renew("444444", requestedAt.plusMinutes(4)))
                 .isInstanceOf(EmailAuthResendLimitExceededException.class);
     }
 }

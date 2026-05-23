@@ -56,22 +56,16 @@ class EmailAuthRedisAdapterTest {
     @Test
     void 이메일_인증_정보를_저장하고_조회한다() {
         // given
-        EmailAuthPurpose purpose = EmailAuthPurpose.JOIN;
         String email = "test@test.com";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
-
-        EmailAuth emailAuth = EmailAuth.create("123456", requestedAt);
+        EmailAuth emailAuth = EmailAuth.create(email, authPurpose, "123456", requestedAt);
 
         // when
-        emailAuthRedisAdapter.save(
-                purpose,
-                email,
-                emailAuth,
-                Duration.ofMinutes(5)
-        );
+        emailAuthRedisAdapter.save(emailAuth, Duration.ofMinutes(5));
 
         Optional<EmailAuth> found =
-                emailAuthRedisAdapter.findByPurposeAndEmail(purpose, email);
+                emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
 
         // then
         assertThat(found).isPresent();
@@ -86,26 +80,23 @@ class EmailAuthRedisAdapterTest {
     @Test
     void 이메일_인증_정보를_삭제한다() {
         // given
-        EmailAuthPurpose purpose = EmailAuthPurpose.JOIN;
         String email = "test@test.com";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
         EmailAuth emailAuth = EmailAuth.create(
+                email,
+                authPurpose,
                 "123456",
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
-        emailAuthRedisAdapter.save(
-                purpose,
-                email,
-                emailAuth,
-                Duration.ofMinutes(5)
-        );
+        emailAuthRedisAdapter.save(emailAuth, Duration.ofMinutes(5));
 
         // when
-        emailAuthRedisAdapter.delete(purpose, email);
+        emailAuthRedisAdapter.delete(emailAuth);
 
         // then
         Optional<EmailAuth> found =
-                emailAuthRedisAdapter.findByPurposeAndEmail(purpose, email);
+                emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
 
         assertThat(found).isEmpty();
     }
@@ -113,24 +104,21 @@ class EmailAuthRedisAdapterTest {
     @Test
     void 저장된_이메일_인증_정보는_TTL이_지나면_만료된다() throws Exception {
         // given
-        EmailAuthPurpose purpose = EmailAuthPurpose.JOIN;
         String email = "test@test.com";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
         EmailAuth emailAuth = EmailAuth.create(
+                email,
+                authPurpose,
                 "123456",
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
         // when
-        emailAuthRedisAdapter.save(
-                purpose,
-                email,
-                emailAuth,
-                Duration.ofMillis(300)
-        );
+        emailAuthRedisAdapter.save(emailAuth, Duration.ofMillis(300));
 
         Thread.sleep(500);
 
-        Optional<EmailAuth> found = emailAuthRedisAdapter.findByPurposeAndEmail(purpose, email);
+        Optional<EmailAuth> found = emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
 
         // then
         assertThat(found).isEmpty();

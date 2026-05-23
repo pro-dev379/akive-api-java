@@ -34,12 +34,15 @@ public class EmailAuthService implements SendEmailAuthCodeUseCase {
         String authCode = emailAuthCodeGenerator.generate();
 
         EmailAuth emailAuth = emailAuthRepository
-                .findByPurposeAndEmail(authPurpose, email)
-                .map(previous -> previous.renew(authCode, requestedAt))
-                .orElseGet(() -> EmailAuth.create(authCode, requestedAt));
+                .findByEmailAndPurpose(email, authPurpose)
+                .map(previous -> {
+                    previous.renew(authCode, requestedAt);
+                    return previous;
+                })
+                .orElseGet(() -> EmailAuth.create(email, authPurpose, authCode, requestedAt));
 
         emailAuthMailSender.sendAuthCode(email, authCode, EXPIRE_DURATION);
-        emailAuthRepository.save(authPurpose, email, emailAuth, EXPIRE_DURATION);
+        emailAuthRepository.save(emailAuth, EXPIRE_DURATION);
 
         return EmailAuthCodeSendResult.of(
                 email,

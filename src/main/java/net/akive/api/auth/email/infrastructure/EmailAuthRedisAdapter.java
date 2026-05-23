@@ -17,19 +17,26 @@ public class EmailAuthRedisAdapter implements EmailAuthRepository {
 
     private final RedisTemplateClient redisTemplateClient;
 
-    public Optional<EmailAuth> findByPurposeAndEmail(EmailAuthPurpose authPurpose, String email) {
+    @Override
+    public Optional<EmailAuth> findByEmailAndPurpose(String email, EmailAuthPurpose authPurpose) {
         return redisTemplateClient.get(createKey(authPurpose, email), EmailAuth.class);
     }
 
-    public void save(EmailAuthPurpose authPurpose, String email, EmailAuth emailAuth, Duration expireDuration) {
+    @Override
+    public void save(EmailAuth emailAuth, Duration expireDuration) {
+        EmailAuthPurpose authPurpose = emailAuth.getAuthPurpose();
+        String email = emailAuth.getEmail();
         redisTemplateClient.set(createKey(authPurpose, email), emailAuth, expireDuration);
     }
 
-    public void delete(EmailAuthPurpose authPurpose, String email) {
+    @Override
+    public void delete(EmailAuth emailAuth) {
+        EmailAuthPurpose authPurpose = emailAuth.getAuthPurpose();
+        String email = emailAuth.getEmail();
         redisTemplateClient.delete(createKey(authPurpose, email));
     }
 
     private String createKey(EmailAuthPurpose authPurpose, String email) {
-        return CacheKeyProvider.emailAuth(authPurpose, email);
+        return CacheKeyProvider.emailAuth(email, authPurpose);
     }
 }

@@ -64,15 +64,15 @@ class EmailAuthServiceTest {
     void 회원_가입_이메일_인증_번호를_전송한다() {
         // given
         String email = "test@test.com";
-        EmailAuthPurpose purpose = EmailAuthPurpose.JOIN;
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
         String authCode = "123456";
 
         given(emailAuthCodeGenerator.generate()).willReturn(authCode);
-        given(emailAuthRepository.findByPurposeAndEmail(purpose, email))
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
                 .willReturn(Optional.empty());
 
         // when
-        EmailAuthCodeSendResult result = emailAuthService.sendAuthCode(email, purpose);
+        EmailAuthCodeSendResult result = emailAuthService.sendAuthCode(email, authPurpose);
 
         // then
         then(emailAuthUserValidator)
@@ -89,7 +89,7 @@ class EmailAuthServiceTest {
 
         then(emailAuthRepository)
                 .should()
-                .save(eq(purpose), eq(email), any(EmailAuth.class), any(Duration.class));
+                .save(any(EmailAuth.class), any(Duration.class));
 
         assertThat(result.email()).isEqualTo(email);
         assertThat(result.expireSeconds()).isEqualTo(300);
@@ -100,15 +100,15 @@ class EmailAuthServiceTest {
     void 비밀번호_찾기_이메일_인증_번호를_전송한다() {
         // given
         String email = "test@test.com";
-        EmailAuthPurpose purpose = EmailAuthPurpose.FIND_PASSWORD;
         String authCode = "123456";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.FIND_PASSWORD;
 
         given(emailAuthCodeGenerator.generate()).willReturn(authCode);
-        given(emailAuthRepository.findByPurposeAndEmail(purpose, email))
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
                 .willReturn(Optional.empty());
 
         // when
-        EmailAuthCodeSendResult result = emailAuthService.sendAuthCode(email, purpose);
+        EmailAuthCodeSendResult result = emailAuthService.sendAuthCode(email, authPurpose);
 
         // then
         then(emailAuthUserValidator)
@@ -125,7 +125,7 @@ class EmailAuthServiceTest {
 
         then(emailAuthRepository)
                 .should()
-                .save(eq(purpose), eq(email), any(EmailAuth.class), any(Duration.class));
+                .save(any(EmailAuth.class), any(Duration.class));
 
         assertThat(result.email()).isEqualTo(email);
         assertThat(result.expireSeconds()).isEqualTo(300);
@@ -136,25 +136,26 @@ class EmailAuthServiceTest {
     void 기존_인증_정보가_있으면_갱신해서_전송한다() {
         // given
         String email = "test@test.com";
-        EmailAuthPurpose purpose = EmailAuthPurpose.JOIN;
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
         String authCode = "123456";
-
         EmailAuth previous = EmailAuth.create(
+                email,
+                authPurpose,
                 "000000",
                 LocalDateTime.of(2025, 5, 21, 9, 55)
         );
 
         given(emailAuthCodeGenerator.generate()).willReturn(authCode);
-        given(emailAuthRepository.findByPurposeAndEmail(purpose, email))
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
                 .willReturn(Optional.of(previous));
 
         // when
-        emailAuthService.sendAuthCode(email, purpose);
+        emailAuthService.sendAuthCode(email, authPurpose);
 
         // then
         then(emailAuthRepository)
                 .should()
-                .save(eq(purpose), eq(email), argThat(emailAuth ->
+                .save(argThat(emailAuth ->
                         emailAuth.getAuthCode().equals(authCode)
                 ), any(Duration.class));
     }
@@ -163,21 +164,22 @@ class EmailAuthServiceTest {
     void 인증번호_재전송_가능_시간_이전이면_예외가_발생하고_저장하지_않는다() {
         // given
         String email = "test@test.com";
-        EmailAuthPurpose purpose = EmailAuthPurpose.JOIN;
-        String authCode = "123456";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
 
-        EmailAuth previous = EmailAuth.create(authCode, LocalDateTime.now(clock));
-
-        given(emailAuthRepository.findByPurposeAndEmail(purpose, email))
-                .willReturn(Optional.of(previous));
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
+                .willReturn(
+                    Optional.of(
+                        EmailAuth.create(email, authPurpose, "123456", LocalDateTime.now(clock))
+                    )
+                );
 
         // when & then
-        assertThatThrownBy(() -> emailAuthService.sendAuthCode(email, purpose))
+        assertThatThrownBy(() -> emailAuthService.sendAuthCode(email, authPurpose))
                 .isInstanceOf(EmailAuthResendTooSoonException.class);
 
         then(emailAuthRepository)
                 .should(never())
-                .save(any(), any(), any(), any());
+                .save(any(), any());
 
         then(emailAuthMailSender)
                 .should(never())
@@ -188,26 +190,20 @@ class EmailAuthServiceTest {
     void 인증번호_재전송_횟수를_초과하면_메일을_전송하지_않고_저장하지_않는다() {
         // given
         String email = "test@test.com";
-        EmailAuthPurpose purpose = EmailAuthPurpose.JOIN;
-        String authCode = "123456";
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
+        LocalDateTime requestedAt = LocalDateTime.now(clock);
+        EmailAuth emailAuth = EmailAuth.create(email, authPurpose, "123456", requestedAt);
 
-        LocalDateTime now = LocalDateTime.now(clock);
+        emailAuth.renew("111111", requestedAt.plusMinutes(1));
+        emailAuth.renew("222222", requestedAt.plusMinutes(2));
+        emailAuth.renew("333333", requestedAt.plusMinutes(3));
 
-        EmailAuth previous = new EmailAuth(
-                "000000",
-                5,
-                false,
-                now.plusMinutes(5),
-                now.minusMinutes(1),
-                now.minusMinutes(1)
-        );
-
-        given(emailAuthCodeGenerator.generate()).willReturn(authCode);
-        given(emailAuthRepository.findByPurposeAndEmail(purpose, email))
-                .willReturn(Optional.of(previous));
+        given(emailAuthCodeGenerator.generate()).willReturn("123456");
+        given(emailAuthRepository.findByEmailAndPurpose(email, authPurpose))
+                .willReturn(Optional.of(emailAuth));
 
         // when & then
-        assertThatThrownBy(() -> emailAuthService.sendAuthCode(email, purpose))
+        assertThatThrownBy(() -> emailAuthService.sendAuthCode(email, authPurpose))
                 .isInstanceOf(EmailAuthResendLimitExceededException.class);
 
         then(emailAuthMailSender)
@@ -216,6 +212,6 @@ class EmailAuthServiceTest {
 
         then(emailAuthRepository)
                 .should(never())
-                .save(any(), any(), any(), any());
+                .save(any(), any());
     }
 }
