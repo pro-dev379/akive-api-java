@@ -216,7 +216,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 이메일_인증번호를_검증한다() {
+    void 이메일_인증_번호를_검증한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -270,7 +270,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 이메일_인증번호가_일치하지_않으면_예외가_발생하고_저장하지_않는다() {
+    void 이메일_인증_번호가_일치하지_않으면_예외가_발생하고_저장하지_않는다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -296,7 +296,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 이메일_인증번호가_만료되면_예외가_발생하고_저장하지_않는다() {
+    void 이메일_인증_번호가_만료되면_예외가_발생하고_저장하지_않는다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
