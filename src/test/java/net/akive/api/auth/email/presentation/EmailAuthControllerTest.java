@@ -5,6 +5,7 @@ import net.akive.api.auth.email.application.dto.EmailAuthCodeSendResult;
 import net.akive.api.auth.email.application.port.in.SendEmailAuthCodeUseCase;
 import net.akive.api.auth.email.application.port.in.VerifyEmailAuthCodeUseCase;
 import net.akive.api.auth.email.domain.EmailAuthPurpose;
+import net.akive.api.auth.email.domain.exception.*;
 import net.akive.api.auth.email.presentation.dto.request.EmailAuthCodeSendRequest;
 import net.akive.api.auth.email.presentation.dto.request.EmailAuthCodeVerifyRequest;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -117,6 +117,48 @@ class EmailAuthControllerTest {
     }
 
     @Test
+    void 이메일_인증_번호_전송_요청_시_재전송_횟수를_초과하면_429를_반환한다() throws Exception {
+        // given
+        EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest(
+                "test@test.com",
+                EmailAuthPurpose.JOIN
+        );
+
+        willThrow(new EmailAuthResendLimitExceededException())
+                .given(sendEmailAuthCodeUseCase)
+                .sendAuthCode(request.email(), request.authPurpose());
+
+        // when & then
+        mockMvc.perform(post("/auth/email/codes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value("EMAIL_AUTH_429_1"))
+                .andExpect(jsonPath("$.message").value("Resend limit exceeded."));
+    }
+
+    @Test
+    void 이메일_인증_번호_전송_요청_시_재전송_가능_시간_이전이면_429를_반환한다() throws Exception {
+        // given
+        EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest(
+                "test@test.com",
+                EmailAuthPurpose.JOIN
+        );
+
+        willThrow(new EmailAuthResendTooSoonException())
+                .given(sendEmailAuthCodeUseCase)
+                .sendAuthCode(request.email(), request.authPurpose());
+
+        // when & then
+        mockMvc.perform(post("/auth/email/codes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value("EMAIL_AUTH_429_2"))
+                .andExpect(jsonPath("$.message").value("Resend request too soon."));
+    }
+
+    @Test
     void 이메일_인증_번호를_검증한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
@@ -141,7 +183,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 인증번호_검증_요청_시_이메일이_비어있으면_400을_반환한다() throws Exception {
+    void 인증_번호_검증_요청_시_이메일이_비어있으면_400을_반환한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "",
@@ -161,7 +203,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 인증번호_검증_요청_시_인증번호가_6자리_숫자가_아니면_400을_반환한다() throws Exception {
+    void 인증_번호_검증_요청_시_인증_번호가_6자리_숫자가_아니면_400을_반환한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
@@ -181,7 +223,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 인증번호_검증_요청_시_인증목적이_없으면_400을_반환한다() throws Exception {
+    void 인증_번호_검증_요청_시_인증_목적이_없으면_400을_반환한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
@@ -198,5 +240,93 @@ class EmailAuthControllerTest {
         then(verifyEmailAuthCodeUseCase)
                 .should(never())
                 .verifyAuthCode(any(), any(), any());
+    }
+
+    @Test
+    void 인증_번호가_일치하지_않으면_400을_반환한다() throws Exception {
+        // given
+        EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
+                "test@test.com",
+                EmailAuthPurpose.JOIN,
+                "000000"
+        );
+
+        willThrow(new EmailAuthCodeMismatchException())
+                .given(verifyEmailAuthCodeUseCase)
+                .verifyAuthCode(request.email(), request.authPurpose(), request.authCode());
+
+        // when & then
+        mockMvc.perform(post("/auth/email/verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("EMAIL_AUTH_400_1"))
+                .andExpect(jsonPath("$.message").value("Authentication code does not match."));
+    }
+
+    @Test
+    void 인증_번호_검증_요청_시_인증_정보가_없으면_404를_반환한다() throws Exception {
+        // given
+        EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
+                "test@test.com",
+                EmailAuthPurpose.JOIN,
+                "123456"
+        );
+
+        willThrow(new EmailAuthNotFoundException())
+                .given(verifyEmailAuthCodeUseCase)
+                .verifyAuthCode(request.email(), request.authPurpose(), request.authCode());
+
+        // when & then
+        mockMvc.perform(post("/auth/email/verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("EMAIL_AUTH_404_1"))
+                .andExpect(jsonPath("$.message").value("Authentication code not found."));
+    }
+
+    @Test
+    void 인증_번호가_만료되면_401을_반환한다() throws Exception {
+        // given
+        EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
+                "test@test.com",
+                EmailAuthPurpose.JOIN,
+                "123456"
+        );
+
+        willThrow(new EmailAuthExpiredException())
+                .given(verifyEmailAuthCodeUseCase)
+                .verifyAuthCode(request.email(), request.authPurpose(), request.authCode());
+
+        // when & then
+        mockMvc.perform(post("/auth/email/verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("EMAIL_AUTH_401_1"))
+                .andExpect(jsonPath("$.message").value("Authentication code expired."));
+    }
+
+    @Test
+    void 이미_검증된_인증번호면_409를_반환한다() throws Exception {
+        // given
+        EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
+                "test@test.com",
+                EmailAuthPurpose.JOIN,
+                "123456"
+        );
+
+        willThrow(new EmailAuthAlreadyVerifiedException())
+                .given(verifyEmailAuthCodeUseCase)
+                .verifyAuthCode(request.email(), request.authPurpose(), request.authCode());
+
+        // when & then
+        mockMvc.perform(post("/auth/email/verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("EMAIL_AUTH_409_1"))
+                .andExpect(jsonPath("$.message").value("Authentication code already verified."));
     }
 }
