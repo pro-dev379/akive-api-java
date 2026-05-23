@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum CommonErrorCode implements ErrorCode {
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_500", "Unexpected server error."),
-    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "COMMON_400", "Invalid request.");
+    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "COMMON_400", "Invalid request."),
+    NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON_404", "Requested resource not found.");
 
     private final HttpStatus status;
     private final String code;

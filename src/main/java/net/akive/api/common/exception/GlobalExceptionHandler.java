@@ -9,6 +9,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 
@@ -46,7 +47,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    protected ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadableException(HttpServletRequest request, HttpMessageNotReadableException e) {
+    protected ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadableException(
+            HttpServletRequest request,
+            HttpMessageNotReadableException e
+    ) {
         log.warn("[HttpMessageNotReadableException] uri={}, method={}, message={}",
                 request.getRequestURI(),
                 request.getMethod(),
@@ -55,9 +59,17 @@ public class GlobalExceptionHandler {
         return createErrorResponse(CommonErrorCode.INVALID_INPUT_VALUE);
     }
 
+    @ExceptionHandler(NoResourceFoundException.class)
+    protected ResponseEntity<ApiErrorResponse> handleNoResourceFoundException(HttpServletRequest request) {
+        log.warn("[NoResourceFoundException] uri={}, method={}", request.getRequestURI(), request.getMethod());
+
+        return createErrorResponse(CommonErrorCode.NOT_FOUND);
+    }
+
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ApiErrorResponse> handleException(HttpServletRequest request, Exception e) {
         log.error("[UnexpectedException] uri={}, method={}", request.getRequestURI(), request.getMethod(), e);
+
         return createErrorResponse(CommonErrorCode.INTERNAL_SERVER_ERROR);
     }
 
