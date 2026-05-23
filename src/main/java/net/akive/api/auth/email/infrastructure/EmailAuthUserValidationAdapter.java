@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class EmailAuthUserValidatorImpl implements EmailAuthUserValidator {
+public class EmailAuthUserValidationAdapter implements EmailAuthUserValidator {
 
     private final UserValidationService userValidationService;
 

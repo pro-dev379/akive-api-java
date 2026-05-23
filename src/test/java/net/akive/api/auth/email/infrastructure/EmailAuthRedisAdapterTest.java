@@ -5,7 +5,6 @@ import net.akive.api.auth.email.domain.EmailAuthPurpose;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-class EmailAuthCacheRepositoryTest {
+class EmailAuthRedisAdapterTest {
 
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:7.2")
@@ -39,7 +38,7 @@ class EmailAuthCacheRepositoryTest {
     }
 
     @Autowired
-    EmailAuthCacheRepository emailAuthCacheRepository;
+    EmailAuthRedisAdapter emailAuthRedisAdapter;
 
     @Autowired
     RedisTemplate<String, Object> redisTemplate;
@@ -64,7 +63,7 @@ class EmailAuthCacheRepositoryTest {
         EmailAuth emailAuth = EmailAuth.create("123456", requestedAt);
 
         // when
-        emailAuthCacheRepository.save(
+        emailAuthRedisAdapter.save(
                 purpose,
                 email,
                 emailAuth,
@@ -72,7 +71,7 @@ class EmailAuthCacheRepositoryTest {
         );
 
         Optional<EmailAuth> found =
-                emailAuthCacheRepository.findByPurposeAndEmail(purpose, email);
+                emailAuthRedisAdapter.findByPurposeAndEmail(purpose, email);
 
         // then
         assertThat(found).isPresent();
@@ -94,7 +93,7 @@ class EmailAuthCacheRepositoryTest {
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
-        emailAuthCacheRepository.save(
+        emailAuthRedisAdapter.save(
                 purpose,
                 email,
                 emailAuth,
@@ -102,11 +101,11 @@ class EmailAuthCacheRepositoryTest {
         );
 
         // when
-        emailAuthCacheRepository.delete(purpose, email);
+        emailAuthRedisAdapter.delete(purpose, email);
 
         // then
         Optional<EmailAuth> found =
-                emailAuthCacheRepository.findByPurposeAndEmail(purpose, email);
+                emailAuthRedisAdapter.findByPurposeAndEmail(purpose, email);
 
         assertThat(found).isEmpty();
     }
@@ -122,7 +121,7 @@ class EmailAuthCacheRepositoryTest {
         );
 
         // when
-        emailAuthCacheRepository.save(
+        emailAuthRedisAdapter.save(
                 purpose,
                 email,
                 emailAuth,
@@ -131,7 +130,7 @@ class EmailAuthCacheRepositoryTest {
 
         Thread.sleep(500);
 
-        Optional<EmailAuth> found = emailAuthCacheRepository.findByPurposeAndEmail(purpose, email);
+        Optional<EmailAuth> found = emailAuthRedisAdapter.findByPurposeAndEmail(purpose, email);
 
         // then
         assertThat(found).isEmpty();

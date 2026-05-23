@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class EmailAuthCacheRepository implements EmailAuthRepository {
+public class EmailAuthRedisAdapter implements EmailAuthRepository {
 
     private final RedisTemplateClient redisTemplateClient;
 

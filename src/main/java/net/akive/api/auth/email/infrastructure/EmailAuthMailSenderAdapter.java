@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class EmailAuthMailSenderImpl implements EmailAuthMailSender {
+public class EmailAuthMailSenderAdapter implements EmailAuthMailSender {
 
     private final EmailSenderService emailSenderService;
 
