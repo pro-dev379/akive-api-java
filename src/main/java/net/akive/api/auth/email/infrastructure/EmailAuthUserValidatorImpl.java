@@ -2,7 +2,7 @@ package net.akive.api.auth.email.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.email.application.port.out.EmailAuthUserValidator;
-import net.akive.api.user.service.UserValidationService;
+import net.akive.api.user.application.UserValidationService;
 import org.springframework.stereotype.Component;
 
 @Component
