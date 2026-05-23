@@ -117,7 +117,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이메일_인증번호를_검증한다() throws Exception {
+    void 이메일_인증_번호를_검증한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
@@ -129,7 +129,7 @@ class EmailAuthControllerTest {
         mockMvc.perform(post("/auth/email/verifications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         then(verifyEmailAuthCodeUseCase)
                 .should()
