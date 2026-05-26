@@ -73,7 +73,7 @@ class EmailVerificationControllerTest {
     }
 
     @Test
-    void 인증번호_전송_요청시_메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+    void 인증번호_전송_요청시_이메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("invalid-email", EmailVerificationPurpose.JOIN);
 
@@ -233,6 +233,46 @@ class EmailVerificationControllerTest {
                 "",
                 EmailVerificationPurpose.JOIN,
                 "123456"
+        );
+
+        // when & then
+        mockMvc.perform(post("/emails/verification-codes/verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        then(verifyEmailVerificationCodeUseCase)
+                .should(never())
+                .verify(any(), any(), any());
+    }
+
+    @Test
+    void 인증번호_검증_요청시_이메일_형식이_올바르지_않으면_400을_반환한다() throws Exception {
+        // given
+        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+                "invalid-email",
+                EmailVerificationPurpose.JOIN,
+                "123456"
+        );
+
+        // when & then
+        mockMvc.perform(post("/emails/verification-codes/verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        then(verifyEmailVerificationCodeUseCase)
+                .should(never())
+                .verify(any(), any(), any());
+    }
+
+    @Test
+    void 인증번호_검증_요청시_인증번호가_비어있으면_400을_반환한다() throws Exception {
+        // given
+        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+                "test@test.com",
+                EmailVerificationPurpose.JOIN,
+                ""
         );
 
         // when & then
