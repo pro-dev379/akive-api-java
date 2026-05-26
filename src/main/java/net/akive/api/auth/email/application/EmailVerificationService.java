@@ -10,7 +10,7 @@ import net.akive.api.auth.email.application.port.out.EmailVerificationRepository
 import net.akive.api.auth.email.application.port.out.EmailVerificationUserValidator;
 import net.akive.api.auth.email.domain.EmailVerification;
 import net.akive.api.auth.email.domain.EmailVerificationPurpose;
-import net.akive.api.auth.email.domain.exception.EmailAuthNotFoundException;
+import net.akive.api.auth.email.domain.exception.EmailVerificationException;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static net.akive.api.auth.email.domain.EmailVerificationPolicy.*;
+import static net.akive.api.auth.email.domain.exception.EmailVerificationErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +60,7 @@ public class EmailVerificationService implements SendEmailVerificationCodeUseCas
     public void verify(String email, EmailVerificationPurpose verificationPurpose, String verificationCode) {
         EmailVerification emailVerification = emailVerificationRepository
                 .findByEmailAndVerificationPurpose(email, verificationPurpose)
-                .orElseThrow(EmailAuthNotFoundException::new);
+                .orElseThrow(() -> new EmailVerificationException(NOT_FOUND));
 
         emailVerification.verify(verificationCode, LocalDateTime.now(clock));
 

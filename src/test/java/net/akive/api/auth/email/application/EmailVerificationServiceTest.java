@@ -8,6 +8,7 @@ import net.akive.api.auth.email.application.port.out.EmailVerificationUserValida
 import net.akive.api.auth.email.domain.EmailVerification;
 import net.akive.api.auth.email.domain.EmailVerificationPurpose;
 import net.akive.api.auth.email.domain.exception.*;
+import net.akive.api.common.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import java.time.*;
 import java.util.Optional;
 
 import static net.akive.api.auth.email.domain.EmailVerificationPolicy.EXPIRE_DURATION;
+import static net.akive.api.auth.email.domain.exception.EmailVerificationErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -185,7 +187,7 @@ class EmailVerificationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> emailVerificationService.send(email, verificationPurpose))
-                .isInstanceOf(EmailAuthResendTooSoonException.class);
+                .satisfies(e -> assertErrorCode(e, RESEND_TOO_SOON));
 
         then(emailVerificationRepository)
                 .should(never())
@@ -214,7 +216,7 @@ class EmailVerificationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> emailVerificationService.send(email, verificationPurpose))
-                .isInstanceOf(EmailAuthResendLimitExceededException.class);
+                .satisfies(e -> assertErrorCode(e, RESEND_LIMIT_EXCEEDED));
 
         then(emailVerificationMailSender)
                 .should(never())
@@ -270,9 +272,8 @@ class EmailVerificationServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() ->
-                emailVerificationService.verify(email, verificationPurpose, verificationCode)
-        ).isInstanceOf(EmailAuthNotFoundException.class);
+        assertThatThrownBy(() -> emailVerificationService.verify(email, verificationPurpose, verificationCode))
+                .satisfies(e -> assertErrorCode(e, NOT_FOUND));
 
         then(emailVerificationRepository)
                 .should(never())
@@ -296,9 +297,8 @@ class EmailVerificationServiceTest {
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatThrownBy(() ->
-                emailVerificationService.verify(email, verificationPurpose, "000000")
-        ).isInstanceOf(EmailAuthCodeMismatchException.class);
+        assertThatThrownBy(() -> emailVerificationService.verify(email, verificationPurpose, "000000"))
+                .satisfies(e -> assertErrorCode(e, CODE_MISMATCH));
 
         then(emailVerificationRepository)
                 .should(never())
@@ -323,9 +323,8 @@ class EmailVerificationServiceTest {
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatThrownBy(() ->
-                emailVerificationService.verify(email, verificationPurpose, verificationCode)
-        ).isInstanceOf(EmailAuthExpiredException.class);
+        assertThatThrownBy(() -> emailVerificationService.verify(email, verificationPurpose, verificationCode))
+                .satisfies(e -> assertErrorCode(e, EXPIRED));
 
         then(emailVerificationRepository)
                 .should(never())
@@ -351,12 +350,19 @@ class EmailVerificationServiceTest {
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatThrownBy(() ->
-                emailVerificationService.verify(email, verificationPurpose, verificationCode)
-        ).isInstanceOf(EmailAuthAlreadyVerifiedException.class);
+        assertThatThrownBy(() -> emailVerificationService.verify(email, verificationPurpose, verificationCode))
+                .satisfies(e -> assertErrorCode(e, ALREADY_VERIFIED));
 
         then(emailVerificationRepository)
                 .should(never())
                 .save(any(), any());
+    }
+
+    private void assertErrorCode(Throwable throwable, ErrorCode expected) {
+        assertThat(throwable)
+                .isInstanceOf(EmailVerificationException.class);
+
+        assertThat(((EmailVerificationException) throwable).getErrorCode())
+                .isEqualTo(expected);
     }
 }

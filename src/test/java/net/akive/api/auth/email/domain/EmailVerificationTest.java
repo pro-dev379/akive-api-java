@@ -1,11 +1,13 @@
 package net.akive.api.auth.email.domain;
 
 import net.akive.api.auth.email.domain.exception.*;
+import net.akive.api.common.exception.ErrorCode;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
 import static net.akive.api.auth.email.domain.EmailVerificationPolicy.*;
+import static net.akive.api.auth.email.domain.exception.EmailVerificationErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -58,7 +60,7 @@ class EmailVerificationTest {
 
         // when & then
         assertThatThrownBy(() -> emailVerification.renew("654321", requestedAt.plusSeconds(10)))
-                .isInstanceOf(EmailAuthResendTooSoonException.class);
+                .satisfies(e -> assertErrorCode(e, RESEND_TOO_SOON));
     }
 
     @Test
@@ -73,7 +75,7 @@ class EmailVerificationTest {
 
         // when & then
         assertThatThrownBy(() -> emailVerification.renew("444444", requestedAt.plusMinutes(4)))
-                .isInstanceOf(EmailAuthResendLimitExceededException.class);
+                .satisfies(e -> assertErrorCode(e, RESEND_LIMIT_EXCEEDED));
     }
 
 
@@ -111,9 +113,8 @@ class EmailVerificationTest {
         emailVerification.verify("123456", requestedAt.plusMinutes(1));
 
         // when & then
-        assertThatThrownBy(() ->
-                emailVerification.verify("123456", requestedAt.plusMinutes(2))
-        ).isInstanceOf(EmailAuthAlreadyVerifiedException.class);
+        assertThatThrownBy(() -> emailVerification.verify("123456", requestedAt.plusMinutes(2)))
+                .satisfies(e -> assertErrorCode(e, ALREADY_VERIFIED));
     }
 
     @Test
@@ -129,9 +130,8 @@ class EmailVerificationTest {
         );
 
         // when & then
-        assertThatThrownBy(() ->
-                emailVerification.verify("000000", requestedAt.plusMinutes(1))
-        ).isInstanceOf(EmailAuthCodeMismatchException.class);
+        assertThatThrownBy(() -> emailVerification.verify("000000", requestedAt.plusMinutes(1)))
+                .satisfies(e -> assertErrorCode(e, CODE_MISMATCH));
     }
 
     @Test
@@ -147,8 +147,15 @@ class EmailVerificationTest {
         );
 
         // when & then
-        assertThatThrownBy(() ->
-                emailVerification.verify("123456", requestedAt.plus(EXPIRE_DURATION).plusSeconds(1))
-        ).isInstanceOf(EmailAuthExpiredException.class);
+        assertThatThrownBy(() -> emailVerification.verify("123456", requestedAt.plus(EXPIRE_DURATION).plusSeconds(1)))
+                .satisfies(e -> assertErrorCode(e, EXPIRED));
+    }
+
+    private void assertErrorCode(Throwable throwable, ErrorCode expected) {
+        assertThat(throwable)
+                .isInstanceOf(EmailVerificationException.class);
+
+        assertThat(((EmailVerificationException) throwable).getErrorCode())
+                .isEqualTo(expected);
     }
 }

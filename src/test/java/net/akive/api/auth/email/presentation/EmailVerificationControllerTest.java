@@ -8,8 +8,7 @@ import net.akive.api.auth.email.domain.EmailVerificationPurpose;
 import net.akive.api.auth.email.domain.exception.*;
 import net.akive.api.auth.email.presentation.dto.request.EmailVerificationCodeSendRequest;
 import net.akive.api.auth.email.presentation.dto.request.EmailVerificationCodeVerifyRequest;
-import net.akive.api.user.excpetion.EmailAlreadyExistsException;
-import net.akive.api.user.excpetion.UserNotFoundException;
+import net.akive.api.user.excpetion.UserException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -19,6 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static net.akive.api.auth.email.domain.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.user.excpetion.UserErrorCode.*;
+import static net.akive.api.user.excpetion.UserErrorCode.NOT_FOUND;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -126,7 +128,7 @@ class EmailVerificationControllerTest {
                 EmailVerificationPurpose.JOIN
         );
 
-        willThrow(new EmailAuthResendLimitExceededException())
+        willThrow(new EmailVerificationException(RESEND_LIMIT_EXCEEDED))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(request.email(), request.verificationPurpose());
 
@@ -147,7 +149,7 @@ class EmailVerificationControllerTest {
                 EmailVerificationPurpose.JOIN
         );
 
-        willThrow(new EmailAuthResendTooSoonException())
+        willThrow(new EmailVerificationException(RESEND_TOO_SOON))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(request.email(), request.verificationPurpose());
 
@@ -169,7 +171,7 @@ class EmailVerificationControllerTest {
                 verificationPurpose
         );
 
-        willThrow(new UserNotFoundException())
+        willThrow(new UserException(NOT_FOUND))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(anyString(), eq(verificationPurpose));
 
@@ -189,7 +191,7 @@ class EmailVerificationControllerTest {
                 verificationPurpose
         );
 
-        willThrow(new EmailAlreadyExistsException())
+        willThrow(new UserException(EMAIL_ALREADY_EXISTS))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(anyString(), eq(verificationPurpose));
 
@@ -293,7 +295,7 @@ class EmailVerificationControllerTest {
                 "000000"
         );
 
-        willThrow(new EmailAuthCodeMismatchException())
+        willThrow(new EmailVerificationException(CODE_MISMATCH))
                 .given(verifyEmailVerificationUseCase)
                 .verify(request.email(), request.verificationPurpose(), request.verificationCode());
 
@@ -315,7 +317,7 @@ class EmailVerificationControllerTest {
                 "123456"
         );
 
-        willThrow(new EmailAuthNotFoundException())
+        willThrow(new EmailVerificationException(EmailVerificationErrorCode.NOT_FOUND))
                 .given(verifyEmailVerificationUseCase)
                 .verify(request.email(), request.verificationPurpose(), request.verificationCode());
 
@@ -337,7 +339,7 @@ class EmailVerificationControllerTest {
                 "123456"
         );
 
-        willThrow(new EmailAuthExpiredException())
+        willThrow(new EmailVerificationException(EXPIRED))
                 .given(verifyEmailVerificationUseCase)
                 .verify(request.email(), request.verificationPurpose(), request.verificationCode());
 
@@ -359,7 +361,7 @@ class EmailVerificationControllerTest {
                 "123456"
         );
 
-        willThrow(new EmailAuthAlreadyVerifiedException())
+        willThrow(new EmailVerificationException(ALREADY_VERIFIED))
                 .given(verifyEmailVerificationUseCase)
                 .verify(request.email(), request.verificationPurpose(), request.verificationCode());
 

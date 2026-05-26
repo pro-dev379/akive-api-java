@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static net.akive.api.auth.email.domain.EmailVerificationPolicy.*;
+import static net.akive.api.auth.email.domain.exception.EmailVerificationErrorCode.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -60,15 +61,15 @@ public class EmailVerification {
 
     public void verify(String inputVerificationCode, LocalDateTime requestedAt) {
         if (this.verified) {
-            throw new EmailAuthAlreadyVerifiedException();
+            throw new EmailVerificationException(ALREADY_VERIFIED);
         }
 
         if (this.expiredAt.isBefore(requestedAt)) {
-            throw new EmailAuthExpiredException();
+            throw new EmailVerificationException(EXPIRED);
         }
 
         if (!Objects.equals(this.verificationCode, inputVerificationCode)) {
-            throw new EmailAuthCodeMismatchException();
+            throw new EmailVerificationException(CODE_MISMATCH);
         }
 
         this.verified = true;
@@ -76,11 +77,11 @@ public class EmailVerification {
 
     private void validateResendAvailable(LocalDateTime requestedAt) {
         if (MAX_RESEND_COUNT <= this.resendCount) {
-            throw new EmailAuthResendLimitExceededException();
+            throw new EmailVerificationException(RESEND_LIMIT_EXCEEDED);
         }
 
         if (Duration.between(this.lastSentAt, requestedAt).compareTo(RESEND_INTERVAL) < 0) {
-            throw new EmailAuthResendTooSoonException();
+            throw new EmailVerificationException(RESEND_TOO_SOON);
         }
     }
 }
