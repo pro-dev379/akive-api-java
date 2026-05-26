@@ -1,10 +1,8 @@
 package net.akive.api.user.application;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.BusinessException;
 import net.akive.api.user.application.port.out.UserRepository;
 import net.akive.api.user.excpetion.EmailAlreadyExistsException;
-import net.akive.api.user.excpetion.UserErrorCode;
 import net.akive.api.user.excpetion.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +22,7 @@ public class UserValidationService {
 
     public void validateUserExistsById(Long userId) {
         if (!userRepository.existsByUserIdAndLeaveFalse(userId)) {
-            throw new EmailAlreadyExistsException();
+            throw new UserNotFoundException();
         }
     }
 
