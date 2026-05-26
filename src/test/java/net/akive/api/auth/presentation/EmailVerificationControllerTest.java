@@ -5,15 +5,14 @@ import net.akive.api.auth.application.dto.EmailVerificationCodeSendResult;
 import net.akive.api.auth.application.port.in.SendEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.in.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.domain.EmailVerificationPurpose;
-import net.akive.api.auth.domain.exception.EmailVerificationErrorCode;
 import net.akive.api.auth.domain.exception.EmailVerificationException;
 import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeSendRequest;
 import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeVerifyRequest;
+import net.akive.api.user.excpetion.UserErrorCode;
 import net.akive.api.user.excpetion.UserException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -21,11 +20,10 @@ import java.time.LocalDateTime;
 
 import static net.akive.api.auth.domain.EmailVerificationPurpose.*;
 import static net.akive.api.auth.domain.exception.EmailVerificationErrorCode.*;
-import static net.akive.api.user.excpetion.UserErrorCode.*;
-import static net.akive.api.user.excpetion.UserErrorCode.NOT_FOUND;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
+import static org.springframework.http.MediaType.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,7 +59,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("test@test.com"))
@@ -81,7 +79,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
@@ -97,7 +95,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
@@ -113,7 +111,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
@@ -136,7 +134,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_1"))
@@ -157,7 +155,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_2"))
@@ -173,13 +171,13 @@ class EmailVerificationControllerTest {
                 verificationPurpose
         );
 
-        willThrow(new UserException(NOT_FOUND))
+        willThrow(new UserException(UserErrorCode.NOT_FOUND))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(anyString(), eq(verificationPurpose));
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
@@ -193,13 +191,13 @@ class EmailVerificationControllerTest {
                 verificationPurpose
         );
 
-        willThrow(new UserException(EMAIL_ALREADY_EXISTS))
+        willThrow(new UserException(UserErrorCode.EMAIL_ALREADY_EXISTS))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(anyString(), eq(verificationPurpose));
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
     }
@@ -215,7 +213,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
 
@@ -239,7 +237,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
@@ -259,7 +257,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
@@ -279,7 +277,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
@@ -299,7 +297,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
@@ -319,7 +317,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
@@ -343,7 +341,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_400_1"))
@@ -359,13 +357,13 @@ class EmailVerificationControllerTest {
                 "123456"
         );
 
-        willThrow(new EmailVerificationException(EmailVerificationErrorCode.NOT_FOUND))
+        willThrow(new EmailVerificationException(NOT_FOUND))
                 .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.email(), request.verificationPurpose(), request.verificationCode());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_404_1"))
@@ -387,7 +385,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_401_1"))
@@ -409,7 +407,7 @@ class EmailVerificationControllerTest {
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_409_1"))

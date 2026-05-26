@@ -1,11 +1,12 @@
 package net.akive.api.auth.domain;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.time.Duration;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+import static lombok.AccessLevel.*;
+
+@NoArgsConstructor(access = PRIVATE)
 public class EmailVerificationPolicy {
 
     public final static Duration EXPIRE_DURATION = Duration.ofMinutes(5);

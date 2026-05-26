@@ -8,8 +8,9 @@ import net.akive.api.auth.application.port.in.VerifyEmailVerificationCodeUseCase
 import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeSendRequest;
 import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeVerifyRequest;
 import net.akive.api.auth.presentation.dto.response.EmailVerificationCodeSendResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping("/emails/verification-codes")
@@ -26,7 +27,7 @@ public class EmailVerificationController {
     }
 
     @PostMapping("/verifications")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(NO_CONTENT)
     public void verify(@RequestBody @Valid EmailVerificationCodeVerifyRequest request) {
         verifyEmailVerificationCodeUseCase.verify(request.email(), request.verificationPurpose(), request.verificationCode());
     }

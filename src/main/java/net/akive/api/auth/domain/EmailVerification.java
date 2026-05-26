@@ -7,12 +7,13 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import static lombok.AccessLevel.*;
 import static net.akive.api.auth.domain.EmailVerificationPolicy.*;
 import static net.akive.api.auth.domain.exception.EmailVerificationErrorCode.*;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
+@AllArgsConstructor(access = PRIVATE)
 public class EmailVerification {
 
     private String email;
