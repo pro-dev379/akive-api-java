@@ -13,7 +13,7 @@ public class EmailSenderService {
     private final EmailSender emailSender;
     private final EmailTemplateRenderer emailTemplateRenderer;
 
-    public void sendTemplateHtml(
+    public void send(
             List<String> to,
             String subject,
             String templatePath,

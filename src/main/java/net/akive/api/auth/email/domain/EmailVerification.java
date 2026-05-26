@@ -7,26 +7,31 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import static net.akive.api.auth.email.domain.EmailAuthPolicy.*;
+import static net.akive.api.auth.email.domain.EmailVerificationPolicy.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class EmailAuth {
+public class EmailVerification {
 
     private String email;
-    private EmailAuthPurpose authPurpose;
-    private String authCode;
+    private EmailVerificationPurpose verificationPurpose;
+    private String verificationCode;
     private int resendCount;
     private boolean verified;
     private LocalDateTime expiredAt;
     private LocalDateTime lastSentAt;
     private LocalDateTime createdAt;
 
-    public EmailAuth(String email, EmailAuthPurpose authPurpose, String authCode, LocalDateTime requestedAt) {
+    public EmailVerification(
+            String email,
+            EmailVerificationPurpose verificationPurpose,
+            String verificationCode,
+            LocalDateTime requestedAt
+    ) {
         this.email = email;
-        this.authPurpose = authPurpose;
-        this.authCode = authCode;
+        this.verificationPurpose = verificationPurpose;
+        this.verificationCode = verificationCode;
         this.resendCount = 0;
         this.verified = false;
         this.expiredAt = requestedAt.plus(EXPIRE_DURATION);
@@ -34,21 +39,26 @@ public class EmailAuth {
         this.createdAt = requestedAt;
     }
 
-    public static EmailAuth create(String email, EmailAuthPurpose authPurpose, String authCode, LocalDateTime requestedAt) {
-        return new EmailAuth(email, authPurpose, authCode, requestedAt);
+    public static EmailVerification create(
+            String email,
+            EmailVerificationPurpose verificationPurpose,
+            String verificationCode,
+            LocalDateTime requestedAt
+    ) {
+        return new EmailVerification(email, verificationPurpose, verificationCode, requestedAt);
     }
 
-    public void renew(String authCode, LocalDateTime requestedAt) {
+    public void renew(String verificationCode, LocalDateTime requestedAt) {
         validateResendAvailable(requestedAt);
 
-        this.authCode = authCode;
+        this.verificationCode = verificationCode;
         this.resendCount++;
         this.verified = false;
         this.expiredAt = requestedAt.plus(EXPIRE_DURATION);
         this.lastSentAt = requestedAt;
     }
 
-    public void verify(String inputAuthCode, LocalDateTime requestedAt) {
+    public void verify(String inputVerificationCode, LocalDateTime requestedAt) {
         if (this.verified) {
             throw new EmailAuthAlreadyVerifiedException();
         }
@@ -57,7 +67,7 @@ public class EmailAuth {
             throw new EmailAuthExpiredException();
         }
 
-        if (!Objects.equals(this.authCode, inputAuthCode)) {
+        if (!Objects.equals(this.verificationCode, inputVerificationCode)) {
             throw new EmailAuthCodeMismatchException();
         }
 

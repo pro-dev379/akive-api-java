@@ -1,7 +1,7 @@
 package net.akive.api.auth.email.infrastructure;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.email.application.port.out.EmailAuthMailSender;
+import net.akive.api.auth.email.application.port.out.EmailVerificationMailSender;
 import net.akive.api.common.email.EmailSenderService;
 import org.springframework.stereotype.Component;
 
@@ -11,18 +11,18 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class EmailAuthMailSenderAdapter implements EmailAuthMailSender {
+public class EmailVerificationMailSenderAdapter implements EmailVerificationMailSender {
 
     private final EmailSenderService emailSenderService;
 
     @Override
-    public void sendAuthCode(String email, String authCode, Duration expireDuration) {
-        emailSenderService.sendTemplateHtml(
+    public void send(String email, String verificationCode, Duration expireDuration) {
+        emailSenderService.send(
                 List.of(email),
                 "[AKIVE] 인증 코드가 도착했어요.",
-                "email/auth-code",
+                "email/verification-code",
                 Map.of(
-                        "authCode", authCode,
+                        "verificationCode", verificationCode,
                         "expireMin", expireDuration.toMinutes()
                 )
         );

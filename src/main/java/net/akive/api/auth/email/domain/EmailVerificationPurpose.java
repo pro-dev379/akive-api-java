@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum EmailAuthPurpose {
+public enum EmailVerificationPurpose {
 
     JOIN("join"), FIND_PASSWORD("find-password");
 

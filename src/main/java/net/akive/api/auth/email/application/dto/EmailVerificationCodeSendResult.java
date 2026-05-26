@@ -2,20 +2,20 @@ package net.akive.api.auth.email.application.dto;
 
 import java.time.LocalDateTime;
 
-public record EmailAuthCodeSendResult(
+public record EmailVerificationCodeSendResult(
         String email,
         LocalDateTime expiredAt,
         long expireSeconds,
         long resendIntervalSeconds
 ) {
 
-    public static EmailAuthCodeSendResult of(
+    public static EmailVerificationCodeSendResult of(
             String email,
             LocalDateTime expiredAt,
             long expiresInSeconds,
             long resendAfterSeconds
     ) {
-        return new EmailAuthCodeSendResult(
+        return new EmailVerificationCodeSendResult(
                 email,
                 expiredAt,
                 expiresInSeconds,

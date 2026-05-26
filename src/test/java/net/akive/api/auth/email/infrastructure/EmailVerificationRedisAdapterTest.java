@@ -1,7 +1,7 @@
 package net.akive.api.auth.email.infrastructure;
 
-import net.akive.api.auth.email.domain.EmailAuth;
-import net.akive.api.auth.email.domain.EmailAuthPurpose;
+import net.akive.api.auth.email.domain.EmailVerification;
+import net.akive.api.auth.email.domain.EmailVerificationPurpose;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-class EmailAuthRedisAdapterTest {
+class EmailVerificationRedisAdapterTest {
 
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:7.2")
@@ -38,7 +38,7 @@ class EmailAuthRedisAdapterTest {
     }
 
     @Autowired
-    EmailAuthRedisAdapter emailAuthRedisAdapter;
+    EmailVerificationRedisAdapter emailAuthRedisAdapter;
 
     @Autowired
     RedisTemplate<String, Object> redisTemplate;
@@ -57,17 +57,17 @@ class EmailAuthRedisAdapterTest {
     void 이메일_인증_정보를_저장하고_조회한다() {
         // given
         String email = "test@test.com";
-        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
-        EmailAuth emailAuth = EmailAuth.create(email, authPurpose, "123456", requestedAt);
+        EmailVerification emailVerification = EmailVerification.create(email, verificationPurpose, "123456", requestedAt);
 
         // when
-        emailAuthRedisAdapter.save(emailAuth, Duration.ofMinutes(5));
-        Optional<EmailAuth> found = emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
+        emailAuthRedisAdapter.save(emailVerification, Duration.ofMinutes(5));
+        Optional<EmailVerification> found = emailAuthRedisAdapter.findByEmailAndVerificationPurpose(email, verificationPurpose);
 
         // then
         assertThat(found).isPresent();
-        assertThat(found.get().getAuthCode()).isEqualTo("123456");
+        assertThat(found.get().getVerificationCode()).isEqualTo("123456");
         assertThat(found.get().getResendCount()).isZero();
         assertThat(found.get().isVerified()).isFalse();
         assertThat(found.get().getExpiredAt()).isEqualTo(requestedAt.plusMinutes(5));
@@ -79,21 +79,21 @@ class EmailAuthRedisAdapterTest {
     void 이메일_인증_정보를_삭제한다() {
         // given
         String email = "test@test.com";
-        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
-        EmailAuth emailAuth = EmailAuth.create(
+        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerification emailVerification = EmailVerification.create(
                 email,
-                authPurpose,
+                verificationPurpose,
                 "123456",
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
-        emailAuthRedisAdapter.save(emailAuth, Duration.ofMinutes(5));
+        emailAuthRedisAdapter.save(emailVerification, Duration.ofMinutes(5));
 
         // when
-        emailAuthRedisAdapter.delete(emailAuth);
+        emailAuthRedisAdapter.delete(emailVerification);
 
         // then
-        Optional<EmailAuth> found = emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
+        Optional<EmailVerification> found = emailAuthRedisAdapter.findByEmailAndVerificationPurpose(email, verificationPurpose);
 
         assertThat(found).isEmpty();
     }
@@ -102,20 +102,20 @@ class EmailAuthRedisAdapterTest {
     void 저장된_이메일_인증_정보는_TTL이_지나면_만료된다() throws Exception {
         // given
         String email = "test@test.com";
-        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
-        EmailAuth emailAuth = EmailAuth.create(
+        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerification emailVerification = EmailVerification.create(
                 email,
-                authPurpose,
+                verificationPurpose,
                 "123456",
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
         // when
-        emailAuthRedisAdapter.save(emailAuth, Duration.ofMillis(300));
+        emailAuthRedisAdapter.save(emailVerification, Duration.ofMillis(300));
 
         Thread.sleep(500);
 
-        Optional<EmailAuth> found = emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
+        Optional<EmailVerification> found = emailAuthRedisAdapter.findByEmailAndVerificationPurpose(email, verificationPurpose);
 
         // then
         assertThat(found).isEmpty();

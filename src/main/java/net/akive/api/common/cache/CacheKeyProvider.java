@@ -2,12 +2,12 @@ package net.akive.api.common.cache;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.akive.api.auth.email.domain.EmailAuthPurpose;
+import net.akive.api.auth.email.domain.EmailVerificationPurpose;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CacheKeyProvider {
 
-    public static String emailAuth(String email, EmailAuthPurpose authPurpose) {
-        return "email-auth:%s:%s".formatted(email, authPurpose.getCode());
+    public static String emailVerification(String email, EmailVerificationPurpose verificationPurpose) {
+        return "email-auth:%s:%s".formatted(email, verificationPurpose.getCode());
     }
 }

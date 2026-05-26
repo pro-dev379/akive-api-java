@@ -5,6 +5,6 @@ import net.akive.api.common.exception.BusinessException;
 public class EmailAuthResendLimitExceededException extends BusinessException {
 
     public EmailAuthResendLimitExceededException() {
-        super(EmailAuthErrorCode.RESEND_LIMIT_EXCEEDED);
+        super(EmailVerificationErrorCode.RESEND_LIMIT_EXCEEDED);
     }
 }
