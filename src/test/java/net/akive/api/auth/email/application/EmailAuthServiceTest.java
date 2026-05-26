@@ -133,7 +133,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 기존_인증_정보가_있으면_갱신해서_전송한다() {
+    void 기존_인증_정보가_있으면_새_인증_정보로_갱신한_뒤_메일을_전송한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -153,11 +153,21 @@ class EmailAuthServiceTest {
         emailAuthService.sendAuthCode(email, authPurpose);
 
         // then
+        then(emailAuthMailSender)
+                .should()
+                .sendAuthCode(eq(email), eq(authCode), any(Duration.class));
+
         then(emailAuthRepository)
                 .should()
-                .save(argThat(emailAuth ->
-                        emailAuth.getAuthCode().equals(authCode)
-                ), any(Duration.class));
+                .save(
+                    argThat(
+                        emailAuth ->
+                            emailAuth == previous &&
+                            emailAuth.getAuthCode().equals(authCode) &&
+                            !emailAuth.isVerified()
+                    ),
+                    any(Duration.class)
+                );
     }
 
     @Test
