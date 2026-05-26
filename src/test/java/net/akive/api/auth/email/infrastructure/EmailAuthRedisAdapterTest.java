@@ -63,9 +63,7 @@ class EmailAuthRedisAdapterTest {
 
         // when
         emailAuthRedisAdapter.save(emailAuth, Duration.ofMinutes(5));
-
-        Optional<EmailAuth> found =
-                emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
+        Optional<EmailAuth> found = emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
 
         // then
         assertThat(found).isPresent();
@@ -95,8 +93,7 @@ class EmailAuthRedisAdapterTest {
         emailAuthRedisAdapter.delete(emailAuth);
 
         // then
-        Optional<EmailAuth> found =
-                emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
+        Optional<EmailAuth> found = emailAuthRedisAdapter.findByEmailAndPurpose(email, authPurpose);
 
         assertThat(found).isEmpty();
     }

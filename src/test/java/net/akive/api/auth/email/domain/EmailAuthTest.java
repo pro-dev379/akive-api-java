@@ -32,11 +32,10 @@ class EmailAuthTest {
     }
 
     @Test
-    void 이메일_인증_정보를_갱신한다() {
+    void 재전송_가능시간_이후에_갱신하면_새_인증정보로_갱신된다() {
         // given
         LocalDateTime firstRequestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
         LocalDateTime secondRequestedAt = firstRequestedAt.plus(RESEND_INTERVAL);
-
         EmailAuth emailAuth = EmailAuth.create("test@test.com", EmailAuthPurpose.JOIN, "123456", firstRequestedAt);
 
         // when
@@ -52,7 +51,7 @@ class EmailAuthTest {
     }
 
     @Test
-    void 재전송_가능_시간_이전에_갱신하면_예외가_발생한다() {
+    void 재전송_가능시간_이전에_갱신하면_예외가_발생한다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
         EmailAuth emailAuth = EmailAuth.create("test@test.com", EmailAuthPurpose.JOIN, "123456", requestedAt);
@@ -63,7 +62,7 @@ class EmailAuthTest {
     }
 
     @Test
-    void 재전송_최대_횟수를_초과하면_예외가_발생한다() {
+    void 재전송_횟수를_초과하면_예외가_발생한다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
         EmailAuth emailAuth = EmailAuth.create("test@test.com", EmailAuthPurpose.JOIN, "123456", requestedAt);
@@ -79,7 +78,7 @@ class EmailAuthTest {
 
 
     @Test
-    void 인증_번호가_일치하면_인증_완료된다() {
+    void 유효한_인증번호를_입력하면_이메일_인증이_완료된다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
         String authCode = "123456";
@@ -98,7 +97,7 @@ class EmailAuthTest {
     }
 
     @Test
-    void 이미_인증된_인증_정보로_다시_인증할_수_없다() {
+    void 이미_인증이_완료된_경우_예외가_발생한다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
 
@@ -118,7 +117,7 @@ class EmailAuthTest {
     }
 
     @Test
-    void 인증_번호가_일치하지_않으면_예외가_발생한다() {
+    void 인증번호가_일치하지_않으면_예외가_발생한다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
 
@@ -136,7 +135,7 @@ class EmailAuthTest {
     }
 
     @Test
-    void 인증_번호가_만료되면_예외가_발생한다() {
+    void 인증번호가_만료되면_예외가_발생한다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
 

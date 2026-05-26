@@ -61,7 +61,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 회원_가입_이메일_인증_번호를_전송한다() {
+    void 회원가입_이메일_인증번호_요청시_인증번호를_전송한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -97,7 +97,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 비밀번호_찾기_이메일_인증_번호를_전송한다() {
+    void 비밀번호찾기_이메일_인증번호_요청시_인증번호를_전송한다() {
         // given
         String email = "test@test.com";
         String authCode = "123456";
@@ -133,7 +133,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 기존_인증_정보가_있으면_새_인증_정보로_갱신한_뒤_메일을_전송한다() {
+    void 기존_인증정보가_존재하면_새_인증정보로_갱신하고_인증번호를_전송한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -171,7 +171,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 인증_번호_재전송_가능_시간_이전이면_예외가_발생하고_저장하지_않는다() {
+    void 재전송_가능시간_이전에_인증번호를_요청하면_예외가_발생한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -197,7 +197,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 인증_번호_재전송_횟수를_초과하면_메일을_전송하지_않고_저장하지_않는다() {
+    void 재전송_횟수를_초과하면_예외가_발생한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -226,7 +226,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 이메일_인증_번호를_검증한다() {
+    void 유효한_인증번호를_입력하면_이메일_인증을_완료한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -260,7 +260,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 이메일_인증_정보가_없으면_예외가_발생한다() {
+    void 인증번호_검증시_이메일_인증정보가_없으면_예외가_발생한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -280,7 +280,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 이메일_인증_번호가_일치하지_않으면_예외가_발생하고_저장하지_않는다() {
+    void 인증번호가_일치하지_않으면_예외가_발생한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -306,7 +306,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 이메일_인증_번호가_만료되면_예외가_발생하고_저장하지_않는다() {
+    void 인증번호가_만료되면_예외가_발생한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
@@ -333,7 +333,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 이미_인증된_경우_예외가_발생하고_저장하지_않는다() {
+    void 이미_인증이_완료된_경우_예외가_발생한다() {
         // given
         String email = "test@test.com";
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;

@@ -42,7 +42,7 @@ class EmailAuthControllerTest {
     VerifyEmailAuthCodeUseCase verifyEmailAuthCodeUseCase;
 
     @Test
-    void 이메일_인증_번호_전송_요청을_처리한다() throws Exception {
+    void 인증번호_전송을_요청하면_인증정보를_응답한다() throws Exception {
         // given
         EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest("test@test.com", EmailAuthPurpose.JOIN);
         EmailAuthCodeSendResult result = EmailAuthCodeSendResult.of(
@@ -71,7 +71,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이메일_인증_번호_전송_요청_시_메일_형식이_올바르지_않으면_400을_반환한다() throws Exception {
+    void 인증번호_전송_요청시_메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
         EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest("invalid-email", EmailAuthPurpose.JOIN);
 
@@ -87,7 +87,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이메일_인증_번호_전송_요청_시_이메일이_비어있으면_400을_반환한다() throws Exception {
+    void 인증번호_전송_요청시_이메일이_비어있으면_400을_응답한다() throws Exception {
         // given
         EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest("", EmailAuthPurpose.JOIN);
 
@@ -103,7 +103,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이메일_인증_번호_전송_요청_시_인증_목적이_없으면_400을_반환한다() throws Exception {
+    void 인증번호_전송_요청시_인증목적이_없으면_400을_응답한다() throws Exception {
         // given
         EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest("test@test.com", null);
 
@@ -119,7 +119,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이메일_인증_번호_전송_요청_시_재전송_횟수를_초과하면_429를_반환한다() throws Exception {
+    void 인증번호_전송_요청시_재전송_횟수를_초과하면_429를_응답한다() throws Exception {
         // given
         EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest(
                 "test@test.com",
@@ -140,7 +140,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이메일_인증_번호_전송_요청_시_재전송_가능_시간_이전이면_429를_반환한다() throws Exception {
+    void 인증번호_전송_요청시_재전송_가능시간_이전이면_429를_응답한다() throws Exception {
         // given
         EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest(
                 "test@test.com",
@@ -161,7 +161,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이메일_인증_번호_전송_요청_시_비밀번호를_찾을_이메일이_없으면_404를_응답한다() throws Exception {
+    void 인증번호_전송_요청시_비밀번호를_찾을_회원이_없으면_404를_응답한다() throws Exception {
         // given
         EmailAuthPurpose authPurpose = EmailAuthPurpose.FIND_PASSWORD;
         EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest(
@@ -181,7 +181,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이메일_인증_번호_전송_요청_시_회원가입_이메일이_중복이면_409를_응답한다() throws Exception {
+    void 인증번호_전송_요청시_회원가입_이메일이_중복되면_409를_응답한다() throws Exception {
         // given
         EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
         EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest(
@@ -201,7 +201,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이메일_인증_번호를_검증한다() throws Exception {
+    void 올바른_인증번호로_검증을_요청하면_204를_응답한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
@@ -225,7 +225,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 인증_번호_검증_요청_시_이메일이_비어있으면_400을_반환한다() throws Exception {
+    void 인증번호_검증_요청시_이메일이_비어있으면_400을_반환한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "",
@@ -245,7 +245,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 인증_번호_검증_요청_시_인증_번호가_6자리_숫자가_아니면_400을_반환한다() throws Exception {
+    void 인증번호_검증_요청시_인증번호가_6자리_숫자가_아니면_400을_응답한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
@@ -265,7 +265,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 인증_번호_검증_요청_시_인증_목적이_없으면_400을_반환한다() throws Exception {
+    void 인증번호_검증_요청시_인증목적이_없으면_400을_응답한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
@@ -285,7 +285,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 인증_번호가_일치하지_않으면_400을_반환한다() throws Exception {
+    void 인증번호_검증_요청시_인증번호가_일치하지_않으면_400을_응답한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
@@ -307,7 +307,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 인증_번호_검증_요청_시_인증_정보가_없으면_404를_반환한다() throws Exception {
+    void 인증번호_검증_요청시_인증정보가_없으면_404를_응답한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
@@ -329,7 +329,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 인증_번호가_만료되면_401을_반환한다() throws Exception {
+    void 인증번호_검증_요청시_인증번호가_만료되면_401을_응답한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
@@ -351,7 +351,7 @@ class EmailAuthControllerTest {
     }
 
     @Test
-    void 이미_검증된_인증번호면_409를_반환한다() throws Exception {
+    void 인증번호_검증_요청시_이미_인증된_경우_409를_응답한다() throws Exception {
         // given
         EmailAuthCodeVerifyRequest request = new EmailAuthCodeVerifyRequest(
                 "test@test.com",
