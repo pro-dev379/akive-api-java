@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
+import static net.akive.api.auth.email.domain.EmailVerificationPurpose.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -57,7 +58,7 @@ class EmailVerificationRedisAdapterTest {
     void 이메일_인증_정보를_저장하고_조회한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
         EmailVerification emailVerification = EmailVerification.create(email, verificationPurpose, "123456", requestedAt);
 
@@ -79,7 +80,7 @@ class EmailVerificationRedisAdapterTest {
     void 이메일_인증_정보를_삭제한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         EmailVerification emailVerification = EmailVerification.create(
                 email,
                 verificationPurpose,
@@ -102,7 +103,7 @@ class EmailVerificationRedisAdapterTest {
     void 저장된_이메일_인증_정보는_TTL이_지나면_만료된다() throws Exception {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         EmailVerification emailVerification = EmailVerification.create(
                 email,
                 verificationPurpose,

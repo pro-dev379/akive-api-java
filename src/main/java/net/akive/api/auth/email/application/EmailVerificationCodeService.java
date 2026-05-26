@@ -70,7 +70,7 @@ public class EmailVerificationCodeService implements SendEmailVerificationCodeUs
     private void validateEmailByPurpose(String email, EmailVerificationPurpose verificationPurpose) {
         switch (verificationPurpose) {
             case FIND_PASSWORD ->  emailVerificationUserValidator.validateUserExistsByEmail(email);
-            case JOIN -> emailVerificationUserValidator.validateEmailNotDuplicate(email);
+            case SIGN_UP -> emailVerificationUserValidator.validateEmailNotDuplicate(email);
         }
     }
 }

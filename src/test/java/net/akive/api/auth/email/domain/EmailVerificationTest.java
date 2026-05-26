@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 
 import static net.akive.api.auth.email.domain.EmailVerificationPolicy.*;
+import static net.akive.api.auth.email.domain.EmailVerificationPurpose.*;
 import static net.akive.api.auth.email.domain.exception.EmailVerificationErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,7 +18,7 @@ class EmailVerificationTest {
     void 이메일_인증_정보를_생성한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
 
@@ -38,7 +39,7 @@ class EmailVerificationTest {
         // given
         LocalDateTime firstRequestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
         LocalDateTime secondRequestedAt = firstRequestedAt.plus(RESEND_INTERVAL);
-        EmailVerification emailVerification = EmailVerification.create("test@test.com", EmailVerificationPurpose.JOIN, "123456", firstRequestedAt);
+        EmailVerification emailVerification = EmailVerification.create("test@test.com", SIGN_UP, "123456", firstRequestedAt);
 
         // when
         emailVerification.renew("654321", secondRequestedAt);
@@ -56,7 +57,7 @@ class EmailVerificationTest {
     void 재전송_가능시간_이전에_갱신하면_예외가_발생한다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
-        EmailVerification emailVerification = EmailVerification.create("test@test.com", EmailVerificationPurpose.JOIN, "123456", requestedAt);
+        EmailVerification emailVerification = EmailVerification.create("test@test.com", SIGN_UP, "123456", requestedAt);
 
         // when & then
         assertThatThrownBy(() -> emailVerification.renew("654321", requestedAt.plusSeconds(10)))
@@ -67,7 +68,7 @@ class EmailVerificationTest {
     void 재전송_횟수를_초과하면_예외가_발생한다() {
         // given
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
-        EmailVerification emailVerification = EmailVerification.create("test@test.com", EmailVerificationPurpose.JOIN, "123456", requestedAt);
+        EmailVerification emailVerification = EmailVerification.create("test@test.com", SIGN_UP, "123456", requestedAt);
 
         emailVerification.renew("111111", requestedAt.plusMinutes(1));
         emailVerification.renew("222222", requestedAt.plusMinutes(2));
@@ -86,7 +87,7 @@ class EmailVerificationTest {
         String verificationCode = "123456";
         EmailVerification emailVerification = EmailVerification.create(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 verificationCode,
                 requestedAt
         );
@@ -105,7 +106,7 @@ class EmailVerificationTest {
 
         EmailVerification emailVerification = EmailVerification.create(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "123456",
                 requestedAt
         );
@@ -124,7 +125,7 @@ class EmailVerificationTest {
 
         EmailVerification emailVerification = EmailVerification.create(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "123456",
                 requestedAt
         );
@@ -141,7 +142,7 @@ class EmailVerificationTest {
 
         EmailVerification emailVerification = EmailVerification.create(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "123456",
                 requestedAt
         );

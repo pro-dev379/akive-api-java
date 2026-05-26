@@ -19,6 +19,7 @@ import java.time.*;
 import java.util.Optional;
 
 import static net.akive.api.auth.email.domain.EmailVerificationPolicy.EXPIRE_DURATION;
+import static net.akive.api.auth.email.domain.EmailVerificationPurpose.*;
 import static net.akive.api.auth.email.domain.exception.EmailVerificationErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -66,7 +67,7 @@ class EmailVerificationServiceTest {
     void 회원가입_이메일_인증번호_요청시_인증번호를_전송한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
 
         given(emailVerificationCodeGenerator.generate()).willReturn(verificationCode);
@@ -103,7 +104,7 @@ class EmailVerificationServiceTest {
         // given
         String email = "test@test.com";
         String verificationCode = "123456";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.FIND_PASSWORD;
+        EmailVerificationPurpose verificationPurpose = FIND_PASSWORD;
 
         given(emailVerificationCodeGenerator.generate()).willReturn(verificationCode);
         given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
@@ -138,7 +139,7 @@ class EmailVerificationServiceTest {
     void 기존_인증정보가_존재하면_새_인증정보로_갱신하고_인증번호를_전송한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
         EmailVerification previous = EmailVerification.create(
                 email,
@@ -176,7 +177,7 @@ class EmailVerificationServiceTest {
     void 재전송_가능시간_이전에_인증번호를_요청하면_예외가_발생한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
 
         given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(
@@ -202,7 +203,7 @@ class EmailVerificationServiceTest {
     void 재전송_횟수를_초과하면_예외가_발생한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         LocalDateTime requestedAt = LocalDateTime.now(clock);
         EmailVerification emailVerification = EmailVerification.create(email, verificationPurpose, "123456", requestedAt);
 
@@ -231,7 +232,7 @@ class EmailVerificationServiceTest {
     void 유효한_인증번호를_입력하면_이메일_인증을_완료한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
 
         LocalDateTime requestedAt = LocalDateTime.now(clock).minusMinutes(1);
@@ -265,7 +266,7 @@ class EmailVerificationServiceTest {
     void 인증번호_검증시_이메일_인증정보가_없으면_예외가_발생한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
 
         given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
@@ -284,7 +285,7 @@ class EmailVerificationServiceTest {
     void 인증번호가_일치하지_않으면_예외가_발생한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
 
         EmailVerification emailVerification = EmailVerification.create(
                 email,
@@ -309,7 +310,7 @@ class EmailVerificationServiceTest {
     void 인증번호가_만료되면_예외가_발생한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
 
         EmailVerification emailVerification = EmailVerification.create(
@@ -335,7 +336,7 @@ class EmailVerificationServiceTest {
     void 이미_인증이_완료된_경우_예외가_발생한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
 
         EmailVerification emailVerification = EmailVerification.create(

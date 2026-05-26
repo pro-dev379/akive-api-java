@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static net.akive.api.auth.email.domain.EmailVerificationPurpose.*;
 import static net.akive.api.auth.email.domain.exception.EmailVerificationErrorCode.*;
 import static net.akive.api.user.excpetion.UserErrorCode.*;
 import static net.akive.api.user.excpetion.UserErrorCode.NOT_FOUND;
@@ -46,7 +47,7 @@ class EmailVerificationControllerTest {
     @Test
     void 인증번호_전송을_요청하면_인증정보를_응답한다() throws Exception {
         // given
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("test@test.com", EmailVerificationPurpose.JOIN);
+        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("test@test.com", SIGN_UP);
         EmailVerificationCodeSendResult result = EmailVerificationCodeSendResult.of(
                 "test@test.com",
                 LocalDateTime.of(2025, 5, 21, 10, 5),
@@ -69,13 +70,13 @@ class EmailVerificationControllerTest {
 
         then(sendEmailVerificationCodeUseCase)
                 .should()
-                .send("test@test.com", EmailVerificationPurpose.JOIN);
+                .send("test@test.com", SIGN_UP);
     }
 
     @Test
     void 인증번호_전송_요청시_이메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("invalid-email", EmailVerificationPurpose.JOIN);
+        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("invalid-email", SIGN_UP);
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -91,7 +92,7 @@ class EmailVerificationControllerTest {
     @Test
     void 인증번호_전송_요청시_이메일이_비어있으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("", EmailVerificationPurpose.JOIN);
+        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("", SIGN_UP);
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -125,7 +126,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN
+                SIGN_UP
         );
 
         willThrow(new EmailVerificationException(RESEND_LIMIT_EXCEEDED))
@@ -146,7 +147,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN
+                SIGN_UP
         );
 
         willThrow(new EmailVerificationException(RESEND_TOO_SOON))
@@ -165,7 +166,7 @@ class EmailVerificationControllerTest {
     @Test
     void 인증번호_전송_요청시_비밀번호를_찾을_회원이_없으면_404를_응답한다() throws Exception {
         // given
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.FIND_PASSWORD;
+        EmailVerificationPurpose verificationPurpose = FIND_PASSWORD;
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
                 "test@test.com",
                 verificationPurpose
@@ -185,7 +186,7 @@ class EmailVerificationControllerTest {
     @Test
     void 인증번호_전송_요청시_회원가입_이메일이_중복되면_409를_응답한다() throws Exception {
         // given
-        EmailVerificationPurpose verificationPurpose = EmailVerificationPurpose.JOIN;
+        EmailVerificationPurpose verificationPurpose = SIGN_UP;
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
                 "test@test.com",
                 verificationPurpose
@@ -207,7 +208,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "123456"
         );
 
@@ -221,7 +222,7 @@ class EmailVerificationControllerTest {
                 .should()
                 .verify(
                         "test@test.com",
-                        EmailVerificationPurpose.JOIN,
+                        SIGN_UP,
                         "123456"
                 );
     }
@@ -231,7 +232,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "123456"
         );
 
@@ -251,7 +252,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "invalid-email",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "123456"
         );
 
@@ -271,7 +272,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 ""
         );
 
@@ -291,7 +292,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "12345"
         );
 
@@ -331,7 +332,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "000000"
         );
 
@@ -353,7 +354,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "123456"
         );
 
@@ -375,7 +376,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "123456"
         );
 
@@ -397,7 +398,7 @@ class EmailVerificationControllerTest {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
-                EmailVerificationPurpose.JOIN,
+                SIGN_UP,
                 "123456"
         );
 

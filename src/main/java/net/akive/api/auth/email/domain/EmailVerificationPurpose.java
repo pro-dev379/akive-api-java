@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum EmailVerificationPurpose {
 
-    JOIN("join"), FIND_PASSWORD("find-password");
+    SIGN_UP("sign-up"), FIND_PASSWORD("find-password");
 
     private final String code;
 }
