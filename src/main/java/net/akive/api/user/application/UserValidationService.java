@@ -28,7 +28,7 @@ public class UserValidationService {
 
     public void validateEmailNotDuplicate(String email) {
         if (userRepository.existsByEmail(email)) {
-            throw new BusinessException(UserErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new EmailAlreadyExistsException();
         }
     }
 }
