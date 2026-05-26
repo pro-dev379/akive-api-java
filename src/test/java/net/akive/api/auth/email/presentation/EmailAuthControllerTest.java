@@ -8,6 +8,8 @@ import net.akive.api.auth.email.domain.EmailAuthPurpose;
 import net.akive.api.auth.email.domain.exception.*;
 import net.akive.api.auth.email.presentation.dto.request.EmailAuthCodeSendRequest;
 import net.akive.api.auth.email.presentation.dto.request.EmailAuthCodeVerifyRequest;
+import net.akive.api.user.excpetion.EmailAlreadyExistsException;
+import net.akive.api.user.excpetion.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -156,6 +158,46 @@ class EmailAuthControllerTest {
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.code").value("EMAIL_AUTH_429_2"))
                 .andExpect(jsonPath("$.message").value("Resend request too soon."));
+    }
+
+    @Test
+    void 이메일_인증_번호_전송_요청_시_비밀번호를_찾을_이메일이_없으면_404를_응답한다() throws Exception {
+        // given
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.FIND_PASSWORD;
+        EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest(
+                "test@test.com",
+                authPurpose
+        );
+
+        willThrow(new UserNotFoundException())
+                .given(sendEmailAuthCodeUseCase)
+                .sendAuthCode(anyString(), eq(authPurpose));
+
+        // when & then
+        mockMvc.perform(post("/auth/email/codes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 이메일_인증_번호_전송_요청_시_회원가입_이메일이_중복이면_409를_응답한다() throws Exception {
+        // given
+        EmailAuthPurpose authPurpose = EmailAuthPurpose.JOIN;
+        EmailAuthCodeSendRequest request = new EmailAuthCodeSendRequest(
+                "test@test.com",
+                authPurpose
+        );
+
+        willThrow(new EmailAlreadyExistsException())
+                .given(sendEmailAuthCodeUseCase)
+                .sendAuthCode(anyString(), eq(authPurpose));
+
+        // when & then
+        mockMvc.perform(post("/auth/email/codes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
     }
 
     @Test
