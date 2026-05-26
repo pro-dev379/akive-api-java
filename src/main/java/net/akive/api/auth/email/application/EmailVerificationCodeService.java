@@ -3,7 +3,7 @@ package net.akive.api.auth.email.application;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.email.application.dto.EmailVerificationCodeSendResult;
 import net.akive.api.auth.email.application.port.in.SendEmailVerificationCodeUseCase;
-import net.akive.api.auth.email.application.port.in.VerifyEmailVerificationUseCase;
+import net.akive.api.auth.email.application.port.in.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.email.application.port.out.EmailVerificationCodeGenerator;
 import net.akive.api.auth.email.application.port.out.EmailVerificationMailSender;
 import net.akive.api.auth.email.application.port.out.EmailVerificationRepository;
@@ -22,7 +22,7 @@ import static net.akive.api.auth.email.domain.exception.EmailVerificationErrorCo
 
 @Service
 @RequiredArgsConstructor
-public class EmailVerificationService implements SendEmailVerificationCodeUseCase, VerifyEmailVerificationUseCase {
+public class EmailVerificationCodeService implements SendEmailVerificationCodeUseCase, VerifyEmailVerificationCodeUseCase {
 
     private final EmailVerificationMailSender emailVerificationMailSender;
     private final EmailVerificationCodeGenerator emailVerificationCodeGenerator;

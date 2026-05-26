@@ -3,7 +3,7 @@ package net.akive.api.auth.email.presentation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.auth.email.application.dto.EmailVerificationCodeSendResult;
 import net.akive.api.auth.email.application.port.in.SendEmailVerificationCodeUseCase;
-import net.akive.api.auth.email.application.port.in.VerifyEmailVerificationUseCase;
+import net.akive.api.auth.email.application.port.in.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.email.domain.EmailVerificationPurpose;
 import net.akive.api.auth.email.domain.exception.*;
 import net.akive.api.auth.email.presentation.dto.request.EmailVerificationCodeSendRequest;
@@ -41,7 +41,7 @@ class EmailVerificationControllerTest {
     SendEmailVerificationCodeUseCase sendEmailVerificationCodeUseCase;
 
     @MockitoBean
-    VerifyEmailVerificationUseCase verifyEmailVerificationUseCase;
+    VerifyEmailVerificationCodeUseCase verifyEmailVerificationCodeUseCase;
 
     @Test
     void 인증번호_전송을_요청하면_인증정보를_응답한다() throws Exception {
@@ -217,7 +217,7 @@ class EmailVerificationControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
 
-        then(verifyEmailVerificationUseCase)
+        then(verifyEmailVerificationCodeUseCase)
                 .should()
                 .verify(
                         "test@test.com",
@@ -241,7 +241,7 @@ class EmailVerificationControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        then(verifyEmailVerificationUseCase)
+        then(verifyEmailVerificationCodeUseCase)
                 .should(never())
                 .verify(any(), any(), any());
     }
@@ -261,7 +261,7 @@ class EmailVerificationControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        then(verifyEmailVerificationUseCase)
+        then(verifyEmailVerificationCodeUseCase)
                 .should(never())
                 .verify(any(), any(), any());
     }
@@ -281,7 +281,7 @@ class EmailVerificationControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        then(verifyEmailVerificationUseCase)
+        then(verifyEmailVerificationCodeUseCase)
                 .should(never())
                 .verify(any(), any(), any());
     }
@@ -296,7 +296,7 @@ class EmailVerificationControllerTest {
         );
 
         willThrow(new EmailVerificationException(CODE_MISMATCH))
-                .given(verifyEmailVerificationUseCase)
+                .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.email(), request.verificationPurpose(), request.verificationCode());
 
         // when & then
@@ -318,7 +318,7 @@ class EmailVerificationControllerTest {
         );
 
         willThrow(new EmailVerificationException(EmailVerificationErrorCode.NOT_FOUND))
-                .given(verifyEmailVerificationUseCase)
+                .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.email(), request.verificationPurpose(), request.verificationCode());
 
         // when & then
@@ -340,7 +340,7 @@ class EmailVerificationControllerTest {
         );
 
         willThrow(new EmailVerificationException(EXPIRED))
-                .given(verifyEmailVerificationUseCase)
+                .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.email(), request.verificationPurpose(), request.verificationCode());
 
         // when & then
@@ -362,7 +362,7 @@ class EmailVerificationControllerTest {
         );
 
         willThrow(new EmailVerificationException(ALREADY_VERIFIED))
-                .given(verifyEmailVerificationUseCase)
+                .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.email(), request.verificationPurpose(), request.verificationCode());
 
         // when & then

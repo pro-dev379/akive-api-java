@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.email.application.dto.EmailVerificationCodeSendResult;
 import net.akive.api.auth.email.application.port.in.SendEmailVerificationCodeUseCase;
-import net.akive.api.auth.email.application.port.in.VerifyEmailVerificationUseCase;
+import net.akive.api.auth.email.application.port.in.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.email.presentation.dto.request.EmailVerificationCodeSendRequest;
 import net.akive.api.auth.email.presentation.dto.request.EmailVerificationCodeVerifyRequest;
 import net.akive.api.auth.email.presentation.dto.response.EmailVerificationCodeSendResponse;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class EmailVerificationController {
 
     private final SendEmailVerificationCodeUseCase sendEmailVerificationCodeUseCase;
-    private final VerifyEmailVerificationUseCase verifyEmailVerificationUseCase;
+    private final VerifyEmailVerificationCodeUseCase verifyEmailVerificationCodeUseCase;
 
     @PostMapping
     public EmailVerificationCodeSendResponse send(@RequestBody @Valid EmailVerificationCodeSendRequest request) {
@@ -28,6 +28,6 @@ public class EmailVerificationController {
     @PostMapping("/verifications")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void verify(@RequestBody @Valid EmailVerificationCodeVerifyRequest request) {
-        verifyEmailVerificationUseCase.verify(request.email(), request.verificationPurpose(), request.verificationCode());
+        verifyEmailVerificationCodeUseCase.verify(request.email(), request.verificationPurpose(), request.verificationCode());
     }
 }

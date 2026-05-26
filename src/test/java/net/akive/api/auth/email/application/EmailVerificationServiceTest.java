@@ -44,7 +44,7 @@ class EmailVerificationServiceTest {
 
     Clock clock;
 
-    EmailVerificationService emailVerificationService;
+    EmailVerificationCodeService emailVerificationService;
 
     @BeforeEach
     void setUp() {
@@ -53,7 +53,7 @@ class EmailVerificationServiceTest {
                 ZoneId.of("Asia/Seoul")
         );
 
-        emailVerificationService = new EmailVerificationService(
+        emailVerificationService = new EmailVerificationCodeService(
                 emailVerificationMailSender,
                 emailVerificationCodeGenerator,
                 emailVerificationUserValidator,
