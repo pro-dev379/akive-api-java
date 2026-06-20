@@ -1,14 +1,14 @@
 package net.akive.api.auth.application;
 
 import net.akive.api.auth.application.dto.EmailVerificationCodeSendResult;
-import net.akive.api.auth.application.port.out.EmailVerificationCodeGenerator;
-import net.akive.api.auth.application.port.out.EmailVerificationMailSender;
-import net.akive.api.auth.application.port.out.EmailVerificationRepository;
-import net.akive.api.auth.application.port.out.EmailVerificationUserValidator;
-import net.akive.api.auth.domain.EmailVerification;
-import net.akive.api.auth.domain.EmailVerificationPurpose;
-import net.akive.api.auth.domain.exception.EmailVerificationException;
+import net.akive.api.auth.application.port.out.emailverification.EmailVerificationCodeGenerator;
+import net.akive.api.auth.application.port.out.emailverification.EmailVerificationMailSender;
+import net.akive.api.auth.application.port.out.emailverification.EmailVerificationRepository;
+import net.akive.api.auth.domain.emailverification.EmailVerification;
+import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
 import net.akive.api.common.exception.ErrorCode;
+import net.akive.api.user.application.port.in.ValidateUserUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.*;
 import java.util.Optional;
 
-import static net.akive.api.auth.domain.EmailVerificationPolicy.EXPIRE_DURATION;
-import static net.akive.api.auth.domain.EmailVerificationPurpose.*;
-import static net.akive.api.auth.domain.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EXPIRE_DURATION;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.*;
+import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -38,7 +38,7 @@ class EmailVerificationServiceTest {
     EmailVerificationCodeGenerator emailVerificationCodeGenerator;
 
     @Mock
-    EmailVerificationUserValidator emailVerificationUserValidator;
+    ValidateUserUseCase validateUserUseCase;
 
     @Mock
     EmailVerificationRepository emailVerificationRepository;
@@ -57,9 +57,9 @@ class EmailVerificationServiceTest {
         emailVerificationService = new EmailVerificationCodeService(
                 emailVerificationMailSender,
                 emailVerificationCodeGenerator,
-                emailVerificationUserValidator,
                 emailVerificationRepository,
-                clock
+                clock,
+                validateUserUseCase
         );
     }
 
@@ -78,11 +78,11 @@ class EmailVerificationServiceTest {
         EmailVerificationCodeSendResult result = emailVerificationService.send(email, verificationPurpose);
 
         // then
-        then(emailVerificationUserValidator)
+        then(validateUserUseCase)
                 .should()
                 .validateEmailNotDuplicate(email);
 
-        then(emailVerificationUserValidator)
+        then(validateUserUseCase)
                 .should(never())
                 .validateUserExistsByEmail(any());
 
@@ -114,11 +114,11 @@ class EmailVerificationServiceTest {
         EmailVerificationCodeSendResult result = emailVerificationService.send(email, verificationPurpose);
 
         // then
-        then(emailVerificationUserValidator)
+        then(validateUserUseCase)
                 .should()
                 .validateUserExistsByEmail(email);
 
-        then(emailVerificationUserValidator)
+        then(validateUserUseCase)
                 .should(never())
                 .validateEmailNotDuplicate(any());
 

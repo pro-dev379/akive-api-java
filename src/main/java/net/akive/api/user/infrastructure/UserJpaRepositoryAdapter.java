@@ -2,13 +2,20 @@ package net.akive.api.user.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.user.application.port.out.UserRepository;
+import net.akive.api.user.domain.User;
+import net.akive.api.user.infrastructure.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class UserJpaRepositoryAdapter implements UserRepository {
+class UserJpaRepositoryAdapter implements UserRepository {
 
     private final UserJpaRepository userJpaRepository;
+
+    @Override
+    public User save(User user) {
+        return userJpaRepository.save(UserEntity.fromModel(user)).toModel();
+    }
 
     @Override
     public boolean existsByUserIdAndLeaveFalse(Long userId) {

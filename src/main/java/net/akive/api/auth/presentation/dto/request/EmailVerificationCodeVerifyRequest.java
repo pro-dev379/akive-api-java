@@ -1,7 +1,7 @@
 package net.akive.api.auth.presentation.dto.request;
 
 import jakarta.validation.constraints.*;
-import net.akive.api.auth.domain.EmailVerificationPurpose;
+import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 
 public record EmailVerificationCodeVerifyRequest(
     @Email @NotBlank  String email,

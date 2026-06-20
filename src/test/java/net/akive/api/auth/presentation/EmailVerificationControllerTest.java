@@ -2,24 +2,25 @@ package net.akive.api.auth.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.auth.application.dto.EmailVerificationCodeSendResult;
-import net.akive.api.auth.application.port.in.SendEmailVerificationCodeUseCase;
-import net.akive.api.auth.application.port.in.VerifyEmailVerificationCodeUseCase;
-import net.akive.api.auth.domain.EmailVerificationPurpose;
-import net.akive.api.auth.domain.exception.EmailVerificationException;
+import net.akive.api.auth.application.port.in.emailverification.SendEmailVerificationCodeUseCase;
+import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;
+import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
 import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeSendRequest;
 import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeVerifyRequest;
 import net.akive.api.user.excpetion.UserErrorCode;
 import net.akive.api.user.excpetion.UserException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
-import static net.akive.api.auth.domain.EmailVerificationPurpose.*;
-import static net.akive.api.auth.domain.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.*;
+import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(EmailVerificationController.class)
 class EmailVerificationControllerTest {
 

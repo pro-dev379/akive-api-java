@@ -1,14 +1,16 @@
 package net.akive.api.auth.domain;
 
-import net.akive.api.auth.domain.exception.EmailVerificationException;
+import net.akive.api.auth.domain.emailverification.EmailVerification;
+import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
 import net.akive.api.common.exception.ErrorCode;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-import static net.akive.api.auth.domain.EmailVerificationPolicy.*;
-import static net.akive.api.auth.domain.EmailVerificationPurpose.*;
-import static net.akive.api.auth.domain.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.*;
+import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

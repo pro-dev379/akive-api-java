@@ -1,6 +1,6 @@
 package net.akive.api.user.infrastructure;
 
-import net.akive.api.user.entity.UserEntity;
+import net.akive.api.user.infrastructure.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
