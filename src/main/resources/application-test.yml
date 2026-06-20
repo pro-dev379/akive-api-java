@@ -1,12 +1,20 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:~/akive
+    url: jdbc:h2:mem:akive;MODE=MySQL;DATABASE_TO_LOWER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
+
   jpa:
     hibernate:
       ddl-auto: create-drop
+
   data:
     redis:
       host: localhost
+
+jwt:
+  access-token:
+    secret: test-access-secret-test-access-secret
+  refresh-token:
+    secret: test-refresh-secret-test-refresh-secret

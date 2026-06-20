@@ -1,4 +1,33 @@
 spring:
+  config:
+    import: >
+      aws-secretsmanager:akive/dev/db,
+      aws-secretsmanager:akive/dev/jwt
+
+  datasource:
+    url: jdbc:mysql://${host}:${port}/${dbname}?characterEncoding=UTF-8
+    username: ${username}
+    password: ${password}
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
   data:
     redis:
       host: master.akive-redis-dev.3ay8cv.apn2.cache.amazonaws.com
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+
+jwt:
+  access-token:
+    secret: ${accessTokenSecret}
+  refresh-token:
+    secret: ${refreshTokenSecret}

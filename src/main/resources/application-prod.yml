@@ -3,21 +3,28 @@ spring:
     import: >
       aws-secretsmanager:akive/prod/db,
       aws-secretsmanager:akive/prod/jwt
+
+  datasource:
+    url: jdbc:mysql://${host}:${port}/${dbname}?characterEncoding=UTF-8
+    username: ${username}
+    password: ${password}
+
   jpa:
     show-sql: false
     hibernate:
       ddl-auto: validate
+
   data:
     redis:
       host: master.akive-redis-prod.3ay8cv.apn2.cache.amazonaws.com
+
 logging:
   level:
     org.hibernate.SQL: info
     org.hibernate.orm.jdbc.bind: off
+
 jwt:
   access-token:
     secret: ${accessTokenSecret}
-    expiration-minutes: 30
   refresh-token:
     secret: ${refreshTokenSecret}
-    expiration-days: 14
