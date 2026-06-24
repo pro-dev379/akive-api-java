@@ -1,7 +1,9 @@
 package net.akive.api.auth.infrastructure.token;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.port.out.token.RefreshTokenRepository;
+import net.akive.api.auth.application.port.out.token.DeleteTokenPort;
+import net.akive.api.auth.application.port.out.token.LoadTokenPort;
+import net.akive.api.auth.application.port.out.token.SaveTokenPort;
 import net.akive.api.common.cache.CacheKeyProvider;
 import net.akive.api.common.cache.RedisTemplateClient;
 import org.springframework.stereotype.Component;
@@ -11,7 +13,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class RefreshTokenRedisAdapter implements RefreshTokenRepository {
+class RefreshTokenRedisAdapter implements LoadTokenPort, SaveTokenPort, DeleteTokenPort {
 
     private final RedisTemplateClient redisTemplateClient;
 

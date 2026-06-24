@@ -1,9 +1,9 @@
 package net.akive.api.auth.infrastructure.token;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.port.out.token.TokenGenerator;
+import net.akive.api.auth.application.port.out.token.CreateTokenPort;
 import net.akive.api.auth.domain.token.TokenPayload;
-import net.akive.api.auth.application.port.out.token.TokenValidator;
+import net.akive.api.auth.application.port.out.token.ValidateTokenPort;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
 import org.springframework.security.oauth2.jwt.*;
@@ -18,7 +18,7 @@ import static org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256;
 
 @Component
 @RequiredArgsConstructor
-public class JwtTokenProvider implements TokenGenerator, TokenValidator {
+class JwtTokenProvider implements CreateTokenPort, ValidateTokenPort {
 
     private static final String ISSUER = "akive";
 
