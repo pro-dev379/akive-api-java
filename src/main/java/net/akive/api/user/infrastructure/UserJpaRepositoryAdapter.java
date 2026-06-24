@@ -1,14 +1,15 @@
 package net.akive.api.user.infrastructure;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.user.application.port.out.UserRepository;
+import net.akive.api.user.application.port.out.SaveUserPort;
+import net.akive.api.user.application.port.out.ValidateUserPort;
 import net.akive.api.user.domain.User;
 import net.akive.api.user.infrastructure.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-class UserJpaRepositoryAdapter implements UserRepository {
+class UserJpaRepositoryAdapter implements SaveUserPort, ValidateUserPort {
 
     private final UserJpaRepository userJpaRepository;
 

@@ -1,14 +1,14 @@
 package net.akive.api.user.infrastructure;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.user.application.port.out.GoalRepository;
+import net.akive.api.user.application.port.out.SaveGoalPort;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.infrastructure.entity.GoalEntity;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-class GoalJpaRepositoryAdapter implements GoalRepository {
+class GoalJpaRepositoryAdapter implements SaveGoalPort {
 
     private final GoalJpaRepository goalJpaRepository;
 

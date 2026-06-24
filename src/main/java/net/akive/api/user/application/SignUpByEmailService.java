@@ -10,9 +10,9 @@ import net.akive.api.mentoring.application.port.in.CreateDefaultMentoringProfile
 import net.akive.api.user.application.dto.SignUpResult;
 import net.akive.api.user.application.dto.SignUpByEmailCommand;
 import net.akive.api.user.application.port.in.SignUpByEmailUseCase;
-import net.akive.api.user.application.port.out.GoalRepository;
-import net.akive.api.user.application.port.out.NicknameGenerator;
-import net.akive.api.user.application.port.out.UserRepository;
+import net.akive.api.user.application.port.out.GenerateNicknamePort;
+import net.akive.api.user.application.port.out.SaveGoalPort;
+import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,9 +24,9 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpo
 @RequiredArgsConstructor
 class SignUpByEmailService implements SignUpByEmailUseCase {
 
-    private final UserRepository userRepository;
-    private final GoalRepository goalRepository;
-    private final NicknameGenerator nicknameGenerator;
+    private final SaveUserPort saveUserPort;
+    private final SaveGoalPort saveGoalPort;
+    private final GenerateNicknamePort generateNicknamePort;
     private final PasswordEncoder passwordEncoder;
 
     private final EnsureEmailVerifiedUseCase ensureEmailVerifiedUseCase;
@@ -43,10 +43,10 @@ class SignUpByEmailService implements SignUpByEmailUseCase {
                 )
         );
 
-        String nickname = nicknameGenerator.generate(command.roleType());
+        String nickname = generateNicknamePort.generate(command.roleType());
         String encodedPassword = passwordEncoder.encode(command.password());
 
-        User savedUser = userRepository.save(
+        User savedUser = saveUserPort.save(
                 User.signUpByEmail(
                         command.email(),
                         nickname,
@@ -57,7 +57,7 @@ class SignUpByEmailService implements SignUpByEmailUseCase {
         Long userId = savedUser.getUserId();
         TokenIssueResult issuedToken = issueTokenUseCase.issue(userId, savedUser.getRoleType());
 
-        goalRepository.save(Goal.createDefault(userId));
+        saveGoalPort.save(Goal.createDefault(userId));
         createDefaultMentoringProfileUseCase.create(userId);
 
         return new SignUpResult(nickname, issuedToken.accessToken(), issuedToken.refreshToken());

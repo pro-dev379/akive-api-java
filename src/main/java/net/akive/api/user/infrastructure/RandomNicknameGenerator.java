@@ -1,13 +1,13 @@
 package net.akive.api.user.infrastructure;
 
-import net.akive.api.user.application.port.out.NicknameGenerator;
+import net.akive.api.user.application.port.out.GenerateNicknamePort;
 import net.akive.api.user.domain.RoleType;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
 @Component
-class RandomNicknameGenerator implements NicknameGenerator {
+class RandomNicknameGenerator implements GenerateNicknamePort {
 
     @Override
     public String generate(RoleType roleType) {
