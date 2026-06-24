@@ -7,6 +7,7 @@ phases:
 
   pre_build:
     commands:
+      - set -e
       - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - REPOSITORY_URI=${ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/${ECR_REPOSITORY_NAME}
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
@@ -15,13 +16,16 @@ phases:
 
   build:
     commands:
+      - set -e
       - chmod +x ./gradlew
-      - ./gradlew clean test bootJar
+      - ./gradlew clean test bootJar --no-build-cache --rerun-tasks
       - docker build -t ${ECR_REPOSITORY_NAME}:${IMAGE_TAG} .
       - docker tag ${ECR_REPOSITORY_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}
 
   post_build:
     commands:
+      - set -e
+      - docker image inspect ${REPOSITORY_URI}:${IMAGE_TAG} > /dev/null
       - docker push ${REPOSITORY_URI}:${IMAGE_TAG}
       - envsubst < Dockerrun.aws.json.template > Dockerrun.aws.json
       - cat Dockerrun.aws.json
