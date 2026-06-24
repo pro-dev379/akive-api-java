@@ -2,8 +2,9 @@ package net.akive.api.user.application;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.akive.api.auth.application.dto.EmailVerificationEnsureVerifiedCommand;
 import net.akive.api.auth.application.dto.TokenIssueResult;
-import net.akive.api.auth.application.port.in.emailverification.ValidateEmailVerificationUseCase;
+import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerifiedUseCase;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.mentoring.application.port.in.CreateDefaultMentoringProfileUseCase;
 import net.akive.api.user.application.dto.SignUpResult;
@@ -28,14 +29,19 @@ class SignUpByEmailService implements SignUpByEmailUseCase {
     private final NicknameGenerator nicknameGenerator;
     private final PasswordEncoder passwordEncoder;
 
-    private final ValidateEmailVerificationUseCase validateEmailVerificationUseCase;
+    private final EnsureEmailVerifiedUseCase ensureEmailVerifiedUseCase;
     private final CreateDefaultMentoringProfileUseCase createDefaultMentoringProfileUseCase;
     private final IssueTokenUseCase issueTokenUseCase;
 
     @Override
     @Transactional
     public SignUpResult signUp(SignUpByEmailCommand command) {
-        validateEmailVerificationUseCase.validateVerified(command.email(), SIGN_UP);
+        ensureEmailVerifiedUseCase.ensureVerified(
+                EmailVerificationEnsureVerifiedCommand.of(
+                        command.email(),
+                        SIGN_UP
+                )
+        );
 
         String nickname = nicknameGenerator.generate(command.roleType());
         String encodedPassword = passwordEncoder.encode(command.password());

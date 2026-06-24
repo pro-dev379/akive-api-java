@@ -1,12 +1,12 @@
 package net.akive.api.auth.infrastructure.emailverification;
 
-import net.akive.api.auth.application.port.out.emailverification.EmailVerificationCodeGenerator;
+import net.akive.api.auth.application.port.out.emailverification.GenerateEmailVerificationCodePort;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 
 @Component
-class SecureRandomEmailVerificationCodeGenerator implements EmailVerificationCodeGenerator {
+class SecureRandomEmailVerificationCodeGenerator implements GenerateEmailVerificationCodePort {
 
     private final SecureRandom secureRandom = new SecureRandom();
 

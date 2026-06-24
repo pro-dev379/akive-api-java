@@ -25,29 +25,22 @@ public class EmailVerification {
     private LocalDateTime lastSentAt;
     private LocalDateTime createdAt;
 
-    public EmailVerification(
-            String email,
-            EmailVerificationPurpose verificationPurpose,
-            String verificationCode,
-            LocalDateTime requestedAt
-    ) {
-        this.email = email;
-        this.verificationPurpose = verificationPurpose;
-        this.verificationCode = verificationCode;
-        this.resendCount = 0;
-        this.verified = false;
-        this.expiredAt = requestedAt.plus(EXPIRE_DURATION);
-        this.lastSentAt = requestedAt;
-        this.createdAt = requestedAt;
-    }
-
     public static EmailVerification create(
             String email,
             EmailVerificationPurpose verificationPurpose,
             String verificationCode,
             LocalDateTime requestedAt
     ) {
-        return new EmailVerification(email, verificationPurpose, verificationCode, requestedAt);
+        return new EmailVerification(
+                email,
+                verificationPurpose,
+                verificationCode,
+                0,
+                false,
+                requestedAt.plus(EXPIRE_DURATION),
+                requestedAt,
+                requestedAt
+        );
     }
 
     public void renew(String verificationCode, LocalDateTime requestedAt) {

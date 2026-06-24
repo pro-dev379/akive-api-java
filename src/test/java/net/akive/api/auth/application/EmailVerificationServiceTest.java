@@ -1,9 +1,9 @@
 package net.akive.api.auth.application;
 
+import net.akive.api.auth.application.dto.EmailVerificationCodeSendCommand;
 import net.akive.api.auth.application.dto.EmailVerificationCodeSendResult;
-import net.akive.api.auth.application.port.out.emailverification.EmailVerificationCodeGenerator;
-import net.akive.api.auth.application.port.out.emailverification.EmailVerificationMailSender;
-import net.akive.api.auth.application.port.out.emailverification.EmailVerificationRepository;
+import net.akive.api.auth.application.dto.EmailVerificationCodeVerifyCommand;
+import net.akive.api.auth.application.port.out.emailverification.*;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
@@ -32,20 +32,23 @@ import static org.mockito.Mockito.never;
 class EmailVerificationServiceTest {
 
     @Mock
-    EmailVerificationMailSender emailVerificationMailSender;
+    SendEmailVerificationMailPort sendEmailVerificationMailPort;
 
     @Mock
-    EmailVerificationCodeGenerator emailVerificationCodeGenerator;
+    GenerateEmailVerificationCodePort generateEmailVerificationCodePort;
 
     @Mock
     ValidateUserUseCase validateUserUseCase;
 
     @Mock
-    EmailVerificationRepository emailVerificationRepository;
+    LoadEmailVerificationPort loadEmailVerificationPort;
+
+    @Mock
+    SaveEmailVerificationPort saveEmailVerificationPort;
 
     Clock clock;
 
-    EmailVerificationCodeService emailVerificationService;
+    EmailVerificationService emailVerificationService;
 
     @BeforeEach
     void setUp() {
@@ -54,10 +57,11 @@ class EmailVerificationServiceTest {
                 ZoneId.of("Asia/Seoul")
         );
 
-        emailVerificationService = new EmailVerificationCodeService(
-                emailVerificationMailSender,
-                emailVerificationCodeGenerator,
-                emailVerificationRepository,
+        emailVerificationService = new EmailVerificationService(
+                sendEmailVerificationMailPort,
+                generateEmailVerificationCodePort,
+                loadEmailVerificationPort,
+                saveEmailVerificationPort,
                 clock,
                 validateUserUseCase
         );
@@ -70,12 +74,13 @@ class EmailVerificationServiceTest {
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
 
-        given(emailVerificationCodeGenerator.generate()).willReturn(verificationCode);
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(generateEmailVerificationCodePort.generate()).willReturn(verificationCode);
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.empty());
 
         // when
-        EmailVerificationCodeSendResult result = emailVerificationService.send(email, verificationPurpose);
+        EmailVerificationCodeSendResult result
+                = emailVerificationService.send(EmailVerificationCodeSendCommand.of(email, verificationPurpose));
 
         // then
         then(validateUserUseCase)
@@ -86,11 +91,11 @@ class EmailVerificationServiceTest {
                 .should(never())
                 .validateUserExistsByEmail(any());
 
-        then(emailVerificationMailSender)
+        then(sendEmailVerificationMailPort)
                 .should()
                 .send(eq(email), eq(verificationCode), any(Duration.class));
 
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should()
                 .save(any(EmailVerification.class), any(Duration.class));
 
@@ -106,12 +111,13 @@ class EmailVerificationServiceTest {
         String verificationCode = "123456";
         EmailVerificationPurpose verificationPurpose = FIND_PASSWORD;
 
-        given(emailVerificationCodeGenerator.generate()).willReturn(verificationCode);
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(generateEmailVerificationCodePort.generate()).willReturn(verificationCode);
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.empty());
 
         // when
-        EmailVerificationCodeSendResult result = emailVerificationService.send(email, verificationPurpose);
+        EmailVerificationCodeSendResult result
+                = emailVerificationService.send(EmailVerificationCodeSendCommand.of(email, verificationPurpose));
 
         // then
         then(validateUserUseCase)
@@ -122,11 +128,11 @@ class EmailVerificationServiceTest {
                 .should(never())
                 .validateEmailNotDuplicate(any());
 
-        then(emailVerificationMailSender)
+        then(sendEmailVerificationMailPort)
                 .should()
                 .send(eq(email), eq(verificationCode), any(Duration.class));
 
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should()
                 .save(any(EmailVerification.class), any(Duration.class));
 
@@ -148,19 +154,19 @@ class EmailVerificationServiceTest {
                 LocalDateTime.of(2025, 5, 21, 9, 55)
         );
 
-        given(emailVerificationCodeGenerator.generate()).willReturn(verificationCode);
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(generateEmailVerificationCodePort.generate()).willReturn(verificationCode);
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.of(previous));
 
         // when
-        emailVerificationService.send(email, verificationPurpose);
+        emailVerificationService.send(EmailVerificationCodeSendCommand.of(email, verificationPurpose));
 
         // then
-        then(emailVerificationMailSender)
+        then(sendEmailVerificationMailPort)
                 .should()
                 .send(eq(email), eq(verificationCode), any(Duration.class));
 
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should()
                 .save(
                     argThat(
@@ -179,7 +185,7 @@ class EmailVerificationServiceTest {
         String email = "test@test.com";
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
 
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(
                     Optional.of(
                         EmailVerification.create(email, verificationPurpose, "123456", LocalDateTime.now(clock))
@@ -187,14 +193,14 @@ class EmailVerificationServiceTest {
                 );
 
         // when & then
-        assertThatThrownBy(() -> emailVerificationService.send(email, verificationPurpose))
+        assertThatThrownBy(() -> emailVerificationService.send(EmailVerificationCodeSendCommand.of(email, verificationPurpose)))
                 .satisfies(e -> assertErrorCode(e, RESEND_TOO_SOON));
 
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should(never())
                 .save(any(), any());
 
-        then(emailVerificationMailSender)
+        then(sendEmailVerificationMailPort)
                 .should(never())
                 .send(any(), any(), any());
     }
@@ -211,19 +217,19 @@ class EmailVerificationServiceTest {
         emailVerification.renew("222222", requestedAt.plusMinutes(2));
         emailVerification.renew("333333", requestedAt.plusMinutes(3));
 
-        given(emailVerificationCodeGenerator.generate()).willReturn("123456");
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(generateEmailVerificationCodePort.generate()).willReturn("123456");
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatThrownBy(() -> emailVerificationService.send(email, verificationPurpose))
+        assertThatThrownBy(() -> emailVerificationService.send(EmailVerificationCodeSendCommand.of(email, verificationPurpose)))
                 .satisfies(e -> assertErrorCode(e, RESEND_LIMIT_EXCEEDED));
 
-        then(emailVerificationMailSender)
+        then(sendEmailVerificationMailPort)
                 .should(never())
                 .send(any(), any(), any());
 
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should(never())
                 .save(any(), any());
     }
@@ -243,14 +249,14 @@ class EmailVerificationServiceTest {
                 requestedAt
         );
 
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when
-        emailVerificationService.verify(email, verificationPurpose, verificationCode);
+        emailVerificationService.verify(EmailVerificationCodeVerifyCommand.of(email, verificationPurpose, verificationCode));
 
         // then
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should()
                 .save(
                         argThat(savedEmailAuth ->
@@ -269,14 +275,18 @@ class EmailVerificationServiceTest {
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
 
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> emailVerificationService.verify(email, verificationPurpose, verificationCode))
+        assertThatThrownBy(() ->
+                emailVerificationService.verify(
+                        EmailVerificationCodeVerifyCommand.of(email, verificationPurpose, verificationCode)
+                    )
+                )
                 .satisfies(e -> assertErrorCode(e, NOT_FOUND));
 
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should(never())
                 .save(any(), any());
     }
@@ -294,14 +304,18 @@ class EmailVerificationServiceTest {
                 LocalDateTime.now(clock).minusMinutes(1)
         );
 
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatThrownBy(() -> emailVerificationService.verify(email, verificationPurpose, "000000"))
+        assertThatThrownBy(() ->
+                emailVerificationService.verify(
+                        EmailVerificationCodeVerifyCommand.of(email, verificationPurpose, "000000")
+                    )
+                )
                 .satisfies(e -> assertErrorCode(e, CODE_MISMATCH));
 
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should(never())
                 .save(any(), any());
     }
@@ -320,14 +334,18 @@ class EmailVerificationServiceTest {
                 LocalDateTime.now(clock).minus(EXPIRE_DURATION).minusSeconds(1)
         );
 
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatThrownBy(() -> emailVerificationService.verify(email, verificationPurpose, verificationCode))
+        assertThatThrownBy(() ->
+                emailVerificationService.verify(
+                        EmailVerificationCodeVerifyCommand.of(email, verificationPurpose, verificationCode)
+                    )
+                )
                 .satisfies(e -> assertErrorCode(e, EXPIRED));
 
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should(never())
                 .save(any(), any());
     }
@@ -347,14 +365,18 @@ class EmailVerificationServiceTest {
         );
         emailVerification.verify(verificationCode, LocalDateTime.now(clock).minusMinutes(1));
 
-        given(emailVerificationRepository.findByEmailAndVerificationPurpose(email, verificationPurpose))
+        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatThrownBy(() -> emailVerificationService.verify(email, verificationPurpose, verificationCode))
+        assertThatThrownBy(() ->
+                emailVerificationService.verify(
+                        EmailVerificationCodeVerifyCommand.of(email, verificationPurpose, verificationCode)
+                    )
+                )
                 .satisfies(e -> assertErrorCode(e, ALREADY_VERIFIED));
 
-        then(emailVerificationRepository)
+        then(saveEmailVerificationPort)
                 .should(never())
                 .save(any(), any());
     }

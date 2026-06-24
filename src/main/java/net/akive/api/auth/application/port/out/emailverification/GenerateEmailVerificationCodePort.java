@@ -1,6 +1,6 @@
 package net.akive.api.auth.application.port.out.emailverification;
 
-public interface EmailVerificationCodeGenerator {
+public interface GenerateEmailVerificationCodePort {
 
     String generate();
 }

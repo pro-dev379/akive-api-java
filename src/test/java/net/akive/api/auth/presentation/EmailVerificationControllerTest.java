@@ -1,7 +1,9 @@
 package net.akive.api.auth.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.akive.api.auth.application.dto.EmailVerificationCodeSendCommand;
 import net.akive.api.auth.application.dto.EmailVerificationCodeSendResult;
+import net.akive.api.auth.application.dto.EmailVerificationCodeVerifyCommand;
 import net.akive.api.auth.application.port.in.emailverification.SendEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
@@ -56,7 +58,7 @@ class EmailVerificationControllerTest {
                 30
         );
 
-        given(sendEmailVerificationCodeUseCase.send(request.email(), request.verificationPurpose()))
+        given(sendEmailVerificationCodeUseCase.send(request.toCommand()))
                 .willReturn(result);
 
         // when & then
@@ -71,7 +73,7 @@ class EmailVerificationControllerTest {
 
         then(sendEmailVerificationCodeUseCase)
                 .should()
-                .send("test@test.com", SIGN_UP);
+                .send(EmailVerificationCodeSendCommand.of("test@test.com", SIGN_UP));
     }
 
     @Test
@@ -87,7 +89,7 @@ class EmailVerificationControllerTest {
 
         then(sendEmailVerificationCodeUseCase)
                 .should(never())
-                .send(any(), any());
+                .send(any(EmailVerificationCodeSendCommand.class));
     }
 
     @Test
@@ -103,7 +105,7 @@ class EmailVerificationControllerTest {
 
         then(sendEmailVerificationCodeUseCase)
                 .should(never())
-                .send(any(), any());
+                .send(any(EmailVerificationCodeSendCommand.class));
     }
 
     @Test
@@ -119,7 +121,7 @@ class EmailVerificationControllerTest {
 
         then(sendEmailVerificationCodeUseCase)
                 .should(never())
-                .send(any(), any());
+                .send(any(EmailVerificationCodeSendCommand.class));
     }
 
     @Test
@@ -132,7 +134,7 @@ class EmailVerificationControllerTest {
 
         willThrow(new EmailVerificationException(RESEND_LIMIT_EXCEEDED))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(request.email(), request.verificationPurpose());
+                .send(request.toCommand());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -153,7 +155,7 @@ class EmailVerificationControllerTest {
 
         willThrow(new EmailVerificationException(RESEND_TOO_SOON))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(request.email(), request.verificationPurpose());
+                .send(request.toCommand());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -175,7 +177,7 @@ class EmailVerificationControllerTest {
 
         willThrow(new UserException(UserErrorCode.NOT_FOUND))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(anyString(), eq(verificationPurpose));
+                .send(any(EmailVerificationCodeSendCommand.class));
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -195,7 +197,7 @@ class EmailVerificationControllerTest {
 
         willThrow(new UserException(UserErrorCode.EMAIL_ALREADY_EXISTS))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(anyString(), eq(verificationPurpose));
+                .send(any(EmailVerificationCodeSendCommand.class));
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -221,11 +223,7 @@ class EmailVerificationControllerTest {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should()
-                .verify(
-                        "test@test.com",
-                        SIGN_UP,
-                        "123456"
-                );
+                .verify(EmailVerificationCodeVerifyCommand.of("test@test.com", SIGN_UP, "123456"));
     }
 
     @Test
@@ -245,7 +243,7 @@ class EmailVerificationControllerTest {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(), any(), any());
+                .verify(any(EmailVerificationCodeVerifyCommand.class));
     }
 
     @Test
@@ -265,7 +263,7 @@ class EmailVerificationControllerTest {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(), any(), any());
+                .verify(any(EmailVerificationCodeVerifyCommand.class));
     }
 
     @Test
@@ -285,7 +283,7 @@ class EmailVerificationControllerTest {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(), any(), any());
+                .verify(any(EmailVerificationCodeVerifyCommand.class));
     }
 
     @Test
@@ -305,7 +303,7 @@ class EmailVerificationControllerTest {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(), any(), any());
+                .verify(any(EmailVerificationCodeVerifyCommand.class));
     }
 
     @Test
@@ -325,7 +323,7 @@ class EmailVerificationControllerTest {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(), any(), any());
+                .verify(any(EmailVerificationCodeVerifyCommand.class));
     }
 
     @Test
@@ -339,7 +337,7 @@ class EmailVerificationControllerTest {
 
         willThrow(new EmailVerificationException(CODE_MISMATCH))
                 .given(verifyEmailVerificationCodeUseCase)
-                .verify(request.email(), request.verificationPurpose(), request.verificationCode());
+                .verify(request.toCommand());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
@@ -361,7 +359,7 @@ class EmailVerificationControllerTest {
 
         willThrow(new EmailVerificationException(NOT_FOUND))
                 .given(verifyEmailVerificationCodeUseCase)
-                .verify(request.email(), request.verificationPurpose(), request.verificationCode());
+                .verify(request.toCommand());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
@@ -383,7 +381,7 @@ class EmailVerificationControllerTest {
 
         willThrow(new EmailVerificationException(EXPIRED))
                 .given(verifyEmailVerificationCodeUseCase)
-                .verify(request.email(), request.verificationPurpose(), request.verificationCode());
+                .verify(request.toCommand());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
@@ -405,7 +403,7 @@ class EmailVerificationControllerTest {
 
         willThrow(new EmailVerificationException(ALREADY_VERIFIED))
                 .given(verifyEmailVerificationCodeUseCase)
-                .verify(request.email(), request.verificationPurpose(), request.verificationCode());
+                .verify(request.toCommand());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")

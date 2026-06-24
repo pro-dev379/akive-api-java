@@ -1,9 +1,9 @@
 package net.akive.api.auth.application.port.in.emailverification;
 
 import net.akive.api.auth.application.dto.EmailVerificationCodeSendResult;
-import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+import net.akive.api.auth.application.dto.EmailVerificationCodeSendCommand;
 
 public interface SendEmailVerificationCodeUseCase {
 
-    EmailVerificationCodeSendResult send(String email, EmailVerificationPurpose verificationPurpose);
+    EmailVerificationCodeSendResult send(EmailVerificationCodeSendCommand command);
 }

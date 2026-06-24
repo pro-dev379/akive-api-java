@@ -1,7 +1,9 @@
 package net.akive.api.auth.infrastructure.emailverification;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.port.out.emailverification.EmailVerificationRepository;
+import net.akive.api.auth.application.port.out.emailverification.DeleteEmailVerificationPort;
+import net.akive.api.auth.application.port.out.emailverification.LoadEmailVerificationPort;
+import net.akive.api.auth.application.port.out.emailverification.SaveEmailVerificationPort;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.common.cache.CacheKeyProvider;
@@ -13,7 +15,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-class EmailVerificationRedisAdapter implements EmailVerificationRepository {
+class EmailVerificationRedisAdapter implements LoadEmailVerificationPort, SaveEmailVerificationPort, DeleteEmailVerificationPort {
 
     private final RedisTemplateClient redisTemplateClient;
 

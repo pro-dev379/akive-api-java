@@ -1,7 +1,7 @@
 package net.akive.api.auth.infrastructure.emailverification;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.port.out.emailverification.EmailVerificationMailSender;
+import net.akive.api.auth.application.port.out.emailverification.SendEmailVerificationMailPort;
 import net.akive.api.common.email.EmailSenderService;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-class EmailVerificationMailSenderAdapter implements EmailVerificationMailSender {
+class EmailVerificationMailSenderAdapter implements SendEmailVerificationMailPort {
 
     private final EmailSenderService emailSenderService;
 
