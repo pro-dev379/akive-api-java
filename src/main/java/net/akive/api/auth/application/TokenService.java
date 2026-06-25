@@ -9,8 +9,6 @@ import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-
 @Service
 @RequiredArgsConstructor
 class TokenService implements IssueTokenUseCase {
@@ -23,12 +21,11 @@ class TokenService implements IssueTokenUseCase {
     public TokenIssueResult issue(Long userId, RoleType roleType) {
         String accessToken = createTokenPort.createAccessToken(userId, roleType);
         String refreshToken = createTokenPort.createRefreshToken(userId, roleType);
-        long refreshTokenExpiration = jwtProperties.refreshToken().expirationDays();
 
         saveTokenPort.save(
                 userId,
                 refreshToken,
-                Duration.ofDays(refreshTokenExpiration)
+                jwtProperties.refreshToken().expiration()
         );
 
         return new TokenIssueResult(accessToken, refreshToken);
