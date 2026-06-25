@@ -14,6 +14,7 @@ import java.time.Instant;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static net.akive.api.auth.domain.token.TokenType.*;
 import static org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256;
 
 @Component
@@ -38,7 +39,7 @@ class JwtTokenProvider implements CreateTokenPort, ValidateTokenPort {
                 .subject(String.valueOf(userId))
                 .issuedAt(now)
                 .expiresAt(expiresAt)
-                .claim("type", "access")
+                .claim("type", ACCESS.name())
                 .claim("role", roleType.name())
                 .build();
 
@@ -55,7 +56,7 @@ class JwtTokenProvider implements CreateTokenPort, ValidateTokenPort {
                 .subject(String.valueOf(userId))
                 .issuedAt(now)
                 .expiresAt(expiresAt)
-                .claim("type", "refresh")
+                .claim("type", REFRESH.name())
                 .claim("role", roleType.name())
                 .build();
 
