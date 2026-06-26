@@ -66,7 +66,7 @@ class SignUpControllerTest {
         mockMvc.perform(post("/users/email")
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nickname").value("USER@abcde"))
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
                 .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
