@@ -9,7 +9,7 @@ import net.akive.api.user.domain.LoginType;
 import net.akive.api.user.domain.User;
 import net.akive.api.user.domain.RoleType;
 
-import static jakarta.persistence.EnumType.*;
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 

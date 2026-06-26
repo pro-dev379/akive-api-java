@@ -13,12 +13,15 @@ import net.akive.api.user.application.port.in.SignUpByEmailUseCase;
 import net.akive.api.user.application.port.out.GenerateNicknamePort;
 import net.akive.api.user.application.port.out.SaveGoalPort;
 import net.akive.api.user.application.port.out.SaveUserPort;
+import net.akive.api.user.application.port.out.ValidateUserPort;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
+import net.akive.api.user.excpetion.UserException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
+import static net.akive.api.user.excpetion.UserErrorCode.EMAIL_ALREADY_EXISTS;
 
 @Service
 @RequiredArgsConstructor
@@ -26,16 +29,22 @@ class SignUpByEmailService implements SignUpByEmailUseCase {
 
     private final SaveUserPort saveUserPort;
     private final SaveGoalPort saveGoalPort;
+    private final ValidateUserPort validateUserPort;
     private final GenerateNicknamePort generateNicknamePort;
-    private final PasswordEncoder passwordEncoder;
 
     private final EnsureEmailVerifiedUseCase ensureEmailVerifiedUseCase;
     private final CreateDefaultMentoringProfileUseCase createDefaultMentoringProfileUseCase;
     private final IssueTokenUseCase issueTokenUseCase;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Override
     @Transactional
     public SignUpResult signUp(SignUpByEmailCommand command) {
+        if (validateUserPort.existsByEmail(command.email())) {
+            throw new UserException(EMAIL_ALREADY_EXISTS);
+        }
+
         ensureEmailVerifiedUseCase.ensureVerified(
                 EmailVerificationEnsureVerifiedCommand.of(
                         command.email(),

@@ -7,4 +7,8 @@ public record SignUpByEmailCommand(
         RoleType roleType,
         String password
 ) {
+
+    public static SignUpByEmailCommand of(String email, RoleType roleType, String password) {
+        return new SignUpByEmailCommand(email, roleType, password);
+    }
 }
