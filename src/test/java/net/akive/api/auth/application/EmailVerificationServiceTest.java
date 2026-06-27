@@ -105,7 +105,7 @@ class EmailVerificationServiceTest {
     }
 
     @Test
-    void 비밀번호찾기_이메일_인증번호_요청시_인증번호를_전송한다() {
+    void 패스워드_찾기_이메일_인증번호_요청시_인증번호를_전송한다() {
         // given
         String email = "test@test.com";
         String verificationCode = "123456";

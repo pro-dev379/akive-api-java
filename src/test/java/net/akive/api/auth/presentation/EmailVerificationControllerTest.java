@@ -167,7 +167,7 @@ class EmailVerificationControllerTest {
     }
 
     @Test
-    void 인증번호_전송_요청시_비밀번호를_찾을_회원이_없으면_404를_응답한다() throws Exception {
+    void 인증번호_전송_요청시_패스워드를_찾을_회원이_없으면_404를_응답한다() throws Exception {
         // given
         EmailVerificationPurpose verificationPurpose = FIND_PASSWORD;
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
