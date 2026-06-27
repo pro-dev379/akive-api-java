@@ -1,4 +1,4 @@
-package net.akive.api.auth.application.dto;
+package net.akive.api.auth.application.dto.result;
 
 import java.time.LocalDateTime;
 

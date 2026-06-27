@@ -2,8 +2,8 @@ package net.akive.api.user.application;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.EmailVerificationEnsureVerifiedCommand;
-import net.akive.api.auth.application.dto.TokenIssueResult;
+import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationEnsureVerifiedCommand;
+import net.akive.api.auth.application.dto.result.TokenIssueResult;
 import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerifiedUseCase;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.mentoring.application.port.in.CreateDefaultMentoringProfileUseCase;

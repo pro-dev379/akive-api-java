@@ -1,7 +1,7 @@
 package net.akive.api.auth.application;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.TokenIssueResult;
+import net.akive.api.auth.application.dto.result.TokenIssueResult;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.application.port.out.token.SaveTokenPort;
 import net.akive.api.auth.application.port.out.token.CreateTokenPort;

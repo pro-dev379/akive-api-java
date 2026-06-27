@@ -1,6 +1,6 @@
 package net.akive.api.auth.application;
 
-import net.akive.api.auth.application.dto.TokenIssueResult;
+import net.akive.api.auth.application.dto.result.TokenIssueResult;
 import net.akive.api.auth.application.port.out.token.CreateTokenPort;
 import net.akive.api.auth.application.port.out.token.SaveTokenPort;
 import net.akive.api.core.config.security.JwtProperties;

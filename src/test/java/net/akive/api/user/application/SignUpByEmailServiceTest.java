@@ -1,7 +1,7 @@
 package net.akive.api.user.application;
 
-import net.akive.api.auth.application.dto.EmailVerificationEnsureVerifiedCommand;
-import net.akive.api.auth.application.dto.TokenIssueResult;
+import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationEnsureVerifiedCommand;
+import net.akive.api.auth.application.dto.result.TokenIssueResult;
 import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerifiedUseCase;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;

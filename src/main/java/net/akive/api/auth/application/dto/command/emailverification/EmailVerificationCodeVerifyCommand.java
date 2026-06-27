@@ -1,4 +1,4 @@
-package net.akive.api.auth.application.dto;
+package net.akive.api.auth.application.dto.command.emailverification;
 
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 

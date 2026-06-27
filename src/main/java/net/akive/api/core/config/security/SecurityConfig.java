@@ -25,8 +25,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/login",
-                                "/auth/token",
+                                "/login/**",
                                 "/users/email",
                                 "/emails/verification-codes/**"
                         ).permitAll()

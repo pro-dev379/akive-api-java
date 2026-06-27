@@ -1,10 +1,10 @@
 package net.akive.api.auth.application;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.EmailVerificationCodeSendResult;
-import net.akive.api.auth.application.dto.EmailVerificationCodeSendCommand;
-import net.akive.api.auth.application.dto.EmailVerificationCodeVerifyCommand;
-import net.akive.api.auth.application.dto.EmailVerificationEnsureVerifiedCommand;
+import net.akive.api.auth.application.dto.result.EmailVerificationCodeSendResult;
+import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeSendCommand;
+import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeVerifyCommand;
+import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationEnsureVerifiedCommand;
 import net.akive.api.auth.application.port.in.emailverification.SendEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerifiedUseCase;
 import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;

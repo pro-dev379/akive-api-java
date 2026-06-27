@@ -1,8 +1,7 @@
 package net.akive.api.auth.presentation;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.EmailVerificationCodeSendResult;
+import net.akive.api.auth.application.dto.result.EmailVerificationCodeSendResult;
 import net.akive.api.auth.application.port.in.emailverification.SendEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeSendRequest;

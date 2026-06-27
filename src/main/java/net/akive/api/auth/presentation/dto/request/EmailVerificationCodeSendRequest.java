@@ -3,7 +3,7 @@ package net.akive.api.auth.presentation.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import net.akive.api.auth.application.dto.EmailVerificationCodeSendCommand;
+import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeSendCommand;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 
 public record EmailVerificationCodeSendRequest(
