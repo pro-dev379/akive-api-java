@@ -59,19 +59,6 @@ public class UserEntity extends BaseTimeEntity {
     @Column(length = 300)
     private String leaveReason;
 
-    public void leave(String reason) {
-        this.leave = true;
-        this.leaveReason = reason;
-    }
-
-    public void changeNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public void changeProfileImage(String imgUrl) {
-        this.imgUrl = imgUrl;
-    }
-
     public static UserEntity reference(Long userId) {
         UserEntity userEntity = new UserEntity();
         userEntity.userId = userId;
