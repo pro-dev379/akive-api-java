@@ -20,7 +20,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
-class UserAccountServiceTest {
+class AccountServiceTest {
 
     @Mock
     SaveUserPort saveUserPort;
@@ -29,7 +29,7 @@ class UserAccountServiceTest {
     LoadUserPort loadUserPort;
 
     @InjectMocks
-    UserAccountService userAccountService;
+    AccountService accountService;
 
     @Test
     void 탈퇴하지_않은_회원이라면_전달받은_암호화된_패스워드로_변경하고_저장한다() {
@@ -49,7 +49,7 @@ class UserAccountServiceTest {
                 .willReturn(Optional.of(user));
 
         // when
-        userAccountService.updatePassword(userId, encodedPassword);
+        accountService.updatePassword(userId, encodedPassword);
 
         // then
         assertThat(user.getPassword()).isEqualTo(encodedPassword);
@@ -67,7 +67,7 @@ class UserAccountServiceTest {
 
         // when & then
         assertThatThrownBy(() ->
-                userAccountService.updatePassword(userId, "encoded-password")
+                accountService.updatePassword(userId, "encoded-password")
         )
                 .isInstanceOf(UserException.class)
                 .satisfies(e ->

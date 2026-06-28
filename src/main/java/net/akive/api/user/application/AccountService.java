@@ -13,7 +13,7 @@ import static net.akive.api.user.excpetion.UserErrorCode.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
-public class UserAccountService implements UpdatePasswordUseCase {
+public class AccountService implements UpdatePasswordUseCase {
 
     private final SaveUserPort saveUserPort;
     private final LoadUserPort loadUserPort;
