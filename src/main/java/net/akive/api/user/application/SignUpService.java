@@ -25,7 +25,7 @@ import static net.akive.api.user.excpetion.UserErrorCode.EMAIL_ALREADY_EXISTS;
 
 @Service
 @RequiredArgsConstructor
-class SignUpByEmailService implements SignUpByEmailUseCase {
+class SignUpService implements SignUpByEmailUseCase {
 
     private final SaveUserPort saveUserPort;
     private final SaveGoalPort saveGoalPort;

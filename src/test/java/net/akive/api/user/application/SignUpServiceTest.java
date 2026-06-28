@@ -34,7 +34,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class SignUpByEmailServiceTest {
+class SignUpServiceTest {
 
     @Mock
     SaveUserPort saveUserPort;
@@ -61,7 +61,7 @@ class SignUpByEmailServiceTest {
     PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    SignUpByEmailService signUpByEmailService;
+    SignUpService signUpService;
 
     @Test
     void 이메일로_회원가입하면_회원_정보와_기본_데이터를_생성하고_토큰을_발급한다() {
@@ -93,7 +93,7 @@ class SignUpByEmailServiceTest {
         when(issueTokenUseCase.issue(savedUser.getUserId(), USER)).thenReturn(issuedToken);
 
         // when
-        SignUpResult result = signUpByEmailService.signUp(command);
+        SignUpResult result = signUpService.signUp(command);
 
         // then
         assertThat(result.nickname()).isEqualTo(nickname);
@@ -140,7 +140,7 @@ class SignUpByEmailServiceTest {
                 .ensureVerified(EmailVerificationEnsureVerifiedCommand.of(command.email(), SIGN_UP));
 
         // when & then
-        assertThatThrownBy(() -> signUpByEmailService.signUp(command))
+        assertThatThrownBy(() -> signUpService.signUp(command))
                 .isInstanceOf(EmailVerificationException.class)
                 .satisfies(e ->
                         assertThat(((EmailVerificationException) e).getErrorCode())
@@ -168,7 +168,7 @@ class SignUpByEmailServiceTest {
                 .thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> signUpByEmailService.signUp(command))
+        assertThatThrownBy(() -> signUpService.signUp(command))
                 .isInstanceOf(UserException.class)
                 .satisfies(e ->
                         assertThat(((UserException) e).getErrorCode())
