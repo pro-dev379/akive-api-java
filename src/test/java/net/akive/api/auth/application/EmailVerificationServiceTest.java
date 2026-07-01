@@ -8,6 +8,8 @@ import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
 import net.akive.api.common.exception.ErrorCode;
+import net.akive.api.common.time.CurrentTimeProvider;
+import net.akive.api.common.time.FixedCurrentTimeProvider;
 import net.akive.api.user.application.port.in.ValidateUserUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,24 +48,21 @@ class EmailVerificationServiceTest {
     @Mock
     SaveEmailVerificationPort saveEmailVerificationPort;
 
-    Clock clock;
+    CurrentTimeProvider currentTimeProvider;
 
     EmailVerificationService emailVerificationService;
 
     @BeforeEach
     void setUp() {
-        clock = Clock.fixed(
-                Instant.parse("2025-05-21T01:00:00Z"),
-                ZoneId.of("Asia/Seoul")
-        );
+        currentTimeProvider = new FixedCurrentTimeProvider(Instant.parse("2025-05-21T01:00:00Z"));
 
         emailVerificationService = new EmailVerificationService(
+                validateUserUseCase,
                 sendEmailVerificationMailPort,
                 generateEmailVerificationCodePort,
                 loadEmailVerificationPort,
                 saveEmailVerificationPort,
-                clock,
-                validateUserUseCase
+                currentTimeProvider
         );
     }
 
@@ -188,7 +187,7 @@ class EmailVerificationServiceTest {
         given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(
                     Optional.of(
-                        EmailVerification.create(email, verificationPurpose, "123456", LocalDateTime.now(clock))
+                        EmailVerification.create(email, verificationPurpose, "123456", currentTimeProvider.now())
                     )
                 );
 
@@ -210,7 +209,7 @@ class EmailVerificationServiceTest {
         // given
         String email = "test@test.com";
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
-        LocalDateTime requestedAt = LocalDateTime.now(clock);
+        LocalDateTime requestedAt = currentTimeProvider.now();
         EmailVerification emailVerification = EmailVerification.create(email, verificationPurpose, "123456", requestedAt);
 
         emailVerification.renew("111111", requestedAt.plusMinutes(1));
@@ -241,7 +240,7 @@ class EmailVerificationServiceTest {
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         String verificationCode = "123456";
 
-        LocalDateTime requestedAt = LocalDateTime.now(clock).minusMinutes(1);
+        LocalDateTime requestedAt = currentTimeProvider.now().minusMinutes(1);
         EmailVerification emailVerification = EmailVerification.create(
                 email,
                 verificationPurpose,
@@ -301,7 +300,7 @@ class EmailVerificationServiceTest {
                 email,
                 verificationPurpose,
                 "123456",
-                LocalDateTime.now(clock).minusMinutes(1)
+                currentTimeProvider.now().minusMinutes(1)
         );
 
         given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
@@ -331,7 +330,7 @@ class EmailVerificationServiceTest {
                 email,
                 verificationPurpose,
                 verificationCode,
-                LocalDateTime.now(clock).minus(EXPIRE_DURATION).minusSeconds(1)
+                currentTimeProvider.now().minus(EXPIRE_DURATION).minusSeconds(1)
         );
 
         given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
@@ -361,9 +360,9 @@ class EmailVerificationServiceTest {
                 email,
                 verificationPurpose,
                 verificationCode,
-                LocalDateTime.now(clock).minusMinutes(2)
+                currentTimeProvider.now().minusMinutes(2)
         );
-        emailVerification.verify(verificationCode, LocalDateTime.now(clock).minusMinutes(1));
+        emailVerification.verify(verificationCode, currentTimeProvider.now().minusMinutes(1));
 
         given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));

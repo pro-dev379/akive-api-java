@@ -1,5 +1,7 @@
 package net.akive.api.auth.infrastructure.token;
 
+import net.akive.api.common.time.CurrentTimeProvider;
+import net.akive.api.common.time.FixedCurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,9 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.jwt.*;
 
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
 
 import static net.akive.api.auth.domain.token.TokenType.*;
 import static net.akive.api.user.domain.RoleType.USER;
@@ -35,16 +35,13 @@ class JwtTokenProviderTest {
 
     JwtTokenProvider jwtTokenProvider;
 
-    Clock clock;
+    CurrentTimeProvider currentTimeProvider;
 
     JwtProperties jwtProperties;
 
     @BeforeEach
     void setUp() {
-        clock = Clock.fixed(
-                Instant.parse("2026-06-25T00:00:00Z"),
-                ZoneOffset.UTC
-        );
+        currentTimeProvider = new FixedCurrentTimeProvider(Instant.parse("2026-06-25T00:00:00Z"));
 
         jwtProperties = new JwtProperties(
                 new JwtProperties.AccessTokenProperties("access-secret", 30),
@@ -56,7 +53,7 @@ class JwtTokenProviderTest {
                 refreshTokenJwtEncoder,
                 refreshTokenJwtDecoder,
                 jwtProperties,
-                clock
+                currentTimeProvider
         );
     }
 

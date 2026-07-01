@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.port.out.token.CreateTokenPort;
 import net.akive.api.auth.domain.token.TokenPayload;
 import net.akive.api.auth.application.port.out.token.ValidateTokenPort;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Component;
 
-import java.time.Clock;
 import java.time.Instant;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -27,11 +27,11 @@ class JwtTokenProvider implements CreateTokenPort, ValidateTokenPort {
     private final JwtEncoder refreshTokenJwtEncoder;
     private final JwtDecoder refreshTokenJwtDecoder;
     private final JwtProperties jwtProperties;
-    private final Clock clock;
+    private final CurrentTimeProvider currentTimeProvider;
 
     @Override
     public String createAccessToken(Long userId, RoleType roleType) {
-        Instant now = Instant.now(clock);
+        Instant now = currentTimeProvider.instant();
         Instant expiresAt = now.plus(jwtProperties.accessToken().expirationMinutes(), MINUTES);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -48,7 +48,7 @@ class JwtTokenProvider implements CreateTokenPort, ValidateTokenPort {
 
     @Override
     public String createRefreshToken(Long userId, RoleType roleType) {
-        Instant now = Instant.now(clock);
+        Instant now = currentTimeProvider.instant();
         Instant expiresAt = now.plus(jwtProperties.refreshToken().expirationDays(), DAYS);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()

@@ -12,11 +12,11 @@ import net.akive.api.auth.application.port.out.emailverification.*;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.user.application.port.in.ValidateUserUseCase;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -30,19 +30,20 @@ class EmailVerificationService
                    VerifyEmailVerificationCodeUseCase,
                    EnsureEmailVerifiedUseCase {
 
+    private final ValidateUserUseCase validateUserUseCase;
+
     private final SendEmailVerificationMailPort sendEmailVerificationMailPort;
     private final GenerateEmailVerificationCodePort generateEmailVerificationCodePort;
     private final LoadEmailVerificationPort loadEmailVerificationPort;
     private final SaveEmailVerificationPort saveEmailVerificationPort;
-    private final Clock clock;
 
-    private final ValidateUserUseCase validateUserUseCase;
+    private final CurrentTimeProvider currentTimeProvider;
 
     @Override
     public EmailVerificationCodeSendResult send(EmailVerificationCodeSendCommand command) {
         validateEmailByPurpose(command.email(), command.verificationPurpose());
 
-        LocalDateTime requestedAt = LocalDateTime.now(clock);
+        LocalDateTime requestedAt = currentTimeProvider.now();
         String verificationCode = generateEmailVerificationCodePort.generate();
 
         EmailVerification emailVerification = loadEmailVerificationPort
@@ -70,7 +71,7 @@ class EmailVerificationService
                 .findByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
                 .orElseThrow(() -> new EmailVerificationException(NOT_FOUND));
 
-        emailVerification.verify(command.verificationCode(), LocalDateTime.now(clock));
+        emailVerification.verify(command.verificationCode(), currentTimeProvider.now());
 
         saveEmailVerificationPort.save(emailVerification, Duration.ofMinutes(15));
     }
