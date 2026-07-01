@@ -1,0 +1,46 @@
+package net.akive.api.mentoring.infrastructure;
+
+import net.akive.api.mentoring.domain.MentoringProfile;
+import net.akive.api.user.application.port.out.SaveUserPort;
+import net.akive.api.user.domain.User;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import static net.akive.api.user.domain.RoleType.USER;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@Transactional
+@SpringBootTest
+@ActiveProfiles("test")
+class MentoringProfileRepositoryAdapterTest {
+
+    @Autowired
+    MentoringProfileRepositoryAdapter mentoringProfileRepositoryAdapter;
+
+    @Autowired
+    SaveUserPort saveUserPort;
+
+    @Test
+    void 멘토링_프로필을_저장한다() {
+        // given
+        User user = User.signUpByEmail(
+                "test@test.com",
+                "USER@abcde",
+                "password123!",
+                USER
+        );
+
+        User savedUser = saveUserPort.save(user);
+        MentoringProfile mentoringProfile = MentoringProfile.createDefault(savedUser.getUserId());
+
+        // when
+        MentoringProfile savedMentoringProfile = mentoringProfileRepositoryAdapter.save(mentoringProfile);
+
+         // then
+        assertThat(savedMentoringProfile.getMentoringProfileId()).isNotNull();
+        assertThat(savedMentoringProfile.getUserId()).isEqualTo(savedUser.getUserId());
+    }
+}
