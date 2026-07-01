@@ -21,6 +21,7 @@ import java.time.*;
 import java.util.Optional;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EXPIRE_DURATION;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFIED_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.*;
 import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -263,7 +264,7 @@ class EmailVerificationServiceTest {
                                         && savedEmailAuth.getEmail().equals(email)
                                         && savedEmailAuth.getVerificationPurpose() == verificationPurpose
                         ),
-                        eq(Duration.ofMinutes(15))
+                        eq(VERIFIED_EXPIRATION_DURATION)
                 );
     }
 

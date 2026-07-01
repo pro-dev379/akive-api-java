@@ -10,6 +10,7 @@ import static lombok.AccessLevel.*;
 public class EmailVerificationPolicy {
 
     public static final Duration EXPIRE_DURATION = Duration.ofMinutes(5);
+    public static final Duration VERIFIED_EXPIRATION_DURATION = Duration.ofMinutes(15);
     public static final Duration RESEND_INTERVAL = Duration.ofSeconds(30);
     public static final int MAX_RESEND_COUNT = 3;
 }

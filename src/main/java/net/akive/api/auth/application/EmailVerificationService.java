@@ -17,7 +17,6 @@ import net.akive.api.user.application.port.in.ValidateUserUseCase;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
@@ -73,7 +72,7 @@ class EmailVerificationService
 
         emailVerification.verify(command.verificationCode(), currentTimeProvider.now());
 
-        saveEmailVerificationPort.save(emailVerification, Duration.ofMinutes(15));
+        saveEmailVerificationPort.save(emailVerification, VERIFIED_EXPIRATION_DURATION);
     }
 
     @Override
