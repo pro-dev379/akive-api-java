@@ -8,27 +8,40 @@ import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.common.cache.CacheKeyProvider;
 import net.akive.api.common.cache.RedisTemplateClient;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Optional;
 
-@Repository
+@Component
 @RequiredArgsConstructor
-class EmailVerificationRedisAdapter implements LoadEmailVerificationPort, SaveEmailVerificationPort, DeleteEmailVerificationPort {
+class EmailVerificationRedisAdapter implements
+        LoadEmailVerificationPort,
+        SaveEmailVerificationPort,
+        DeleteEmailVerificationPort {
 
     private final RedisTemplateClient redisTemplateClient;
 
     @Override
-    public Optional<EmailVerification> findByEmailAndVerificationPurpose(String email, EmailVerificationPurpose verificationPurpose) {
-        return redisTemplateClient.get(createKey(verificationPurpose, email), EmailVerification.class);
+    public Optional<EmailVerification> findByEmailAndVerificationPurpose(
+            String email,
+            EmailVerificationPurpose verificationPurpose
+    ) {
+        return redisTemplateClient.get(
+                createKey(verificationPurpose, email),
+                EmailVerification.class
+        );
     }
 
     @Override
     public void save(EmailVerification emailVerification, Duration ttl) {
         EmailVerificationPurpose verificationPurpose = emailVerification.getVerificationPurpose();
         String email = emailVerification.getEmail();
-        redisTemplateClient.set(createKey(verificationPurpose, email), emailVerification, ttl);
+        redisTemplateClient.set(
+                createKey(verificationPurpose, email),
+                emailVerification,
+                ttl
+        );
     }
 
     @Override
