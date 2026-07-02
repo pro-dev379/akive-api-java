@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-class UserJpaRepositoryAdapter implements LoadUserPort, SaveUserPort, ValidateUserPort {
+class UserJpaAdapter implements LoadUserPort, SaveUserPort, ValidateUserPort {
 
     private final UserJpaRepository userJpaRepository;
 

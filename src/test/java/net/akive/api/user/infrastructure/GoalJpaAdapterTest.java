@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GoalJpaRepositoryAdapterTest extends RepositoryTestSupport {
+class GoalJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 회원의_목표를_저장한다() {

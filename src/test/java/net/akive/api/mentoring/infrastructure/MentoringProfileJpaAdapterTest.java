@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MentoringProfileRepositoryAdapterTest extends RepositoryTestSupport {
+class MentoringProfileJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 멘토링_프로필을_저장한다() {

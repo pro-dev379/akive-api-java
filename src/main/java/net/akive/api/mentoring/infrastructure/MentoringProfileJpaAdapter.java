@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-class MentoringProfileRepositoryAdapter implements SaveMentoringProfilePort {
+class MentoringProfileJpaAdapter implements SaveMentoringProfilePort {
 
     private final MentoringProfileJpaRepository mentoringProfileJpaRepository;
 

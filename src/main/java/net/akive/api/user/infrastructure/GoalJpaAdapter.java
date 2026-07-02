@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-class GoalJpaRepositoryAdapter implements SaveGoalPort {
+class GoalJpaAdapter implements SaveGoalPort {
 
     private final GoalJpaRepository goalJpaRepository;
 

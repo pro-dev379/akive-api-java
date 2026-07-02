@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UserJpaRepositoryAdapterTest extends RepositoryTestSupport {
+class UserJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 이메일로_회원가입_후_회원을_저장한다() {
