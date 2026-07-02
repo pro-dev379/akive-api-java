@@ -56,7 +56,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_전송_요청시_이메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+    void 인증번호_전송_요청_시_이메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("invalid-email", SIGN_UP);
 
@@ -72,7 +72,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_전송_요청시_이메일이_비어있으면_400을_응답한다() throws Exception {
+    void 인증번호_전송_요청_시_이메일이_비어있으면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("", SIGN_UP);
 
@@ -88,7 +88,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_전송_요청시_인증목적이_없으면_400을_응답한다() throws Exception {
+    void 인증번호_전송_요청_시_인증목적이_없으면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("test@test.com", null);
 
@@ -104,7 +104,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_전송_요청시_재전송_횟수를_초과하면_429를_응답한다() throws Exception {
+    void 인증번호_전송_요청_시_재전송_횟수를_초과하면_429를_응답한다() throws Exception {
         // given
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
                 "test@test.com",
@@ -125,7 +125,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_전송_요청시_재전송_가능시간_이전이면_429를_응답한다() throws Exception {
+    void 인증번호_전송_요청_시_재전송_가능시간_이전이면_429를_응답한다() throws Exception {
         // given
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
                 "test@test.com",
@@ -146,7 +146,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_전송_요청시_패스워드를_찾을_회원이_없으면_404를_응답한다() throws Exception {
+    void 인증번호_전송_요청_시_패스워드를_찾을_회원이_없으면_404를_응답한다() throws Exception {
         // given
         EmailVerificationPurpose verificationPurpose = FIND_PASSWORD;
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
@@ -166,7 +166,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_전송_요청시_회원가입_이메일이_중복되면_409를_응답한다() throws Exception {
+    void 인증번호_전송_요청_시_회원가입_이메일이_중복되면_409를_응답한다() throws Exception {
         // given
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
@@ -206,7 +206,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_검증_요청시_이메일이_비어있으면_400을_반환한다() throws Exception {
+    void 인증번호_검증_요청_시_이메일이_비어있으면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "",
@@ -226,7 +226,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_검증_요청시_이메일_형식이_올바르지_않으면_400을_반환한다() throws Exception {
+    void 인증번호_검증_요청_시_이메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "invalid-email",
@@ -246,7 +246,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_검증_요청시_인증번호가_비어있으면_400을_반환한다() throws Exception {
+    void 인증번호_검증_요청_시_인증번호가_비어있으면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
@@ -266,7 +266,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_검증_요청시_인증번호가_6자리_숫자가_아니면_400을_응답한다() throws Exception {
+    void 인증번호_검증_요청_시_인증번호가_6자리_숫자가_아니면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
@@ -286,7 +286,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_검증_요청시_인증목적이_없으면_400을_응답한다() throws Exception {
+    void 인증번호_검증_요청_시_인증목적이_없으면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
@@ -306,7 +306,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_검증_요청시_인증번호가_일치하지_않으면_400을_응답한다() throws Exception {
+    void 인증번호_검증_요청_시_인증번호가_일치하지_않으면_400을_응답한다() throws Exception {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
@@ -328,7 +328,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_검증_요청시_인증정보가_없으면_404를_응답한다() throws Exception {
+    void 인증번호_검증_요청_시_인증정보가_없으면_404를_응답한다() throws Exception {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
@@ -350,7 +350,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_검증_요청시_인증번호가_만료되면_401을_응답한다() throws Exception {
+    void 인증번호_검증_요청_시_인증번호가_만료되면_401을_응답한다() throws Exception {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",
@@ -372,7 +372,7 @@ class EmailVerificationControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 인증번호_검증_요청시_이미_인증된_경우_409를_응답한다() throws Exception {
+    void 인증번호_검증_요청_시_이미_인증된_경우_409를_응답한다() throws Exception {
         // given
         EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
                 "test@test.com",

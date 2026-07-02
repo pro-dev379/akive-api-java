@@ -28,8 +28,10 @@ class DefaultMentoringProfileCreateServiceTest {
         defaultMentoringProfileCreateService.create(userId);
 
         // then
-        then(saveMentoringProfilePort).should().save(argThat(mentoringProfile ->
-                mentoringProfile.getUserId().equals(userId)
-        ));
+        then(saveMentoringProfilePort)
+                .should()
+                .save(argThat(mentoringProfile ->
+                        mentoringProfile.getUserId().equals(userId)
+                ));
     }
 }

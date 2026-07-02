@@ -17,6 +17,7 @@ import net.akive.api.user.domain.User;
 import net.akive.api.user.excpetion.UserException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,7 +28,7 @@ import static net.akive.api.auth.domain.emailverification.exception.EmailVerific
 import static net.akive.api.user.domain.RoleType.USER;
 import static net.akive.api.user.excpetion.UserErrorCode.EMAIL_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.then;
@@ -109,25 +110,30 @@ class SignUpServiceTest {
         then(generateNicknamePort).should().generate(USER);
         then(passwordEncoder).should().encode(command.password());
 
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
         then(saveUserPort).should()
-                .save(argThat(user ->
-                        user.getEmail().equals(command.email())
-                                && user.getNickname().equals(nickname)
-                                && user.getPassword().equals(encodedPassword)
-                                && user.getRoleType() == USER
-                ));
+                .save(userCaptor.capture());
+
+        User userToSave = userCaptor.getValue();
+
+        assertThat(userToSave.getEmail()).isEqualTo(command.email());
+        assertThat(userToSave.getNickname()).isEqualTo(nickname);
+        assertThat(userToSave.getPassword()).isEqualTo(encodedPassword);
+        assertThat(userToSave.getRoleType()).isEqualTo(USER);
 
         then(issueTokenUseCase).should().issue(savedUser.getUserId(), USER);
 
-        then(saveGoalPort).should().save(argThat(goal ->
-                goal.getUserId().equals(savedUser.getUserId())
-        ));
+        then(saveGoalPort).should()
+                .save(argThat(goal ->
+                        goal.getUserId().equals(savedUser.getUserId())
+                ));
 
         then(createDefaultMentoringProfileUseCase).should().create(savedUser.getUserId());
     }
 
     @Test
-    void 이메일_인증이_되지_않으면_회원가입에_실패한다() {
+    void 이메일_인증이_완료되지_않으면_회원가입이_거부된다() {
         // given
         SignUpByEmailCommand command = new SignUpByEmailCommand(
                 "test@test.com",
@@ -140,12 +146,10 @@ class SignUpServiceTest {
                 .ensureVerified(EmailVerificationEnsureVerifiedCommand.of(command.email(), SIGN_UP));
 
         // when & then
-        assertThatThrownBy(() -> signUpService.signUp(command))
-                .isInstanceOf(EmailVerificationException.class)
-                .satisfies(e ->
-                        assertThat(((EmailVerificationException) e).getErrorCode())
-                                .isEqualTo(NOT_VERIFIED)
-                );
+        assertThatExceptionOfType(EmailVerificationException.class)
+                .isThrownBy(() -> signUpService.signUp(command))
+                .extracting(EmailVerificationException::getErrorCode)
+                .isEqualTo(NOT_VERIFIED);
 
         then(generateNicknamePort).should(never()).generate(command.roleType());
         then(passwordEncoder).should(never()).encode(command.password());
@@ -156,7 +160,7 @@ class SignUpServiceTest {
     }
 
     @Test
-    void 이미_가입된_이메일이면_회원가입에_실패한다() {
+    void 이미_가입된_이메일이면_회원가입이_거부된다() {
         // given
         SignUpByEmailCommand command = new SignUpByEmailCommand(
                 "test@test.com",
@@ -168,12 +172,10 @@ class SignUpServiceTest {
                 .thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> signUpService.signUp(command))
-                .isInstanceOf(UserException.class)
-                .satisfies(e ->
-                        assertThat(((UserException) e).getErrorCode())
-                                .isEqualTo(EMAIL_ALREADY_EXISTS)
-                );
+        assertThatExceptionOfType(UserException.class)
+                .isThrownBy(() -> signUpService.signUp(command))
+                .extracting(UserException::getErrorCode)
+                .isEqualTo(EMAIL_ALREADY_EXISTS);
 
         then(ensureEmailVerifiedUseCase).should(never()).ensureVerified(any());
         then(generateNicknamePort).should(never()).generate(any());

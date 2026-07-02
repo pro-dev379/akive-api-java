@@ -26,7 +26,7 @@ class EmailSenderServiceTest {
     EmailSenderService emailSenderService;
 
     @Test
-   void 이메일_템플릿을_렌더링하여_HTML_이메일을_발송한다() {
+    void 이메일_템플릿을_렌더링하여_HTML_이메일을_발송한다() {
         // given
         List<String> to = List.of("test@test.com");
         String subject = "이메일 인증 코드";

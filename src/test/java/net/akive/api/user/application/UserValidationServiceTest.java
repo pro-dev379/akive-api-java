@@ -10,8 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static net.akive.api.user.excpetion.UserErrorCode.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.user.excpetion.UserErrorCode.NOT_FOUND;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -38,18 +37,16 @@ class UserValidationServiceTest {
     }
 
     @Test
-    void 이메일로_회원_존재_검증_시_회원가_없으면_예외가_발생한다() {
+    void 이메일에_해당하는_회원이_없으면_회원_존재_검증이_실패한다() {
         // given
         String email = "test@example.com";
         given(validateUserPort.existsByEmailAndLeaveFalse(email)).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> userValidationService.validateUserExistsByEmail(email))
-                .isInstanceOf(UserException.class)
-                .satisfies(e ->
-                        assertThat(((UserException) e).getErrorCode())
-                                .isEqualTo(NOT_FOUND)
-                );
+        assertThatExceptionOfType(UserException.class)
+                .isThrownBy(() -> userValidationService.validateUserExistsByEmail(email))
+                .extracting(UserException::getErrorCode)
+                .isEqualTo(NOT_FOUND);
     }
 
     @Test
@@ -66,18 +63,16 @@ class UserValidationServiceTest {
     }
 
     @Test
-    void 식별값으로_회원_존재_검증_시_회원가_없으면_예외가_발생한다() {
+    void 식별값에_해당하는_회원이_없으면_회원_존재_검증이_실패한다() {
         // given
         Long userId = 1L;
         given(validateUserPort.existsByUserIdAndLeaveFalse(userId)).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> userValidationService.validateUserExistsById(userId))
-                .isInstanceOf(UserException.class)
-                .satisfies(e ->
-                        assertThat(((UserException) e).getErrorCode())
-                                .isEqualTo(NOT_FOUND)
-                );
+        assertThatExceptionOfType(UserException.class)
+                .isThrownBy(() -> userValidationService.validateUserExistsById(userId))
+                .extracting(UserException::getErrorCode)
+                .isEqualTo(NOT_FOUND);
     }
 
     @Test
@@ -94,17 +89,15 @@ class UserValidationServiceTest {
     }
 
     @Test
-    void 이메일_중복_검증_시_이미_존재하는_이메일이면_예외가_발생한다() {
+    void 이미_존재하는_이메일이면_이메일_중복_검증이_실패한다() {
         // given
         String email = "test@example.com";
         given(validateUserPort.existsByEmail(email)).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> userValidationService.validateEmailNotDuplicate(email))
-                .isInstanceOf(UserException.class)
-                .satisfies(e ->
-                        assertThat(((UserException) e).getErrorCode())
-                                .isEqualTo(EMAIL_ALREADY_EXISTS)
-                );
+        assertThatExceptionOfType(UserException.class)
+                .isThrownBy(() -> userValidationService.validateEmailNotDuplicate(email))
+                .extracting(UserException::getErrorCode)
+                .isEqualTo(EMAIL_ALREADY_EXISTS);
     }
 }

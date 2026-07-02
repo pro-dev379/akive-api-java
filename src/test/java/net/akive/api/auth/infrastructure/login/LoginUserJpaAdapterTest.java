@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static net.akive.api.auth.domain.login.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
 import static net.akive.api.user.domain.RoleType.USER;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class LoginUserJpaAdapterTest extends RepositoryTestSupport {
@@ -42,8 +42,9 @@ class LoginUserJpaAdapterTest extends RepositoryTestSupport {
         String email = "none@test.com";
 
         // when & then
-        assertThatThrownBy(() -> loadEmailLoginUserPort.findByEmailAndLeaveFalse(email))
-                .isInstanceOf(LoginException.class)
-                .hasMessage(INVALID_EMAIL_OR_PASSWORD.getMessage());
+        assertThatExceptionOfType(LoginException.class)
+                .isThrownBy(() -> loadEmailLoginUserPort.findByEmailAndLeaveFalse(email))
+                .extracting(LoginException::getErrorCode)
+                .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
     }
 }

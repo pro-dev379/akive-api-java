@@ -58,7 +58,7 @@ class SignUpControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 이메일로_회원가입_요청시_이메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+    void 이메일로_회원가입_요청_시_이메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
         SignUpByEmailRequest request = new SignUpByEmailRequest(
                 "invalid-email",
@@ -76,7 +76,7 @@ class SignUpControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 이메일로_회원가입_요청시_회원_타입이_없으면_400을_응답한다() throws Exception {
+    void 이메일로_회원가입_요청_시_회원_타입이_없으면_400을_응답한다() throws Exception {
         // given
         SignUpByEmailRequest request = new SignUpByEmailRequest(
                 "test@test.com",
@@ -94,7 +94,7 @@ class SignUpControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 이메일로_회원가입_요청시_패스워드_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+    void 이메일로_회원가입_요청_시_패스워드_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
         SignUpByEmailRequest request = new SignUpByEmailRequest(
                 "test@test.com",
@@ -112,7 +112,7 @@ class SignUpControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 이메일로_회원가입_요청시_이메일_인증이_안_된_경우_400을_응답한다() throws Exception {
+    void 이메일로_회원가입_요청_시_이메일_인증이_완료되지_않으면_400을_응답한다() throws Exception {
         // given
         SignUpByEmailRequest request = new SignUpByEmailRequest(
                 "test@test.com",
@@ -132,7 +132,7 @@ class SignUpControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void 이메일로_회원가입_요청시_이미_가입된_경우_409를_응답한다() throws Exception{
+    void 이메일로_회원가입_요청_시_이미_가입된_이메일이면_409를_응답한다() throws Exception {
         // given
         SignUpByEmailRequest request = new SignUpByEmailRequest(
                 "test@test.com",

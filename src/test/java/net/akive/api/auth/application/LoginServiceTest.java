@@ -23,7 +23,7 @@ import java.util.Optional;
 import static net.akive.api.auth.domain.login.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -97,12 +97,10 @@ class LoginServiceTest {
                 .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
 
         // when & then
-        assertThatThrownBy(() -> loginService.login(command))
-                .isInstanceOf(LoginException.class)
-                .satisfies(e ->
-                        assertThat(((LoginException) e).getErrorCode())
-                                .isEqualTo(INVALID_EMAIL_OR_PASSWORD)
-                );
+        assertThatExceptionOfType(LoginException.class)
+                .isThrownBy(() -> loginService.login(command))
+                .extracting(LoginException::getErrorCode)
+                .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(passwordEncoder).shouldHaveNoInteractions();
         then(loadLegacyUserPasswordPort).shouldHaveNoInteractions();
@@ -130,11 +128,10 @@ class LoginServiceTest {
                 .willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> loginService.login(command))
-                .satisfies(e ->
-                        assertThat(((LoginException) e).getErrorCode())
-                                .isEqualTo(INVALID_EMAIL_OR_PASSWORD)
-                );
+        assertThatExceptionOfType(LoginException.class)
+                .isThrownBy(() -> loginService.login(command))
+                .extracting(LoginException::getErrorCode)
+                .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(loadLegacyUserPasswordPort).shouldHaveNoInteractions();
         then(legacyPasswordVerifier).shouldHaveNoInteractions();
@@ -188,6 +185,36 @@ class LoginServiceTest {
     }
 
     @Test
+    void 저장된_레거시_패스워드가_없으면_로그인할_수_없다() {
+        // given
+        LoginByEmailCommand command = new LoginByEmailCommand("test@test.com", "password123!");
+
+        LoginUser user = new LoginUser(
+                1L,
+                "test@test.com",
+                null,
+                USER
+        );
+
+        given(loadEmailLoginUserPort.findByEmailAndLeaveFalse(command.email()))
+                .willReturn(user);
+        given(loadLegacyUserPasswordPort.findByUserId(user.userId()))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatExceptionOfType(LoginException.class)
+                .isThrownBy(() -> loginService.login(command))
+                .extracting(LoginException::getErrorCode)
+                .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
+
+        then(legacyPasswordVerifier).shouldHaveNoInteractions();
+        then(passwordEncoder).shouldHaveNoInteractions();
+        then(updatePasswordUseCase).shouldHaveNoInteractions();
+        then(deleteLegacyUserPasswordPort).shouldHaveNoInteractions();
+        then(issueTokenUseCase).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 저장된_레거시_패스워드와_일치하지_않으면_로그인할_수_없다() {
         // given
         LoginByEmailCommand command = new LoginByEmailCommand("test@test.com", "wrong-password");
@@ -213,11 +240,10 @@ class LoginServiceTest {
                 .willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> loginService.login(command))
-                .satisfies(e ->
-                        assertThat(((LoginException) e).getErrorCode())
-                                .isEqualTo(INVALID_EMAIL_OR_PASSWORD)
-                );
+        assertThatExceptionOfType(LoginException.class)
+                .isThrownBy(() -> loginService.login(command))
+                .extracting(LoginException::getErrorCode)
+                .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(updatePasswordUseCase).shouldHaveNoInteractions();
         then(deleteLegacyUserPasswordPort).shouldHaveNoInteractions();
