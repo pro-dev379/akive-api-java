@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.user.application.port.out.SaveGoalPort;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.infrastructure.entity.GoalEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 @RequiredArgsConstructor
 class GoalJpaRepositoryAdapter implements SaveGoalPort {
 

@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.mentoring.application.port.out.SaveMentoringProfilePort;
 import net.akive.api.mentoring.domain.MentoringProfile;
 import net.akive.api.mentoring.infrastructure.entity.MentoringProfileEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 @RequiredArgsConstructor
 class MentoringProfileRepositoryAdapter implements SaveMentoringProfilePort {
 
