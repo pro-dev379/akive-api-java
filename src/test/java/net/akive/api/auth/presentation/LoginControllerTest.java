@@ -1,16 +1,10 @@
 package net.akive.api.auth.presentation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.auth.application.dto.result.LoginResult;
-import net.akive.api.auth.application.port.in.login.LoginByEmailUseCase;
 import net.akive.api.auth.domain.login.exception.LoginException;
 import net.akive.api.auth.presentation.dto.request.LoginByEmailRequest;
+import net.akive.api.support.ControllerTestSupport;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static net.akive.api.auth.domain.login.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
 import static org.mockito.BDDMockito.*;
@@ -19,18 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(LoginController.class)
-class LoginControllerTest {
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @MockitoBean
-    LoginByEmailUseCase loginByEmailUseCase;
+class LoginControllerTest extends ControllerTestSupport {
 
     @Test
     void 이메일_로그인_요청시_올바른_이메일과_패스워드를_전달하면_토큰을_발급한다() throws Exception {

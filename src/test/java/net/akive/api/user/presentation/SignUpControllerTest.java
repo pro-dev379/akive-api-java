@@ -1,18 +1,12 @@
 package net.akive.api.user.presentation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
+import net.akive.api.support.ControllerTestSupport;
 import net.akive.api.user.application.dto.SignUpByEmailCommand;
 import net.akive.api.user.application.dto.SignUpResult;
-import net.akive.api.user.application.port.in.SignUpByEmailUseCase;
 import net.akive.api.user.excpetion.UserException;
 import net.akive.api.user.presentation.dto.request.SignUpByEmailRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.NOT_VERIFIED;
 import static net.akive.api.user.domain.RoleType.USER;
@@ -25,18 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(SignUpController.class)
-class SignUpControllerTest {
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @MockitoBean
-    SignUpByEmailUseCase signUpByEmailUseCase;
+class SignUpControllerTest extends ControllerTestSupport {
 
     @Test
     void 이메일로_회원가입하면_토큰과_닉네임이_응답된다() throws Exception {

@@ -2,32 +2,16 @@ package net.akive.api.auth.infrastructure.login;
 
 import net.akive.api.auth.domain.login.LegacyUserPassword;
 import net.akive.api.auth.infrastructure.entity.LegacyUserPasswordEntity;
-import net.akive.api.user.application.port.out.SaveUserPort;
+import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Transactional
-@SpringBootTest
-@ActiveProfiles("test")
-class LegacyUserPasswordJpaAdapterTest {
-
-    @Autowired
-    LegacyUserPasswordJpaAdapter legacyUserPasswordJpaAdapter;
-
-    @Autowired
-    SaveUserPort saveUserPort;
-
-    @Autowired
-    LegacyUserPasswordJpaRepository legacyUserPasswordJpaRepository;
+class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 회원의_기존_패스워드가_존재하면_조회할_수_있다() {
@@ -43,8 +27,7 @@ class LegacyUserPasswordJpaAdapterTest {
         saveLegacyPassword(savedUser);
 
         // when
-        Optional<LegacyUserPassword> result =
-                legacyUserPasswordJpaAdapter.findByUserId(savedUser.getUserId());
+        Optional<LegacyUserPassword> result = loadLegacyUserPasswordPort.findByUserId(savedUser.getUserId());
 
         // then
         assertThat(result).isPresent();
@@ -67,12 +50,10 @@ class LegacyUserPasswordJpaAdapterTest {
         saveLegacyPassword(savedUser);
 
         // when
-        legacyUserPasswordJpaAdapter.deleteByUserId(savedUser.getUserId());
+        deleteLegacyUserPasswordPort.deleteByUserId(savedUser.getUserId());
 
         // then
-        assertThat(
-                legacyUserPasswordJpaAdapter.findByUserId(savedUser.getUserId())
-        ).isEmpty();
+        assertThat(loadLegacyUserPasswordPort.findByUserId(savedUser.getUserId())).isEmpty();
     }
 
     private void saveLegacyPassword(User savedUser) {

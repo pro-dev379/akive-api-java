@@ -1,23 +1,16 @@
 package net.akive.api.auth.presentation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeSendCommand;
 import net.akive.api.auth.application.dto.result.EmailVerificationCodeSendResult;
 import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeVerifyCommand;
-import net.akive.api.auth.application.port.in.emailverification.SendEmailVerificationCodeUseCase;
-import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
 import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeSendRequest;
 import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeVerifyRequest;
+import net.akive.api.support.ControllerTestSupport;
 import net.akive.api.user.excpetion.UserErrorCode;
 import net.akive.api.user.excpetion.UserException;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
@@ -31,21 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(EmailVerificationController.class)
-class EmailVerificationControllerTest {
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @MockitoBean
-    SendEmailVerificationCodeUseCase sendEmailVerificationCodeUseCase;
-
-    @MockitoBean
-    VerifyEmailVerificationCodeUseCase verifyEmailVerificationCodeUseCase;
+class EmailVerificationControllerTest extends ControllerTestSupport {
 
     @Test
     void 인증번호_전송을_요청하면_인증정보를_응답한다() throws Exception {

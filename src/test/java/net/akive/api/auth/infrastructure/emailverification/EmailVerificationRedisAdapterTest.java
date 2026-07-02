@@ -2,57 +2,17 @@ package net.akive.api.auth.infrastructure.emailverification;
 
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import org.junit.jupiter.api.AfterEach;
+import net.akive.api.support.StoreTestSupport;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.Optional;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@Testcontainers
-@ActiveProfiles("test")
-class EmailVerificationRedisAdapterTest {
-
-    @Container
-    static GenericContainer<?> redis = new GenericContainer<>("redis:7.2")
-            .withExposedPorts(6379);
-
-    @DynamicPropertySource
-    static void redisProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
-    }
-
-    @Autowired
-    EmailVerificationRedisAdapter emailAuthRedisAdapter;
-
-    @Autowired
-    RedisTemplate<String, Object> redisTemplate;
-
-    @AfterEach
-    void tearDown() {
-        RedisConnectionFactory connectionFactory =
-                Objects.requireNonNull(redisTemplate.getConnectionFactory());
-
-        connectionFactory.getConnection()
-                .serverCommands()
-                .flushDb();
-    }
+class EmailVerificationRedisAdapterTest extends StoreTestSupport {
 
     @Test
     void 이메일_인증_정보를_저장하고_조회한다() {
@@ -63,8 +23,8 @@ class EmailVerificationRedisAdapterTest {
         EmailVerification emailVerification = EmailVerification.create(email, verificationPurpose, "123456", requestedAt);
 
         // when
-        emailAuthRedisAdapter.save(emailVerification, Duration.ofMinutes(5));
-        Optional<EmailVerification> found = emailAuthRedisAdapter.findByEmailAndVerificationPurpose(email, verificationPurpose);
+        saveEmailVerificationPort.save(emailVerification, Duration.ofMinutes(5));
+        Optional<EmailVerification> found = loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose);
 
         // then
         assertThat(found).isPresent();
@@ -88,13 +48,13 @@ class EmailVerificationRedisAdapterTest {
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
-        emailAuthRedisAdapter.save(emailVerification, Duration.ofMinutes(5));
+        saveEmailVerificationPort.save(emailVerification, Duration.ofMinutes(5));
 
         // when
-        emailAuthRedisAdapter.delete(emailVerification);
+        deleteEmailVerificationPort.delete(emailVerification);
 
         // then
-        Optional<EmailVerification> found = emailAuthRedisAdapter.findByEmailAndVerificationPurpose(email, verificationPurpose);
+        Optional<EmailVerification> found = loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose);
 
         assertThat(found).isEmpty();
     }
@@ -112,11 +72,11 @@ class EmailVerificationRedisAdapterTest {
         );
 
         // when
-        emailAuthRedisAdapter.save(emailVerification, Duration.ofMillis(300));
+        saveEmailVerificationPort.save(emailVerification, Duration.ofMillis(300));
 
         Thread.sleep(500);
 
-        Optional<EmailVerification> found = emailAuthRedisAdapter.findByEmailAndVerificationPurpose(email, verificationPurpose);
+        Optional<EmailVerification> found = loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose);
 
         // then
         assertThat(found).isEmpty();

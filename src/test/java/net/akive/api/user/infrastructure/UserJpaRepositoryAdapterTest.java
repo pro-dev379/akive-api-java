@@ -1,22 +1,13 @@
 package net.akive.api.user.infrastructure;
 
+import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Transactional
-@SpringBootTest
-@ActiveProfiles("test")
-class UserJpaRepositoryAdapterTest {
-
-    @Autowired
-    UserJpaRepositoryAdapter userJpaRepositoryAdapter;
+class UserJpaRepositoryAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 이메일로_회원가입_후_회원을_저장한다() {
@@ -24,7 +15,7 @@ class UserJpaRepositoryAdapterTest {
         User user = signUpByEmail();
 
         // when
-        User savedUser = userJpaRepositoryAdapter.save(user);
+        User savedUser = saveUserPort.save(user);
 
         // then
         assertThat(savedUser.getUserId()).isNotNull();
@@ -34,10 +25,10 @@ class UserJpaRepositoryAdapterTest {
     void 이미_가입된_이메일로는_중복_검증을_통과할_수_없다() {
         // given
         User user = signUpByEmail();
-        User savedUser = userJpaRepositoryAdapter.save(user);
+        User savedUser = saveUserPort.save(user);
 
         // when
-        boolean exists = userJpaRepositoryAdapter.existsByEmail(savedUser.getEmail());
+        boolean exists = validateUserPort.existsByEmail(savedUser.getEmail());
 
         // then
         assertThat(exists).isTrue();
@@ -46,7 +37,7 @@ class UserJpaRepositoryAdapterTest {
     @Test
     void 아직_가입되지_않은_이메일은_중복_검증을_통과한다() {
         // when
-        boolean exists = userJpaRepositoryAdapter.existsByEmail("none@example.com");
+        boolean exists = validateUserPort.existsByEmail("none@example.com");
 
         // then
         assertThat(exists).isFalse();
@@ -56,10 +47,10 @@ class UserJpaRepositoryAdapterTest {
     void 이메일을_통해_이메일로_가입된_회원을_활성_상태로_조회할_수_있다() {
         // given
         User user = signUpByEmail();
-        User savedUser = userJpaRepositoryAdapter.save(user);
+        User savedUser = saveUserPort.save(user);
 
         // when
-        boolean exists = userJpaRepositoryAdapter.existsByEmailAndLeaveFalse(savedUser.getEmail());
+        boolean exists = validateUserPort.existsByEmailAndLeaveFalse(savedUser.getEmail());
 
         // then
         assertThat(exists).isTrue();
@@ -68,7 +59,7 @@ class UserJpaRepositoryAdapterTest {
     @Test
     void 가입되지_않은_이메일로는_활성_회원을_조회할_수_없다() {
         // when
-        boolean exists = userJpaRepositoryAdapter.existsByEmailAndLeaveFalse("none@example.com");
+        boolean exists = validateUserPort.existsByEmailAndLeaveFalse("none@example.com");
 
         // then
         assertThat(exists).isFalse();
@@ -78,10 +69,10 @@ class UserJpaRepositoryAdapterTest {
     void 식별자를_통해_이메일로_가입된_회원을_활성_상태로_조회할_수_있다() {
         // given
         User user = signUpByEmail();
-        User savedUser = userJpaRepositoryAdapter.save(user);
+        User savedUser = saveUserPort.save(user);
 
         // when
-        boolean exists = userJpaRepositoryAdapter.existsByUserIdAndLeaveFalse(savedUser.getUserId());
+        boolean exists = validateUserPort.existsByUserIdAndLeaveFalse(savedUser.getUserId());
 
         // then
         assertThat(exists).isTrue();
@@ -90,7 +81,7 @@ class UserJpaRepositoryAdapterTest {
     @Test
     void 존재하지_않는_회원_식별자로는_활성_회원을_조회할_수_없다() {
         // when
-        boolean exists = userJpaRepositoryAdapter.existsByUserIdAndLeaveFalse(999L);
+        boolean exists = validateUserPort.existsByUserIdAndLeaveFalse(999L);
 
         // then
         assertThat(exists).isFalse();
