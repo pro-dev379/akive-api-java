@@ -18,12 +18,19 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
     private final JwtDecoder accessTokenJwtDecoder;
+    private final TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint;
 
     @Bean
     @Order(1)
-    public SecurityFilterChain tokenSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain publicSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher("/tokens")
+                .securityMatcher(
+                        "/tokens",
+                        "/login/**",
+                        "/users/email",
+                        "/emails/verification-codes",
+                        "/emails/verification-codes/**"
+                )
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -47,15 +54,12 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/login/**",
-                                "/users/email",
-                                "/emails/verification-codes/**"
-                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt -> jwt.decoder(accessTokenJwtDecoder))
+                        oauth2
+                                .jwt(jwt -> jwt.decoder(accessTokenJwtDecoder))
+                                .authenticationEntryPoint(tokenAuthenticationEntryPoint)
                 )
                 .build();
     }
