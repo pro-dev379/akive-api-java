@@ -1,4 +1,4 @@
-package net.akive.api.auth.presentation.dto.request;
+package net.akive.api.auth.presentation.dto.request.emailverification;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

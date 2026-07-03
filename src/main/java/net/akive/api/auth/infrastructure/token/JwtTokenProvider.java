@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.port.out.token.CreateTokenPort;
 import net.akive.api.auth.domain.token.TokenPayload;
 import net.akive.api.auth.application.port.out.token.ValidateTokenPort;
+import net.akive.api.auth.domain.token.exception.TokenException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,8 @@ import java.time.Instant;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static net.akive.api.auth.domain.token.TokenType.*;
+import static net.akive.api.auth.domain.token.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.auth.domain.token.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
 import static org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256;
 
 @Component
@@ -65,12 +69,50 @@ class JwtTokenProvider implements CreateTokenPort, ValidateTokenPort {
 
     @Override
     public TokenPayload validateRefreshToken(String refreshToken) {
-        Jwt jwt = refreshTokenJwtDecoder.decode(refreshToken);
+        Jwt jwt = decodeRefreshToken(refreshToken);
 
-        return new TokenPayload(
-                Long.valueOf(jwt.getSubject()),
-                jwt.getClaim("role")
-        );
+        validateRefreshTokenType(jwt);
+
+        return createTokenPayload(jwt);
+    }
+
+    private Jwt decodeRefreshToken(String refreshToken) {
+        try {
+            return refreshTokenJwtDecoder.decode(refreshToken);
+        } catch (JwtValidationException e) {
+            if (containsExpiredTokenError(e)) {
+                throw new TokenException(EXPIRED_REFRESH_TOKEN);
+            }
+
+            throw new TokenException(INVALID_REFRESH_TOKEN);
+        } catch (JwtException e) {
+            throw new TokenException(INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    private void validateRefreshTokenType(Jwt jwt) {
+        if (!REFRESH.name().equals(jwt.getClaimAsString("type"))) {
+            throw new TokenException(INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    private TokenPayload createTokenPayload(Jwt jwt) {
+        try {
+            return new TokenPayload(
+                    Long.valueOf(jwt.getSubject()),
+                    RoleType.valueOf(jwt.getClaimAsString("role")),
+                    jwt.getExpiresAt()
+            );
+        } catch (RuntimeException e) {
+            throw new TokenException(INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    private boolean containsExpiredTokenError(JwtValidationException e) {
+        return e.getErrors()
+                .stream()
+                .map(OAuth2Error::getDescription)
+                .anyMatch(description -> description != null && description.contains("expired"));
     }
 
     private String encode(JwtEncoder jwtEncoder, JwtClaimsSet claims) {

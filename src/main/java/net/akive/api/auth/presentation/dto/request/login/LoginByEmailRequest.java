@@ -1,4 +1,4 @@
-package net.akive.api.auth.presentation.dto.request;
+package net.akive.api.auth.presentation.dto.request.login;
 
 import jakarta.validation.constraints.NotBlank;
 import net.akive.api.auth.application.dto.command.login.LoginByEmailCommand;

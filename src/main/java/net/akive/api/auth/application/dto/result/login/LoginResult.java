@@ -1,4 +1,4 @@
-package net.akive.api.auth.application.dto.result;
+package net.akive.api.auth.application.dto.result.login;
 
 public record LoginResult(
         String accessToken,

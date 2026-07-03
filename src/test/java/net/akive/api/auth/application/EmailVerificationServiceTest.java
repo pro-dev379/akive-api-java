@@ -3,7 +3,7 @@ package net.akive.api.auth.application;
 import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeSendCommand;
 import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeVerifyCommand;
 import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationEnsureVerifiedCommand;
-import net.akive.api.auth.application.dto.result.EmailVerificationCodeSendResult;
+import net.akive.api.auth.application.dto.result.emailverification.EmailVerificationCodeSendResult;
 import net.akive.api.auth.application.port.out.emailverification.*;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;

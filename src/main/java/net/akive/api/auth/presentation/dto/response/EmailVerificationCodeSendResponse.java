@@ -1,7 +1,7 @@
 package net.akive.api.auth.presentation.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import net.akive.api.auth.application.dto.result.EmailVerificationCodeSendResult;
+import net.akive.api.auth.application.dto.result.emailverification.EmailVerificationCodeSendResult;
 
 import java.time.LocalDateTime;
 

@@ -6,6 +6,7 @@ import net.akive.api.common.response.ApiErrorResponse;
 import net.akive.api.common.response.FieldErrorDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingRequestValueException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,15 +47,19 @@ public class GlobalExceptionHandler {
         return createErrorResponse(CommonErrorCode.INVALID_INPUT_VALUE, fieldErrors);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    protected ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadableException(
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            MissingRequestValueException.class
+    })
+    protected ResponseEntity<ApiErrorResponse> handleInvalidInputException(
             HttpServletRequest request,
-            HttpMessageNotReadableException e
+            Exception e
     ) {
-        log.warn("[HttpMessageNotReadableException] uri={}, method={}, message={}",
+        log.warn("[InvalidInputException] uri={}, method={}, exception={}, message={}",
                 request.getRequestURI(),
                 request.getMethod(),
-                e.getMostSpecificCause().getMessage());
+                e.getClass().getSimpleName(),
+                e.getMessage());
 
         return createErrorResponse(CommonErrorCode.INVALID_INPUT_VALUE);
     }

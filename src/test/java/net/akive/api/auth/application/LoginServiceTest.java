@@ -1,8 +1,8 @@
 package net.akive.api.auth.application;
 
 import net.akive.api.auth.application.dto.command.login.LoginByEmailCommand;
-import net.akive.api.auth.application.dto.result.LoginResult;
-import net.akive.api.auth.application.dto.result.TokenIssueResult;
+import net.akive.api.auth.application.dto.result.login.LoginResult;
+import net.akive.api.auth.application.dto.result.token.TokenIssueResult;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.application.port.out.login.DeleteLegacyUserPasswordPort;
 import net.akive.api.auth.application.port.out.login.LoadEmailLoginUserPort;

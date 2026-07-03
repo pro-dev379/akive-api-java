@@ -2,5 +2,7 @@ package net.akive.api.auth.domain.token;
 
 import net.akive.api.user.domain.RoleType;
 
-public record TokenPayload(Long userId, RoleType roleType) {
+import java.time.Instant;
+
+public record TokenPayload(Long userId, RoleType roleType, Instant expiresAt) {
 }

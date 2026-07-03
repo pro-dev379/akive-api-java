@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.auth.application.port.in.emailverification.SendEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.in.login.LoginByEmailUseCase;
+import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.presentation.EmailVerificationController;
 import net.akive.api.auth.presentation.LoginController;
+import net.akive.api.auth.presentation.TokenController;
 import net.akive.api.user.application.port.in.SignUpByEmailUseCase;
 import net.akive.api.user.presentation.SignUpController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
         EmailVerificationController.class,
         SignUpController.class,
         LoginController.class,
+        TokenController.class,
 })
 @AutoConfigureMockMvc(addFilters = false)
 public abstract class ControllerTestSupport {
@@ -39,4 +42,7 @@ public abstract class ControllerTestSupport {
 
     @MockitoBean
     protected LoginByEmailUseCase loginByEmailUseCase;
+
+    @MockitoBean
+    protected IssueTokenUseCase issueTokenUseCase;
 }

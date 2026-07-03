@@ -3,6 +3,7 @@ package net.akive.api.auth.infrastructure.token;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.port.out.token.DeleteTokenPort;
 import net.akive.api.auth.application.port.out.token.LoadTokenPort;
+import net.akive.api.auth.application.port.out.token.RotateTokenPort;
 import net.akive.api.auth.application.port.out.token.SaveTokenPort;
 import net.akive.api.common.cache.CacheKeyProvider;
 import net.akive.api.common.cache.RedisTemplateClient;
@@ -13,7 +14,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-class RefreshTokenRedisAdapter implements LoadTokenPort, SaveTokenPort, DeleteTokenPort {
+class RefreshTokenRedisAdapter implements LoadTokenPort, SaveTokenPort, RotateTokenPort, DeleteTokenPort {
 
     private final RedisTemplateClient redisTemplateClient;
 
@@ -25,6 +26,16 @@ class RefreshTokenRedisAdapter implements LoadTokenPort, SaveTokenPort, DeleteTo
     @Override
     public void save(Long userId, String refreshToken, Duration ttl) {
         redisTemplateClient.set(CacheKeyProvider.refreshToken(userId), refreshToken, ttl);
+    }
+
+    @Override
+    public boolean rotate(Long userId, String currentRefreshToken, String newRefreshToken, Duration ttl) {
+        return redisTemplateClient.compareAndSet(
+                CacheKeyProvider.refreshToken(userId),
+                currentRefreshToken,
+                newRefreshToken,
+                ttl
+        );
     }
 
     @Override

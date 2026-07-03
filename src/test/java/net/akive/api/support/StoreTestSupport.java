@@ -5,6 +5,7 @@ import net.akive.api.auth.application.port.out.emailverification.LoadEmailVerifi
 import net.akive.api.auth.application.port.out.emailverification.SaveEmailVerificationPort;
 import net.akive.api.auth.application.port.out.token.DeleteTokenPort;
 import net.akive.api.auth.application.port.out.token.LoadTokenPort;
+import net.akive.api.auth.application.port.out.token.RotateTokenPort;
 import net.akive.api.auth.application.port.out.token.SaveTokenPort;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ public class StoreTestSupport extends IntegrationTestSupport{
 
     @Autowired
     protected SaveTokenPort saveTokenPort;
+
+    @Autowired
+    protected RotateTokenPort rotateTokenPort;
 
     @Autowired
     protected DeleteTokenPort deleteTokenPort;

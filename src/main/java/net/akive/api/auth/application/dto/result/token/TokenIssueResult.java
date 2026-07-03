@@ -1,4 +1,4 @@
-package net.akive.api.auth.application.dto.result;
+package net.akive.api.auth.application.dto.result.token;
 
 public record TokenIssueResult(String accessToken, String refreshToken) {
 }

@@ -57,4 +57,75 @@ class RefreshTokenRedisAdapterTest extends StoreTestSupport {
         // then
         assertThat(found).isEmpty();
     }
+
+    @Test
+    void 저장된_리프레시_토큰이_현재_토큰과_같으면_새_토큰으로_교체한다() {
+        // given
+        Long userId = 1L;
+        String currentRefreshToken = "current-refresh-token";
+        String newRefreshToken = "new-refresh-token";
+
+        saveTokenPort.save(userId, currentRefreshToken, Duration.ofMinutes(5));
+
+        // when
+        boolean rotated = rotateTokenPort.rotate(
+                userId,
+                currentRefreshToken,
+                newRefreshToken,
+                Duration.ofMinutes(5)
+        );
+
+        // then
+        Optional<String> found = loadTokenPort.findByUserId(userId);
+
+        assertThat(rotated).isTrue();
+        assertThat(found).contains(newRefreshToken);
+    }
+
+    @Test
+    void 저장된_리프레시_토큰이_현재_토큰과_다르면_교체하지_않는다() {
+        // given
+        Long userId = 1L;
+        String currentRefreshToken = "current-refresh-token";
+        String otherRefreshToken = "other-refresh-token";
+        String newRefreshToken = "new-refresh-token";
+
+        saveTokenPort.save(userId, otherRefreshToken, Duration.ofMinutes(5));
+
+        // when
+        boolean rotated = rotateTokenPort.rotate(
+                userId,
+                currentRefreshToken,
+                newRefreshToken,
+                Duration.ofMinutes(5)
+        );
+
+        // then
+        Optional<String> found = loadTokenPort.findByUserId(userId);
+
+        assertThat(rotated).isFalse();
+        assertThat(found).contains(otherRefreshToken);
+    }
+
+    @Test
+    void 저장된_리프레시_토큰이_없으면_교체하지_않는다() {
+        // given
+        Long userId = 1L;
+        String currentRefreshToken = "current-refresh-token";
+        String newRefreshToken = "new-refresh-token";
+
+        // when
+        boolean rotated = rotateTokenPort.rotate(
+                userId,
+                currentRefreshToken,
+                newRefreshToken,
+                Duration.ofMinutes(5)
+        );
+
+        // then
+        Optional<String> found = loadTokenPort.findByUserId(userId);
+
+        assertThat(rotated).isFalse();
+        assertThat(found).isEmpty();
+    }
 }

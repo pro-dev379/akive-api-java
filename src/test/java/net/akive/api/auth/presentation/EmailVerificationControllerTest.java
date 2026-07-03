@@ -1,12 +1,12 @@
 package net.akive.api.auth.presentation;
 
 import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeSendCommand;
-import net.akive.api.auth.application.dto.result.EmailVerificationCodeSendResult;
+import net.akive.api.auth.application.dto.result.emailverification.EmailVerificationCodeSendResult;
 import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeVerifyCommand;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
-import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeSendRequest;
-import net.akive.api.auth.presentation.dto.request.EmailVerificationCodeVerifyRequest;
+import net.akive.api.auth.presentation.dto.request.emailverification.EmailVerificationCodeSendRequest;
+import net.akive.api.auth.presentation.dto.request.emailverification.EmailVerificationCodeVerifyRequest;
 import net.akive.api.support.ControllerTestSupport;
 import net.akive.api.user.excpetion.UserErrorCode;
 import net.akive.api.user.excpetion.UserException;

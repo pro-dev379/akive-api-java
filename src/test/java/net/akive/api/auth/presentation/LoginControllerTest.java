@@ -1,8 +1,8 @@
 package net.akive.api.auth.presentation;
 
-import net.akive.api.auth.application.dto.result.LoginResult;
+import net.akive.api.auth.application.dto.result.login.LoginResult;
 import net.akive.api.auth.domain.login.exception.LoginException;
-import net.akive.api.auth.presentation.dto.request.LoginByEmailRequest;
+import net.akive.api.auth.presentation.dto.request.login.LoginByEmailRequest;
 import net.akive.api.support.ControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
