@@ -32,8 +32,8 @@ public class TokenController {
             throw new TokenException(INVALID_REFRESH_TOKEN);
         }
 
-        TokenReissueResult issue = issueTokenUseCase.reissue(refreshToken);
+        TokenReissueResult result = issueTokenUseCase.reissue(refreshToken);
 
-        return new TokenReissueResponse(issue.accessToken(), issue.refreshToken());
+        return new TokenReissueResponse(result.accessToken(), result.refreshToken());
     }
 }

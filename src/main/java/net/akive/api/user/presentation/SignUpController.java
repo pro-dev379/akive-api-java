@@ -20,7 +20,7 @@ public class SignUpController {
     @PostMapping("/email")
     @ResponseStatus(CREATED)
     public SignUpResponse signUpByEmail(@Validated @RequestBody SignUpByEmailRequest request) {
-        SignUpResult signUpResult = signUpByEmailUseCase.signUp(request.toCommand());
-        return SignUpResponse.from(signUpResult);
+        SignUpResult result = signUpByEmailUseCase.signUp(request.toCommand());
+        return SignUpResponse.from(result);
     }
 }
