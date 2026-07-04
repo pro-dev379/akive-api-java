@@ -12,6 +12,7 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPolic
 import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
 
 @Getter
+@Builder(access = PRIVATE)
 @NoArgsConstructor(access = PRIVATE)
 @AllArgsConstructor(access = PRIVATE)
 public class EmailVerification {
@@ -31,16 +32,16 @@ public class EmailVerification {
             String verificationCode,
             LocalDateTime requestedAt
     ) {
-        return new EmailVerification(
-                email,
-                verificationPurpose,
-                verificationCode,
-                0,
-                false,
-                requestedAt.plus(EXPIRE_DURATION),
-                requestedAt,
-                requestedAt
-        );
+        return EmailVerification.builder()
+                .email(email)
+                .verificationPurpose(verificationPurpose)
+                .verificationCode(verificationCode)
+                .resendCount(0)
+                .verified(false)
+                .expiresAt(requestedAt.plus(EXPIRE_DURATION))
+                .lastSentAt(requestedAt)
+                .createdAt(requestedAt)
+                .build();
     }
 
     public void renew(String verificationCode, LocalDateTime requestedAt) {

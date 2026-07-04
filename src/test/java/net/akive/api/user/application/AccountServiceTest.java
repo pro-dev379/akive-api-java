@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
 import static net.akive.api.user.excpetion.UserErrorCode.NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,13 +38,18 @@ class AccountServiceTest {
         Long userId = 1L;
         String encodedPassword = "encoded-password";
 
-        User user = User.builder()
-                .userId(userId)
-                .email("test@test.com")
-                .nickname("USER@abcde")
-                .password("old-password")
-                .roleType(USER)
-                .build();
+        User user = User.create(
+                userId,
+                "test@test.com",
+                USER,
+                EMAIL,
+                "USER@abcde",
+                "old-password",
+                null,
+                null,
+                false,
+                null
+        );
 
         given(loadUserPort.loadByUserIdAndLeaveFalse(userId))
                 .willReturn(Optional.of(user));

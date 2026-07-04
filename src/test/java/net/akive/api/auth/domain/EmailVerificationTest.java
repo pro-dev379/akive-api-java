@@ -98,6 +98,18 @@ class EmailVerificationTest {
     }
 
     @Test
+    void 만료_시각과_같은_시각에_인증번호를_입력하면_이메일_인증이_완료된다() {
+        // given
+        EmailVerification emailVerification = emailVerification(SIGN_UP);
+
+        // when
+        emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plus(EXPIRE_DURATION));
+
+        // then
+        assertThat(emailVerification.isVerified()).isTrue();
+    }
+
+    @Test
     void 이미_인증이_완료된_인증정보이면_검증이_거부된다() {
         // given
         EmailVerification emailVerification = emailVerification(SIGN_UP);

@@ -83,17 +83,17 @@ public class UserEntity extends BaseTimeEntity {
     }
 
     public User toModel() {
-        return User.builder()
-                .userId(this.userId)
-                .email(this.email)
-                .roleType(this.roleType)
-                .loginType(this.loginType)
-                .nickname(this.nickname)
-                .password(this.password)
-                .imgUrl(this.imgUrl)
-                .aim(this.aim)
-                .leave(this.leave)
-                .leaveReason(this.leaveReason)
-                .build();
+        return User.create(
+                this.userId,
+                this.email,
+                this.roleType,
+                this.loginType,
+                this.nickname,
+                this.password,
+                this.imgUrl,
+                this.aim,
+                this.leave,
+                this.leaveReason
+        );
     }
 }

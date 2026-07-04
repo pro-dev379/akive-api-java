@@ -60,13 +60,13 @@ public class GoalEntity {
     }
 
     public Goal toModel() {
-        return Goal.builder()
-                .goalId(this.goalId)
-                .userId(this.user.getUserId())
-                .attendOn(this.attendOn)
-                .rest10MinSec(this.rest10MinSec)
-                .mealNum(this.mealNum)
-                .meal1TimeSec(this.meal1TimeSec)
-                .build();
+        return Goal.create(
+                this.goalId,
+                this.user.getUserId(),
+                this.attendOn,
+                this.rest10MinSec,
+                this.mealNum,
+                this.meal1TimeSec
+        );
     }
 }

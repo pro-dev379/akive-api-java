@@ -95,19 +95,19 @@ public class MentoringProfileEntity extends BaseTimeEntity {
     }
 
     public MentoringProfile toModel() {
-        return MentoringProfile.builder()
-                .mentoringProfileId(this.mentoringProfileId)
-                .userId(this.getUser().getUserId())
-                .goal(this.goal)
-                .preference(this.preference)
-                .constraint(this.constraint)
-                .weakness(this.weakness)
-                .strength(this.strength)
-                .recurringPattern(this.recurringPattern)
-                .decisionOrCommitment(this.decisionOrCommitment)
-                .studyPlan(this.studyPlan)
-                .behavioralPattern(this.behavioralPattern)
-                .effectiveAdvice(this.effectiveAdvice)
-                .build();
+        return MentoringProfile.create(
+                this.mentoringProfileId,
+                this.getUser().getUserId(),
+                this.goal,
+                this.preference,
+                this.constraint,
+                this.weakness,
+                this.strength,
+                this.recurringPattern,
+                this.decisionOrCommitment,
+                this.studyPlan,
+                this.behavioralPattern,
+                this.effectiveAdvice
+        );
     }
 }

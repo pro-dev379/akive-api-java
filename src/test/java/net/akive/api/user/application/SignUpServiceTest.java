@@ -25,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.NOT_VERIFIED;
+import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
 import static net.akive.api.user.excpetion.UserErrorCode.EMAIL_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,13 +77,18 @@ class SignUpServiceTest {
         String nickname = "USER@abcde";
         String encodedPassword = "encodedPassword";
 
-        User savedUser = User.builder()
-                .userId(1L)
-                .email(command.email())
-                .nickname(nickname)
-                .password(encodedPassword)
-                .roleType(USER)
-                .build();
+        User savedUser = User.create(
+                1L,
+                command.email(),
+                USER,
+                EMAIL,
+                nickname,
+                encodedPassword,
+                null,
+                null,
+                false,
+                null
+        );
 
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
