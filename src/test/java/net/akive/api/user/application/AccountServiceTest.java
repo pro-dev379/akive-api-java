@@ -45,7 +45,7 @@ class AccountServiceTest {
                 .roleType(USER)
                 .build();
 
-        given(loadUserPort.findByUserIdAndLeaveFalse(userId))
+        given(loadUserPort.loadByUserIdAndLeaveFalse(userId))
                 .willReturn(Optional.of(user));
 
         // when
@@ -62,7 +62,7 @@ class AccountServiceTest {
         // given
         Long userId = 999L;
 
-        given(loadUserPort.findByUserIdAndLeaveFalse(userId))
+        given(loadUserPort.loadByUserIdAndLeaveFalse(userId))
                 .willReturn(Optional.empty());
 
         // when & then

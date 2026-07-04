@@ -19,7 +19,7 @@ class RefreshTokenRedisAdapterTest extends StoreTestSupport {
 
         // when
         saveTokenPort.save(userId, refreshToken, Duration.ofMinutes(5));
-        Optional<String> found = loadTokenPort.findByUserId(userId);
+        Optional<String> found = loadTokenPort.loadByUserId(userId);
 
         // then
         assertThat(found).contains(refreshToken);
@@ -37,7 +37,7 @@ class RefreshTokenRedisAdapterTest extends StoreTestSupport {
         deleteTokenPort.delete(userId);
 
         // then
-        Optional<String> found = loadTokenPort.findByUserId(userId);
+        Optional<String> found = loadTokenPort.loadByUserId(userId);
 
         assertThat(found).isEmpty();
     }
@@ -55,7 +55,7 @@ class RefreshTokenRedisAdapterTest extends StoreTestSupport {
         await()
                 .atMost(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
-                    Optional<String> found = loadTokenPort.findByUserId(userId);
+                    Optional<String> found = loadTokenPort.loadByUserId(userId);
 
                     assertThat(found).isEmpty();
                 });
@@ -79,7 +79,7 @@ class RefreshTokenRedisAdapterTest extends StoreTestSupport {
         );
 
         // then
-        Optional<String> found = loadTokenPort.findByUserId(userId);
+        Optional<String> found = loadTokenPort.loadByUserId(userId);
 
         assertThat(rotated).isTrue();
         assertThat(found).contains(newRefreshToken);
@@ -104,7 +104,7 @@ class RefreshTokenRedisAdapterTest extends StoreTestSupport {
         );
 
         // then
-        Optional<String> found = loadTokenPort.findByUserId(userId);
+        Optional<String> found = loadTokenPort.loadByUserId(userId);
 
         assertThat(rotated).isFalse();
         assertThat(found).contains(otherRefreshToken);
@@ -126,7 +126,7 @@ class RefreshTokenRedisAdapterTest extends StoreTestSupport {
         );
 
         // then
-        Optional<String> found = loadTokenPort.findByUserId(userId);
+        Optional<String> found = loadTokenPort.loadByUserId(userId);
 
         assertThat(rotated).isFalse();
         assertThat(found).isEmpty();

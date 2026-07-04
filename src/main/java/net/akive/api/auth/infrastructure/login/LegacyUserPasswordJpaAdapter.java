@@ -18,7 +18,7 @@ class LegacyUserPasswordJpaAdapter
     private final LegacyUserPasswordJpaRepository legacyUserPasswordJpaRepository;
 
     @Override
-    public Optional<LegacyUserPassword> findByUserId(Long userId) {
+    public Optional<LegacyUserPassword> loadByUserId(Long userId) {
         return legacyUserPasswordJpaRepository
                 .findByUser_UserId(userId)
                 .map(LegacyUserPasswordEntity::toModel);

@@ -27,7 +27,7 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
         saveLegacyPassword(savedUser);
 
         // when
-        Optional<LegacyUserPassword> result = loadLegacyUserPasswordPort.findByUserId(savedUser.getUserId());
+        Optional<LegacyUserPassword> result = loadLegacyUserPasswordPort.loadByUserId(savedUser.getUserId());
 
         // then
         assertThat(result).isPresent();
@@ -53,7 +53,7 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
         deleteLegacyUserPasswordPort.deleteByUserId(savedUser.getUserId());
 
         // then
-        assertThat(loadLegacyUserPasswordPort.findByUserId(savedUser.getUserId())).isEmpty();
+        assertThat(loadLegacyUserPasswordPort.loadByUserId(savedUser.getUserId())).isEmpty();
     }
 
     private void saveLegacyPassword(User savedUser) {

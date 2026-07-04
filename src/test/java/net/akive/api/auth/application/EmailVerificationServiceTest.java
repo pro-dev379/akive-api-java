@@ -79,7 +79,7 @@ class EmailVerificationServiceTest {
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
 
         given(generateEmailVerificationCodePort.generate()).willReturn(VERIFICATION_CODE);
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.empty());
 
         // when
@@ -127,7 +127,7 @@ class EmailVerificationServiceTest {
         EmailVerificationPurpose verificationPurpose = FIND_PASSWORD;
 
         given(generateEmailVerificationCodePort.generate()).willReturn(VERIFICATION_CODE);
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.empty());
 
         // when
@@ -168,7 +168,7 @@ class EmailVerificationServiceTest {
         );
 
         given(generateEmailVerificationCodePort.generate()).willReturn(VERIFICATION_CODE);
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.of(previous));
 
         // when
@@ -200,7 +200,7 @@ class EmailVerificationServiceTest {
         // given
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
 
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(
                         Optional.of(emailVerification(verificationPurpose, currentTimeProvider.now()))
                 );
@@ -232,7 +232,7 @@ class EmailVerificationServiceTest {
         emailVerification.renew("333333", requestedAt.plusMinutes(3));
 
         given(generateEmailVerificationCodePort.generate()).willReturn(VERIFICATION_CODE);
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
@@ -258,7 +258,7 @@ class EmailVerificationServiceTest {
         LocalDateTime requestedAt = currentTimeProvider.now().minusMinutes(1);
         EmailVerification emailVerification = emailVerification(verificationPurpose, requestedAt);
 
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when
@@ -282,7 +282,7 @@ class EmailVerificationServiceTest {
         // given
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
 
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.empty());
 
         // when & then
@@ -308,7 +308,7 @@ class EmailVerificationServiceTest {
                 currentTimeProvider.now().minusMinutes(1)
         );
 
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
@@ -334,7 +334,7 @@ class EmailVerificationServiceTest {
                 currentTimeProvider.now().minus(EXPIRE_DURATION).minusSeconds(1)
         );
 
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
@@ -361,7 +361,7 @@ class EmailVerificationServiceTest {
         );
         emailVerification.verify(VERIFICATION_CODE, currentTimeProvider.now().minusMinutes(1));
 
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
@@ -387,7 +387,7 @@ class EmailVerificationServiceTest {
         );
         emailVerification.verify(VERIFICATION_CODE, currentTimeProvider.now().minusMinutes(1));
 
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when
@@ -396,7 +396,7 @@ class EmailVerificationServiceTest {
         // then
         then(loadEmailVerificationPort)
                 .should()
-                .findByEmailAndVerificationPurpose(EMAIL, verificationPurpose);
+                .loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose);
     }
 
     @Test
@@ -404,7 +404,7 @@ class EmailVerificationServiceTest {
         // given
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
 
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.empty());
 
         // when & then
@@ -425,7 +425,7 @@ class EmailVerificationServiceTest {
                 currentTimeProvider.now().minusMinutes(1)
         );
 
-        given(loadEmailVerificationPort.findByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(EMAIL, verificationPurpose))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then

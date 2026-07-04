@@ -57,7 +57,7 @@ class TokenService implements IssueTokenUseCase {
         Instant expiresAt = tokenPayload.expiresAt();
 
         String savedRefreshToken = loadTokenPort
-                .findByUserId(userId)
+                .loadByUserId(userId)
                 .orElseThrow(() -> new TokenException(INVALID_REFRESH_TOKEN));
 
         if (!savedRefreshToken.equals(refreshToken)) {

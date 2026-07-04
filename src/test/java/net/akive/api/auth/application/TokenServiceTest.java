@@ -104,7 +104,7 @@ class TokenServiceTest {
 
         given(validateTokenPort.validateRefreshToken(refreshToken))
                 .willReturn(new TokenPayload(userId, roleType, expiresAt));
-        given(loadTokenPort.findByUserId(userId))
+        given(loadTokenPort.loadByUserId(userId))
                 .willReturn(Optional.of(refreshToken));
         given(createTokenPort.createAccessToken(userId, roleType))
                 .willReturn(newAccessToken);
@@ -143,7 +143,7 @@ class TokenServiceTest {
 
         given(validateTokenPort.validateRefreshToken(refreshToken))
                 .willReturn(new TokenPayload(userId, roleType, expiresAt));
-        given(loadTokenPort.findByUserId(userId))
+        given(loadTokenPort.loadByUserId(userId))
                 .willReturn(Optional.of(refreshToken));
         given(createTokenPort.createAccessToken(userId, roleType))
                 .willReturn(newAccessToken);
@@ -179,7 +179,7 @@ class TokenServiceTest {
 
         given(validateTokenPort.validateRefreshToken(refreshToken))
                 .willReturn(new TokenPayload(userId, roleType, expiresAt));
-        given(loadTokenPort.findByUserId(userId))
+        given(loadTokenPort.loadByUserId(userId))
                 .willReturn(Optional.of(refreshToken));
         given(createTokenPort.createAccessToken(userId, roleType))
                 .willReturn(newAccessToken);
@@ -216,7 +216,7 @@ class TokenServiceTest {
 
         given(validateTokenPort.validateRefreshToken(refreshToken))
                 .willReturn(new TokenPayload(userId, roleType, expiresAt));
-        given(loadTokenPort.findByUserId(userId))
+        given(loadTokenPort.loadByUserId(userId))
                 .willReturn(Optional.of(refreshToken));
         given(createTokenPort.createAccessToken(userId, roleType))
                 .willReturn(newAccessToken);
@@ -243,7 +243,7 @@ class TokenServiceTest {
 
         given(validateTokenPort.validateRefreshToken(refreshToken))
                 .willReturn(new TokenPayload(userId, roleType, expiresAt));
-        given(loadTokenPort.findByUserId(userId))
+        given(loadTokenPort.loadByUserId(userId))
                 .willReturn(Optional.empty());
 
         // when & then
@@ -267,7 +267,7 @@ class TokenServiceTest {
 
         given(validateTokenPort.validateRefreshToken(refreshToken))
                 .willReturn(new TokenPayload(userId, roleType, expiresAt));
-        given(loadTokenPort.findByUserId(userId))
+        given(loadTokenPort.loadByUserId(userId))
                 .willReturn(Optional.of(savedRefreshToken));
 
         // when & then

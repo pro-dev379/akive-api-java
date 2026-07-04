@@ -36,7 +36,7 @@ class LoginService implements LoginByEmailUseCase {
     @Override
     @Transactional
     public LoginResult login(LoginByEmailCommand command) {
-        LoginUser user = loadEmailLoginUserPort.findByEmailAndLeaveFalse(command.email());
+        LoginUser user = loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email());
 
         if (hasPassword(user)) {
             validatePassword(command.password(), user.password());
@@ -62,7 +62,7 @@ class LoginService implements LoginByEmailUseCase {
     private void validateLegacyPassword(String rawPassword, LoginUser user) {
         LegacyUserPassword legacyUserPassword
                 = loadLegacyUserPasswordPort
-                .findByUserId(user.userId())
+                .loadByUserId(user.userId())
                 .orElseThrow(() -> new LoginException(INVALID_EMAIL_OR_PASSWORD));
 
         if (!legacyPasswordVerifier.matches(rawPassword, legacyUserPassword)) {

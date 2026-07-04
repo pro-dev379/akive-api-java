@@ -25,7 +25,7 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
 
         // when
         saveEmailVerificationPort.save(emailVerification, Duration.ofMinutes(5));
-        Optional<EmailVerification> found = loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose);
+        Optional<EmailVerification> found = loadEmailVerificationPort.loadByEmailAndVerificationPurpose(email, verificationPurpose);
 
         // then
         assertThat(found).isPresent();
@@ -55,7 +55,7 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
         deleteEmailVerificationPort.delete(emailVerification);
 
         // then
-        Optional<EmailVerification> found = loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose);
+        Optional<EmailVerification> found = loadEmailVerificationPort.loadByEmailAndVerificationPurpose(email, verificationPurpose);
 
         assertThat(found).isEmpty();
     }
@@ -80,7 +80,7 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
                 .atMost(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
                     Optional<EmailVerification> found =
-                            loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose);
+                            loadEmailVerificationPort.loadByEmailAndVerificationPurpose(email, verificationPurpose);
 
                     assertThat(found).isEmpty();
                 });

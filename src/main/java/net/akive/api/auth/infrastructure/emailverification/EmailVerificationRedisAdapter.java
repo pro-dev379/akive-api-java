@@ -23,7 +23,7 @@ class EmailVerificationRedisAdapter implements
     private final RedisTemplateClient redisTemplateClient;
 
     @Override
-    public Optional<EmailVerification> findByEmailAndVerificationPurpose(
+    public Optional<EmailVerification> loadByEmailAndVerificationPurpose(
             String email,
             EmailVerificationPurpose verificationPurpose
     ) {

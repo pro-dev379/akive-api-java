@@ -46,7 +46,7 @@ class EmailVerificationService
         String verificationCode = generateEmailVerificationCodePort.generate();
 
         EmailVerification emailVerification = loadEmailVerificationPort
-                .findByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
+                .loadByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
                 .map(previous -> {
                     previous.renew(verificationCode, requestedAt);
                     return previous;
@@ -67,7 +67,7 @@ class EmailVerificationService
     @Override
     public void verify(EmailVerificationCodeVerifyCommand command) {
         EmailVerification emailVerification = loadEmailVerificationPort
-                .findByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
+                .loadByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
                 .orElseThrow(() -> new EmailVerificationException(NOT_FOUND));
 
         emailVerification.verify(command.verificationCode(), currentTimeProvider.now());
@@ -79,7 +79,7 @@ class EmailVerificationService
     @Transactional(readOnly = true)
     public void ensureVerified(EmailVerificationEnsureVerifiedCommand command) {
         EmailVerification emailVerification = loadEmailVerificationPort
-                .findByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
+                .loadByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
                 .orElseThrow(() -> new EmailVerificationException(NOT_VERIFIED));
 
         if (!emailVerification.isVerified()) {

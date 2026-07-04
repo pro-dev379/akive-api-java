@@ -19,7 +19,7 @@ class RefreshTokenRedisAdapter implements LoadTokenPort, SaveTokenPort, RotateTo
     private final RedisTemplateClient redisTemplateClient;
 
     @Override
-    public Optional<String> findByUserId(Long userId) {
+    public Optional<String> loadByUserId(Long userId) {
         return redisTemplateClient.get(CacheKeyProvider.refreshToken(userId), String.class);
     }
 

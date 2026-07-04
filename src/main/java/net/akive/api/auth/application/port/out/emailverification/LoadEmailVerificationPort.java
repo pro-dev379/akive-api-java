@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface LoadEmailVerificationPort {
 
-    Optional<EmailVerification> findByEmailAndVerificationPurpose(String email, EmailVerificationPurpose verificationPurpose);
+    Optional<EmailVerification> loadByEmailAndVerificationPurpose(String email, EmailVerificationPurpose verificationPurpose);
 }

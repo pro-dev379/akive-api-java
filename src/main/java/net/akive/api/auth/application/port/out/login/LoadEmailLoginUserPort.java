@@ -4,5 +4,5 @@ import net.akive.api.auth.domain.login.LoginUser;
 
 public interface LoadEmailLoginUserPort {
 
-    LoginUser findByEmailAndLeaveFalse(String email);
+    LoginUser loadByEmailAndLeaveFalse(String email);
 }

@@ -27,7 +27,7 @@ class LoginUserJpaAdapterTest extends RepositoryTestSupport {
 
         // when
         LoginUser loginUser =
-                loadEmailLoginUserPort.findByEmailAndLeaveFalse(savedUser.getEmail());
+                loadEmailLoginUserPort.loadByEmailAndLeaveFalse(savedUser.getEmail());
 
         // then
         assertThat(loginUser.userId()).isEqualTo(savedUser.getUserId());
@@ -43,7 +43,7 @@ class LoginUserJpaAdapterTest extends RepositoryTestSupport {
 
         // when & then
         assertThatExceptionOfType(LoginException.class)
-                .isThrownBy(() -> loadEmailLoginUserPort.findByEmailAndLeaveFalse(email))
+                .isThrownBy(() -> loadEmailLoginUserPort.loadByEmailAndLeaveFalse(email))
                 .extracting(LoginException::getErrorCode)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
     }

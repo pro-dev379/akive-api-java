@@ -4,5 +4,5 @@ import java.util.Optional;
 
 public interface LoadTokenPort {
 
-    Optional<String> findByUserId(Long userId);
+    Optional<String> loadByUserId(Long userId);
 }

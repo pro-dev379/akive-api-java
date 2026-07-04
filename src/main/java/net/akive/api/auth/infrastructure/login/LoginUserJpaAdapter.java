@@ -16,7 +16,7 @@ class LoginUserJpaAdapter implements LoadEmailLoginUserPort {
     private final UserJpaRepository userJpaRepository;
 
     @Override
-    public LoginUser findByEmailAndLeaveFalse(String email) {
+    public LoginUser loadByEmailAndLeaveFalse(String email) {
         return userJpaRepository.findByEmailAndLeaveFalse(email)
                 .map(user -> new LoginUser(
                         user.getUserId(),

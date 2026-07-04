@@ -68,7 +68,7 @@ class LoginServiceTest {
 
         TokenIssueResult token = new TokenIssueResult("access-token", "refresh-token");
 
-        given(loadEmailLoginUserPort.findByEmailAndLeaveFalse(command.email()))
+        given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
         given(passwordEncoder.matches(command.password(), user.password()))
                 .willReturn(true);
@@ -93,7 +93,7 @@ class LoginServiceTest {
         // given
         LoginByEmailCommand command = new LoginByEmailCommand("not-found@test.com", "password123!");
 
-        given(loadEmailLoginUserPort.findByEmailAndLeaveFalse(command.email()))
+        given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
 
         // when & then
@@ -122,7 +122,7 @@ class LoginServiceTest {
                 USER
         );
 
-        given(loadEmailLoginUserPort.findByEmailAndLeaveFalse(command.email()))
+        given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
         given(passwordEncoder.matches(command.password(), user.password()))
                 .willReturn(false);
@@ -160,9 +160,9 @@ class LoginServiceTest {
 
         TokenIssueResult token = new TokenIssueResult("access-token", "refresh-token");
 
-        given(loadEmailLoginUserPort.findByEmailAndLeaveFalse(command.email()))
+        given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
-        given(loadLegacyUserPasswordPort.findByUserId(user.userId()))
+        given(loadLegacyUserPasswordPort.loadByUserId(user.userId()))
                 .willReturn(Optional.of(legacyUserPassword));
         given(legacyPasswordVerifier.matches(command.password(), legacyUserPassword))
                 .willReturn(true);
@@ -196,9 +196,9 @@ class LoginServiceTest {
                 USER
         );
 
-        given(loadEmailLoginUserPort.findByEmailAndLeaveFalse(command.email()))
+        given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
-        given(loadLegacyUserPasswordPort.findByUserId(user.userId()))
+        given(loadLegacyUserPasswordPort.loadByUserId(user.userId()))
                 .willReturn(Optional.empty());
 
         // when & then
@@ -232,9 +232,9 @@ class LoginServiceTest {
                 "legacy-salt"
         );
 
-        given(loadEmailLoginUserPort.findByEmailAndLeaveFalse(command.email()))
+        given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
-        given(loadLegacyUserPasswordPort.findByUserId(user.userId()))
+        given(loadLegacyUserPasswordPort.loadByUserId(user.userId()))
                 .willReturn(Optional.of(legacyUserPassword));
         given(legacyPasswordVerifier.matches(command.password(), legacyUserPassword))
                 .willReturn(false);

@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface LoadLegacyUserPasswordPort {
 
-    Optional<LegacyUserPassword> findByUserId(Long userId);
+    Optional<LegacyUserPassword> loadByUserId(Long userId);
 }

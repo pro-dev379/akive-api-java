@@ -21,7 +21,7 @@ public class AccountService implements UpdatePasswordUseCase {
     @Override
     @Transactional
     public void updatePassword(Long userId, String encodedPassword) {
-        User user = loadUserPort.findByUserIdAndLeaveFalse(userId)
+        User user = loadUserPort.loadByUserIdAndLeaveFalse(userId)
                 .orElseThrow(() -> new UserException(NOT_FOUND));
 
         user.updatePassword(encodedPassword);
