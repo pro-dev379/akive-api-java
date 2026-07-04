@@ -24,7 +24,7 @@ public class LegacyUserPasswordEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long legacyUserPasswordId;
 
-    @OneToOne(fetch = LAZY)
+    @OneToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 

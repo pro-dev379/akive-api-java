@@ -25,7 +25,7 @@ public class GoalEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long goalId;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 

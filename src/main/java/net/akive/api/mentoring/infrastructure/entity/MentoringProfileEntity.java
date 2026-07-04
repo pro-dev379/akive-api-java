@@ -42,7 +42,7 @@ public class MentoringProfileEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long mentoringProfileId;
 
-    @OneToOne(fetch = LAZY)
+    @OneToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
