@@ -21,7 +21,7 @@ public class EmailVerification {
     private String verificationCode;
     private int resendCount;
     private boolean verified;
-    private LocalDateTime expiredAt;
+    private LocalDateTime expiresAt;
     private LocalDateTime lastSentAt;
     private LocalDateTime createdAt;
 
@@ -49,7 +49,7 @@ public class EmailVerification {
         this.verificationCode = verificationCode;
         this.resendCount++;
         this.verified = false;
-        this.expiredAt = requestedAt.plus(EXPIRE_DURATION);
+        this.expiresAt = requestedAt.plus(EXPIRE_DURATION);
         this.lastSentAt = requestedAt;
     }
 
@@ -58,7 +58,7 @@ public class EmailVerification {
             throw new EmailVerificationException(ALREADY_VERIFIED);
         }
 
-        if (this.expiredAt.isBefore(requestedAt)) {
+        if (this.expiresAt.isBefore(requestedAt)) {
             throw new EmailVerificationException(EXPIRED);
         }
 

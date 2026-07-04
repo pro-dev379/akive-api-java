@@ -10,7 +10,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @JsonInclude(NON_NULL)
 public record EmailVerificationCodeSendResponse(
         String email,
-        LocalDateTime expiredAt,
+        LocalDateTime expiresAt,
         long expireSeconds,
         long resendIntervalSeconds
 ) {
@@ -18,7 +18,7 @@ public record EmailVerificationCodeSendResponse(
     public static EmailVerificationCodeSendResponse from(EmailVerificationCodeSendResult result) {
         return new EmailVerificationCodeSendResponse(
                 result.email(),
-                result.expiredAt(),
+                result.expiresAt(),
                 result.expireSeconds(),
                 result.resendIntervalSeconds()
         );

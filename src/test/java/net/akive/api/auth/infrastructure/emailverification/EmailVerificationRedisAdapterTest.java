@@ -32,7 +32,7 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
         assertThat(found.get().getVerificationCode()).isEqualTo("123456");
         assertThat(found.get().getResendCount()).isZero();
         assertThat(found.get().isVerified()).isFalse();
-        assertThat(found.get().getExpiredAt()).isEqualTo(requestedAt.plusMinutes(5));
+        assertThat(found.get().getExpiresAt()).isEqualTo(requestedAt.plusMinutes(5));
         assertThat(found.get().getLastSentAt()).isEqualTo(requestedAt);
         assertThat(found.get().getCreatedAt()).isEqualTo(requestedAt);
     }

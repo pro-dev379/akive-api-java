@@ -4,20 +4,20 @@ import java.time.LocalDateTime;
 
 public record EmailVerificationCodeSendResult(
         String email,
-        LocalDateTime expiredAt,
+        LocalDateTime expiresAt,
         long expireSeconds,
         long resendIntervalSeconds
 ) {
 
     public static EmailVerificationCodeSendResult of(
             String email,
-            LocalDateTime expiredAt,
+            LocalDateTime expiresAt,
             long expiresInSeconds,
             long resendAfterSeconds
     ) {
         return new EmailVerificationCodeSendResult(
                 email,
-                expiredAt,
+                expiresAt,
                 expiresInSeconds,
                 resendAfterSeconds
         );

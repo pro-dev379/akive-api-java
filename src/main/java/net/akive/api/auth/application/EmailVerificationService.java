@@ -58,7 +58,7 @@ class EmailVerificationService
 
         return EmailVerificationCodeSendResult.of(
                 command.email(),
-                emailVerification.getExpiredAt(),
+                emailVerification.getExpiresAt(),
                 EXPIRE_DURATION.toSeconds(),
                 RESEND_INTERVAL.toSeconds()
         );

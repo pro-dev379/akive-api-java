@@ -46,7 +46,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("test@test.com"))
-                .andExpect(jsonPath("$.expiredAt").exists())
+                .andExpect(jsonPath("$.expiresAt").exists())
                 .andExpect(jsonPath("$.expireSeconds").value(300))
                 .andExpect(jsonPath("$.resendIntervalSeconds").value(30));
 

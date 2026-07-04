@@ -33,7 +33,7 @@ class EmailVerificationTest {
         assertThat(emailVerification.getVerificationCode()).isEqualTo(VERIFICATION_CODE);
         assertThat(emailVerification.getResendCount()).isZero();
         assertThat(emailVerification.isVerified()).isFalse();
-        assertThat(emailVerification.getExpiredAt()).isEqualTo(REQUESTED_AT.plus(EXPIRE_DURATION));
+        assertThat(emailVerification.getExpiresAt()).isEqualTo(REQUESTED_AT.plus(EXPIRE_DURATION));
         assertThat(emailVerification.getLastSentAt()).isEqualTo(REQUESTED_AT);
         assertThat(emailVerification.getCreatedAt()).isEqualTo(REQUESTED_AT);
     }
@@ -51,7 +51,7 @@ class EmailVerificationTest {
         assertThat(emailVerification.getVerificationCode()).isEqualTo("654321");
         assertThat(emailVerification.getResendCount()).isEqualTo(1);
         assertThat(emailVerification.isVerified()).isFalse();
-        assertThat(emailVerification.getExpiredAt()).isEqualTo(secondRequestedAt.plus(EXPIRE_DURATION));
+        assertThat(emailVerification.getExpiresAt()).isEqualTo(secondRequestedAt.plus(EXPIRE_DURATION));
         assertThat(emailVerification.getLastSentAt()).isEqualTo(secondRequestedAt);
         assertThat(emailVerification.getCreatedAt()).isEqualTo(REQUESTED_AT);
     }

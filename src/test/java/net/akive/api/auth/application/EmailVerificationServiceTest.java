@@ -112,11 +112,11 @@ class EmailVerificationServiceTest {
         assertThat(savedEmailVerification.isVerified()).isFalse();
         assertThat(savedEmailVerification.getResendCount()).isZero();
         assertThat(savedEmailVerification.getLastSentAt()).isEqualTo(currentTimeProvider.now());
-        assertThat(savedEmailVerification.getExpiredAt())
+        assertThat(savedEmailVerification.getExpiresAt())
                 .isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
 
         assertThat(result.email()).isEqualTo(EMAIL);
-        assertThat(result.expiredAt()).isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
+        assertThat(result.expiresAt()).isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
         assertThat(result.expireSeconds()).isEqualTo(EXPIRE_DURATION.toSeconds());
         assertThat(result.resendIntervalSeconds()).isEqualTo(RESEND_INTERVAL.toSeconds());
     }
@@ -151,7 +151,7 @@ class EmailVerificationServiceTest {
                 .save(any(EmailVerification.class), eq(EXPIRE_DURATION));
 
         assertThat(result.email()).isEqualTo(EMAIL);
-        assertThat(result.expiredAt()).isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
+        assertThat(result.expiresAt()).isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
         assertThat(result.expireSeconds()).isEqualTo(EXPIRE_DURATION.toSeconds());
         assertThat(result.resendIntervalSeconds()).isEqualTo(RESEND_INTERVAL.toSeconds());
     }
@@ -191,7 +191,7 @@ class EmailVerificationServiceTest {
         assertThat(savedEmailVerification.getResendCount()).isEqualTo(1);
         assertThat(savedEmailVerification.isVerified()).isFalse();
         assertThat(savedEmailVerification.getLastSentAt()).isEqualTo(currentTimeProvider.now());
-        assertThat(savedEmailVerification.getExpiredAt())
+        assertThat(savedEmailVerification.getExpiresAt())
                 .isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
     }
 
