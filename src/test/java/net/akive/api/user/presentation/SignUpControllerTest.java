@@ -1,7 +1,7 @@
 package net.akive.api.user.presentation;
 
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
-import net.akive.api.support.ControllerTestSupport;
+import net.akive.api.support.PublicControllerTestSupport;
 import net.akive.api.user.application.dto.SignUpByEmailCommand;
 import net.akive.api.user.application.dto.SignUpResult;
 import net.akive.api.user.excpetion.UserException;
@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class SignUpControllerTest extends ControllerTestSupport {
+class SignUpControllerTest extends PublicControllerTestSupport {
 
     @Test
     void 이메일로_회원가입하면_토큰과_닉네임이_응답된다() throws Exception {

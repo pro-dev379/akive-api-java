@@ -7,7 +7,7 @@ import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
 import net.akive.api.auth.presentation.dto.request.emailverification.EmailVerificationCodeSendRequest;
 import net.akive.api.auth.presentation.dto.request.emailverification.EmailVerificationCodeVerifyRequest;
-import net.akive.api.support.ControllerTestSupport;
+import net.akive.api.support.PublicControllerTestSupport;
 import net.akive.api.user.excpetion.UserErrorCode;
 import net.akive.api.user.excpetion.UserException;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class EmailVerificationControllerTest extends ControllerTestSupport {
+class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
     @Test
     void 인증번호_전송을_요청하면_인증정보를_응답한다() throws Exception {

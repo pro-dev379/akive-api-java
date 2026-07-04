@@ -3,7 +3,7 @@ package net.akive.api.auth.presentation;
 import net.akive.api.auth.application.dto.result.login.LoginResult;
 import net.akive.api.auth.domain.login.exception.LoginException;
 import net.akive.api.auth.presentation.dto.request.login.LoginByEmailRequest;
-import net.akive.api.support.ControllerTestSupport;
+import net.akive.api.support.PublicControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
 import static net.akive.api.auth.domain.login.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class LoginControllerTest extends ControllerTestSupport {
+class LoginControllerTest extends PublicControllerTestSupport {
 
     @Test
     void 이메일_로그인_요청_시_올바른_이메일과_패스워드를_전달하면_토큰을_발급한다() throws Exception {

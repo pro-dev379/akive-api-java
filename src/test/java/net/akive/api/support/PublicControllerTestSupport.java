@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
         TokenController.class,
 })
 @AutoConfigureMockMvc(addFilters = false)
-public abstract class ControllerTestSupport {
+public abstract class PublicControllerTestSupport {
 
     @Autowired
     protected MockMvc mockMvc;

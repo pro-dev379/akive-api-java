@@ -2,7 +2,7 @@ package net.akive.api.auth.presentation;
 
 import net.akive.api.auth.application.dto.result.token.TokenReissueResult;
 import net.akive.api.auth.domain.token.exception.TokenException;
-import net.akive.api.support.ControllerTestSupport;
+import net.akive.api.support.PublicControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
 import static net.akive.api.auth.domain.token.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class TokenControllerTest extends ControllerTestSupport {
+class TokenControllerTest extends PublicControllerTestSupport {
 
     @Test
     void 리프레시_토큰으로_토큰을_재발행한다() throws Exception {
