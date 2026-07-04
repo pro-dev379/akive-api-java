@@ -5,7 +5,9 @@ import net.akive.api.auth.application.dto.result.emailverification.EmailVerifica
 
 import java.time.LocalDateTime;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@JsonInclude(NON_NULL)
 public record EmailVerificationCodeSendResponse(
         String email,
         LocalDateTime expiredAt,
