@@ -49,9 +49,20 @@ class MentoringProfileTest {
         Long userId = 1L;
 
         // when
-        MentoringProfile mentoringProfile = MentoringProfile.createDefault(userId);
+        MentoringProfile defaultMentoringProfile = MentoringProfile.createDefault(userId);
 
         // then
-        assertThat(mentoringProfile.getUserId()).isEqualTo(userId);
+        assertThat(defaultMentoringProfile.getMentoringProfileId()).isNull();
+        assertThat(defaultMentoringProfile.getUserId()).isEqualTo(userId);
+        assertThat(defaultMentoringProfile.getGoal()).isNull();
+        assertThat(defaultMentoringProfile.getPreference()).isNull();
+        assertThat(defaultMentoringProfile.getConstraint()).isNull();
+        assertThat(defaultMentoringProfile.getWeakness()).isNull();
+        assertThat(defaultMentoringProfile.getStrength()).isNull();
+        assertThat(defaultMentoringProfile.getRecurringPattern()).isNull();
+        assertThat(defaultMentoringProfile.getDecisionOrCommitment()).isNull();
+        assertThat(defaultMentoringProfile.getStudyPlan()).isNull();
+        assertThat(defaultMentoringProfile.getBehavioralPattern()).isNull();
+        assertThat(defaultMentoringProfile.getEffectiveAdvice()).isNull();
     }
 }
