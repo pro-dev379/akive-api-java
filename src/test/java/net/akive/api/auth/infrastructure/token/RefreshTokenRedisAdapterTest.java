@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.util.Optional;
 
+import static org.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RefreshTokenRedisAdapterTest extends StoreTestSupport {
@@ -42,7 +43,7 @@ class RefreshTokenRedisAdapterTest extends StoreTestSupport {
     }
 
     @Test
-    void 저장된_리프레시_토큰은_TTL이_지나면_만료된다() throws Exception {
+    void 저장된_리프레시_토큰은_TTL이_지나면_만료된다() {
         // given
         Long userId = 1L;
         String refreshToken = "refresh-token";
@@ -50,12 +51,14 @@ class RefreshTokenRedisAdapterTest extends StoreTestSupport {
         // when
         saveTokenPort.save(userId, refreshToken, Duration.ofMillis(300));
 
-        Thread.sleep(500);
-
-        Optional<String> found = loadTokenPort.findByUserId(userId);
-
         // then
-        assertThat(found).isEmpty();
+        await()
+                .atMost(Duration.ofSeconds(1))
+                .untilAsserted(() -> {
+                    Optional<String> found = loadTokenPort.findByUserId(userId);
+
+                    assertThat(found).isEmpty();
+                });
     }
 
     @Test

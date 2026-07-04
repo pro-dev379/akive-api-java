@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.*;
+import static org.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EmailVerificationRedisAdapterTest extends StoreTestSupport {
@@ -60,7 +61,7 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
     }
 
     @Test
-    void 저장된_이메일_인증_정보는_TTL이_지나면_만료된다() throws Exception {
+    void 저장된_이메일_인증_정보는_TTL이_지나면_만료된다() {
         // given
         String email = "test@test.com";
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
@@ -74,11 +75,14 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
         // when
         saveEmailVerificationPort.save(emailVerification, Duration.ofMillis(300));
 
-        Thread.sleep(500);
-
-        Optional<EmailVerification> found = loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose);
-
         // then
-        assertThat(found).isEmpty();
+        await()
+                .atMost(Duration.ofSeconds(1))
+                .untilAsserted(() -> {
+                    Optional<EmailVerification> found =
+                            loadEmailVerificationPort.findByEmailAndVerificationPurpose(email, verificationPurpose);
+
+                    assertThat(found).isEmpty();
+                });
     }
 }
