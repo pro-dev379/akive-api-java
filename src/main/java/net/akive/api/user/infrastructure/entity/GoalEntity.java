@@ -40,11 +40,11 @@ public class GoalEntity {
     private Integer meal1TimeSec;
 
     @Column(updatable = false)
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
 
     @PrePersist
     private void prePersist() {
-        createdDate = LocalDateTime.now();
+        createdAt = LocalDateTime.now();
     }
 
     public static GoalEntity fromModel(Goal goal) {
@@ -54,6 +54,7 @@ public class GoalEntity {
         goalEntity.attendOn = goal.getAttendOn();
         goalEntity.rest10MinSec = goal.getRest10MinSec();
         goalEntity.mealNum = goal.getMealNum();
+        goalEntity.meal1TimeSec = goal.getMeal1TimeSec();
 
         return goalEntity;
     }
