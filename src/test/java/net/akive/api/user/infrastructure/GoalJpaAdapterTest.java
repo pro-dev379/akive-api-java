@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GoalJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
-    void 회원의_목표를_저장한다() {
+    void 회원의_기본_목표를_저장한다() {
         // given
         User savedUser = saveUser();
         Goal goal = Goal.createDefault(savedUser.getUserId());
