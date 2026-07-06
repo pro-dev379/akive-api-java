@@ -2,8 +2,8 @@ package net.akive.api.user.application;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationEnsureVerifiedCommand;
-import net.akive.api.auth.application.dto.result.token.TokenIssueResult;
+import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
+import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
 import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerifiedUseCase;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.mentoring.application.port.in.CreateDefaultMentoringProfileUseCase;
@@ -16,12 +16,12 @@ import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.application.port.out.ValidateUserPort;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
-import net.akive.api.user.excpetion.UserException;
+import net.akive.api.user.exception.UserException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.user.excpetion.UserErrorCode.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +46,7 @@ class SignUpService implements SignUpByEmailUseCase {
         }
 
         ensureEmailVerifiedUseCase.ensureVerified(
-                EmailVerificationEnsureVerifiedCommand.of(
+                EnsureEmailVerifiedCommand.of(
                         command.email(),
                         SIGN_UP
                 )
@@ -64,7 +64,7 @@ class SignUpService implements SignUpByEmailUseCase {
                 )
         );
         Long userId = savedUser.getUserId();
-        TokenIssueResult issuedToken = issueTokenUseCase.issue(userId, savedUser.getRoleType());
+        IssueTokenResult issuedToken = issueTokenUseCase.issue(userId, savedUser.getRoleType());
 
         saveGoalPort.save(Goal.createDefault(userId));
         createDefaultMentoringProfileUseCase.create(userId);

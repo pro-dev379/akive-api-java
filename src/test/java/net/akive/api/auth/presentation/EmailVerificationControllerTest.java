@@ -1,15 +1,15 @@
 package net.akive.api.auth.presentation;
 
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeSendCommand;
-import net.akive.api.auth.application.dto.result.emailverification.EmailVerificationCodeSendResult;
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeVerifyCommand;
+import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCodeCommand;
+import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationCodeResult;
+import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
-import net.akive.api.auth.presentation.dto.request.emailverification.EmailVerificationCodeSendRequest;
-import net.akive.api.auth.presentation.dto.request.emailverification.EmailVerificationCodeVerifyRequest;
+import net.akive.api.auth.presentation.dto.request.emailverification.SendEmailVerificationCodeRequest;
+import net.akive.api.auth.presentation.dto.request.emailverification.VerifyEmailVerificationCodeRequest;
 import net.akive.api.support.PublicControllerTestSupport;
-import net.akive.api.user.excpetion.UserErrorCode;
-import net.akive.api.user.excpetion.UserException;
+import net.akive.api.user.exception.UserErrorCode;
+import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -29,8 +29,8 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 인증번호_전송을_요청하면_인증정보를_응답한다() throws Exception {
         // given
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("test@test.com", SIGN_UP);
-        EmailVerificationCodeSendResult result = EmailVerificationCodeSendResult.of(
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
+        SendEmailVerificationCodeResult result = SendEmailVerificationCodeResult.of(
                 "test@test.com",
                 LocalDateTime.of(2025, 5, 21, 10, 5),
                 300,
@@ -52,13 +52,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(sendEmailVerificationCodeUseCase)
                 .should()
-                .send(EmailVerificationCodeSendCommand.of("test@test.com", SIGN_UP));
+                .send(SendEmailVerificationCodeCommand.of("test@test.com", SIGN_UP));
     }
 
     @Test
     void 인증번호_전송_요청_시_이메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("invalid-email", SIGN_UP);
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("invalid-email", SIGN_UP);
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -68,13 +68,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(sendEmailVerificationCodeUseCase)
                 .should(never())
-                .send(any(EmailVerificationCodeSendCommand.class));
+                .send(any(SendEmailVerificationCodeCommand.class));
     }
 
     @Test
     void 인증번호_전송_요청_시_이메일이_비어있으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("", SIGN_UP);
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("", SIGN_UP);
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -84,13 +84,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(sendEmailVerificationCodeUseCase)
                 .should(never())
-                .send(any(EmailVerificationCodeSendCommand.class));
+                .send(any(SendEmailVerificationCodeCommand.class));
     }
 
     @Test
     void 인증번호_전송_요청_시_인증목적이_없으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest("test@test.com", null);
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", null);
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -100,13 +100,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(sendEmailVerificationCodeUseCase)
                 .should(never())
-                .send(any(EmailVerificationCodeSendCommand.class));
+                .send(any(SendEmailVerificationCodeCommand.class));
     }
 
     @Test
     void 인증번호_전송_요청_시_재전송_횟수를_초과하면_429를_응답한다() throws Exception {
         // given
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest(
                 "test@test.com",
                 SIGN_UP
         );
@@ -127,7 +127,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 인증번호_전송_요청_시_재전송_가능시간_이전이면_429를_응답한다() throws Exception {
         // given
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest(
                 "test@test.com",
                 SIGN_UP
         );
@@ -149,14 +149,14 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     void 인증번호_전송_요청_시_패스워드를_찾을_회원이_없으면_404를_응답한다() throws Exception {
         // given
         EmailVerificationPurpose verificationPurpose = FIND_PASSWORD;
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest(
                 "test@test.com",
                 verificationPurpose
         );
 
         willThrow(new UserException(UserErrorCode.NOT_FOUND))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(any(EmailVerificationCodeSendCommand.class));
+                .send(any(SendEmailVerificationCodeCommand.class));
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -169,14 +169,14 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     void 인증번호_전송_요청_시_회원가입_이메일이_중복되면_409를_응답한다() throws Exception {
         // given
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
-        EmailVerificationCodeSendRequest request = new EmailVerificationCodeSendRequest(
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest(
                 "test@test.com",
                 verificationPurpose
         );
 
         willThrow(new UserException(UserErrorCode.EMAIL_ALREADY_EXISTS))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(any(EmailVerificationCodeSendCommand.class));
+                .send(any(SendEmailVerificationCodeCommand.class));
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -188,7 +188,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 올바른_인증번호로_검증을_요청하면_204를_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "test@test.com",
                 SIGN_UP,
                 "123456"
@@ -202,13 +202,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should()
-                .verify(EmailVerificationCodeVerifyCommand.of("test@test.com", SIGN_UP, "123456"));
+                .verify(VerifyEmailVerificationCodeCommand.of("test@test.com", SIGN_UP, "123456"));
     }
 
     @Test
     void 인증번호_검증_요청_시_이메일이_비어있으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "",
                 SIGN_UP,
                 "123456"
@@ -222,13 +222,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(EmailVerificationCodeVerifyCommand.class));
+                .verify(any(VerifyEmailVerificationCodeCommand.class));
     }
 
     @Test
     void 인증번호_검증_요청_시_이메일_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "invalid-email",
                 SIGN_UP,
                 "123456"
@@ -242,13 +242,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(EmailVerificationCodeVerifyCommand.class));
+                .verify(any(VerifyEmailVerificationCodeCommand.class));
     }
 
     @Test
     void 인증번호_검증_요청_시_인증번호가_비어있으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "test@test.com",
                 SIGN_UP,
                 ""
@@ -262,13 +262,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(EmailVerificationCodeVerifyCommand.class));
+                .verify(any(VerifyEmailVerificationCodeCommand.class));
     }
 
     @Test
     void 인증번호_검증_요청_시_인증번호가_6자리_숫자가_아니면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "test@test.com",
                 SIGN_UP,
                 "12345"
@@ -282,13 +282,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(EmailVerificationCodeVerifyCommand.class));
+                .verify(any(VerifyEmailVerificationCodeCommand.class));
     }
 
     @Test
     void 인증번호_검증_요청_시_인증목적이_없으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "test@test.com",
                 null,
                 "123456"
@@ -302,13 +302,13 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should(never())
-                .verify(any(EmailVerificationCodeVerifyCommand.class));
+                .verify(any(VerifyEmailVerificationCodeCommand.class));
     }
 
     @Test
     void 인증번호_검증_요청_시_인증번호가_일치하지_않으면_400을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "test@test.com",
                 SIGN_UP,
                 "000000"
@@ -330,7 +330,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 인증번호_검증_요청_시_인증정보가_없으면_404를_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "test@test.com",
                 SIGN_UP,
                 "123456"
@@ -352,7 +352,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 인증번호_검증_요청_시_인증번호가_만료되면_401을_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "test@test.com",
                 SIGN_UP,
                 "123456"
@@ -374,7 +374,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 인증번호_검증_요청_시_이미_인증된_경우_409를_응답한다() throws Exception {
         // given
-        EmailVerificationCodeVerifyRequest request = new EmailVerificationCodeVerifyRequest(
+        VerifyEmailVerificationCodeRequest request = new VerifyEmailVerificationCodeRequest(
                 "test@test.com",
                 SIGN_UP,
                 "123456"

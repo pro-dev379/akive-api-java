@@ -1,6 +1,6 @@
 package net.akive.api.auth.infrastructure.emailverification;
 
-import net.akive.api.common.email.EmailSenderService;
+import net.akive.api.common.email.SendEmailService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +18,7 @@ import static org.mockito.BDDMockito.then;
 class EmailVerificationMailSenderAdapterTest {
 
     @Mock
-    EmailSenderService emailSenderService;
+    SendEmailService sendEmailService;
 
     @InjectMocks
     EmailVerificationMailSenderAdapter emailVerificationMailSenderAdapter;
@@ -38,7 +38,7 @@ class EmailVerificationMailSenderAdapterTest {
         );
 
         // then
-        then(emailSenderService).should().send(
+        then(sendEmailService).should().send(
                 eq(List.of(email)),
                 eq("[AKIVE] 인증 코드가 도착했어요."),
                 eq("email/verification-code"),

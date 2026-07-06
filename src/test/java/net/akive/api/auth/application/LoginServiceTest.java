@@ -2,7 +2,7 @@ package net.akive.api.auth.application;
 
 import net.akive.api.auth.application.dto.command.login.LoginByEmailCommand;
 import net.akive.api.auth.application.dto.result.login.LoginResult;
-import net.akive.api.auth.application.dto.result.token.TokenIssueResult;
+import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.application.port.out.login.DeleteLegacyUserPasswordPort;
 import net.akive.api.auth.application.port.out.login.LoadEmailLoginUserPort;
@@ -66,7 +66,7 @@ class LoginServiceTest {
                 USER
         );
 
-        TokenIssueResult token = new TokenIssueResult("access-token", "refresh-token");
+        IssueTokenResult token = new IssueTokenResult("access-token", "refresh-token");
 
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
@@ -158,7 +158,7 @@ class LoginServiceTest {
                 "legacy-salt"
         );
 
-        TokenIssueResult token = new TokenIssueResult("access-token", "refresh-token");
+        IssueTokenResult token = new IssueTokenResult("access-token", "refresh-token");
 
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);

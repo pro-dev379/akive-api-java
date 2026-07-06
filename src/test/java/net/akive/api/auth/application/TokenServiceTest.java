@@ -1,7 +1,7 @@
 package net.akive.api.auth.application;
 
-import net.akive.api.auth.application.dto.result.token.TokenIssueResult;
-import net.akive.api.auth.application.dto.result.token.TokenReissueResult;
+import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
+import net.akive.api.auth.application.dto.result.token.ReissueTokenResult;
 import net.akive.api.auth.application.port.out.token.CreateTokenPort;
 import net.akive.api.auth.application.port.out.token.LoadTokenPort;
 import net.akive.api.auth.application.port.out.token.RotateTokenPort;
@@ -81,7 +81,7 @@ class TokenServiceTest {
                 .willReturn(refreshTokenExpiration);
 
         // when
-        TokenIssueResult result = tokenService.issue(userId, roleType);
+        IssueTokenResult result = tokenService.issue(userId, roleType);
 
         // then
         assertThat(result.accessToken()).isEqualTo(accessToken);
@@ -120,7 +120,7 @@ class TokenServiceTest {
                 .willReturn(true);
 
         // when
-        TokenReissueResult result = tokenService.reissue(refreshToken);
+        ReissueTokenResult result = tokenService.reissue(refreshToken);
 
         // then
         assertThat(result.accessToken()).isEqualTo(newAccessToken);
@@ -195,7 +195,7 @@ class TokenServiceTest {
                 .willReturn(true);
 
         // when
-        TokenReissueResult result = tokenService.reissue(refreshToken);
+        ReissueTokenResult result = tokenService.reissue(refreshToken);
 
         // then
         assertThat(result.accessToken()).isEqualTo(newAccessToken);
@@ -224,7 +224,7 @@ class TokenServiceTest {
                 .willReturn(now);
 
         // when
-        TokenReissueResult result = tokenService.reissue(refreshToken);
+        ReissueTokenResult result = tokenService.reissue(refreshToken);
 
         // then
         assertThat(result.accessToken()).isEqualTo(newAccessToken);

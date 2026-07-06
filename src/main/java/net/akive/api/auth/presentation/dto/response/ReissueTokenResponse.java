@@ -6,5 +6,5 @@ import org.springframework.lang.Nullable;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @JsonInclude(NON_NULL)
-public record TokenReissueResponse(String accessToken, @Nullable String refreshToken) {
+public record ReissueTokenResponse(String accessToken, @Nullable String refreshToken) {
 }

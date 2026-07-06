@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class EmailSenderService {
+public class SendEmailService {
 
     private final EmailSender emailSender;
     private final EmailTemplateRenderer emailTemplateRenderer;

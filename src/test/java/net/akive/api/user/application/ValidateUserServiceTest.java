@@ -1,27 +1,27 @@
 package net.akive.api.user.application;
 
 import net.akive.api.user.application.port.out.ValidateUserPort;
-import net.akive.api.user.excpetion.UserException;
+import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.user.excpetion.UserErrorCode.EMAIL_ALREADY_EXISTS;
-import static net.akive.api.user.excpetion.UserErrorCode.NOT_FOUND;
+import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.user.exception.UserErrorCode.NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
-class UserValidationServiceTest {
+class ValidateUserServiceTest {
 
     @Mock
     ValidateUserPort validateUserPort;
 
     @InjectMocks
-    UserValidationService userValidationService;
+    ValidateUserService validateUserService;
 
     @Test
     void 이메일로_회원_존재_검증에_성공한다() {
@@ -30,7 +30,7 @@ class UserValidationServiceTest {
         given(validateUserPort.existsByEmailAndLeaveFalse(email)).willReturn(true);
 
         // when
-        userValidationService.validateUserExistsByEmail(email);
+        validateUserService.validateUserExistsByEmail(email);
 
         // then
         then(validateUserPort).should().existsByEmailAndLeaveFalse(email);
@@ -44,7 +44,7 @@ class UserValidationServiceTest {
 
         // when & then
         assertThatExceptionOfType(UserException.class)
-                .isThrownBy(() -> userValidationService.validateUserExistsByEmail(email))
+                .isThrownBy(() -> validateUserService.validateUserExistsByEmail(email))
                 .extracting(UserException::getErrorCode)
                 .isEqualTo(NOT_FOUND);
     }
@@ -56,7 +56,7 @@ class UserValidationServiceTest {
         given(validateUserPort.existsByUserIdAndLeaveFalse(userId)).willReturn(true);
 
         // when
-        userValidationService.validateUserExistsById(userId);
+        validateUserService.validateUserExistsById(userId);
 
         // then
         then(validateUserPort).should().existsByUserIdAndLeaveFalse(userId);
@@ -70,7 +70,7 @@ class UserValidationServiceTest {
 
         // when & then
         assertThatExceptionOfType(UserException.class)
-                .isThrownBy(() -> userValidationService.validateUserExistsById(userId))
+                .isThrownBy(() -> validateUserService.validateUserExistsById(userId))
                 .extracting(UserException::getErrorCode)
                 .isEqualTo(NOT_FOUND);
     }
@@ -82,7 +82,7 @@ class UserValidationServiceTest {
         given(validateUserPort.existsByEmail(email)).willReturn(false);
 
         // when
-        userValidationService.validateEmailNotDuplicate(email);
+        validateUserService.validateEmailNotDuplicate(email);
 
         // then
         then(validateUserPort).should().existsByEmail(email);
@@ -96,7 +96,7 @@ class UserValidationServiceTest {
 
         // when & then
         assertThatExceptionOfType(UserException.class)
-                .isThrownBy(() -> userValidationService.validateEmailNotDuplicate(email))
+                .isThrownBy(() -> validateUserService.validateEmailNotDuplicate(email))
                 .extracting(UserException::getErrorCode)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
     }

@@ -4,10 +4,10 @@ import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 
 import java.util.List;
 
-public record SessionalPlansResponse(List<SessionalPlanItemResponse> sessionalPlans) {
+public record GetSessionalPlansResponse(List<SessionalPlanItemResponse> sessionalPlans) {
 
-    public static SessionalPlansResponse from(List<SessionalPlanSummaryResult> results) {
-        return new SessionalPlansResponse(
+    public static GetSessionalPlansResponse from(List<SessionalPlanSummaryResult> results) {
+        return new GetSessionalPlansResponse(
                 results.stream().map(SessionalPlanItemResponse::from).toList()
         );
     }

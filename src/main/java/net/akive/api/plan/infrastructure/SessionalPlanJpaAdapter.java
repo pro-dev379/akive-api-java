@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class SessionalPlanPortJpaAdapter implements LoadSessionalPlanPort, SaveSessionalPlanPort, ValidateSessionalPlanPort {
+public class SessionalPlanJpaAdapter implements LoadSessionalPlanPort, SaveSessionalPlanPort, ValidateSessionalPlanPort {
 
     private final SessionalPlanJpaRepository sessionalPlanJpaRepository;
 

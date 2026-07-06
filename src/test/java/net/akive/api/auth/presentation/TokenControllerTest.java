@@ -1,6 +1,6 @@
 package net.akive.api.auth.presentation;
 
-import net.akive.api.auth.application.dto.result.token.TokenReissueResult;
+import net.akive.api.auth.application.dto.result.token.ReissueTokenResult;
 import net.akive.api.auth.domain.token.exception.TokenException;
 import net.akive.api.support.PublicControllerTestSupport;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class TokenControllerTest extends PublicControllerTestSupport {
         String newRefreshToken = "new-refresh-token";
 
         given(issueTokenUseCase.reissue(refreshToken))
-                .willReturn(new TokenReissueResult(newAccessToken, newRefreshToken));
+                .willReturn(new ReissueTokenResult(newAccessToken, newRefreshToken));
 
         // when & then
         mockMvc.perform(post("/tokens")
@@ -44,7 +44,7 @@ class TokenControllerTest extends PublicControllerTestSupport {
         String newAccessToken = "new-access-token";
 
         given(issueTokenUseCase.reissue(refreshToken))
-                .willReturn(new TokenReissueResult(newAccessToken, null));
+                .willReturn(new ReissueTokenResult(newAccessToken, null));
 
         // when & then
         mockMvc.perform(post("/tokens")
@@ -61,7 +61,7 @@ class TokenControllerTest extends PublicControllerTestSupport {
         String newAccessToken = "new-access-token";
 
         given(issueTokenUseCase.reissue(refreshToken))
-                .willReturn(new TokenReissueResult(newAccessToken, null));
+                .willReturn(new ReissueTokenResult(newAccessToken, null));
 
         // when & then
         mockMvc.perform(post("/tokens")

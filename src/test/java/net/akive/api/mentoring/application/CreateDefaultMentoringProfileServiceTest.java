@@ -11,13 +11,13 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
-class DefaultMentoringProfileCreateServiceTest {
+class CreateDefaultMentoringProfileServiceTest {
 
     @Mock
     SaveMentoringProfilePort saveMentoringProfilePort;
 
     @InjectMocks
-    DefaultMentoringProfileCreateService defaultMentoringProfileCreateService;
+    CreateDefaultMentoringProfileService createDefaultMentoringProfileService;
 
     @Test
     void 회원의_기본_멘토링_프로필을_생성하여_저장한다() {
@@ -25,7 +25,7 @@ class DefaultMentoringProfileCreateServiceTest {
         Long userId = 1L;
 
         // when
-        defaultMentoringProfileCreateService.create(userId);
+        createDefaultMentoringProfileService.create(userId);
 
         // then
         then(saveMentoringProfilePort)

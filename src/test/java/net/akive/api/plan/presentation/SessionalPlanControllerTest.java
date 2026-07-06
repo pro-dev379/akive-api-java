@@ -1,9 +1,9 @@
 package net.akive.api.plan.presentation;
 
-import net.akive.api.plan.application.dto.command.SessionalPlanCreateCommand;
+import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.domain.exception.SessionalPlanException;
-import net.akive.api.plan.presentation.dto.request.SessionalPlanCreateRequest;
+import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
 import net.akive.api.support.PrivateControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -85,12 +85,12 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     void 세셔널_플랜을_생성한다() throws Exception {
         // given
         Long userId = 1L;
-        SessionalPlanCreateRequest request = new SessionalPlanCreateRequest(
+        CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
                 LocalDate.of(2026, 7, 7),
                 LocalDate.of(2026, 7, 14)
         );
-        SessionalPlanCreateCommand command = request.toCommand(userId);
+        CreateSessionalPlanCommand command = request.toCommand(userId);
         SessionalPlanSummaryResult result = new SessionalPlanSummaryResult(
                 1L,
                 "1회차",
@@ -117,7 +117,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     void 세셔널_플랜_생성_요청_시_세셔널_플랜명이_비어있으면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
-        SessionalPlanCreateRequest request = new SessionalPlanCreateRequest(
+        CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "",
                 LocalDate.of(2026, 7, 7),
                 LocalDate.of(2026, 7, 14)
@@ -131,14 +131,14 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("COMMON_400_1"));
 
-        then(createSessionalPlanUseCase).should(never()).create(any(SessionalPlanCreateCommand.class));
+        then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
 
     @Test
     void 세셔널_플랜_생성_요청_시_세셔널_플랜명이_100자를_초과하면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
-        SessionalPlanCreateRequest request = new SessionalPlanCreateRequest(
+        CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "a".repeat(101),
                 LocalDate.of(2026, 7, 7),
                 LocalDate.of(2026, 7, 14)
@@ -152,14 +152,14 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("COMMON_400_1"));
 
-        then(createSessionalPlanUseCase).should(never()).create(any(SessionalPlanCreateCommand.class));
+        then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
 
     @Test
     void 세셔널_플랜_생성_요청_시_시작일이_없으면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
-        SessionalPlanCreateRequest request = new SessionalPlanCreateRequest(
+        CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
                 null,
                 LocalDate.of(2026, 7, 14)
@@ -173,14 +173,14 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("COMMON_400_1"));
 
-        then(createSessionalPlanUseCase).should(never()).create(any(SessionalPlanCreateCommand.class));
+        then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
 
     @Test
     void 세셔널_플랜_생성_요청_시_종료일이_없으면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
-        SessionalPlanCreateRequest request = new SessionalPlanCreateRequest(
+        CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
                 LocalDate.of(2026, 7, 7),
                 null
@@ -194,7 +194,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("COMMON_400_1"));
 
-        then(createSessionalPlanUseCase).should(never()).create(any(SessionalPlanCreateCommand.class));
+        then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
 
     @Test
@@ -217,14 +217,14 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("COMMON_400_1"));
 
-        then(createSessionalPlanUseCase).should(never()).create(any(SessionalPlanCreateCommand.class));
+        then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
 
     @Test
     void 이미_존재하는_세셔널_플랜명이면_409를_응답한다() throws Exception {
         // given
         Long userId = 1L;
-        SessionalPlanCreateRequest request = new SessionalPlanCreateRequest(
+        CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
                 LocalDate.of(2026, 7, 7),
                 LocalDate.of(2026, 7, 14)

@@ -1,12 +1,12 @@
 package net.akive.api.auth.presentation;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.result.emailverification.EmailVerificationCodeSendResult;
+import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationCodeResult;
 import net.akive.api.auth.application.port.in.emailverification.SendEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;
-import net.akive.api.auth.presentation.dto.request.emailverification.EmailVerificationCodeSendRequest;
-import net.akive.api.auth.presentation.dto.request.emailverification.EmailVerificationCodeVerifyRequest;
-import net.akive.api.auth.presentation.dto.response.EmailVerificationCodeSendResponse;
+import net.akive.api.auth.presentation.dto.request.emailverification.SendEmailVerificationCodeRequest;
+import net.akive.api.auth.presentation.dto.request.emailverification.VerifyEmailVerificationCodeRequest;
+import net.akive.api.auth.presentation.dto.response.SendEmailVerificationCodeResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,14 +21,14 @@ public class EmailVerificationController {
     private final VerifyEmailVerificationCodeUseCase verifyEmailVerificationCodeUseCase;
 
     @PostMapping
-    public EmailVerificationCodeSendResponse send(@RequestBody @Validated EmailVerificationCodeSendRequest request) {
-        EmailVerificationCodeSendResult result = sendEmailVerificationCodeUseCase.send(request.toCommand());
-        return EmailVerificationCodeSendResponse.from(result);
+    public SendEmailVerificationCodeResponse send(@RequestBody @Validated SendEmailVerificationCodeRequest request) {
+        SendEmailVerificationCodeResult result = sendEmailVerificationCodeUseCase.send(request.toCommand());
+        return SendEmailVerificationCodeResponse.from(result);
     }
 
     @PostMapping("/verifications")
     @ResponseStatus(NO_CONTENT)
-    public void verify(@RequestBody @Validated EmailVerificationCodeVerifyRequest request) {
+    public void verify(@RequestBody @Validated VerifyEmailVerificationCodeRequest request) {
         verifyEmailVerificationCodeUseCase.verify(request.toCommand());
     }
 }

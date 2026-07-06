@@ -2,19 +2,19 @@ package net.akive.api.plan.application.dto.command;
 
 import java.time.LocalDate;
 
-public record SessionalPlanCreateCommand(
+public record CreateSessionalPlanCommand(
         Long userId,
         String sessionName,
         LocalDate sessionStartOn,
         LocalDate sessionEndOn
 ) {
 
-    public static SessionalPlanCreateCommand of(
+    public static CreateSessionalPlanCommand of(
             Long userId,
             String sessionName,
             LocalDate sessionStartOn,
             LocalDate sessionEndOn
     ) {
-        return new SessionalPlanCreateCommand(userId, sessionName, sessionStartOn, sessionEndOn);
+        return new CreateSessionalPlanCommand(userId, sessionName, sessionStartOn, sessionEndOn);
     }
 }

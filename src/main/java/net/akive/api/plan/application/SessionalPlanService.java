@@ -2,7 +2,7 @@ package net.akive.api.plan.application;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.time.CurrentTimeProvider;
-import net.akive.api.plan.application.dto.command.SessionalPlanCreateCommand;
+import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.application.port.in.CreateSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
@@ -20,7 +20,7 @@ import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION
 
 @Service
 @RequiredArgsConstructor
-class SessionalPlansService implements GetSessionalPlansUseCase, CreateSessionalPlanUseCase {
+class SessionalPlanService implements GetSessionalPlansUseCase, CreateSessionalPlanUseCase {
 
     private final LoadSessionalPlanPort loadSessionalPlanPort;
     private final SaveSessionalPlanPort saveSessionalPlanPort;
@@ -38,7 +38,7 @@ class SessionalPlansService implements GetSessionalPlansUseCase, CreateSessional
 
     @Override
     @Transactional
-    public SessionalPlanSummaryResult create(SessionalPlanCreateCommand command) {
+    public SessionalPlanSummaryResult create(CreateSessionalPlanCommand command) {
         if (validateSessionalPlanPort.existsByUserIdAndSessionName(command.userId(), command.sessionName())) {
             throw new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS);
         }

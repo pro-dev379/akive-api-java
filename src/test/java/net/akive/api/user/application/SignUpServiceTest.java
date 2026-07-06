@@ -1,7 +1,7 @@
 package net.akive.api.user.application;
 
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationEnsureVerifiedCommand;
-import net.akive.api.auth.application.dto.result.token.TokenIssueResult;
+import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
+import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
 import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerifiedUseCase;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
@@ -14,7 +14,7 @@ import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.application.port.out.ValidateUserPort;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
-import net.akive.api.user.excpetion.UserException;
+import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,7 +27,7 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpo
 import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.NOT_VERIFIED;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
-import static net.akive.api.user.excpetion.UserErrorCode.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -92,7 +92,7 @@ class SignUpServiceTest {
 
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
-        TokenIssueResult issuedToken = new TokenIssueResult(accessToken, refreshToken);
+        IssueTokenResult issuedToken = new IssueTokenResult(accessToken, refreshToken);
 
         when(generateNicknamePort.generate(USER)).thenReturn(nickname);
         when(passwordEncoder.encode(command.password())).thenReturn(encodedPassword);
@@ -110,7 +110,7 @@ class SignUpServiceTest {
         then(ensureEmailVerifiedUseCase)
                 .should()
                 .ensureVerified(
-                        EmailVerificationEnsureVerifiedCommand.of(command.email(), SIGN_UP)
+                        EnsureEmailVerifiedCommand.of(command.email(), SIGN_UP)
                 );
 
         then(generateNicknamePort).should().generate(USER);
@@ -149,7 +149,7 @@ class SignUpServiceTest {
 
         doThrow(new EmailVerificationException(NOT_VERIFIED))
                 .when(ensureEmailVerifiedUseCase)
-                .ensureVerified(EmailVerificationEnsureVerifiedCommand.of(command.email(), SIGN_UP));
+                .ensureVerified(EnsureEmailVerifiedCommand.of(command.email(), SIGN_UP));
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)

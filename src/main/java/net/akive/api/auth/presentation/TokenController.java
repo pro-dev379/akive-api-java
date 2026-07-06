@@ -1,10 +1,10 @@
 package net.akive.api.auth.presentation;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.result.token.TokenReissueResult;
+import net.akive.api.auth.application.dto.result.token.ReissueTokenResult;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.domain.token.exception.TokenException;
-import net.akive.api.auth.presentation.dto.response.TokenReissueResponse;
+import net.akive.api.auth.presentation.dto.response.ReissueTokenResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +22,7 @@ public class TokenController {
     private final IssueTokenUseCase issueTokenUseCase;
 
     @PostMapping
-    public TokenReissueResponse reissue(@RequestHeader("Authorization") String authorizationHeader) {
+    public ReissueTokenResponse reissue(@RequestHeader("Authorization") String authorizationHeader) {
         if (!authorizationHeader.startsWith(BEARER_PREFIX)) {
             throw new TokenException(INVALID_REFRESH_TOKEN);
         }
@@ -32,8 +32,8 @@ public class TokenController {
             throw new TokenException(INVALID_REFRESH_TOKEN);
         }
 
-        TokenReissueResult result = issueTokenUseCase.reissue(refreshToken);
+        ReissueTokenResult result = issueTokenUseCase.reissue(refreshToken);
 
-        return new TokenReissueResponse(result.accessToken(), result.refreshToken());
+        return new ReissueTokenResponse(result.accessToken(), result.refreshToken());
     }
 }

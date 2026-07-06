@@ -2,17 +2,17 @@ package net.akive.api.auth.application.dto.command.emailverification;
 
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 
-public record EmailVerificationCodeVerifyCommand(
+public record VerifyEmailVerificationCodeCommand(
         String email,
         EmailVerificationPurpose verificationPurpose,
         String verificationCode
 ) {
 
-    public static EmailVerificationCodeVerifyCommand of(
+    public static VerifyEmailVerificationCodeCommand of(
             String email,
             EmailVerificationPurpose verificationPurpose,
             String verificationCode
     ) {
-        return new EmailVerificationCodeVerifyCommand(email, verificationPurpose, verificationCode);
+        return new VerifyEmailVerificationCodeCommand(email, verificationPurpose, verificationCode);
     }
 }

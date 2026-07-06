@@ -1,4 +1,4 @@
-package net.akive.api.user.excpetion;
+package net.akive.api.user.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

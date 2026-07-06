@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-class DefaultMentoringProfileCreateService implements CreateDefaultMentoringProfileUseCase {
+class CreateDefaultMentoringProfileService implements CreateDefaultMentoringProfileUseCase {
 
     private final SaveMentoringProfilePort saveMentoringProfilePort;
 

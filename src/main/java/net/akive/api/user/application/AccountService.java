@@ -5,11 +5,11 @@ import net.akive.api.user.application.port.in.UpdatePasswordUseCase;
 import net.akive.api.user.application.port.out.LoadUserPort;
 import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.domain.User;
-import net.akive.api.user.excpetion.UserException;
+import net.akive.api.user.exception.UserException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.user.excpetion.UserErrorCode.NOT_FOUND;
+import static net.akive.api.user.exception.UserErrorCode.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

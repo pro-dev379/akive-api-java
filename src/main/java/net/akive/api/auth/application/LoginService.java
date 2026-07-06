@@ -3,7 +3,7 @@ package net.akive.api.auth.application;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.dto.command.login.LoginByEmailCommand;
 import net.akive.api.auth.application.dto.result.login.LoginResult;
-import net.akive.api.auth.application.dto.result.token.TokenIssueResult;
+import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
 import net.akive.api.auth.application.port.in.login.LoginByEmailUseCase;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.application.port.out.login.DeleteLegacyUserPasswordPort;
@@ -77,7 +77,7 @@ class LoginService implements LoginByEmailUseCase {
     }
 
     private LoginResult issueToken(LoginUser user) {
-        TokenIssueResult token = issueTokenUseCase.issue(user.userId(), user.roleType());
+        IssueTokenResult token = issueTokenUseCase.issue(user.userId(), user.roleType());
 
         return new LoginResult(
                 token.accessToken(),

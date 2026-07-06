@@ -1,10 +1,10 @@
 package net.akive.api.auth.application;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.result.emailverification.EmailVerificationCodeSendResult;
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeSendCommand;
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeVerifyCommand;
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationEnsureVerifiedCommand;
+import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationCodeResult;
+import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCodeCommand;
+import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
+import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
 import net.akive.api.auth.application.port.in.emailverification.SendEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerifiedUseCase;
 import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;
@@ -39,7 +39,7 @@ class EmailVerificationService
     private final CurrentTimeProvider currentTimeProvider;
 
     @Override
-    public EmailVerificationCodeSendResult send(EmailVerificationCodeSendCommand command) {
+    public SendEmailVerificationCodeResult send(SendEmailVerificationCodeCommand command) {
         validateEmailByPurpose(command.email(), command.verificationPurpose());
 
         LocalDateTime requestedAt = currentTimeProvider.now();
@@ -56,7 +56,7 @@ class EmailVerificationService
         sendEmailVerificationMailPort.send(command.email(), verificationCode, EXPIRE_DURATION);
         saveEmailVerificationPort.save(emailVerification, EXPIRE_DURATION);
 
-        return EmailVerificationCodeSendResult.of(
+        return SendEmailVerificationCodeResult.of(
                 command.email(),
                 emailVerification.getExpiresAt(),
                 EXPIRE_DURATION.toSeconds(),
@@ -65,7 +65,7 @@ class EmailVerificationService
     }
 
     @Override
-    public void verify(EmailVerificationCodeVerifyCommand command) {
+    public void verify(VerifyEmailVerificationCodeCommand command) {
         EmailVerification emailVerification = loadEmailVerificationPort
                 .loadByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
                 .orElseThrow(() -> new EmailVerificationException(NOT_FOUND));
@@ -77,7 +77,7 @@ class EmailVerificationService
 
     @Override
     @Transactional(readOnly = true)
-    public void ensureVerified(EmailVerificationEnsureVerifiedCommand command) {
+    public void ensureVerified(EnsureEmailVerifiedCommand command) {
         EmailVerification emailVerification = loadEmailVerificationPort
                 .loadByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
                 .orElseThrow(() -> new EmailVerificationException(NOT_VERIFIED));

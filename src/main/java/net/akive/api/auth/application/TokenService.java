@@ -1,8 +1,8 @@
 package net.akive.api.auth.application;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.result.token.TokenIssueResult;
-import net.akive.api.auth.application.dto.result.token.TokenReissueResult;
+import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
+import net.akive.api.auth.application.dto.result.token.ReissueTokenResult;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.application.port.out.token.LoadTokenPort;
 import net.akive.api.auth.application.port.out.token.RotateTokenPort;
@@ -35,7 +35,7 @@ class TokenService implements IssueTokenUseCase {
     private final JwtProperties jwtProperties;
 
     @Override
-    public TokenIssueResult issue(Long userId, RoleType roleType) {
+    public IssueTokenResult issue(Long userId, RoleType roleType) {
         String accessToken = createTokenPort.createAccessToken(userId, roleType);
         String refreshToken = createTokenPort.createRefreshToken(userId, roleType);
 
@@ -45,11 +45,11 @@ class TokenService implements IssueTokenUseCase {
                 jwtProperties.refreshToken().expiration()
         );
 
-        return new TokenIssueResult(accessToken, refreshToken);
+        return new IssueTokenResult(accessToken, refreshToken);
     }
 
     @Override
-    public TokenReissueResult reissue(String refreshToken) {
+    public ReissueTokenResult reissue(String refreshToken) {
         TokenPayload tokenPayload = validateTokenPort.validateRefreshToken(refreshToken);
 
         Long userId = tokenPayload.userId();
@@ -82,7 +82,7 @@ class TokenService implements IssueTokenUseCase {
             }
         }
 
-        return new TokenReissueResult(newAccessToken, newRefreshToken);
+        return new ReissueTokenResult(newAccessToken, newRefreshToken);
     }
 
     private boolean requiresRefreshTokenRotation(Instant expiresAt) {

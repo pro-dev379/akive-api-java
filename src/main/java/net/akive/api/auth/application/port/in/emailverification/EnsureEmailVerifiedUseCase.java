@@ -1,8 +1,8 @@
 package net.akive.api.auth.application.port.in.emailverification;
 
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationEnsureVerifiedCommand;
+import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
 
 public interface EnsureEmailVerifiedUseCase {
 
-    void ensureVerified(EmailVerificationEnsureVerifiedCommand command);
+    void ensureVerified(EnsureEmailVerifiedCommand command);
 }

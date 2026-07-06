@@ -1,7 +1,7 @@
 package net.akive.api.plan.application;
 
 import net.akive.api.common.time.CurrentTimeProvider;
-import net.akive.api.plan.application.dto.command.SessionalPlanCreateCommand;
+import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.SaveSessionalPlanPort;
@@ -28,7 +28,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
-class SessionalPlansServiceTest {
+class SessionalPlanServiceTest {
 
     @Mock
     LoadSessionalPlanPort loadSessionalPlanPort;
@@ -43,7 +43,7 @@ class SessionalPlansServiceTest {
     CurrentTimeProvider currentTimeProvider;
 
     @InjectMocks
-    SessionalPlansService sessionalPlansService;
+    SessionalPlanService sessionalPlanService;
 
     @Test
     void 회원의_세셔널_플랜_목록을_조회한다() {
@@ -68,7 +68,7 @@ class SessionalPlansServiceTest {
                 .willReturn(List.of(firstPlan, secondPlan));
 
         // when
-        List<SessionalPlanSummaryResult> results = sessionalPlansService.getAll(userId);
+        List<SessionalPlanSummaryResult> results = sessionalPlanService.getAll(userId);
 
         // then
         assertThat(results)
@@ -105,7 +105,7 @@ class SessionalPlansServiceTest {
                 .willReturn(List.of());
 
         // when
-        List<SessionalPlanSummaryResult> results = sessionalPlansService.getAll(userId);
+        List<SessionalPlanSummaryResult> results = sessionalPlanService.getAll(userId);
 
         // then
         assertThat(results).isEmpty();
@@ -117,7 +117,7 @@ class SessionalPlansServiceTest {
     void 세셔널_플랜을_생성한다() {
         // given
         Long userId = 1L;
-        SessionalPlanCreateCommand command = SessionalPlanCreateCommand.of(
+        CreateSessionalPlanCommand command = CreateSessionalPlanCommand.of(
                 userId,
                 "1회차",
                 LocalDate.of(2026, 7, 7),
@@ -139,7 +139,7 @@ class SessionalPlansServiceTest {
                 .willReturn(savedSessionalPlan);
 
         // when
-        SessionalPlanSummaryResult result = sessionalPlansService.create(command);
+        SessionalPlanSummaryResult result = sessionalPlanService.create(command);
 
         // then
         assertThat(result.sessionalPlanId()).isEqualTo(1L);
@@ -155,7 +155,7 @@ class SessionalPlansServiceTest {
     void 이미_존재하는_세셔널_플랜명이면_세셔널_플랜_생성에_실패한다() {
         // given
         Long userId = 1L;
-        SessionalPlanCreateCommand command = SessionalPlanCreateCommand.of(
+        CreateSessionalPlanCommand command = CreateSessionalPlanCommand.of(
                 userId,
                 "1회차",
                 LocalDate.of(2026, 7, 7),
@@ -167,7 +167,7 @@ class SessionalPlansServiceTest {
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
-                .isThrownBy(() -> sessionalPlansService.create(command))
+                .isThrownBy(() -> sessionalPlanService.create(command))
                 .extracting(SessionalPlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 

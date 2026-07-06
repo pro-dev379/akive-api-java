@@ -4,13 +4,13 @@ import net.akive.api.auth.domain.emailverification.exception.EmailVerificationEx
 import net.akive.api.support.PublicControllerTestSupport;
 import net.akive.api.user.application.dto.SignUpByEmailCommand;
 import net.akive.api.user.application.dto.SignUpResult;
-import net.akive.api.user.excpetion.UserException;
+import net.akive.api.user.exception.UserException;
 import net.akive.api.user.presentation.dto.request.SignUpByEmailRequest;
 import org.junit.jupiter.api.Test;
 
 import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.NOT_VERIFIED;
 import static net.akive.api.user.domain.RoleType.USER;
-import static net.akive.api.user.excpetion.UserErrorCode.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;

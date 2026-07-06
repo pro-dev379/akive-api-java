@@ -14,7 +14,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
-class EmailSenderServiceTest {
+class SendEmailServiceTest {
 
     @Mock
     EmailSender emailSender;
@@ -23,7 +23,7 @@ class EmailSenderServiceTest {
     EmailTemplateRenderer emailTemplateRenderer;
 
     @InjectMocks
-    EmailSenderService emailSenderService;
+    SendEmailService sendEmailService;
 
     @Test
     void 이메일_템플릿을_렌더링하여_HTML_이메일을_발송한다() {
@@ -42,7 +42,7 @@ class EmailSenderServiceTest {
                 .willReturn(content);
 
         // when
-        emailSenderService.send(to, subject, templatePath, variables);
+        sendEmailService.send(to, subject, templatePath, variables);
 
         // then
         then(emailTemplateRenderer).should().render(templatePath, variables);

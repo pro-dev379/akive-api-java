@@ -1,9 +1,9 @@
 package net.akive.api.auth.application;
 
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeSendCommand;
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationCodeVerifyCommand;
-import net.akive.api.auth.application.dto.command.emailverification.EmailVerificationEnsureVerifiedCommand;
-import net.akive.api.auth.application.dto.result.emailverification.EmailVerificationCodeSendResult;
+import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCodeCommand;
+import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
+import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
+import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationCodeResult;
 import net.akive.api.auth.application.port.out.emailverification.*;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
@@ -83,7 +83,7 @@ class EmailVerificationServiceTest {
                 .willReturn(Optional.empty());
 
         // when
-        EmailVerificationCodeSendResult result = emailVerificationService.send(sendCommand(verificationPurpose));
+        SendEmailVerificationCodeResult result = emailVerificationService.send(sendCommand(verificationPurpose));
 
         // then
         then(validateUserUseCase)
@@ -131,7 +131,7 @@ class EmailVerificationServiceTest {
                 .willReturn(Optional.empty());
 
         // when
-        EmailVerificationCodeSendResult result = emailVerificationService.send(sendCommand(verificationPurpose));
+        SendEmailVerificationCodeResult result = emailVerificationService.send(sendCommand(verificationPurpose));
 
         // then
         then(validateUserUseCase)
@@ -437,19 +437,19 @@ class EmailVerificationServiceTest {
                 .isEqualTo(NOT_VERIFIED);
     }
 
-    private EmailVerificationCodeSendCommand sendCommand(EmailVerificationPurpose verificationPurpose) {
-        return EmailVerificationCodeSendCommand.of(EMAIL, verificationPurpose);
+    private SendEmailVerificationCodeCommand sendCommand(EmailVerificationPurpose verificationPurpose) {
+        return SendEmailVerificationCodeCommand.of(EMAIL, verificationPurpose);
     }
 
-    private EmailVerificationCodeVerifyCommand verifyCommand(
+    private VerifyEmailVerificationCodeCommand verifyCommand(
             EmailVerificationPurpose verificationPurpose,
             String verificationCode
     ) {
-        return EmailVerificationCodeVerifyCommand.of(EMAIL, verificationPurpose, verificationCode);
+        return VerifyEmailVerificationCodeCommand.of(EMAIL, verificationPurpose, verificationCode);
     }
 
-    private EmailVerificationEnsureVerifiedCommand ensureVerifiedCommand(EmailVerificationPurpose verificationPurpose) {
-        return EmailVerificationEnsureVerifiedCommand.of(EMAIL, verificationPurpose);
+    private EnsureEmailVerifiedCommand ensureVerifiedCommand(EmailVerificationPurpose verificationPurpose) {
+        return EnsureEmailVerifiedCommand.of(EMAIL, verificationPurpose);
     }
 
     private EmailVerification emailVerification(

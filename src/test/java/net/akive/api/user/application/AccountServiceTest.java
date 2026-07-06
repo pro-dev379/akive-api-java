@@ -3,7 +3,7 @@ package net.akive.api.user.application;
 import net.akive.api.user.application.port.out.LoadUserPort;
 import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.domain.User;
-import net.akive.api.user.excpetion.UserException;
+import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
-import static net.akive.api.user.excpetion.UserErrorCode.NOT_FOUND;
+import static net.akive.api.user.exception.UserErrorCode.NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;

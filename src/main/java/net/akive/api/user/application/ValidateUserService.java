@@ -3,16 +3,16 @@ package net.akive.api.user.application;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.user.application.port.in.ValidateUserUseCase;
 import net.akive.api.user.application.port.out.ValidateUserPort;
-import net.akive.api.user.excpetion.UserException;
+import net.akive.api.user.exception.UserException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.user.excpetion.UserErrorCode.*;
+import static net.akive.api.user.exception.UserErrorCode.*;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-class UserValidationService implements ValidateUserUseCase {
+class ValidateUserService implements ValidateUserUseCase {
 
     private final ValidateUserPort validateUserPort;
 
