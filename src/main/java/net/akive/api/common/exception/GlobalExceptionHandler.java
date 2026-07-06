@@ -22,11 +22,14 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ApiErrorResponse> handleBusinessException(HttpServletRequest request, BusinessException e) {
         ErrorCode errorCode = e.getErrorCode();
 
-        log.warn("[BusinessException] uri={}, method={}, code={}, message={}",
+        log.warn(
+                "[BusinessException] uri={}, method={}, code={}, message={}",
                 request.getRequestURI(),
                 request.getMethod(),
                 errorCode.getCode(),
-                e.getMessage());
+                e.getMessage(),
+                e
+        );
 
         return createErrorResponse(errorCode);
     }
@@ -42,7 +45,13 @@ public class GlobalExceptionHandler {
                 ))
                 .toList();
 
-        log.info("[ValidationException] uri={}, method={}, errors={}", request.getRequestURI(), request.getMethod(), fieldErrors);
+        log.info(
+                "[ValidationException] uri={}, method={}, errors={}",
+                request.getRequestURI(),
+                request.getMethod(),
+                fieldErrors,
+                e
+        );
 
         return createErrorResponse(CommonErrorCode.INVALID_INPUT_VALUE, fieldErrors);
     }
@@ -55,11 +64,14 @@ public class GlobalExceptionHandler {
             HttpServletRequest request,
             Exception e
     ) {
-        log.warn("[InvalidInputException] uri={}, method={}, exception={}, message={}",
+        log.warn(
+                "[InvalidInputException] uri={}, method={}, exception={}, message={}",
                 request.getRequestURI(),
                 request.getMethod(),
                 e.getClass().getSimpleName(),
-                e.getMessage());
+                e.getMessage(),
+                e
+        );
 
         return createErrorResponse(CommonErrorCode.INVALID_INPUT_VALUE);
     }
