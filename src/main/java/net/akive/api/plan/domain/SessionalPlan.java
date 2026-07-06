@@ -1,11 +1,14 @@
 package net.akive.api.plan.domain;
 
 import lombok.*;
+import net.akive.api.plan.domain.exception.SessionalPlanException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
+import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.*;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -20,6 +23,28 @@ public class SessionalPlan {
     private LocalDate sessionEndOn;
 
     public static SessionalPlan create(
+            Long userId,
+            String sessionName,
+            LocalDate sessionStartOn,
+            LocalDate sessionEndOn,
+            LocalDateTime requestedAt
+    ) {
+        if (!sessionStartOn.isBefore(sessionEndOn) ||
+                sessionStartOn.isBefore(requestedAt.toLocalDate()) ||
+                !sessionEndOn.isAfter(requestedAt.toLocalDate())
+        ) {
+            throw new SessionalPlanException(INVALID_SESSION_PERIOD);
+        }
+
+        return SessionalPlan.builder()
+                .userId(userId)
+                .sessionName(sessionName)
+                .sessionStartOn(sessionStartOn)
+                .sessionEndOn(sessionEndOn)
+                .build();
+    }
+
+    public static SessionalPlan reconstruct(
             Long sessionalPlanId,
             Long userId,
             String sessionName,

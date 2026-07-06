@@ -4,15 +4,15 @@ import net.akive.api.plan.domain.SessionalPlan;
 
 import java.time.LocalDate;
 
-public record SessionalPlanResult(
+public record SessionalPlanSummaryResult(
         Long sessionalPlanId,
         String sessionName,
         LocalDate sessionStartOn,
         LocalDate sessionEndOn
 ) {
 
-    public static SessionalPlanResult from(SessionalPlan sessionalPlan) {
-        return new SessionalPlanResult(
+    public static SessionalPlanSummaryResult from(SessionalPlan sessionalPlan) {
+        return new SessionalPlanSummaryResult(
                 sessionalPlan.getSessionalPlanId(),
                 sessionalPlan.getSessionName(),
                 sessionalPlan.getSessionStartOn(),
