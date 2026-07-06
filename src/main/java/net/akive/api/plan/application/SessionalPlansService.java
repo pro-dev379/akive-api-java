@@ -43,7 +43,7 @@ class SessionalPlansService implements GetSessionalPlansUseCase, CreateSessional
             throw new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS);
         }
 
-        SessionalPlan sessionalPlan = SessionalPlan.create(
+        SessionalPlan sessionalPlan = SessionalPlan.createForUser(
                 command.userId(),
                 command.sessionName(),
                 command.sessionStartOn(),

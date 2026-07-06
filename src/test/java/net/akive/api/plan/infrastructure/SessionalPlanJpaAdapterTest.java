@@ -27,7 +27,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 "password123!",
                 USER
         ));
-        SessionalPlan sessionalPlan = SessionalPlan.reconstruct(
+        SessionalPlan sessionalPlan = SessionalPlan.create(
                 null,
                 savedUser.getUserId(),
                 "1회차",
@@ -58,14 +58,14 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 USER
         ));
 
-        SessionalPlan firstPlan = SessionalPlan.reconstruct(
+        SessionalPlan firstPlan = SessionalPlan.create(
                 null,
                 savedUser.getUserId(),
                 "1회차",
                 LocalDate.of(2026, 7, 1),
                 LocalDate.of(2026, 7, 7)
         );
-        SessionalPlan secondPlan = SessionalPlan.reconstruct(
+        SessionalPlan secondPlan = SessionalPlan.create(
                 null,
                 savedUser.getUserId(),
                 "2회차",
@@ -112,7 +112,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 USER
         ));
 
-        SessionalPlan sessionalPlan = SessionalPlan.reconstruct(
+        SessionalPlan sessionalPlan = SessionalPlan.create(
                 null,
                 savedUser.getUserId(),
                 "1회차",

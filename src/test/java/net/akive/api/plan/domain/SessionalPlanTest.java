@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class SessionalPlanTest {
 
     @Test
-    void 세셔널_플랜을_생성한다() {
+    void 회원의_세셔널_플랜을_생성한다() {
         // given
         Long userId = 2L;
         String sessionName = "1회차";
@@ -22,7 +22,7 @@ class SessionalPlanTest {
         LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
 
         // when
-        SessionalPlan sessionalPlan = SessionalPlan.create(
+        SessionalPlan sessionalPlan = SessionalPlan.createForUser(
                 userId,
                 sessionName,
                 sessionStartOn,
@@ -46,7 +46,7 @@ class SessionalPlanTest {
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
-                .isThrownBy(() -> SessionalPlan.create(
+                .isThrownBy(() -> SessionalPlan.createForUser(
                         2L,
                         "1회차",
                         sessionOn,
@@ -64,7 +64,7 @@ class SessionalPlanTest {
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
-                .isThrownBy(() -> SessionalPlan.create(
+                .isThrownBy(() -> SessionalPlan.createForUser(
                         2L,
                         "1회차",
                         LocalDate.of(2026, 7, 5),
@@ -82,7 +82,7 @@ class SessionalPlanTest {
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
-                .isThrownBy(() -> SessionalPlan.create(
+                .isThrownBy(() -> SessionalPlan.createForUser(
                         2L,
                         "1회차",
                         LocalDate.of(2026, 7, 5),
@@ -94,7 +94,7 @@ class SessionalPlanTest {
     }
 
     @Test
-    void 저장된_세셔널_플랜을_재구성한다() {
+    void 저장된_세셔널_플랜_값으로_도메인_객체를_생성한다() {
         // given
         Long persistedSessionalPlanId = 1L;
         Long persistedUserId = 2L;
@@ -103,7 +103,7 @@ class SessionalPlanTest {
         LocalDate persistedSessionEndOn = LocalDate.of(2026, 7, 7);
 
         // when
-        SessionalPlan sessionalPlan = SessionalPlan.reconstruct(
+        SessionalPlan sessionalPlan = SessionalPlan.create(
                 persistedSessionalPlanId,
                 persistedUserId,
                 persistedSessionName,

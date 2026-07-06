@@ -49,14 +49,14 @@ class SessionalPlansServiceTest {
     void 회원의_세셔널_플랜_목록을_조회한다() {
         // given
         Long userId = 1L;
-        SessionalPlan firstPlan = SessionalPlan.reconstruct(
+        SessionalPlan firstPlan = SessionalPlan.create(
                 2L,
                 userId,
                 "2회차",
                 LocalDate.of(2026, 7, 8),
                 LocalDate.of(2026, 7, 14)
         );
-        SessionalPlan secondPlan = SessionalPlan.reconstruct(
+        SessionalPlan secondPlan = SessionalPlan.create(
                 1L,
                 userId,
                 "1회차",
@@ -123,7 +123,7 @@ class SessionalPlansServiceTest {
                 LocalDate.of(2026, 7, 7),
                 LocalDate.of(2026, 7, 14)
         );
-        SessionalPlan savedSessionalPlan = SessionalPlan.reconstruct(
+        SessionalPlan savedSessionalPlan = SessionalPlan.create(
                 1L,
                 userId,
                 "1회차",

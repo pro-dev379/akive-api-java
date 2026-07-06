@@ -22,7 +22,7 @@ public class SessionalPlan {
     private LocalDate sessionStartOn;
     private LocalDate sessionEndOn;
 
-    public static SessionalPlan create(
+    public static SessionalPlan createForUser(
             Long userId,
             String sessionName,
             LocalDate sessionStartOn,
@@ -44,7 +44,7 @@ public class SessionalPlan {
                 .build();
     }
 
-    public static SessionalPlan reconstruct(
+    public static SessionalPlan create(
             Long sessionalPlanId,
             Long userId,
             String sessionName,

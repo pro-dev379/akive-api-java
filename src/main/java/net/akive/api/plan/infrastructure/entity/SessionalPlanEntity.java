@@ -59,7 +59,7 @@ public class SessionalPlanEntity extends BaseTimeEntity {
     }
 
     public SessionalPlan toModel() {
-        return SessionalPlan.reconstruct(
+        return SessionalPlan.create(
                 this.sessionalPlanId,
                 this.user.getUserId(),
                 this.sessionName,
