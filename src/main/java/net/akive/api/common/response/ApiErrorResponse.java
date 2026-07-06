@@ -5,7 +5,9 @@ import net.akive.api.common.exception.ErrorCode;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+
+@JsonInclude(NON_EMPTY)
 public record ApiErrorResponse(String code, String message, List<FieldErrorDetail> errors) {
 
     public static ApiErrorResponse of(ErrorCode errorCode) {
