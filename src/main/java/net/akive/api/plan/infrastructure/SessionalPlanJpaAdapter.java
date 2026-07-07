@@ -2,10 +2,7 @@ package net.akive.api.plan.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.dto.result.DailyTodoResult;
-import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
-import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
-import net.akive.api.plan.application.port.out.SaveSessionalPlanPort;
-import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
+import net.akive.api.plan.application.port.out.*;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.infrastructure.entity.SessionalPlanEntity;
 import net.akive.api.plan.infrastructure.projection.DailyTodoProjection;
@@ -20,6 +17,7 @@ public class SessionalPlanJpaAdapter implements
         LoadSessionalPlanPort,
         LoadDailyTodosPort,
         SaveSessionalPlanPort,
+        DeleteSessionalPlanPort,
         ValidateSessionalPlanPort {
 
     private final SessionalPlanJpaRepository sessionalPlanJpaRepository;
@@ -46,6 +44,11 @@ public class SessionalPlanJpaAdapter implements
     @Override
     public SessionalPlan save(SessionalPlan sessionalPlan) {
         return sessionalPlanJpaRepository.save(SessionalPlanEntity.fromModel(sessionalPlan)).toModel();
+    }
+
+    @Override
+    public long deleteBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId) {
+        return sessionalPlanJpaRepository.deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId);
     }
 
     @Override

@@ -6,11 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.plan.domain.TotalQuantity;
+import org.hibernate.annotations.OnDelete;
 
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
+import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Entity
 @Table(
@@ -31,6 +33,7 @@ public class TotalQuantityEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long totalQuantityId;
 
+    @OnDelete(action = CASCADE)
     @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "sessional_plan_id", nullable = false)
     private SessionalPlanEntity sessionalPlan;

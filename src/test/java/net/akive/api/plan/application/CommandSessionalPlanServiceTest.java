@@ -3,7 +3,9 @@ package net.akive.api.plan.application;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.common.time.FixedCurrentTimeProvider;
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
+import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
+import net.akive.api.plan.application.port.out.DeleteSessionalPlanPort;
 import net.akive.api.plan.application.port.out.SaveSessionalPlanPort;
 import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
 import net.akive.api.plan.domain.SessionalPlan;
@@ -17,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.time.LocalDate;
 
+import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.NOT_FOUND;
 import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -34,6 +37,9 @@ class CommandSessionalPlanServiceTest {
     @Mock
     SaveSessionalPlanPort saveSessionalPlanPort;
 
+    @Mock
+    DeleteSessionalPlanPort deleteSessionalPlanPort;
+
     CurrentTimeProvider currentTimeProvider;
 
     CommandSessionalPlanService commandSessionalPlanService;
@@ -44,6 +50,7 @@ class CommandSessionalPlanServiceTest {
 
         commandSessionalPlanService = new CommandSessionalPlanService(
                 saveSessionalPlanPort,
+                deleteSessionalPlanPort,
                 validateSessionalPlanPort,
                 currentTimeProvider
         );
@@ -107,5 +114,41 @@ class CommandSessionalPlanServiceTest {
 
         then(validateSessionalPlanPort).should().existsByUserIdAndSessionName(userId, "1회차");
         then(saveSessionalPlanPort).should(never()).save(any(SessionalPlan.class));
+    }
+
+    @Test
+    void 세셔널_플랜을_삭제한다() {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        DeleteSessionalPlanCommand command = DeleteSessionalPlanCommand.of(userId, sessionalPlanId);
+
+        given(deleteSessionalPlanPort.deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(1L);
+
+        // when
+        commandSessionalPlanService.delete(command);
+
+        // then
+        then(deleteSessionalPlanPort).should().deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+    }
+
+    @Test
+    void 삭제할_세셔널_플랜이_없으면_세셔널_플랜_삭제에_실패한다() {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        DeleteSessionalPlanCommand command = DeleteSessionalPlanCommand.of(userId, sessionalPlanId);
+
+        given(deleteSessionalPlanPort.deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(0L);
+
+        // when & then
+        assertThatExceptionOfType(SessionalPlanException.class)
+                .isThrownBy(() -> commandSessionalPlanService.delete(command))
+                .extracting(SessionalPlanException::getErrorCode)
+                .isEqualTo(NOT_FOUND);
+
+        then(deleteSessionalPlanPort).should().deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId);
     }
 }

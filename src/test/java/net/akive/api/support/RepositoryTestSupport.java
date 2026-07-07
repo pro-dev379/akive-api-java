@@ -5,6 +5,7 @@ import net.akive.api.auth.application.port.out.login.LoadEmailLoginUserPort;
 import net.akive.api.auth.application.port.out.login.LoadLegacyUserPasswordPort;
 import net.akive.api.auth.infrastructure.login.LegacyUserPasswordJpaRepository;
 import net.akive.api.mentoring.application.port.out.SaveMentoringProfilePort;
+import net.akive.api.plan.application.port.out.DeleteSessionalPlanPort;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.SaveSessionalPlanPort;
 import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
@@ -46,6 +47,9 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     @Autowired
     protected SaveSessionalPlanPort saveSessionalPlanPort;
+
+    @Autowired
+    protected DeleteSessionalPlanPort deleteSessionalPlanPort;
 
     @Autowired
     protected ValidateSessionalPlanPort validateSessionalPlanPort;

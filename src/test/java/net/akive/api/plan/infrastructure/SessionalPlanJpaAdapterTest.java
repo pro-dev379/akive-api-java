@@ -118,4 +118,71 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         assertThat(validateSessionalPlanPort.existsByUserIdAndSessionName(anotherUser.getUserId(), "1회차"))
                 .isFalse();
     }
+
+    @Test
+    void 회원의_세셔널_플랜을_삭제한다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                "test@test.com",
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        SessionalPlan sessionalPlan = SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "1회차",
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 7)
+        );
+        SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
+
+        // when
+        long deletedCount = deleteSessionalPlanPort.deleteBySessionalPlanIdAndUserId(
+                savedSessionalPlan.getSessionalPlanId(),
+                savedUser.getUserId()
+        );
+
+        // then
+        assertThat(deletedCount).isEqualTo(1L);
+        assertThat(loadSessionalPlanPort.loadAllByUserIdOrderBySessionalPlanIdDesc(savedUser.getUserId()))
+                .isEmpty();
+    }
+
+    @Test
+    void 다른_회원의_세셔널_플랜은_삭제하지_않는다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                "test@test.com",
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        User anotherUser = saveUserPort.save(User.signUpByEmail(
+                "another@test.com",
+                "USER@fghij",
+                "password123!",
+                USER
+        ));
+        SessionalPlan sessionalPlan = SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "1회차",
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 7)
+        );
+        SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
+
+        // when
+        long deletedCount = deleteSessionalPlanPort.deleteBySessionalPlanIdAndUserId(
+                savedSessionalPlan.getSessionalPlanId(),
+                anotherUser.getUserId()
+        );
+
+        // then
+        assertThat(deletedCount).isZero();
+        assertThat(loadSessionalPlanPort.loadAllByUserIdOrderBySessionalPlanIdDesc(savedUser.getUserId()))
+                .extracting(SessionalPlan::getSessionalPlanId)
+                .containsExactly(savedSessionalPlan.getSessionalPlanId());
+    }
 }

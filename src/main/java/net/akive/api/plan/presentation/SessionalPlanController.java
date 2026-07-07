@@ -2,10 +2,12 @@ package net.akive.api.plan.presentation;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.application.dto.result.DailyTodoResult;
 import net.akive.api.plan.application.port.in.CreateSessionalPlanUseCase;
+import net.akive.api.plan.application.port.in.DeleteSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
 import net.akive.api.plan.application.port.in.GetDailyTodosUseCase;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
@@ -19,6 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping("/sessional-plans")
@@ -28,6 +31,7 @@ public class SessionalPlanController {
     private final GetSessionalPlansUseCase getSessionalPlansUseCase;
     private final GetDailyTodosUseCase getDailyTodosUseCase;
     private final CreateSessionalPlanUseCase createSessionalPlanUseCase;
+    private final DeleteSessionalPlanUseCase deleteSessionalPlanUseCase;
 
     @GetMapping
     public GetSessionalPlansResponse getAll(@AuthenticatedUserId Long userId) {
@@ -55,5 +59,14 @@ public class SessionalPlanController {
         SessionalPlanSummaryResult result = createSessionalPlanUseCase.create(request.toCommand(userId));
 
         return CreateSessionalPlanResponse.from(result);
+    }
+
+    @DeleteMapping("/{sessionalPlanId}")
+    @ResponseStatus(NO_CONTENT)
+    public void delete(
+            @AuthenticatedUserId Long userId,
+            @PathVariable Long sessionalPlanId
+    ) {
+        deleteSessionalPlanUseCase.delete(DeleteSessionalPlanCommand.of(userId, sessionalPlanId));
     }
 }

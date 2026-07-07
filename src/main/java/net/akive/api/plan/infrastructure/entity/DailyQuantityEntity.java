@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.plan.domain.DailyQuantity;
+import org.hibernate.annotations.OnDelete;
 
 import java.time.LocalDate;
 
@@ -13,6 +14,7 @@ import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
+import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Entity
 @Table(
@@ -33,6 +35,7 @@ public class DailyQuantityEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long dailyQuantityId;
 
+    @OnDelete(action = CASCADE)
     @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "weekly_quantity_id", nullable = false)
     private WeeklyQuantityEntity weeklyQuantity;

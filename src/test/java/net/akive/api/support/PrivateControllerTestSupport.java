@@ -2,6 +2,7 @@ package net.akive.api.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.plan.application.port.in.CreateSessionalPlanUseCase;
+import net.akive.api.plan.application.port.in.DeleteSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
 import net.akive.api.plan.application.port.in.GetDailyTodosUseCase;
 import net.akive.api.plan.presentation.SessionalPlanController;
@@ -27,4 +28,7 @@ public abstract class PrivateControllerTestSupport {
 
     @MockitoBean
     protected CreateSessionalPlanUseCase createSessionalPlanUseCase;
+
+    @MockitoBean
+    protected DeleteSessionalPlanUseCase deleteSessionalPlanUseCase;
 }

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum SessionalPlanErrorCode implements ErrorCode {
 
     INVALID_SESSION_PERIOD(HttpStatus.BAD_REQUEST, "SESSIONAL_PLAN_400_3", "Invalid session period."),
+    NOT_FOUND(HttpStatus.NOT_FOUND, "SESSIONAL_PLAN_404_1", "Sessional plan not found."),
     SESSION_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "SESSIONAL_PLAN_409_1", "Session name already exists.");
 
     private final HttpStatus status;
