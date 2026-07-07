@@ -1,6 +1,7 @@
 package net.akive.api.plan.presentation;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.application.dto.result.DailyTodoResult;
@@ -11,8 +12,6 @@ import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
 import net.akive.api.plan.presentation.dto.response.CreateSessionalPlanResponse;
 import net.akive.api.plan.presentation.dto.response.GetSessionalPlansResponse;
 import net.akive.api.plan.presentation.dto.response.GetDailyTodosResponse;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +30,7 @@ public class SessionalPlanController {
     private final CreateSessionalPlanUseCase createSessionalPlanUseCase;
 
     @GetMapping
-    public GetSessionalPlansResponse getAll(@AuthenticationPrincipal Jwt jwt) {
-        Long userId = Long.valueOf(jwt.getSubject());
+    public GetSessionalPlansResponse getAll(@AuthenticatedUserId Long userId) {
         List<SessionalPlanSummaryResult> results = getSessionalPlansUseCase.getAll(userId);
 
         return GetSessionalPlansResponse.from(results);
@@ -40,10 +38,9 @@ public class SessionalPlanController {
 
     @GetMapping("/todos/{date}")
     public GetDailyTodosResponse getTodosByDate(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticatedUserId Long userId,
             @PathVariable LocalDate date
     ) {
-        Long userId = Long.valueOf(jwt.getSubject());
         List<DailyTodoResult> results = getDailyTodosUseCase.getTodosByDate(GetDailyTodosCommand.of(userId, date));
 
         return GetDailyTodosResponse.from(results);
@@ -52,10 +49,9 @@ public class SessionalPlanController {
     @PostMapping
     @ResponseStatus(CREATED)
     public CreateSessionalPlanResponse create(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticatedUserId Long userId,
             @Validated @RequestBody CreateSessionalPlanRequest request
     ) {
-        Long userId = Long.valueOf(jwt.getSubject());
         SessionalPlanSummaryResult result = createSessionalPlanUseCase.create(request.toCommand(userId));
 
         return CreateSessionalPlanResponse.from(result);
