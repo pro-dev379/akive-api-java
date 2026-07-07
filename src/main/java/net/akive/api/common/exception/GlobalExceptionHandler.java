@@ -6,6 +6,7 @@ import net.akive.api.common.response.ApiErrorResponse;
 import net.akive.api.common.response.FieldErrorDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MissingRequestValueException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -58,6 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             HttpMessageNotReadableException.class,
+            MethodArgumentTypeMismatchException.class,
             MissingRequestValueException.class
     })
     protected ResponseEntity<ApiErrorResponse> handleInvalidInputException(
