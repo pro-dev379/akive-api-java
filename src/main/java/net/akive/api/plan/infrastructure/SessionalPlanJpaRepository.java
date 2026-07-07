@@ -8,6 +8,5 @@ import java.util.List;
 public interface SessionalPlanJpaRepository extends JpaRepository<SessionalPlanEntity, Long> {
 
     List<SessionalPlanEntity> findByUser_userIdOrderBySessionalPlanIdDesc(Long userId);
-
     boolean existsByUser_userIdAndSessionName(Long userId, String sessionName);
 }

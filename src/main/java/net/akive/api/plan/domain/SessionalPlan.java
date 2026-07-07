@@ -5,6 +5,7 @@ import net.akive.api.plan.domain.exception.SessionalPlanException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -21,6 +22,7 @@ public class SessionalPlan {
     private String sessionName;
     private LocalDate sessionStartOn;
     private LocalDate sessionEndOn;
+    private List<TotalQuantity> totalQuantities;
 
     public static SessionalPlan createForUser(
             Long userId,

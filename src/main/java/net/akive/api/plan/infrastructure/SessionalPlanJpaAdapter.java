@@ -1,20 +1,29 @@
 package net.akive.api.plan.infrastructure;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.plan.application.dto.result.DailyTodoResult;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
+import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
 import net.akive.api.plan.application.port.out.SaveSessionalPlanPort;
 import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.infrastructure.entity.SessionalPlanEntity;
+import net.akive.api.plan.infrastructure.projection.DailyTodoProjection;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class SessionalPlanJpaAdapter implements LoadSessionalPlanPort, SaveSessionalPlanPort, ValidateSessionalPlanPort {
+public class SessionalPlanJpaAdapter implements
+        LoadSessionalPlanPort,
+        LoadDailyTodosPort,
+        SaveSessionalPlanPort,
+        ValidateSessionalPlanPort {
 
     private final SessionalPlanJpaRepository sessionalPlanJpaRepository;
+    private final SessionalPlanQueryRepository sessionalPlanQueryRepository;
 
     @Override
     public List<SessionalPlan> loadAllByUserIdOrderBySessionalPlanIdDesc(Long userId) {
@@ -26,6 +35,15 @@ public class SessionalPlanJpaAdapter implements LoadSessionalPlanPort, SaveSessi
     }
 
     @Override
+    public List<DailyTodoResult> loadDailyTodos(Long userId, LocalDate date) {
+        return sessionalPlanQueryRepository
+                .findDailyTodos(userId, date)
+                .stream()
+                .map(this::toDailyTodoResult)
+                .toList();
+    }
+
+    @Override
     public SessionalPlan save(SessionalPlan sessionalPlan) {
         return sessionalPlanJpaRepository.save(SessionalPlanEntity.fromModel(sessionalPlan)).toModel();
     }
@@ -33,5 +51,22 @@ public class SessionalPlanJpaAdapter implements LoadSessionalPlanPort, SaveSessi
     @Override
     public boolean existsByUserIdAndSessionName(Long userId, String sessionName) {
         return sessionalPlanJpaRepository.existsByUser_userIdAndSessionName(userId, sessionName);
+    }
+
+    private DailyTodoResult toDailyTodoResult(DailyTodoProjection projection) {
+        return new DailyTodoResult(
+                projection.sessionalPlanId(),
+                projection.totalQuantityId(),
+                projection.weeklyQuantityId(),
+                projection.dailyQuantityId(),
+                projection.subject(),
+                projection.subjectCategory(),
+                projection.dailyQuantityAmount(),
+                projection.completedQuantityAmount(),
+                projection.delayQuantityAmount(),
+                projection.unit(),
+                projection.dailyQuantityMemo(),
+                projection.date()
+        );
     }
 }

@@ -47,6 +47,13 @@ public class SessionalPlanEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDate sessionEndOn;
 
+    public static SessionalPlanEntity reference(Long sessionalPlanId) {
+        SessionalPlanEntity sessionalPlanEntity = new SessionalPlanEntity();
+        sessionalPlanEntity.sessionalPlanId = sessionalPlanId;
+
+        return sessionalPlanEntity;
+    }
+
     public static SessionalPlanEntity fromModel(SessionalPlan sessionalPlan) {
         SessionalPlanEntity sessionalPlanEntity = new SessionalPlanEntity();
         sessionalPlanEntity.sessionalPlanId = sessionalPlan.getSessionalPlanId();

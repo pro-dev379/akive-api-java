@@ -1,6 +1,8 @@
 package net.akive.api.plan.presentation;
 
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
+import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
+import net.akive.api.plan.application.dto.result.DailyTodoResult;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.domain.exception.SessionalPlanException;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
@@ -79,6 +81,84 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.sessionalPlans").isEmpty());
 
         then(getSessionalPlansUseCase).should().getAll(userId);
+    }
+
+    @Test
+    void 날짜별_투두_리스트를_조회한다() throws Exception {
+        // given
+        Long userId = 1L;
+        LocalDate date = LocalDate.of(2026, 7, 7);
+        List<DailyTodoResult> results = List.of(
+                new DailyTodoResult(
+                        1L,
+                        10L,
+                        100L,
+                        1000L,
+                        "영어",
+                        "학습",
+                        30,
+                        10,
+                        0,
+                        "분",
+                        "단어 암기",
+                        date
+                )
+        );
+
+        given(getDailyTodosUseCase.getTodosByDate(GetDailyTodosCommand.of(userId, date)))
+                .willReturn(results);
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/todos/{date}", date)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.todos[0].sessionalPlanId").value(1L))
+                .andExpect(jsonPath("$.todos[0].totalQuantityId").value(10L))
+                .andExpect(jsonPath("$.todos[0].weeklyQuantityId").value(100L))
+                .andExpect(jsonPath("$.todos[0].dailyQuantityId").value(1000L))
+                .andExpect(jsonPath("$.todos[0].subject").value("영어"))
+                .andExpect(jsonPath("$.todos[0].subjectCategory").value("학습"))
+                .andExpect(jsonPath("$.todos[0].dailyQuantityAmount").value(30))
+                .andExpect(jsonPath("$.todos[0].completedQuantityAmount").value(10))
+                .andExpect(jsonPath("$.todos[0].delayQuantityAmount").value(0))
+                .andExpect(jsonPath("$.todos[0].unit").value("분"))
+                .andExpect(jsonPath("$.todos[0].dailyQuantityMemo").value("단어 암기"))
+                .andExpect(jsonPath("$.todos[0].date").value("2026-07-07"));
+
+        then(getDailyTodosUseCase).should().getTodosByDate(GetDailyTodosCommand.of(userId, date));
+    }
+
+    @Test
+    void 날짜별_투두_리스트가_없으면_빈_목록을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        LocalDate date = LocalDate.of(2026, 7, 7);
+
+        given(getDailyTodosUseCase.getTodosByDate(GetDailyTodosCommand.of(userId, date)))
+                .willReturn(List.of());
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/todos/{date}", date)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.todos").isArray())
+                .andExpect(jsonPath("$.todos").isEmpty());
+
+        then(getDailyTodosUseCase).should().getTodosByDate(GetDailyTodosCommand.of(userId, date));
+    }
+
+    @Test
+    void 날짜별_투두_리스트_요청_시_날짜_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/todos/{date}", "2026-13-07")
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+
+        then(getDailyTodosUseCase).should(never()).getTodosByDate(any(GetDailyTodosCommand.class));
     }
 
     @Test
