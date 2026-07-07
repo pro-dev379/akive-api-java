@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Component
-public class SystemCurrentTimeProvider implements CurrentTimeProvider{
+public class SystemCurrentTimeProvider implements CurrentTimeProvider {
 
     private final Clock clock = Clock.systemDefaultZone();
 

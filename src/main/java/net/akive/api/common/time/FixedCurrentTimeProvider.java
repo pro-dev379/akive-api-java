@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-public class FixedCurrentTimeProvider implements CurrentTimeProvider{
+public class FixedCurrentTimeProvider implements CurrentTimeProvider {
 
     private final Clock clock;
 
