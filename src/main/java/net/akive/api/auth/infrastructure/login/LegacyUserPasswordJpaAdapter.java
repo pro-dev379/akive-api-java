@@ -11,9 +11,9 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-class LegacyUserPasswordJpaAdapter
-        implements LoadLegacyUserPasswordPort,
-                   DeleteLegacyUserPasswordPort {
+class LegacyUserPasswordJpaAdapter implements
+        LoadLegacyUserPasswordPort,
+        DeleteLegacyUserPasswordPort {
 
     private final LegacyUserPasswordJpaRepository legacyUserPasswordJpaRepository;
 

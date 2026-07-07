@@ -24,10 +24,10 @@ import static net.akive.api.auth.domain.emailverification.exception.EmailVerific
 
 @Service
 @RequiredArgsConstructor
-class EmailVerificationService
-        implements SendEmailVerificationCodeUseCase,
-                   VerifyEmailVerificationCodeUseCase,
-                   EnsureEmailVerifiedUseCase {
+class EmailVerificationService implements
+        SendEmailVerificationCodeUseCase,
+        VerifyEmailVerificationCodeUseCase,
+        EnsureEmailVerifiedUseCase {
 
     private final ValidateUserUseCase validateUserUseCase;
 
