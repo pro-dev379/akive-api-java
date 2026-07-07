@@ -21,16 +21,6 @@ import static lombok.AccessLevel.PROTECTED;
                         name = "ux-mentoring_profile-user_id",
                         columnNames = "user_id"
                 )
-        },
-        indexes = {
-                @Index(
-                        name = "ix-mentoring_profile-created_at",
-                        columnList = "created_at"
-                ),
-                @Index(
-                        name = "ix-mentoring_profile-updated_at",
-                        columnList = "updated_at"
-                )
         }
 )
 @Getter
