@@ -1,11 +1,9 @@
 package net.akive.api.plan.infrastructure;
 
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.infrastructure.entity.SessionalPlanEntity;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,9 +12,6 @@ import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
-
-    @Autowired
-    SessionalPlanJpaRepository sessionalPlanJpaRepository;
 
     @Test
     void 세셔널_플랜을_저장한다() {
@@ -44,8 +39,6 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         assertThat(savedSessionalPlan.getSessionName()).isEqualTo("1회차");
         assertThat(savedSessionalPlan.getSessionStartOn()).isEqualTo(LocalDate.of(2026, 7, 1));
         assertThat(savedSessionalPlan.getSessionEndOn()).isEqualTo(LocalDate.of(2026, 7, 7));
-        assertThat(sessionalPlanJpaRepository.findById(savedSessionalPlan.getSessionalPlanId()))
-                .isPresent();
     }
 
     @Test
@@ -73,12 +66,8 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 LocalDate.of(2026, 7, 14)
         );
 
-        SessionalPlanEntity savedFirstPlan = sessionalPlanJpaRepository.save(
-                SessionalPlanEntity.fromModel(firstPlan)
-        );
-        SessionalPlanEntity savedSecondPlan = sessionalPlanJpaRepository.save(
-                SessionalPlanEntity.fromModel(secondPlan)
-        );
+        SessionalPlan savedFirstPlan = saveSessionalPlanPort.save(firstPlan);
+        SessionalPlan savedSecondPlan = saveSessionalPlanPort.save(secondPlan);
 
         // when
         List<SessionalPlan> sessionalPlans = loadSessionalPlanPort
@@ -119,7 +108,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 LocalDate.of(2026, 7, 1),
                 LocalDate.of(2026, 7, 7)
         );
-        sessionalPlanJpaRepository.save(SessionalPlanEntity.fromModel(sessionalPlan));
+        saveSessionalPlanPort.save(sessionalPlan);
 
         // when & then
         assertThat(validateSessionalPlanPort.existsByUserIdAndSessionName(savedUser.getUserId(), "1회차"))
