@@ -517,7 +517,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
-    void 학습량이_등록된_세셔널_플랜의_기간을_수정하면_400을_응답한다() throws Exception {
+    void 세션_총량이_등록된_세셔널_플랜의_기간을_수정하면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 10L;
@@ -543,7 +543,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
-    void 학습량이_등록되어도_기간을_변경하지_않으면_세셔널_플랜명을_수정한다() throws Exception {
+    void 세션_총량이_등록되어도_기간을_변경하지_않으면_세셔널_플랜명을_수정한다() throws Exception {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 10L;

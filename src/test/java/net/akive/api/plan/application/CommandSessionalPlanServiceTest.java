@@ -288,7 +288,7 @@ class CommandSessionalPlanServiceTest {
     }
 
     @Test
-    void 학습량이_등록된_세셔널_플랜의_기간을_변경하면_세셔널_플랜_수정에_실패한다() {
+    void 세션_총량이_등록된_세셔널_플랜의_기간을_변경하면_세셔널_플랜_수정에_실패한다() {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 10L;
@@ -334,7 +334,7 @@ class CommandSessionalPlanServiceTest {
     }
 
     @Test
-    void 학습량이_등록되어도_기간을_변경하지_않으면_세셔널_플랜명은_수정할_수_있다() {
+    void 세션_총량이_등록되어도_기간을_변경하지_않으면_세셔널_플랜명은_수정할_수_있다() {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 10L;
