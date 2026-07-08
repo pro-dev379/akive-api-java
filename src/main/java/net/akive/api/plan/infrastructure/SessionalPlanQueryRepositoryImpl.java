@@ -15,7 +15,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class SessionalPlanQueryRepositoryImpl implements SessionalPlanQueryRepository {
+class SessionalPlanQueryRepositoryImpl implements SessionalPlanQueryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
