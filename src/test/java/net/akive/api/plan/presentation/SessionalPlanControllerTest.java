@@ -375,6 +375,28 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
+    void 세셔널_플랜_수정_요청_시_세셔널_플랜명이_100자를_초과하면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "a".repeat(101),
+                LocalDate.of(2026, 7, 7),
+                LocalDate.of(2026, 7, 14)
+        );
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+
+        then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
+    }
+
+    @Test
     void 세셔널_플랜_수정_요청_시_시작일이_없으면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
