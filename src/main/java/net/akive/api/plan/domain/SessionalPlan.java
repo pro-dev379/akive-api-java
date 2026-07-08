@@ -31,12 +31,7 @@ public class SessionalPlan {
             LocalDate sessionEndOn,
             LocalDateTime requestedAt
     ) {
-        if (!sessionStartOn.isBefore(sessionEndOn) ||
-                sessionStartOn.isBefore(requestedAt.toLocalDate()) ||
-                !sessionEndOn.isAfter(requestedAt.toLocalDate())
-        ) {
-            throw new SessionalPlanException(INVALID_SESSION_PERIOD);
-        }
+        validateSessionPeriod(sessionStartOn, sessionEndOn, requestedAt);
 
         return SessionalPlan.builder()
                 .userId(userId)
@@ -60,5 +55,53 @@ public class SessionalPlan {
                 .sessionStartOn(sessionStartOn)
                 .sessionEndOn(sessionEndOn)
                 .build();
+    }
+
+    public SessionalPlan update(
+            String sessionName,
+            LocalDate sessionStartOn,
+            LocalDate sessionEndOn,
+            boolean duplicateSessionNameExists,
+            boolean hasTotalQuantity,
+            LocalDateTime requestedAt
+    ) {
+        if (duplicateSessionNameExists) {
+            throw new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS);
+        }
+
+        validateSessionPeriod(sessionStartOn, sessionEndOn, requestedAt);
+        validateSessionPeriodChangeAllowed(sessionStartOn, sessionEndOn, hasTotalQuantity);
+
+        return SessionalPlan.builder()
+                .sessionalPlanId(this.sessionalPlanId)
+                .userId(this.userId)
+                .sessionName(sessionName)
+                .sessionStartOn(sessionStartOn)
+                .sessionEndOn(sessionEndOn)
+                .build();
+    }
+
+    private static void validateSessionPeriod(
+            LocalDate sessionStartOn,
+            LocalDate sessionEndOn,
+            LocalDateTime requestedAt
+    ) {
+        if (!sessionStartOn.isBefore(sessionEndOn) ||
+                sessionStartOn.isBefore(requestedAt.toLocalDate()) ||
+                !sessionEndOn.isAfter(requestedAt.toLocalDate())
+        ) {
+            throw new SessionalPlanException(INVALID_SESSION_PERIOD);
+        }
+    }
+
+    private void validateSessionPeriodChangeAllowed(
+            LocalDate sessionStartOn,
+            LocalDate sessionEndOn,
+            boolean hasTotalQuantity
+    ) {
+        if (hasTotalQuantity &&
+                (!this.sessionStartOn.equals(sessionStartOn) || !this.sessionEndOn.equals(sessionEndOn))) {
+            throw new SessionalPlanException(SESSION_PERIOD_CHANGE_NOT_ALLOWED);
+        }
     }
 }

@@ -6,11 +6,14 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SessionalPlanJpaRepository extends JpaRepository<SessionalPlanEntity, Long> {
 
+    Optional<SessionalPlanEntity> findBySessionalPlanIdAndUser_userId(Long sessionalPlanId, Long userId);
     List<SessionalPlanEntity> findByUser_userIdOrderBySessionalPlanIdDesc(Long userId);
     boolean existsByUser_userIdAndSessionName(Long userId, String sessionName);
+    boolean existsByUser_userIdAndSessionNameAndSessionalPlanIdNot(Long userId, String sessionName, Long sessionalPlanId);
 
     @Modifying(clearAutomatically = true)
     @Query("""

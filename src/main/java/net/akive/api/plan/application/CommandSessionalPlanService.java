@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
+import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.application.port.in.CreateSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.DeleteSessionalPlanUseCase;
-import net.akive.api.plan.application.port.out.DeleteSessionalPlanPort;
-import net.akive.api.plan.application.port.out.SaveSessionalPlanPort;
-import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
+import net.akive.api.plan.application.port.in.UpdateSessionalPlanUseCase;
+import net.akive.api.plan.application.port.out.*;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.exception.SessionalPlanException;
 import org.springframework.stereotype.Service;
@@ -21,8 +21,13 @@ import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CommandSessionalPlanService implements CreateSessionalPlanUseCase, DeleteSessionalPlanUseCase {
+class CommandSessionalPlanService implements
+        CreateSessionalPlanUseCase,
+        DeleteSessionalPlanUseCase,
+        UpdateSessionalPlanUseCase {
 
+    private final LoadSessionalPlanPort loadSessionalPlanPort;
+    private final ValidateTotalQuantityPort validateTotalQuantityPort;
     private final SaveSessionalPlanPort saveSessionalPlanPort;
     private final DeleteSessionalPlanPort deleteSessionalPlanPort;
     private final ValidateSessionalPlanPort validateSessionalPlanPort;
@@ -53,5 +58,43 @@ public class CommandSessionalPlanService implements CreateSessionalPlanUseCase, 
         if (deletedCount == 0) {
             throw new SessionalPlanException(NOT_FOUND);
         }
+    }
+
+    @Override
+    public void update(UpdateSessionalPlanCommand command) {
+        boolean duplicateSessionNameExists =
+                hasDuplicateSessionNameExceptCurrent(
+                        command.userId(),
+                        command.sessionName(),
+                        command.sessionalPlanId()
+                );
+
+        boolean hasTotalQuantity = !duplicateSessionNameExists && hasTotalQuantity(command.sessionalPlanId());
+
+        SessionalPlan sessionalPlan = loadSessionalPlan(command.sessionalPlanId(), command.userId());
+        SessionalPlan updatedSessionalPlan = sessionalPlan.update(
+                command.sessionName(),
+                command.sessionStartOn(),
+                command.sessionEndOn(),
+                duplicateSessionNameExists,
+                hasTotalQuantity,
+                currentTimeProvider.now()
+        );
+
+        saveSessionalPlanPort.save(updatedSessionalPlan);
+    }
+
+    private SessionalPlan loadSessionalPlan(Long sessionalPlanId, Long userId) {
+        return loadSessionalPlanPort
+                .loadBySessionalPlanIdAndUserId(sessionalPlanId, userId)
+                .orElseThrow(() -> new SessionalPlanException(NOT_FOUND));
+    }
+
+    private boolean hasDuplicateSessionNameExceptCurrent(Long userId, String sessionName, Long sessionalPlanId) {
+        return validateSessionalPlanPort.existsByUserIdAndSessionNameAndSessionalPlanIdNot(userId, sessionName, sessionalPlanId);
+    }
+
+    private boolean hasTotalQuantity(Long sessionalPlanId) {
+        return validateTotalQuantityPort.existsBySessionalPlanId(sessionalPlanId);
     }
 }

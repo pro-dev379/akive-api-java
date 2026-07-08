@@ -10,10 +10,11 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class SessionalPlanJpaAdapter implements
+class SessionalPlanJpaAdapter implements
         LoadSessionalPlanPort,
         LoadDailyTodosPort,
         SaveSessionalPlanPort,
@@ -22,6 +23,13 @@ public class SessionalPlanJpaAdapter implements
 
     private final SessionalPlanJpaRepository sessionalPlanJpaRepository;
     private final SessionalPlanQueryRepository sessionalPlanQueryRepository;
+
+    @Override
+    public Optional<SessionalPlan> loadBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId) {
+        return sessionalPlanJpaRepository
+                .findBySessionalPlanIdAndUser_userId(sessionalPlanId, userId)
+                .map(SessionalPlanEntity::toModel);
+    }
 
     @Override
     public List<SessionalPlan> loadAllByUserIdOrderBySessionalPlanIdDesc(Long userId) {
@@ -54,6 +62,12 @@ public class SessionalPlanJpaAdapter implements
     @Override
     public boolean existsByUserIdAndSessionName(Long userId, String sessionName) {
         return sessionalPlanJpaRepository.existsByUser_userIdAndSessionName(userId, sessionName);
+    }
+
+    @Override
+    public boolean existsByUserIdAndSessionNameAndSessionalPlanIdNot(Long userId, String sessionName, Long sessionalPlanId) {
+        return sessionalPlanJpaRepository
+                .existsByUser_userIdAndSessionNameAndSessionalPlanIdNot(userId, sessionName, sessionalPlanId);
     }
 
     private DailyTodoResult toDailyTodoResult(DailyTodoProjection projection) {

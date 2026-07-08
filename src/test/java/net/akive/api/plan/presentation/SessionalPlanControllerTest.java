@@ -3,10 +3,12 @@ package net.akive.api.plan.presentation;
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
+import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.DailyTodoResult;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.domain.exception.SessionalPlanException;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
+import net.akive.api.plan.presentation.dto.request.UpdateSessionalPlanRequest;
 import net.akive.api.support.PrivateControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +17,7 @@ import java.util.List;
 
 import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.NOT_FOUND;
 import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -25,6 +28,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -324,6 +328,218 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("SESSIONAL_PLAN_409_1"));
+    }
+
+    @Test
+    void 세셔널_플랜을_수정한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "수정된 1회차",
+                LocalDate.of(2026, 7, 8),
+                LocalDate.of(2026, 7, 15)
+        );
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+        then(updateSessionalPlanUseCase).should()
+                .update(request.toCommand(sessionalPlanId, userId));
+    }
+
+    @Test
+    void 세셔널_플랜_수정_요청_시_세셔널_플랜명이_비어있으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "",
+                LocalDate.of(2026, 7, 8),
+                LocalDate.of(2026, 7, 15)
+        );
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+
+        then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
+    }
+
+    @Test
+    void 세셔널_플랜_수정_요청_시_시작일이_없으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "수정된 1회차",
+                null,
+                LocalDate.of(2026, 7, 15)
+        );
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+
+        then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
+    }
+
+    @Test
+    void 세셔널_플랜_수정_요청_시_종료일이_없으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "수정된 1회차",
+                LocalDate.of(2026, 7, 8),
+                null
+        );
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+
+        then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
+    }
+
+    @Test
+    void 세셔널_플랜_수정_요청_시_날짜_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        String request = """
+                {
+                  "sessionName": "1회차",
+                  "sessionStartOn": "2026/07/07",
+                  "sessionEndOn": "2026-07-14"
+                }
+                """;
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+
+        then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
+    }
+
+    @Test
+    void 수정할_세셔널_플랜이_없으면_404를_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "수정된 1회차",
+                LocalDate.of(2026, 7, 8),
+                LocalDate.of(2026, 7, 15)
+        );
+
+        willThrow(new SessionalPlanException(NOT_FOUND))
+                .given(updateSessionalPlanUseCase)
+                .update(request.toCommand(sessionalPlanId, userId));
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("SESSIONAL_PLAN_404_1"));
+
+        then(updateSessionalPlanUseCase).should().update(request.toCommand(sessionalPlanId, userId));
+    }
+
+    @Test
+    void 이미_존재하는_세셔널_플랜명으로_수정하면_409를_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "2회차",
+                LocalDate.of(2026, 7, 8),
+                LocalDate.of(2026, 7, 15)
+        );
+
+        willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS))
+                .given(updateSessionalPlanUseCase)
+                .update(request.toCommand(sessionalPlanId, userId));
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SESSIONAL_PLAN_409_1"));
+
+        then(updateSessionalPlanUseCase).should().update(request.toCommand(sessionalPlanId, userId));
+    }
+
+    @Test
+    void 학습량이_등록된_세셔널_플랜의_기간을_수정하면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "1회차",
+                LocalDate.of(2026, 7, 8),
+                LocalDate.of(2026, 7, 15)
+        );
+
+        willThrow(new SessionalPlanException(SESSION_PERIOD_CHANGE_NOT_ALLOWED))
+                .given(updateSessionalPlanUseCase)
+                .update(request.toCommand(sessionalPlanId, userId));
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("SESSIONAL_PLAN_400_2"));
+
+        then(updateSessionalPlanUseCase).should().update(request.toCommand(sessionalPlanId, userId));
+    }
+
+    @Test
+    void 학습량이_등록되어도_기간을_변경하지_않으면_세셔널_플랜명을_수정한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "수정된 1회차",
+                LocalDate.of(2026, 7, 7),
+                LocalDate.of(2026, 7, 14)
+        );
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+        then(updateSessionalPlanUseCase).should()
+                .update(request.toCommand(sessionalPlanId, userId));
     }
 
     @Test

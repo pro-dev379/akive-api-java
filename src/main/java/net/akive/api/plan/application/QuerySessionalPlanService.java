@@ -32,6 +32,6 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetDailyTod
 
     @Override
     public List<DailyTodoResult> getTodosByDate(GetDailyTodosCommand command) {
-        return loadDailyTodosPort.loadDailyTodos(command.userId(), command.date());
+        return loadDailyTodosPort.loadDailyTodosByUserIdAndDate(command.userId(), command.date());
     }
 }

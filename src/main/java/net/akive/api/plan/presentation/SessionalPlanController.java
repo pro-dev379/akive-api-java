@@ -6,11 +6,9 @@ import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.application.dto.result.DailyTodoResult;
-import net.akive.api.plan.application.port.in.CreateSessionalPlanUseCase;
-import net.akive.api.plan.application.port.in.DeleteSessionalPlanUseCase;
-import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
-import net.akive.api.plan.application.port.in.GetDailyTodosUseCase;
+import net.akive.api.plan.application.port.in.*;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
+import net.akive.api.plan.presentation.dto.request.UpdateSessionalPlanRequest;
 import net.akive.api.plan.presentation.dto.response.CreateSessionalPlanResponse;
 import net.akive.api.plan.presentation.dto.response.GetSessionalPlansResponse;
 import net.akive.api.plan.presentation.dto.response.GetDailyTodosResponse;
@@ -31,6 +29,7 @@ public class SessionalPlanController {
     private final GetSessionalPlansUseCase getSessionalPlansUseCase;
     private final GetDailyTodosUseCase getDailyTodosUseCase;
     private final CreateSessionalPlanUseCase createSessionalPlanUseCase;
+    private final UpdateSessionalPlanUseCase updateSessionalPlanUseCase;
     private final DeleteSessionalPlanUseCase deleteSessionalPlanUseCase;
 
     @GetMapping
@@ -59,6 +58,16 @@ public class SessionalPlanController {
         SessionalPlanSummaryResult result = createSessionalPlanUseCase.create(request.toCommand(userId));
 
         return CreateSessionalPlanResponse.from(result);
+    }
+
+    @PutMapping("/{sessionalPlanId}")
+    @ResponseStatus(NO_CONTENT)
+    public void update(
+            @AuthenticatedUserId Long userId,
+            @PathVariable Long sessionalPlanId,
+            @Validated @RequestBody UpdateSessionalPlanRequest request
+    ) {
+        updateSessionalPlanUseCase.update(request.toCommand(sessionalPlanId, userId));
     }
 
     @DeleteMapping("/{sessionalPlanId}")

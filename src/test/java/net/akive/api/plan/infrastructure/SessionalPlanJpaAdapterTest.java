@@ -86,6 +86,71 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
+    void 회원의_세셔널_플랜을_조회한다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                "test@test.com",
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        SessionalPlan sessionalPlan = SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "1회차",
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 7)
+        );
+        SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
+
+        // when
+        SessionalPlan loadedSessionalPlan = loadSessionalPlanPort
+                .loadBySessionalPlanIdAndUserId(
+                        savedSessionalPlan.getSessionalPlanId(),
+                        savedUser.getUserId()
+                )
+                .orElseThrow();
+
+        // then
+        assertThat(loadedSessionalPlan.getSessionalPlanId()).isEqualTo(savedSessionalPlan.getSessionalPlanId());
+        assertThat(loadedSessionalPlan.getUserId()).isEqualTo(savedUser.getUserId());
+        assertThat(loadedSessionalPlan.getSessionName()).isEqualTo("1회차");
+        assertThat(loadedSessionalPlan.getSessionStartOn()).isEqualTo(LocalDate.of(2026, 7, 1));
+        assertThat(loadedSessionalPlan.getSessionEndOn()).isEqualTo(LocalDate.of(2026, 7, 7));
+    }
+
+    @Test
+    void 다른_회원의_세셔널_플랜은_조회되지_않는다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                "test@test.com",
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        User anotherUser = saveUserPort.save(User.signUpByEmail(
+                "another@test.com",
+                "USER@fghij",
+                "password123!",
+                USER
+        ));
+        SessionalPlan sessionalPlan = SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "1회차",
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 7)
+        );
+        SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
+
+        // when & then
+        assertThat(loadSessionalPlanPort.loadBySessionalPlanIdAndUserId(
+                savedSessionalPlan.getSessionalPlanId(),
+                anotherUser.getUserId()
+        )).isEmpty();
+    }
+
+    @Test
     void 회원의_세셔널_플랜명이_이미_존재하는지_확인한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
@@ -117,6 +182,66 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 .isFalse();
         assertThat(validateSessionalPlanPort.existsByUserIdAndSessionName(anotherUser.getUserId(), "1회차"))
                 .isFalse();
+    }
+
+    @Test
+    void 현재_세셔널_플랜을_제외하고_회원의_세셔널_플랜명이_이미_존재하는지_확인한다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                "test@test.com",
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        User anotherUser = saveUserPort.save(User.signUpByEmail(
+                "another@test.com",
+                "USER@fghij",
+                "password123!",
+                USER
+        ));
+
+        SessionalPlan firstPlan = SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "1회차",
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 7)
+        );
+        SessionalPlan secondPlan = SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "2회차",
+                LocalDate.of(2026, 7, 8),
+                LocalDate.of(2026, 7, 14)
+        );
+        SessionalPlan anotherUserPlan = SessionalPlan.create(
+                null,
+                anotherUser.getUserId(),
+                "2회차",
+                LocalDate.of(2026, 7, 8),
+                LocalDate.of(2026, 7, 14)
+        );
+
+        SessionalPlan savedFirstPlan = saveSessionalPlanPort.save(firstPlan);
+        SessionalPlan savedSecondPlan = saveSessionalPlanPort.save(secondPlan);
+        saveSessionalPlanPort.save(anotherUserPlan);
+
+        // when & then
+        assertThat(validateSessionalPlanPort.existsByUserIdAndSessionNameAndSessionalPlanIdNot(
+                savedUser.getUserId(),
+                "1회차",
+                savedFirstPlan.getSessionalPlanId()
+        )).isFalse();
+        assertThat(validateSessionalPlanPort.existsByUserIdAndSessionNameAndSessionalPlanIdNot(
+                savedUser.getUserId(),
+                "2회차",
+                savedFirstPlan.getSessionalPlanId()
+        )).isTrue();
+        assertThat(validateSessionalPlanPort.existsByUserIdAndSessionNameAndSessionalPlanIdNot(
+                savedUser.getUserId(),
+                "2회차",
+                savedSecondPlan.getSessionalPlanId()
+        )).isFalse();
     }
 
     @Test
