@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.NOT_FOUND;
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
 
 @Service
 @Transactional
@@ -35,15 +34,12 @@ class CommandSessionalPlanService implements
 
     @Override
     public SessionalPlanSummaryResult create(CreateSessionalPlanCommand command) {
-        if (validateSessionalPlanPort.existsByUserIdAndSessionName(command.userId(), command.sessionName())) {
-            throw new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS);
-        }
-
         SessionalPlan sessionalPlan = SessionalPlan.createForUser(
                 command.userId(),
                 command.sessionName(),
                 command.sessionStartOn(),
                 command.sessionEndOn(),
+                hasDuplicateSessionName(command.userId(), command.sessionName()),
                 currentTimeProvider.now()
         );
 
@@ -93,6 +89,10 @@ class CommandSessionalPlanService implements
 
     private boolean hasDuplicateSessionNameExceptCurrent(Long userId, String sessionName, Long sessionalPlanId) {
         return validateSessionalPlanPort.existsByUserIdAndSessionNameAndSessionalPlanIdNot(userId, sessionName, sessionalPlanId);
+    }
+
+    private boolean hasDuplicateSessionName(Long userId, String sessionName) {
+        return validateSessionalPlanPort.existsByUserIdAndSessionName(userId, sessionName);
     }
 
     private boolean hasTotalQuantity(Long sessionalPlanId) {

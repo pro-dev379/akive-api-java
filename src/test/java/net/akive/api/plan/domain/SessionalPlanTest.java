@@ -29,6 +29,7 @@ class SessionalPlanTest {
                 sessionName,
                 sessionStartOn,
                 sessionEndOn,
+                false,
                 requestedAt
         );
 
@@ -53,6 +54,7 @@ class SessionalPlanTest {
                         "1회차",
                         sessionOn,
                         sessionOn,
+                        false,
                         requestedAt
                 ))
                 .extracting(SessionalPlanException::getErrorCode)
@@ -71,6 +73,7 @@ class SessionalPlanTest {
                         "1회차",
                         LocalDate.of(2026, 7, 5),
                         LocalDate.of(2026, 7, 7),
+                        false,
                         requestedAt
                 ))
                 .extracting(SessionalPlanException::getErrorCode)
@@ -89,10 +92,30 @@ class SessionalPlanTest {
                         "1회차",
                         LocalDate.of(2026, 7, 5),
                         LocalDate.of(2026, 7, 6),
+                        false,
                         requestedAt
                 ))
                 .extracting(SessionalPlanException::getErrorCode)
                 .isEqualTo(INVALID_SESSION_PERIOD);
+    }
+
+    @Test
+    void 이미_존재하는_세셔널_플랜명이면_세셔널_플랜_생성에_실패한다() {
+        // given
+        LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
+
+        // when & then
+        assertThatExceptionOfType(SessionalPlanException.class)
+                .isThrownBy(() -> SessionalPlan.createForUser(
+                        2L,
+                        "1회차",
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2026, 7, 14),
+                        true,
+                        requestedAt
+                ))
+                .extracting(SessionalPlanException::getErrorCode)
+                .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
     }
 
     @Test

@@ -29,8 +29,10 @@ public class SessionalPlan {
             String sessionName,
             LocalDate sessionStartOn,
             LocalDate sessionEndOn,
+            boolean duplicateSessionNameExists,
             LocalDateTime requestedAt
     ) {
+        validateSessionNameDuplication(duplicateSessionNameExists);
         validateSessionPeriod(sessionStartOn, sessionEndOn, requestedAt);
 
         return SessionalPlan.builder()
@@ -65,10 +67,7 @@ public class SessionalPlan {
             boolean hasTotalQuantity,
             LocalDateTime requestedAt
     ) {
-        if (duplicateSessionNameExists) {
-            throw new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS);
-        }
-
+        validateSessionNameDuplication(duplicateSessionNameExists);
         validateSessionPeriod(sessionStartOn, sessionEndOn, requestedAt);
         validateSessionPeriodChangeAllowed(sessionStartOn, sessionEndOn, hasTotalQuantity);
 
@@ -91,6 +90,12 @@ public class SessionalPlan {
                 !sessionEndOn.isAfter(requestedAt.toLocalDate())
         ) {
             throw new SessionalPlanException(INVALID_SESSION_PERIOD);
+        }
+    }
+
+    private static void validateSessionNameDuplication(boolean duplicateSessionNameExists) {
+        if (duplicateSessionNameExists) {
+            throw new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS);
         }
     }
 
