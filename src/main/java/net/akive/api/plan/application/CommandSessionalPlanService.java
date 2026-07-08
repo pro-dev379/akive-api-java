@@ -62,6 +62,8 @@ class CommandSessionalPlanService implements
 
     @Override
     public void update(UpdateSessionalPlanCommand command) {
+        SessionalPlan sessionalPlan = loadSessionalPlan(command.sessionalPlanId(), command.userId());
+
         boolean duplicateSessionNameExists =
                 hasDuplicateSessionNameExceptCurrent(
                         command.userId(),
@@ -71,7 +73,6 @@ class CommandSessionalPlanService implements
 
         boolean hasTotalQuantity = !duplicateSessionNameExists && hasTotalQuantity(command.sessionalPlanId());
 
-        SessionalPlan sessionalPlan = loadSessionalPlan(command.sessionalPlanId(), command.userId());
         SessionalPlan updatedSessionalPlan = sessionalPlan.update(
                 command.sessionName(),
                 command.sessionStartOn(),
