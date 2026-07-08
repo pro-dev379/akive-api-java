@@ -41,9 +41,9 @@ class SessionalPlanJpaAdapter implements
     }
 
     @Override
-    public List<DailyTodoResult> loadDailyTodos(Long userId, LocalDate date) {
+    public List<DailyTodoResult> loadDailyTodosByUserIdAndDate(Long userId, LocalDate date) {
         return sessionalPlanQueryRepository
-                .findDailyTodos(userId, date)
+                .findDailyTodosByUserIdAndDate(userId, date)
                 .stream()
                 .map(this::toDailyTodoResult)
                 .toList();

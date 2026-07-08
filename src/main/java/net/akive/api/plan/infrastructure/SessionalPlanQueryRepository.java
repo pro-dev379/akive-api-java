@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface SessionalPlanQueryRepository {
 
-    List<DailyTodoProjection> findDailyTodos(Long userId, LocalDate date);
+    List<DailyTodoProjection> findDailyTodosByUserIdAndDate(Long userId, LocalDate date);
 }

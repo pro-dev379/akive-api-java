@@ -123,7 +123,7 @@ class QuerySessionalPlanServiceTest {
         );
         GetDailyTodosCommand command = GetDailyTodosCommand.of(userId, date);
 
-        given(loadDailyTodosPort.loadDailyTodos(userId, date))
+        given(loadDailyTodosPort.loadDailyTodosByUserIdAndDate(userId, date))
                 .willReturn(dailyTodos);
 
         // when
@@ -132,7 +132,7 @@ class QuerySessionalPlanServiceTest {
         // then
         assertThat(results).isEqualTo(dailyTodos);
 
-        then(loadDailyTodosPort).should().loadDailyTodos(userId, date);
+        then(loadDailyTodosPort).should().loadDailyTodosByUserIdAndDate(userId, date);
     }
 
     @Test
@@ -142,7 +142,7 @@ class QuerySessionalPlanServiceTest {
         LocalDate date = LocalDate.of(2026, 7, 7);
         GetDailyTodosCommand command = GetDailyTodosCommand.of(userId, date);
 
-        given(loadDailyTodosPort.loadDailyTodos(userId, date))
+        given(loadDailyTodosPort.loadDailyTodosByUserIdAndDate(userId, date))
                 .willReturn(List.of());
 
         // when
@@ -151,6 +151,6 @@ class QuerySessionalPlanServiceTest {
         // then
         assertThat(results).isEqualTo(List.of());
 
-        then(loadDailyTodosPort).should().loadDailyTodos(userId, date);
+        then(loadDailyTodosPort).should().loadDailyTodosByUserIdAndDate(userId, date);
     }
 }

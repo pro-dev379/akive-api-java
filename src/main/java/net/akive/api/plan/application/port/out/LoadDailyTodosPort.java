@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface LoadDailyTodosPort {
 
-    List<DailyTodoResult> loadDailyTodos(Long userId, LocalDate date);
+    List<DailyTodoResult> loadDailyTodosByUserIdAndDate(Long userId, LocalDate date);
 }

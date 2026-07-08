@@ -20,7 +20,7 @@ public class SessionalPlanQueryRepositoryImpl implements SessionalPlanQueryRepos
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<DailyTodoProjection> findDailyTodos(Long userId, LocalDate date) {
+    public List<DailyTodoProjection> findDailyTodosByUserIdAndDate(Long userId, LocalDate date) {
         QDailyQuantityEntity dq = QDailyQuantityEntity.dailyQuantityEntity;
         QWeeklyQuantityEntity wq = QWeeklyQuantityEntity.weeklyQuantityEntity;
         QTotalQuantityEntity tq = QTotalQuantityEntity.totalQuantityEntity;
