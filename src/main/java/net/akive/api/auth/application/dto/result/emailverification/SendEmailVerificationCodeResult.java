@@ -1,13 +1,29 @@
 package net.akive.api.auth.application.dto.result.emailverification;
 
+import net.akive.api.common.domain.Email;
+
 import java.time.LocalDateTime;
 
 public record SendEmailVerificationCodeResult(
-        String email,
+        Email email,
         LocalDateTime expiresAt,
         long expireSeconds,
         long resendIntervalSeconds
 ) {
+
+    public static SendEmailVerificationCodeResult of(
+            Email email,
+            LocalDateTime expiresAt,
+            long expiresInSeconds,
+            long resendAfterSeconds
+    ) {
+        return new SendEmailVerificationCodeResult(
+                email,
+                expiresAt,
+                expiresInSeconds,
+                resendAfterSeconds
+        );
+    }
 
     public static SendEmailVerificationCodeResult of(
             String email,
@@ -16,7 +32,7 @@ public record SendEmailVerificationCodeResult(
             long resendAfterSeconds
     ) {
         return new SendEmailVerificationCodeResult(
-                email,
+                Email.of(email),
                 expiresAt,
                 expiresInSeconds,
                 resendAfterSeconds

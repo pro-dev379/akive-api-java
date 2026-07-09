@@ -1,6 +1,7 @@
 package net.akive.api.auth.domain.emailverification;
 
 import lombok.*;
+import net.akive.api.common.domain.Email;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
 
 import java.time.Duration;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static lombok.AccessLevel.*;
+import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
 import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
 
@@ -17,9 +19,9 @@ import static net.akive.api.auth.domain.emailverification.exception.EmailVerific
 @AllArgsConstructor(access = PRIVATE)
 public class EmailVerification {
 
-    private String email;
+    private Email email;
     private EmailVerificationPurpose verificationPurpose;
-    private String verificationCode;
+    private EmailVerificationCode verificationCode;
     private int resendCount;
     private boolean verified;
     private LocalDateTime expiresAt;
@@ -27,34 +29,40 @@ public class EmailVerification {
     private LocalDateTime createdAt;
 
     public static EmailVerification create(
-            String email,
+            Email email,
             EmailVerificationPurpose verificationPurpose,
-            String verificationCode,
+            EmailVerificationCode verificationCode,
             LocalDateTime requestedAt
     ) {
+        LocalDateTime validatedRequestedAt = requireNonNull(requestedAt);
+
         return EmailVerification.builder()
-                .email(email)
-                .verificationPurpose(verificationPurpose)
-                .verificationCode(verificationCode)
+                .email(requireNonNull(email))
+                .verificationPurpose(requireNonNull(verificationPurpose))
+                .verificationCode(requireNonNull(verificationCode))
                 .resendCount(0)
                 .verified(false)
-                .expiresAt(requestedAt.plus(EXPIRE_DURATION))
-                .lastSentAt(requestedAt)
-                .createdAt(requestedAt)
+                .expiresAt(validatedRequestedAt.plus(EXPIRE_DURATION))
+                .lastSentAt(validatedRequestedAt)
+                .createdAt(validatedRequestedAt)
                 .build();
     }
 
-    public void renew(String verificationCode, LocalDateTime requestedAt) {
+    public void renew(EmailVerificationCode verificationCode, LocalDateTime requestedAt) {
+        requireNonNull(requestedAt);
         validateResendAvailable(requestedAt);
 
-        this.verificationCode = verificationCode;
+        this.verificationCode = requireNonNull(verificationCode);
         this.resendCount++;
         this.verified = false;
         this.expiresAt = requestedAt.plus(EXPIRE_DURATION);
         this.lastSentAt = requestedAt;
     }
 
-    public void verify(String inputVerificationCode, LocalDateTime requestedAt) {
+    public void verify(EmailVerificationCode inputVerificationCode, LocalDateTime requestedAt) {
+        EmailVerificationCode validatedInputVerificationCode = requireNonNull(inputVerificationCode);
+        requireNonNull(requestedAt);
+
         if (this.verified) {
             throw new EmailVerificationException(ALREADY_VERIFIED);
         }
@@ -63,7 +71,7 @@ public class EmailVerification {
             throw new EmailVerificationException(EXPIRED);
         }
 
-        if (!Objects.equals(this.verificationCode, inputVerificationCode)) {
+        if (!Objects.equals(this.verificationCode, validatedInputVerificationCode)) {
             throw new EmailVerificationException(CODE_MISMATCH);
         }
 

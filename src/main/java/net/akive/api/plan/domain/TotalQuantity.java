@@ -9,6 +9,7 @@ import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
+import static net.akive.api.common.domain.DomainValidator.*;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -17,31 +18,43 @@ import static lombok.AccessLevel.PROTECTED;
 public class TotalQuantity {
 
     private Long totalQuantityId;
-    private Long sessionalPlanId;
+    private SessionalPlan sessionalPlan;
     private String subject;
     private String subjectCategory;
-    private Integer totalQuantityAmount;
+    private int totalQuantityAmount;
     private String unit;
     private String totalQuantityMemo;
     private List<WeeklyQuantity> weeklyQuantities;
 
     public static TotalQuantity create(
             Long totalQuantityId,
-            Long sessionalPlanId,
+            SessionalPlan sessionalPlan,
             String subject,
             String subjectCategory,
-            Integer totalQuantityAmount,
+            int totalQuantityAmount,
             String unit,
             String totalQuantityMemo
     ) {
         return TotalQuantity.builder()
                 .totalQuantityId(totalQuantityId)
-                .sessionalPlanId(sessionalPlanId)
-                .subject(subject)
-                .subjectCategory(subjectCategory)
-                .totalQuantityAmount(totalQuantityAmount)
-                .unit(unit)
-                .totalQuantityMemo(totalQuantityMemo)
+                .sessionalPlan(requireNonNull(sessionalPlan))
+                .subject(validateSubject(subject))
+                .subjectCategory(validateSubjectCategory(subjectCategory))
+                .totalQuantityAmount(requirePositive(totalQuantityAmount))
+                .unit(validateUnit(unit))
+                .totalQuantityMemo(requireMaxLengthIfPresent(totalQuantityMemo, 25))
                 .build();
+    }
+
+    private static String validateSubject(String subject) {
+        return requireMaxLength(requireNotBlank(subject), 100);
+    }
+
+    private static String validateSubjectCategory(String subjectCategory) {
+        return requireMaxLength(requireNotBlank(subjectCategory), 10);
+    }
+
+    private static String validateUnit(String unit) {
+        return requireMaxLength(requireNotBlank(unit), 10);
     }
 }

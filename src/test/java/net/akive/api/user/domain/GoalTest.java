@@ -1,10 +1,14 @@
 package net.akive.api.user.domain;
 
+import net.akive.api.common.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
 
+import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class GoalTest {
 
@@ -51,5 +55,28 @@ class GoalTest {
         assertThat(goal.getRest10MinSec()).isEqualTo(120);
         assertThat(goal.getMealNum()).isEqualTo(3);
         assertThat(goal.getMeal1TimeSec()).isEqualTo(3_600);
+    }
+
+    @Test
+    void 기본_목표는_회원_식별자가_없으면_생성에_실패한다() {
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> Goal.createDefault(null))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(REQUIRED_VALUE_MISSING);
+    }
+
+    @Test
+    void 음수_목표값이면_목표_생성에_실패한다() {
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> Goal.create(
+                        1L,
+                        2L,
+                        LocalTime.of(9, 30),
+                        -1,
+                        2,
+                        1_800
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(VALUE_NEGATIVE);
     }
 }

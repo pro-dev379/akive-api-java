@@ -1,8 +1,10 @@
 package net.akive.api.user.application.port.in;
 
+import net.akive.api.common.domain.Email;
+
 public interface ValidateUserUseCase {
 
-    void validateUserExistsByEmail(String email);
+    void validateUserExistsByEmail(Email email);
     void validateUserExistsById(Long userId);
-    void validateEmailNotDuplicate(String email);
+    void validateEmailNotDuplicate(Email email);
 }

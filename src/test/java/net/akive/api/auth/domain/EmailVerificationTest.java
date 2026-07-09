@@ -1,6 +1,8 @@
 package net.akive.api.auth.domain;
 
+import net.akive.api.common.domain.Email;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
+import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
 import org.junit.jupiter.api.Test;
@@ -28,9 +30,9 @@ class EmailVerificationTest {
         EmailVerification emailVerification = emailVerification(verificationPurpose);
 
         // then
-        assertThat(emailVerification.getEmail()).isEqualTo(EMAIL);
+        assertThat(emailVerification.getEmail()).isEqualTo(Email.of(EMAIL));
         assertThat(emailVerification.getVerificationPurpose()).isEqualTo(verificationPurpose);
-        assertThat(emailVerification.getVerificationCode()).isEqualTo(VERIFICATION_CODE);
+        assertThat(emailVerification.getVerificationCode()).isEqualTo(EmailVerificationCode.of(VERIFICATION_CODE));
         assertThat(emailVerification.getResendCount()).isZero();
         assertThat(emailVerification.isVerified()).isFalse();
         assertThat(emailVerification.getExpiresAt()).isEqualTo(REQUESTED_AT.plus(EXPIRE_DURATION));
@@ -45,10 +47,10 @@ class EmailVerificationTest {
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
         // when
-        emailVerification.renew("654321", secondRequestedAt);
+        emailVerification.renew(EmailVerificationCode.of("654321"), secondRequestedAt);
 
         // then
-        assertThat(emailVerification.getVerificationCode()).isEqualTo("654321");
+        assertThat(emailVerification.getVerificationCode()).isEqualTo(EmailVerificationCode.of("654321"));
         assertThat(emailVerification.getResendCount()).isEqualTo(1);
         assertThat(emailVerification.isVerified()).isFalse();
         assertThat(emailVerification.getExpiresAt()).isEqualTo(secondRequestedAt.plus(EXPIRE_DURATION));
@@ -63,7 +65,10 @@ class EmailVerificationTest {
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerification.renew("654321", REQUESTED_AT.plusSeconds(10)))
+                .isThrownBy(() -> emailVerification.renew(
+                        EmailVerificationCode.of("654321"),
+                        REQUESTED_AT.plusSeconds(10)
+                ))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(RESEND_TOO_SOON);
     }
@@ -73,13 +78,13 @@ class EmailVerificationTest {
         // given
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
-        emailVerification.renew("111111", REQUESTED_AT.plusMinutes(1));
-        emailVerification.renew("222222", REQUESTED_AT.plusMinutes(2));
-        emailVerification.renew("333333", REQUESTED_AT.plusMinutes(3));
+        emailVerification.renew(EmailVerificationCode.of("111111"), REQUESTED_AT.plusMinutes(1));
+        emailVerification.renew(EmailVerificationCode.of("222222"), REQUESTED_AT.plusMinutes(2));
+        emailVerification.renew(EmailVerificationCode.of("333333"), REQUESTED_AT.plusMinutes(3));
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerification.renew("444444", REQUESTED_AT.plusMinutes(4)))
+                .isThrownBy(() -> emailVerification.renew(EmailVerificationCode.of("444444"), REQUESTED_AT.plusMinutes(4)))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(RESEND_LIMIT_EXCEEDED);
     }
@@ -91,7 +96,7 @@ class EmailVerificationTest {
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
         // when
-        emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plusMinutes(1));
+        emailVerification.verify(EmailVerificationCode.of(VERIFICATION_CODE), REQUESTED_AT.plusMinutes(1));
 
         // then
         assertThat(emailVerification.isVerified()).isTrue();
@@ -103,7 +108,7 @@ class EmailVerificationTest {
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
         // when
-        emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plus(EXPIRE_DURATION));
+        emailVerification.verify(EmailVerificationCode.of(VERIFICATION_CODE), REQUESTED_AT.plus(EXPIRE_DURATION));
 
         // then
         assertThat(emailVerification.isVerified()).isTrue();
@@ -114,11 +119,14 @@ class EmailVerificationTest {
         // given
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
-        emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plusMinutes(1));
+        emailVerification.verify(EmailVerificationCode.of(VERIFICATION_CODE), REQUESTED_AT.plusMinutes(1));
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plusMinutes(2)))
+                .isThrownBy(() -> emailVerification.verify(
+                        EmailVerificationCode.of(VERIFICATION_CODE),
+                        REQUESTED_AT.plusMinutes(2)
+                ))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(ALREADY_VERIFIED);
     }
@@ -130,7 +138,10 @@ class EmailVerificationTest {
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerification.verify("000000", REQUESTED_AT.plusMinutes(1)))
+                .isThrownBy(() -> emailVerification.verify(
+                        EmailVerificationCode.of("000000"),
+                        REQUESTED_AT.plusMinutes(1)
+                ))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(CODE_MISMATCH);
     }
@@ -144,7 +155,7 @@ class EmailVerificationTest {
         assertThatExceptionOfType(EmailVerificationException.class)
                 .isThrownBy(() ->
                         emailVerification.verify(
-                                VERIFICATION_CODE,
+                                EmailVerificationCode.of(VERIFICATION_CODE),
                                 REQUESTED_AT.plus(EXPIRE_DURATION).plusSeconds(1)
                         )
                 )
@@ -153,6 +164,11 @@ class EmailVerificationTest {
     }
 
     private EmailVerification emailVerification(EmailVerificationPurpose verificationPurpose) {
-        return EmailVerification.create(EMAIL, verificationPurpose, VERIFICATION_CODE, REQUESTED_AT);
+        return EmailVerification.create(
+                Email.of(EMAIL),
+                verificationPurpose,
+                EmailVerificationCode.of(VERIFICATION_CODE),
+                REQUESTED_AT
+        );
     }
 }

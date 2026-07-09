@@ -1,5 +1,6 @@
 package net.akive.api.user.infrastructure;
 
+import net.akive.api.common.domain.Email;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
@@ -25,7 +26,7 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
 
     private User saveUser() {
         User user = User.signUpByEmail(
-                "test@example.com",
+                Email.of("test@example.com"),
                 "nickname",
                 "encodedPassword",
                 USER

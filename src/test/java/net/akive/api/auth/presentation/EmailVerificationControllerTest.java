@@ -202,7 +202,12 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(verifyEmailVerificationCodeUseCase)
                 .should()
-                .verify(VerifyEmailVerificationCodeCommand.of("test@test.com", SIGN_UP, "123456"));
+                .verify(
+                    VerifyEmailVerificationCodeCommand.of(
+                            "test@test.com",
+                            SIGN_UP,
+                            "123456")
+                );
     }
 
     @Test

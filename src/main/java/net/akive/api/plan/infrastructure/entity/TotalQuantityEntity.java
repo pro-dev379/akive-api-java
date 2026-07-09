@@ -44,7 +44,7 @@ public class TotalQuantityEntity extends BaseTimeEntity {
     @Column(length = 10, nullable = false)
     private String subjectCategory;
 
-    private Integer totalQuantityAmount;
+    private int totalQuantityAmount;
 
     @Column(length = 10, nullable = false)
     private String unit;
@@ -52,17 +52,10 @@ public class TotalQuantityEntity extends BaseTimeEntity {
     @Column(length = 25)
     private String totalQuantityMemo;
 
-    public static TotalQuantityEntity reference(Long totalQuantityId) {
-        TotalQuantityEntity totalQuantityEntity = new TotalQuantityEntity();
-        totalQuantityEntity.totalQuantityId = totalQuantityId;
-
-        return totalQuantityEntity;
-    }
-
     public static TotalQuantityEntity fromModel(TotalQuantity totalQuantity) {
         TotalQuantityEntity totalQuantityEntity = new TotalQuantityEntity();
         totalQuantityEntity.totalQuantityId = totalQuantity.getTotalQuantityId();
-        totalQuantityEntity.sessionalPlan = SessionalPlanEntity.reference(totalQuantity.getSessionalPlanId());
+        totalQuantityEntity.sessionalPlan = SessionalPlanEntity.fromModel(totalQuantity.getSessionalPlan());
         totalQuantityEntity.subject = totalQuantity.getSubject();
         totalQuantityEntity.subjectCategory = totalQuantity.getSubjectCategory();
         totalQuantityEntity.totalQuantityAmount = totalQuantity.getTotalQuantityAmount();
@@ -75,7 +68,7 @@ public class TotalQuantityEntity extends BaseTimeEntity {
     public TotalQuantity toModel() {
         return TotalQuantity.create(
                 this.totalQuantityId,
-                this.sessionalPlan.getSessionalPlanId(),
+                this.sessionalPlan.toModel(),
                 this.subject,
                 this.subjectCategory,
                 this.totalQuantityAmount,

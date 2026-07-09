@@ -1,0 +1,158 @@
+package net.akive.api.plan.domain;
+
+import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.plan.domain.exception.WeeklyQuantityException;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+
+import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
+import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
+import static net.akive.api.plan.domain.exception.WeeklyQuantityErrorCode.AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT;
+import static net.akive.api.plan.domain.exception.WeeklyQuantityErrorCode.PERIOD_OUT_OF_SESSION_PERIOD;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+class WeeklyQuantityTest {
+
+    private static final SessionalPlan VALID_SESSIONAL_PLAN = SessionalPlan.create(
+            2L,
+            1L,
+            "세션",
+            SessionPeriod.of(LocalDate.of(2026, 7, 7), LocalDate.of(2026, 7, 14))
+    );
+    private static final TotalQuantity VALID_TOTAL_QUANTITY = TotalQuantity.create(
+            2L,
+            VALID_SESSIONAL_PLAN,
+            "수학",
+            "과목",
+            100,
+            "문제",
+            null
+    );
+    private static final WeekPeriod VALID_WEEK_PERIOD = WeekPeriod.of(
+            LocalDate.of(2026, 7, 7),
+            LocalDate.of(2026, 7, 14)
+    );
+
+    @Test
+    void 주간_계획량을_생성한다() {
+        // given
+        String weeklyQuantityMemo = "메모";
+
+        // when
+        WeeklyQuantity weeklyQuantity = WeeklyQuantity.create(
+                1L,
+                VALID_TOTAL_QUANTITY,
+                VALID_WEEK_PERIOD,
+                10,
+                weeklyQuantityMemo
+        );
+
+        // then
+        assertThat(weeklyQuantity.getWeeklyQuantityId()).isEqualTo(1L);
+        assertThat(weeklyQuantity.getTotalQuantity()).isEqualTo(VALID_TOTAL_QUANTITY);
+        assertThat(weeklyQuantity.getWeekPeriod()).isEqualTo(VALID_WEEK_PERIOD);
+        assertThat(weeklyQuantity.getWeeklyQuantityAmount()).isEqualTo(10);
+        assertThat(weeklyQuantity.getWeeklyQuantityMemo()).isEqualTo(weeklyQuantityMemo);
+    }
+
+    @Test
+    void 주간_계획량의_세션_총량_식별자는_null일_수_없다() {
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> WeeklyQuantity.create(
+                        1L,
+                        null,
+                        VALID_WEEK_PERIOD,
+                        10,
+                        null
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(REQUIRED_VALUE_MISSING);
+    }
+
+    @Test
+    void 주간_계획량은_음수일_수_없다() {
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> WeeklyQuantity.create(
+                        1L,
+                        VALID_TOTAL_QUANTITY,
+                        VALID_WEEK_PERIOD,
+                        -1,
+                        null
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(VALUE_NEGATIVE);
+    }
+
+    @Test
+    void 주간_계획량은_세션_총량보다_클_수_없다() {
+        assertThatExceptionOfType(WeeklyQuantityException.class)
+                .isThrownBy(() -> WeeklyQuantity.create(
+                        1L,
+                        VALID_TOTAL_QUANTITY,
+                        VALID_WEEK_PERIOD,
+                        101,
+                        null
+                ))
+                .extracting(WeeklyQuantityException::getErrorCode)
+                .isEqualTo(AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT);
+    }
+
+    @Test
+    void 주간_계획량의_기간은_null일_수_없다() {
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> WeeklyQuantity.create(
+                        1L,
+                        VALID_TOTAL_QUANTITY,
+                        null,
+                        10,
+                        null
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(REQUIRED_VALUE_MISSING);
+    }
+
+    @Test
+    void 주간_계획량의_기간은_세션_기간_시작일보다_빠를_수_없다() {
+        assertThatExceptionOfType(WeeklyQuantityException.class)
+                .isThrownBy(() -> WeeklyQuantity.create(
+                        1L,
+                        VALID_TOTAL_QUANTITY,
+                        WeekPeriod.of(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 13)),
+                        10,
+                        null
+                ))
+                .extracting(WeeklyQuantityException::getErrorCode)
+                .isEqualTo(PERIOD_OUT_OF_SESSION_PERIOD);
+    }
+
+    @Test
+    void 주간_계획량의_기간은_세션_기간_종료일보다_늦을_수_없다() {
+        assertThatExceptionOfType(WeeklyQuantityException.class)
+                .isThrownBy(() -> WeeklyQuantity.create(
+                        1L,
+                        VALID_TOTAL_QUANTITY,
+                        WeekPeriod.of(LocalDate.of(2026, 7, 8), LocalDate.of(2026, 7, 15)),
+                        10,
+                        null
+                ))
+                .extracting(WeeklyQuantityException::getErrorCode)
+                .isEqualTo(PERIOD_OUT_OF_SESSION_PERIOD);
+    }
+
+    @Test
+    void 주간_계획량의_메모는_25자를_초과할_수_없다() {
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> WeeklyQuantity.create(
+                        1L,
+                        VALID_TOTAL_QUANTITY,
+                        VALID_WEEK_PERIOD,
+                        10,
+                        "가".repeat(26)
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(MAX_LENGTH_EXCEEDED);
+    }
+}

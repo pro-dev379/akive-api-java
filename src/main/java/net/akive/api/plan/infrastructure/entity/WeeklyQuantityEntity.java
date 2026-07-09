@@ -5,10 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.persistence.BaseTimeEntity;
+import net.akive.api.plan.domain.TotalQuantity;
 import net.akive.api.plan.domain.WeeklyQuantity;
 import org.hibernate.annotations.OnDelete;
-
-import java.time.LocalDate;
 
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -32,30 +31,19 @@ public class WeeklyQuantityEntity extends BaseTimeEntity {
     @JoinColumn(name = "total_quantity_id", nullable = false)
     private TotalQuantityEntity totalQuantity;
 
-    @Column(nullable = false)
-    private LocalDate weekStartOn;
+    @Embedded
+    private WeekPeriodEntity weekPeriod;
 
-    @Column(nullable = false)
-    private LocalDate weekEndOn;
-
-    private Integer weeklyQuantityAmount;
+    private int weeklyQuantityAmount;
 
     @Column(length = 25)
     private String weeklyQuantityMemo;
 
-    public static WeeklyQuantityEntity reference(Long weeklyQuantityId) {
-        WeeklyQuantityEntity weeklyQuantityEntity = new WeeklyQuantityEntity();
-        weeklyQuantityEntity.weeklyQuantityId = weeklyQuantityId;
-
-        return weeklyQuantityEntity;
-    }
-
     public static WeeklyQuantityEntity fromModel(WeeklyQuantity weeklyQuantity) {
         WeeklyQuantityEntity weeklyQuantityEntity = new WeeklyQuantityEntity();
         weeklyQuantityEntity.weeklyQuantityId = weeklyQuantity.getWeeklyQuantityId();
-        weeklyQuantityEntity.totalQuantity = TotalQuantityEntity.reference(weeklyQuantity.getTotalQuantityId());
-        weeklyQuantityEntity.weekStartOn = weeklyQuantity.getWeekStartOn();
-        weeklyQuantityEntity.weekEndOn = weeklyQuantity.getWeekEndOn();
+        weeklyQuantityEntity.totalQuantity = TotalQuantityEntity.fromModel(weeklyQuantity.getTotalQuantity());
+        weeklyQuantityEntity.weekPeriod = WeekPeriodEntity.fromModel(weeklyQuantity.getWeekPeriod());
         weeklyQuantityEntity.weeklyQuantityAmount = weeklyQuantity.getWeeklyQuantityAmount();
         weeklyQuantityEntity.weeklyQuantityMemo = weeklyQuantity.getWeeklyQuantityMemo();
 
@@ -63,11 +51,12 @@ public class WeeklyQuantityEntity extends BaseTimeEntity {
     }
 
     public WeeklyQuantity toModel() {
+        TotalQuantity totalQuantity = this.totalQuantity.toModel();
+
         return WeeklyQuantity.create(
                 this.weeklyQuantityId,
-                this.totalQuantity.getTotalQuantityId(),
-                this.weekStartOn,
-                this.weekEndOn,
+                totalQuantity,
+                this.weekPeriod.toModel(),
                 this.weeklyQuantityAmount,
                 this.weeklyQuantityMemo
         );

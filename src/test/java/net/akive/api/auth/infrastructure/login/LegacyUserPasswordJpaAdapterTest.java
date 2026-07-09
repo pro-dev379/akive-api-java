@@ -1,5 +1,6 @@
 package net.akive.api.auth.infrastructure.login;
 
+import net.akive.api.common.domain.Email;
 import net.akive.api.auth.domain.login.LegacyUserPassword;
 import net.akive.api.auth.infrastructure.entity.LegacyUserPasswordEntity;
 import net.akive.api.support.RepositoryTestSupport;
@@ -17,7 +18,7 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_기존_패스워드가_존재하면_조회할_수_있다() {
         // given
         User user = User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -40,7 +41,7 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_기존_패스워드를_삭제할_수_있다() {
         // given
         User user = User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER

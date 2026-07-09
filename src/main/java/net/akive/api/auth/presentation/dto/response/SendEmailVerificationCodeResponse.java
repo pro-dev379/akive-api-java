@@ -17,7 +17,7 @@ public record SendEmailVerificationCodeResponse(
 
     public static SendEmailVerificationCodeResponse from(SendEmailVerificationCodeResult result) {
         return new SendEmailVerificationCodeResponse(
-                result.email(),
+                result.email().value(),
                 result.expiresAt(),
                 result.expireSeconds(),
                 result.resendIntervalSeconds()

@@ -1,13 +1,12 @@
 package net.akive.api.auth.application;
 
+import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.dto.command.login.LoginByEmailCommand;
 import net.akive.api.auth.application.dto.result.login.LoginResult;
 import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.application.port.out.login.DeleteLegacyUserPasswordPort;
 import net.akive.api.auth.application.port.out.login.LoadEmailLoginUserPort;
-import net.akive.api.auth.application.port.out.login.LoadLegacyUserPasswordPort;
-import net.akive.api.auth.domain.login.LegacyUserPassword;
 import net.akive.api.auth.domain.login.LoginUser;
 import net.akive.api.auth.domain.login.exception.LoginException;
 import net.akive.api.user.application.port.in.UpdatePasswordUseCase;
@@ -18,14 +17,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-
 import static net.akive.api.auth.domain.login.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class LoginServiceTest {
@@ -40,38 +39,28 @@ class LoginServiceTest {
     LoadEmailLoginUserPort loadEmailLoginUserPort;
 
     @Mock
-    LoadLegacyUserPasswordPort loadLegacyUserPasswordPort;
-
-    @Mock
     DeleteLegacyUserPasswordPort deleteLegacyUserPasswordPort;
 
     @Mock
-    PasswordEncoder passwordEncoder;
+    LoginDomainService loginDomainService;
 
     @Mock
-    LegacyPasswordVerifier legacyPasswordVerifier;
+    PasswordEncoder passwordEncoder;
 
     @InjectMocks
     LoginService loginService;
 
     @Test
-    void 저장된_패스워드와_일치하면_토큰을_발급한다() {
+    void 로그인_인증에_성공하면_토큰을_발급한다() {
         // given
-        LoginByEmailCommand command = new LoginByEmailCommand("test@test.com", "password123!");
-
-        LoginUser user = new LoginUser(
-                1L,
-                "test@test.com",
-                "encoded-password",
-                USER
-        );
-
+        LoginByEmailCommand command = new LoginByEmailCommand(Email.of("test@test.com"), "password123!");
+        LoginUser user = loginUser("encoded-password");
         IssueTokenResult token = new IssueTokenResult("access-token", "refresh-token");
 
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
-        given(passwordEncoder.matches(command.password(), user.password()))
-                .willReturn(true);
+        given(loginDomainService.authenticate(user, command.password()))
+                .willReturn(new LoginDomainService.LoginAuthentication(user, false));
         given(issueTokenUseCase.issue(user.userId(), user.roleType()))
                 .willReturn(token);
 
@@ -82,90 +71,24 @@ class LoginServiceTest {
         assertThat(result.accessToken()).isEqualTo("access-token");
         assertThat(result.refreshToken()).isEqualTo("refresh-token");
 
-        then(loadLegacyUserPasswordPort).shouldHaveNoInteractions();
-        then(legacyPasswordVerifier).shouldHaveNoInteractions();
+        then(loadEmailLoginUserPort).should().loadByEmailAndLeaveFalse(command.email());
+        then(loginDomainService).should().authenticate(user, command.password());
+        then(issueTokenUseCase).should().issue(user.userId(), user.roleType());
         then(updatePasswordUseCase).shouldHaveNoInteractions();
         then(deleteLegacyUserPasswordPort).shouldHaveNoInteractions();
     }
 
     @Test
-    void 존재하지_않는_이메일이라면_로그인할_수_없다() {
+    void 레거시_패스워드로_인증되면_패스워드를_마이그레이션하고_토큰을_발급한다() {
         // given
-        LoginByEmailCommand command = new LoginByEmailCommand("not-found@test.com", "password123!");
-
-        given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
-                .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
-
-        // when & then
-        assertThatExceptionOfType(LoginException.class)
-                .isThrownBy(() -> loginService.login(command))
-                .extracting(LoginException::getErrorCode)
-                .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
-
-        then(passwordEncoder).shouldHaveNoInteractions();
-        then(loadLegacyUserPasswordPort).shouldHaveNoInteractions();
-        then(legacyPasswordVerifier).shouldHaveNoInteractions();
-        then(updatePasswordUseCase).shouldHaveNoInteractions();
-        then(deleteLegacyUserPasswordPort).shouldHaveNoInteractions();
-        then(issueTokenUseCase).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void 저장된_패스워드와_일치하지_않으면_로그인할_수_없다() {
-        // given
-        LoginByEmailCommand command = new LoginByEmailCommand("test@test.com", "wrong-password");
-
-        LoginUser user = new LoginUser(
-                1L,
-                "test@test.com",
-                "encoded-password",
-                USER
-        );
-
-        given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
-                .willReturn(user);
-        given(passwordEncoder.matches(command.password(), user.password()))
-                .willReturn(false);
-
-        // when & then
-        assertThatExceptionOfType(LoginException.class)
-                .isThrownBy(() -> loginService.login(command))
-                .extracting(LoginException::getErrorCode)
-                .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
-
-        then(loadLegacyUserPasswordPort).shouldHaveNoInteractions();
-        then(legacyPasswordVerifier).shouldHaveNoInteractions();
-        then(updatePasswordUseCase).shouldHaveNoInteractions();
-        then(deleteLegacyUserPasswordPort).shouldHaveNoInteractions();
-        then(issueTokenUseCase).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void 저장된_레거시_패스워드와_일치하면_패스워드를_마이그레이션하고_토큰을_발급한다() {
-        // given
-        LoginByEmailCommand command = new LoginByEmailCommand("test@test.com", "password123!");
-
-        LoginUser user = new LoginUser(
-                1L,
-                "test@test.com",
-                null,
-                USER
-        );
-
-        LegacyUserPassword legacyUserPassword = new LegacyUserPassword(
-                1L,
-                "legacy-password",
-                "legacy-salt"
-        );
-
+        LoginByEmailCommand command = new LoginByEmailCommand(Email.of("test@test.com"), "password123!");
+        LoginUser user = loginUser(null);
         IssueTokenResult token = new IssueTokenResult("access-token", "refresh-token");
 
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
-        given(loadLegacyUserPasswordPort.loadByUserId(user.userId()))
-                .willReturn(Optional.of(legacyUserPassword));
-        given(legacyPasswordVerifier.matches(command.password(), legacyUserPassword))
-                .willReturn(true);
+        given(loginDomainService.authenticate(user, command.password()))
+                .willReturn(new LoginDomainService.LoginAuthentication(user, true));
         given(passwordEncoder.encode(command.password()))
                 .willReturn("encoded-password");
         given(issueTokenUseCase.issue(user.userId(), user.roleType()))
@@ -178,28 +101,18 @@ class LoginServiceTest {
         assertThat(result.accessToken()).isEqualTo("access-token");
         assertThat(result.refreshToken()).isEqualTo("refresh-token");
 
-        then(updatePasswordUseCase).should()
-                .updatePassword(user.userId(), "encoded-password");
-        then(deleteLegacyUserPasswordPort).should()
-                .deleteByUserId(user.userId());
+        then(updatePasswordUseCase).should().updatePassword(user.userId(), "encoded-password");
+        then(deleteLegacyUserPasswordPort).should().deleteByUserId(user.userId());
+        then(issueTokenUseCase).should().issue(user.userId(), user.roleType());
     }
 
     @Test
-    void 저장된_레거시_패스워드가_없으면_로그인할_수_없다() {
+    void 존재하지_않는_이메일이라면_로그인할_수_없다() {
         // given
-        LoginByEmailCommand command = new LoginByEmailCommand("test@test.com", "password123!");
-
-        LoginUser user = new LoginUser(
-                1L,
-                "test@test.com",
-                null,
-                USER
-        );
+        LoginByEmailCommand command = new LoginByEmailCommand(Email.of("not-found@test.com"), "password123!");
 
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
-                .willReturn(user);
-        given(loadLegacyUserPasswordPort.loadByUserId(user.userId()))
-                .willReturn(Optional.empty());
+                .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
 
         // when & then
         assertThatExceptionOfType(LoginException.class)
@@ -207,37 +120,22 @@ class LoginServiceTest {
                 .extracting(LoginException::getErrorCode)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
-        then(legacyPasswordVerifier).shouldHaveNoInteractions();
-        then(passwordEncoder).shouldHaveNoInteractions();
+        then(loginDomainService).shouldHaveNoInteractions();
         then(updatePasswordUseCase).shouldHaveNoInteractions();
         then(deleteLegacyUserPasswordPort).shouldHaveNoInteractions();
         then(issueTokenUseCase).shouldHaveNoInteractions();
     }
 
     @Test
-    void 저장된_레거시_패스워드와_일치하지_않으면_로그인할_수_없다() {
+    void 로그인_인증에_실패하면_토큰을_발급하지_않는다() {
         // given
-        LoginByEmailCommand command = new LoginByEmailCommand("test@test.com", "wrong-password");
-
-        LoginUser user = new LoginUser(
-                1L,
-                "test@test.com",
-                null,
-                USER
-        );
-
-        LegacyUserPassword legacyUserPassword = new LegacyUserPassword(
-                1L,
-                "legacy-password",
-                "legacy-salt"
-        );
+        LoginByEmailCommand command = new LoginByEmailCommand(Email.of("test@test.com"), "wrong-password");
+        LoginUser user = loginUser("encoded-password");
 
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
-        given(loadLegacyUserPasswordPort.loadByUserId(user.userId()))
-                .willReturn(Optional.of(legacyUserPassword));
-        given(legacyPasswordVerifier.matches(command.password(), legacyUserPassword))
-                .willReturn(false);
+        given(loginDomainService.authenticate(user, command.password()))
+                .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
 
         // when & then
         assertThatExceptionOfType(LoginException.class)
@@ -245,8 +143,17 @@ class LoginServiceTest {
                 .extracting(LoginException::getErrorCode)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
-        then(updatePasswordUseCase).shouldHaveNoInteractions();
-        then(deleteLegacyUserPasswordPort).shouldHaveNoInteractions();
+        then(updatePasswordUseCase).should(never()).updatePassword(any(), any());
+        then(deleteLegacyUserPasswordPort).should(never()).deleteByUserId(any());
         then(issueTokenUseCase).shouldHaveNoInteractions();
+    }
+
+    private LoginUser loginUser(String password) {
+        return LoginUser.create(
+                1L,
+                Email.of("test@test.com"),
+                password,
+                USER
+        );
     }
 }

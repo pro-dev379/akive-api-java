@@ -10,17 +10,10 @@ import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerif
 import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.out.emailverification.*;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
-import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
-import net.akive.api.common.time.CurrentTimeProvider;
-import net.akive.api.user.application.port.in.ValidateUserUseCase;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,31 +22,15 @@ class EmailVerificationService implements
         VerifyEmailVerificationCodeUseCase,
         EnsureEmailVerifiedUseCase {
 
-    private final ValidateUserUseCase validateUserUseCase;
-
     private final SendEmailVerificationMailPort sendEmailVerificationMailPort;
-    private final GenerateEmailVerificationCodePort generateEmailVerificationCodePort;
-    private final LoadEmailVerificationPort loadEmailVerificationPort;
     private final SaveEmailVerificationPort saveEmailVerificationPort;
-
-    private final CurrentTimeProvider currentTimeProvider;
+    private final EmailVerificationDomainService emailVerificationDomainService;
 
     @Override
     public SendEmailVerificationCodeResult send(SendEmailVerificationCodeCommand command) {
-        validateEmailByPurpose(command.email(), command.verificationPurpose());
+        EmailVerification emailVerification = emailVerificationDomainService.issue(command.email(), command.verificationPurpose());
 
-        LocalDateTime requestedAt = currentTimeProvider.now();
-        String verificationCode = generateEmailVerificationCodePort.generate();
-
-        EmailVerification emailVerification = loadEmailVerificationPort
-                .loadByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
-                .map(previous -> {
-                    previous.renew(verificationCode, requestedAt);
-                    return previous;
-                })
-                .orElseGet(() -> EmailVerification.create(command.email(), command.verificationPurpose(), verificationCode, requestedAt));
-
-        sendEmailVerificationMailPort.send(command.email(), verificationCode, EXPIRE_DURATION);
+        sendEmailVerificationMailPort.send(emailVerification, EXPIRE_DURATION);
         saveEmailVerificationPort.save(emailVerification, EXPIRE_DURATION);
 
         return SendEmailVerificationCodeResult.of(
@@ -66,11 +43,11 @@ class EmailVerificationService implements
 
     @Override
     public void verify(VerifyEmailVerificationCodeCommand command) {
-        EmailVerification emailVerification = loadEmailVerificationPort
-                .loadByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
-                .orElseThrow(() -> new EmailVerificationException(NOT_FOUND));
-
-        emailVerification.verify(command.verificationCode(), currentTimeProvider.now());
+        EmailVerification emailVerification = emailVerificationDomainService.verify(
+                command.email(),
+                command.verificationPurpose(),
+                command.verificationCode()
+        );
 
         saveEmailVerificationPort.save(emailVerification, VERIFIED_EXPIRATION_DURATION);
     }
@@ -78,19 +55,6 @@ class EmailVerificationService implements
     @Override
     @Transactional(readOnly = true)
     public void ensureVerified(EnsureEmailVerifiedCommand command) {
-        EmailVerification emailVerification = loadEmailVerificationPort
-                .loadByEmailAndVerificationPurpose(command.email(), command.verificationPurpose())
-                .orElseThrow(() -> new EmailVerificationException(NOT_VERIFIED));
-
-        if (!emailVerification.isVerified()) {
-            throw new EmailVerificationException(NOT_VERIFIED);
-        }
-    }
-
-    private void validateEmailByPurpose(String email, EmailVerificationPurpose verificationPurpose) {
-        switch (verificationPurpose) {
-            case FIND_PASSWORD ->  validateUserUseCase.validateUserExistsByEmail(email);
-            case SIGN_UP -> validateUserUseCase.validateEmailNotDuplicate(email);
-        }
+        emailVerificationDomainService.ensureVerified(command.email(), command.verificationPurpose());
     }
 }

@@ -1,5 +1,7 @@
 package net.akive.api.plan.infrastructure;
 
+import net.akive.api.common.domain.Email;
+import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
@@ -17,7 +19,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 세셔널_플랜을_저장한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -26,8 +28,10 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 7, 7)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
         );
 
         // when
@@ -37,15 +41,19 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         assertThat(savedSessionalPlan.getSessionalPlanId()).isNotNull();
         assertThat(savedSessionalPlan.getUserId()).isEqualTo(savedUser.getUserId());
         assertThat(savedSessionalPlan.getSessionName()).isEqualTo("1회차");
-        assertThat(savedSessionalPlan.getSessionStartOn()).isEqualTo(LocalDate.of(2026, 7, 1));
-        assertThat(savedSessionalPlan.getSessionEndOn()).isEqualTo(LocalDate.of(2026, 7, 7));
+        assertThat(savedSessionalPlan.getSessionPeriod()).isEqualTo(
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
+        );
     }
 
     @Test
     void 회원의_세셔널_플랜_목록을_식별자_역순으로_조회한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -55,15 +63,19 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 7, 7)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
         );
         SessionalPlan secondPlan = SessionalPlan.create(
                 null,
                 savedUser.getUserId(),
                 "2회차",
-                LocalDate.of(2026, 7, 8),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 14)
+                )
         );
 
         SessionalPlan savedFirstPlan = saveSessionalPlanPort.save(firstPlan);
@@ -89,7 +101,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_세셔널_플랜을_조회한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -98,8 +110,10 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 7, 7)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
         );
         SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
 
@@ -115,21 +129,25 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         assertThat(loadedSessionalPlan.getSessionalPlanId()).isEqualTo(savedSessionalPlan.getSessionalPlanId());
         assertThat(loadedSessionalPlan.getUserId()).isEqualTo(savedUser.getUserId());
         assertThat(loadedSessionalPlan.getSessionName()).isEqualTo("1회차");
-        assertThat(loadedSessionalPlan.getSessionStartOn()).isEqualTo(LocalDate.of(2026, 7, 1));
-        assertThat(loadedSessionalPlan.getSessionEndOn()).isEqualTo(LocalDate.of(2026, 7, 7));
+        assertThat(loadedSessionalPlan.getSessionPeriod()).isEqualTo(
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
+        );
     }
 
     @Test
     void 다른_회원의_세셔널_플랜은_조회되지_않는다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
         ));
         User anotherUser = saveUserPort.save(User.signUpByEmail(
-                "another@test.com",
+                Email.of("another@test.com"),
                 "USER@fghij",
                 "password123!",
                 USER
@@ -138,8 +156,10 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 7, 7)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
         );
         SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
 
@@ -154,13 +174,13 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_세셔널_플랜명이_이미_존재하는지_확인한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
         ));
         User anotherUser = saveUserPort.save(User.signUpByEmail(
-                "another@test.com",
+                Email.of("another@test.com"),
                 "USER@fghij",
                 "password123!",
                 USER
@@ -170,8 +190,10 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 7, 7)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
         );
         saveSessionalPlanPort.save(sessionalPlan);
 
@@ -188,13 +210,13 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 현재_세셔널_플랜을_제외하고_회원의_세셔널_플랜명이_이미_존재하는지_확인한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
         ));
         User anotherUser = saveUserPort.save(User.signUpByEmail(
-                "another@test.com",
+                Email.of("another@test.com"),
                 "USER@fghij",
                 "password123!",
                 USER
@@ -204,22 +226,28 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 7, 7)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
         );
         SessionalPlan secondPlan = SessionalPlan.create(
                 null,
                 savedUser.getUserId(),
                 "2회차",
-                LocalDate.of(2026, 7, 8),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 14)
+                )
         );
         SessionalPlan anotherUserPlan = SessionalPlan.create(
                 null,
                 anotherUser.getUserId(),
                 "2회차",
-                LocalDate.of(2026, 7, 8),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 14)
+                )
         );
 
         SessionalPlan savedFirstPlan = saveSessionalPlanPort.save(firstPlan);
@@ -248,7 +276,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_세셔널_플랜을_삭제한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -257,8 +285,10 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 7, 7)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
         );
         SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
 
@@ -278,13 +308,13 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 다른_회원의_세셔널_플랜은_삭제하지_않는다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
         ));
         User anotherUser = saveUserPort.save(User.signUpByEmail(
-                "another@test.com",
+                Email.of("another@test.com"),
                 "USER@fghij",
                 "password123!",
                 USER
@@ -293,8 +323,10 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 7, 7)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
         );
         SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
 

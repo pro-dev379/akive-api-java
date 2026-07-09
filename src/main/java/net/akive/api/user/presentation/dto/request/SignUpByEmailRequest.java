@@ -18,6 +18,6 @@ public record SignUpByEmailRequest(
         String password
 ) {
         public SignUpByEmailCommand toCommand() {
-                return new SignUpByEmailCommand(email, roleType, password);
+                return SignUpByEmailCommand.of(email, roleType, password);
         }
 }

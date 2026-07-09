@@ -11,6 +11,7 @@ public enum EmailVerificationErrorCode implements ErrorCode {
 
     CODE_MISMATCH(HttpStatus.BAD_REQUEST, "EMAIL_VERIFICATION_400_1", "Verification code does not match."),
     NOT_VERIFIED(HttpStatus.BAD_REQUEST, "EMAIL_VERIFICATION_400_2", "Verification has not been completed."),
+    INVALID_CODE_FORMAT(HttpStatus.BAD_REQUEST, "EMAIL_VERIFICATION_400_3", "Verification code format is invalid."),
     EXPIRED(HttpStatus.UNAUTHORIZED, "EMAIL_VERIFICATION_401_1", "Verification code expired."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "EMAIL_VERIFICATION_404_1", "Verification code not found."),
     ALREADY_VERIFIED(HttpStatus.CONFLICT, "EMAIL_VERIFICATION_409_1", "Verification code already verified."),

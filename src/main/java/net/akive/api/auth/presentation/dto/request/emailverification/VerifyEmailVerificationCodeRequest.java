@@ -11,6 +11,6 @@ public record VerifyEmailVerificationCodeRequest(
 ) {
 
     public VerifyEmailVerificationCodeCommand toCommand() {
-        return new VerifyEmailVerificationCodeCommand(email, verificationPurpose, verificationCode);
+        return VerifyEmailVerificationCodeCommand.of(email, verificationPurpose, verificationCode);
     }
 }

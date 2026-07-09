@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import static lombok.AccessLevel.PRIVATE;
+import static net.akive.api.common.domain.DomainValidator.*;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -42,23 +43,23 @@ public class MentoringProfile {
     ) {
         return MentoringProfile.builder()
                 .mentoringProfileId(mentoringProfileId)
-                .userId(userId)
-                .goal(goal)
-                .preference(preference)
-                .constraint(constraint)
-                .weakness(weakness)
-                .strength(strength)
-                .recurringPattern(recurringPattern)
-                .decisionOrCommitment(decisionOrCommitment)
-                .studyPlan(studyPlan)
-                .behavioralPattern(behavioralPattern)
-                .effectiveAdvice(effectiveAdvice)
+                .userId(requirePositive(userId))
+                .goal(requireMaxLengthIfPresent(goal, 140))
+                .preference(requireMaxLengthIfPresent(preference, 100))
+                .constraint(requireMaxLengthIfPresent(constraint, 100))
+                .weakness(requireMaxLengthIfPresent(weakness, 140))
+                .strength(requireMaxLengthIfPresent(strength, 80))
+                .recurringPattern(requireMaxLengthIfPresent(recurringPattern, 80))
+                .decisionOrCommitment(requireMaxLengthIfPresent(decisionOrCommitment, 120))
+                .studyPlan(requireMaxLengthIfPresent(studyPlan, 220))
+                .behavioralPattern(requireMaxLengthIfPresent(behavioralPattern, 80))
+                .effectiveAdvice(requireMaxLengthIfPresent(effectiveAdvice, 140))
                 .build();
     }
 
     public static MentoringProfile createDefault(Long userId) {
         return MentoringProfile.builder()
-                .userId(userId)
+                .userId(requirePositive(userId))
                 .build();
     }
 }

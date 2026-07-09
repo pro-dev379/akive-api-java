@@ -1,5 +1,9 @@
 package net.akive.api.auth.infrastructure.emailverification;
 
+import net.akive.api.auth.domain.emailverification.EmailVerification;
+import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
+import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+import net.akive.api.common.domain.Email;
 import net.akive.api.common.email.SendEmailService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.argThat;
@@ -27,13 +32,18 @@ class EmailVerificationMailSenderAdapterTest {
     void 이메일_인증_메일을_발송한다() {
         // given
         String email = "test@test.com";
-        String verificationCode = "123456";
+        EmailVerificationCode verificationCode = EmailVerificationCode.of("123456");
         Duration expireDuration = Duration.ofMinutes(5);
+        EmailVerification emailVerification = EmailVerification.create(
+                Email.of(email),
+                EmailVerificationPurpose.SIGN_UP,
+                verificationCode,
+                LocalDateTime.of(2025, 5, 21, 10, 0)
+        );
 
         // when
         emailVerificationMailSenderAdapter.send(
-                email,
-                verificationCode,
+                emailVerification,
                 expireDuration
         );
 
@@ -43,7 +53,7 @@ class EmailVerificationMailSenderAdapterTest {
                 eq("[AKIVE] 인증 코드가 도착했어요."),
                 eq("email/verification-code"),
                 argThat(variables ->
-                        variables.get("verificationCode").equals(verificationCode)
+                        variables.get("verificationCode").equals(verificationCode.value())
                                 && variables.get("expireMin").equals(5L)
                 )
         );

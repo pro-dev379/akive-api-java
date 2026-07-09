@@ -5,6 +5,7 @@ import net.akive.api.plan.application.dto.result.DailyTodoResult;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
+import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,15 +41,19 @@ class QuerySessionalPlanServiceTest {
                 2L,
                 userId,
                 "2회차",
-                LocalDate.of(2026, 7, 8),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 14)
+                )
         );
         SessionalPlan secondPlan = SessionalPlan.create(
                 1L,
                 userId,
                 "1회차",
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 7, 7)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
         );
 
         given(loadSessionalPlanPort.loadAllByUserIdOrderBySessionalPlanIdDesc(userId))
@@ -62,21 +67,24 @@ class QuerySessionalPlanServiceTest {
                 .extracting(
                         SessionalPlanSummaryResult::sessionalPlanId,
                         SessionalPlanSummaryResult::sessionName,
-                        SessionalPlanSummaryResult::sessionStartOn,
-                        SessionalPlanSummaryResult::sessionEndOn
+                        SessionalPlanSummaryResult::sessionPeriod
                 )
                 .containsExactly(
                         tuple(
                                 2L,
                                 "2회차",
-                                LocalDate.of(2026, 7, 8),
-                                LocalDate.of(2026, 7, 14)
+                                SessionPeriod.of(
+                                        LocalDate.of(2026, 7, 8),
+                                        LocalDate.of(2026, 7, 14)
+                                )
                         ),
                         tuple(
                                 1L,
                                 "1회차",
-                                LocalDate.of(2026, 7, 1),
-                                LocalDate.of(2026, 7, 7)
+                                SessionPeriod.of(
+                                        LocalDate.of(2026, 7, 1),
+                                        LocalDate.of(2026, 7, 7)
+                                )
                         )
                 );
 

@@ -1,6 +1,7 @@
 package net.akive.api.user.application;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.port.in.ValidateUserUseCase;
 import net.akive.api.user.application.port.out.ValidateUserPort;
 import net.akive.api.user.exception.UserException;
@@ -17,7 +18,7 @@ class ValidateUserService implements ValidateUserUseCase {
     private final ValidateUserPort validateUserPort;
 
     @Override
-    public void validateUserExistsByEmail(String email) {
+    public void validateUserExistsByEmail(Email email) {
         if (!validateUserPort.existsByEmailAndLeaveFalse(email)) {
             throw new UserException(NOT_FOUND);
         }
@@ -31,7 +32,7 @@ class ValidateUserService implements ValidateUserUseCase {
     }
 
     @Override
-    public void validateEmailNotDuplicate(String email) {
+    public void validateEmailNotDuplicate(Email email) {
         if (validateUserPort.existsByEmail(email)) {
             throw new UserException(EMAIL_ALREADY_EXISTS);
         }

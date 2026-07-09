@@ -1,6 +1,8 @@
 package net.akive.api.auth.infrastructure.emailverification;
 
+import net.akive.api.common.domain.Email;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
+import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.support.StoreTestSupport;
 import org.junit.jupiter.api.Test;
@@ -21,15 +23,21 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
         String email = "test@test.com";
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
-        EmailVerification emailVerification = EmailVerification.create(email, verificationPurpose, "123456", requestedAt);
+        EmailVerification emailVerification = EmailVerification.create(
+                Email.of(email),
+                verificationPurpose,
+                EmailVerificationCode.of("123456"),
+                requestedAt
+        );
 
         // when
         saveEmailVerificationPort.save(emailVerification, Duration.ofMinutes(5));
-        Optional<EmailVerification> found = loadEmailVerificationPort.loadByEmailAndVerificationPurpose(email, verificationPurpose);
+        Optional<EmailVerification> found =
+                loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(email), verificationPurpose);
 
         // then
         assertThat(found).isPresent();
-        assertThat(found.get().getVerificationCode()).isEqualTo("123456");
+        assertThat(found.get().getVerificationCode()).isEqualTo(EmailVerificationCode.of("123456"));
         assertThat(found.get().getResendCount()).isZero();
         assertThat(found.get().isVerified()).isFalse();
         assertThat(found.get().getExpiresAt()).isEqualTo(requestedAt.plusMinutes(5));
@@ -43,9 +51,9 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
         String email = "test@test.com";
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         EmailVerification emailVerification = EmailVerification.create(
-                email,
+                Email.of(email),
                 verificationPurpose,
-                "123456",
+                EmailVerificationCode.of("123456"),
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
@@ -55,7 +63,8 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
         deleteEmailVerificationPort.delete(emailVerification);
 
         // then
-        Optional<EmailVerification> found = loadEmailVerificationPort.loadByEmailAndVerificationPurpose(email, verificationPurpose);
+        Optional<EmailVerification> found =
+                loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(email), verificationPurpose);
 
         assertThat(found).isEmpty();
     }
@@ -66,9 +75,9 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
         String email = "test@test.com";
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         EmailVerification emailVerification = EmailVerification.create(
-                email,
+                Email.of(email),
                 verificationPurpose,
-                "123456",
+                EmailVerificationCode.of("123456"),
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
@@ -80,7 +89,10 @@ class EmailVerificationRedisAdapterTest extends StoreTestSupport {
                 .atMost(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
                     Optional<EmailVerification> found =
-                            loadEmailVerificationPort.loadByEmailAndVerificationPurpose(email, verificationPurpose);
+                            loadEmailVerificationPort.loadByEmailAndVerificationPurpose(
+                                    Email.of(email),
+                                    verificationPurpose
+                            );
 
                     assertThat(found).isEmpty();
                 });

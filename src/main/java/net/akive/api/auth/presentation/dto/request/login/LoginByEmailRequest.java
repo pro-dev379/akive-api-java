@@ -9,6 +9,6 @@ public record LoginByEmailRequest(
 ) {
 
     public LoginByEmailCommand toCommand() {
-        return new LoginByEmailCommand(email, password);
+        return LoginByEmailCommand.of(email, password);
     }
 }

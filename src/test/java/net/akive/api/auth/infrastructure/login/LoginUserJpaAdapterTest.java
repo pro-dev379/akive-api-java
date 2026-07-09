@@ -1,5 +1,6 @@
 package net.akive.api.auth.infrastructure.login;
 
+import net.akive.api.common.domain.Email;
 import net.akive.api.auth.domain.login.LoginUser;
 import net.akive.api.auth.domain.login.exception.LoginException;
 import net.akive.api.support.RepositoryTestSupport;
@@ -17,7 +18,7 @@ class LoginUserJpaAdapterTest extends RepositoryTestSupport {
     void 이메일_로그인_회원이_존재하면_조회할_수_있다() {
         // given
         User user = User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "encoded-password",
                 USER
@@ -26,20 +27,19 @@ class LoginUserJpaAdapterTest extends RepositoryTestSupport {
         User savedUser = saveUserPort.save(user);
 
         // when
-        LoginUser loginUser =
-                loadEmailLoginUserPort.loadByEmailAndLeaveFalse(savedUser.getEmail());
+        LoginUser loginUser = loadEmailLoginUserPort.loadByEmailAndLeaveFalse(savedUser.getEmail());
 
         // then
         assertThat(loginUser.userId()).isEqualTo(savedUser.getUserId());
         assertThat(loginUser.email()).isEqualTo(savedUser.getEmail());
-        assertThat(loginUser.password()).isEqualTo(savedUser.getPassword());
+        assertThat(loginUser.passwordValue()).isEqualTo(savedUser.getPassword());
         assertThat(loginUser.roleType()).isEqualTo(savedUser.getRoleType());
     }
 
     @Test
     void 이메일_로그인_회원이_존재하지_않으면_로그인할_수_없다() {
         // given
-        String email = "none@test.com";
+        Email email = Email.of("none@test.com");
 
         // when & then
         assertThatExceptionOfType(LoginException.class)

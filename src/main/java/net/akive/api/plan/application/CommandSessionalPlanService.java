@@ -1,7 +1,6 @@
 package net.akive.api.plan.application;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
@@ -26,21 +25,16 @@ class CommandSessionalPlanService implements
         UpdateSessionalPlanUseCase {
 
     private final LoadSessionalPlanPort loadSessionalPlanPort;
-    private final ValidateTotalQuantityPort validateTotalQuantityPort;
     private final SaveSessionalPlanPort saveSessionalPlanPort;
     private final DeleteSessionalPlanPort deleteSessionalPlanPort;
-    private final ValidateSessionalPlanPort validateSessionalPlanPort;
-    private final CurrentTimeProvider currentTimeProvider;
+    private final SessionalPlanDomainService sessionalPlanDomainService;
 
     @Override
     public SessionalPlanSummaryResult create(CreateSessionalPlanCommand command) {
-        SessionalPlan sessionalPlan = SessionalPlan.createForUser(
+        SessionalPlan sessionalPlan = sessionalPlanDomainService.createForUser(
                 command.userId(),
                 command.sessionName(),
-                command.sessionStartOn(),
-                command.sessionEndOn(),
-                hasDuplicateSessionName(command.userId(), command.sessionName()),
-                currentTimeProvider.now()
+                command.sessionPeriod()
         );
 
         SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
@@ -60,22 +54,10 @@ class CommandSessionalPlanService implements
     public void update(UpdateSessionalPlanCommand command) {
         SessionalPlan sessionalPlan = loadSessionalPlan(command.sessionalPlanId(), command.userId());
 
-        boolean duplicateSessionNameExists =
-                hasDuplicateSessionNameExceptCurrent(
-                        command.userId(),
-                        command.sessionName(),
-                        command.sessionalPlanId()
-                );
-
-        boolean hasTotalQuantity = !duplicateSessionNameExists && hasTotalQuantity(command.sessionalPlanId());
-
-        SessionalPlan updatedSessionalPlan = sessionalPlan.update(
+        SessionalPlan updatedSessionalPlan = sessionalPlanDomainService.update(
+                sessionalPlan,
                 command.sessionName(),
-                command.sessionStartOn(),
-                command.sessionEndOn(),
-                duplicateSessionNameExists,
-                hasTotalQuantity,
-                currentTimeProvider.now()
+                command.sessionPeriod()
         );
 
         saveSessionalPlanPort.save(updatedSessionalPlan);
@@ -85,17 +67,5 @@ class CommandSessionalPlanService implements
         return loadSessionalPlanPort
                 .loadBySessionalPlanIdAndUserId(sessionalPlanId, userId)
                 .orElseThrow(() -> new SessionalPlanException(NOT_FOUND));
-    }
-
-    private boolean hasDuplicateSessionNameExceptCurrent(Long userId, String sessionName, Long sessionalPlanId) {
-        return validateSessionalPlanPort.existsByUserIdAndSessionNameAndSessionalPlanIdNot(userId, sessionName, sessionalPlanId);
-    }
-
-    private boolean hasDuplicateSessionName(Long userId, String sessionName) {
-        return validateSessionalPlanPort.existsByUserIdAndSessionName(userId, sessionName);
-    }
-
-    private boolean hasTotalQuantity(Long sessionalPlanId) {
-        return validateTotalQuantityPort.existsBySessionalPlanId(sessionalPlanId);
     }
 }

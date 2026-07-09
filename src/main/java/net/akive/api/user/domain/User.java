@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.domain.Email;
 
 import static lombok.AccessLevel.PRIVATE;
+import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 
 @Getter
@@ -14,8 +16,10 @@ import static net.akive.api.user.domain.LoginType.EMAIL;
 @AllArgsConstructor(access = PRIVATE)
 public class User {
 
+    private static final int NICKNAME_MAX_LENGTH = 100;
+
     private Long userId;
-    private String email;
+    private Email email;
     private RoleType roleType;
     private LoginType loginType;
     private String nickname;
@@ -27,7 +31,7 @@ public class User {
 
     public static User create(
             Long userId,
-            String email,
+            Email email,
             RoleType roleType,
             LoginType loginType,
             String nickname,
@@ -39,11 +43,11 @@ public class User {
     ) {
         return User.builder()
                 .userId(userId)
-                .email(email)
-                .roleType(roleType)
-                .loginType(loginType)
-                .nickname(nickname)
-                .password(password)
+                .email(requireNonNull(email))
+                .roleType(requireNonNull(roleType))
+                .loginType(requireNonNull(loginType))
+                .nickname(validateNickname(nickname))
+                .password(validateEncodedPassword(password))
                 .imgUrl(imgUrl)
                 .aim(aim)
                 .leave(leave)
@@ -52,22 +56,30 @@ public class User {
     }
 
     public static User signUpByEmail(
-            String email,
+            Email email,
             String nickname,
             String encodedPassword,
             RoleType roleType
     ) {
         return User.builder()
-                .email(email)
-                .roleType(roleType)
-                .loginType(EMAIL)
-                .nickname(nickname)
-                .password(encodedPassword)
+                .email(requireNonNull(email))
+                .roleType(requireNonNull(roleType))
+                .loginType(requireNonNull(EMAIL))
+                .nickname(validateNickname(nickname))
+                .password(validateEncodedPassword(encodedPassword))
                 .leave(false)
                 .build();
     }
 
     public void updatePassword(String encodedPassword) {
-        this.password = encodedPassword;
+        this.password = validateEncodedPassword(encodedPassword);
+    }
+
+    private static String validateNickname(String nickname) {
+        return requireMaxLength(requireNotBlank(nickname), NICKNAME_MAX_LENGTH);
+    }
+
+    private static String validateEncodedPassword(String encodedPassword) {
+        return requireNotBlank(encodedPassword);
     }
 }

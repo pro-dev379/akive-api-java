@@ -1,9 +1,10 @@
 package net.akive.api.auth.application.dto.command.emailverification;
 
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+import net.akive.api.common.domain.Email;
 
 public record SendEmailVerificationCodeCommand(
-        String email,
+        Email email,
         EmailVerificationPurpose verificationPurpose
 ) {
 
@@ -11,6 +12,6 @@ public record SendEmailVerificationCodeCommand(
             String email,
             EmailVerificationPurpose verificationPurpose
     ) {
-        return new SendEmailVerificationCodeCommand(email, verificationPurpose);
+        return new SendEmailVerificationCodeCommand(Email.of(email), verificationPurpose);
     }
 }

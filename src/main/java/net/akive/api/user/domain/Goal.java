@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalTime;
 
 import static lombok.AccessLevel.PRIVATE;
+import static net.akive.api.common.domain.DomainValidator.*;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -32,17 +33,17 @@ public class Goal {
     ) {
         return Goal.builder()
                 .goalId(goalId)
-                .userId(userId)
-                .attendOn(attendOn)
-                .rest10MinSec(rest10MinSec)
-                .mealNum(mealNum)
-                .meal1TimeSec(meal1TimeSec)
+                .userId(requirePositive(userId))
+                .attendOn(requireNonNull(attendOn))
+                .rest10MinSec(requireNonNegative(rest10MinSec))
+                .mealNum(requireNonNegative(mealNum))
+                .meal1TimeSec(requireNonNegative(meal1TimeSec))
                 .build();
     }
 
     public static Goal createDefault(Long userId) {
         return Goal.builder()
-                .userId(userId)
+                .userId(requirePositive(userId))
                 .attendOn(LocalTime.of(20, 0))
                 .rest10MinSec(120)
                 .mealNum(3)

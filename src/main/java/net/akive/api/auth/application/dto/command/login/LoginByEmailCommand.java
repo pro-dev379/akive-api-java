@@ -1,8 +1,10 @@
 package net.akive.api.auth.application.dto.command.login;
 
-public record LoginByEmailCommand(String email, String password) {
+import net.akive.api.common.domain.Email;
+
+public record LoginByEmailCommand(Email email, String password) {
 
     public static LoginByEmailCommand of(String email, String password) {
-        return new LoginByEmailCommand(email, password);
+        return new LoginByEmailCommand(Email.of(email), password);
     }
 }

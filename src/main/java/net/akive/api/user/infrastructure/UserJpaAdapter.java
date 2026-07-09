@@ -1,6 +1,7 @@
 package net.akive.api.user.infrastructure;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.port.out.LoadUserPort;
 import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.application.port.out.ValidateUserPort;
@@ -32,12 +33,12 @@ class UserJpaAdapter implements LoadUserPort, SaveUserPort, ValidateUserPort {
     }
 
     @Override
-    public boolean existsByEmailAndLeaveFalse(String email) {
-        return userJpaRepository.existsByEmailAndLeaveFalse(email);
+    public boolean existsByEmailAndLeaveFalse(Email email) {
+        return userJpaRepository.existsByEmailAndLeaveFalse(email.value());
     }
 
     @Override
-    public boolean existsByEmail(String email) {
-        return userJpaRepository.existsByEmail(email);
+    public boolean existsByEmail(Email email) {
+        return userJpaRepository.existsByEmail(email.value());
     }
 }

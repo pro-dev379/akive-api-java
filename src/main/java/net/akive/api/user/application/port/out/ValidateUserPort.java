@@ -1,8 +1,10 @@
 package net.akive.api.user.application.port.out;
 
+import net.akive.api.common.domain.Email;
+
 public interface ValidateUserPort {
 
     boolean existsByUserIdAndLeaveFalse(Long userId);
-    boolean existsByEmailAndLeaveFalse(String email);
-    boolean existsByEmail(String email);
+    boolean existsByEmailAndLeaveFalse(Email email);
+    boolean existsByEmail(Email email);
 }

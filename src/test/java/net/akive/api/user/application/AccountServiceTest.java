@@ -1,5 +1,6 @@
 package net.akive.api.user.application;
 
+import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.port.out.LoadUserPort;
 import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.domain.User;
@@ -40,7 +41,7 @@ class AccountServiceTest {
 
         User user = User.create(
                 userId,
-                "test@test.com",
+                Email.of("test@test.com"),
                 USER,
                 EMAIL,
                 "USER@abcde",

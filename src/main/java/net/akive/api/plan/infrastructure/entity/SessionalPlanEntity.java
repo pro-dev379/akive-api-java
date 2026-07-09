@@ -8,8 +8,6 @@ import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.user.infrastructure.entity.UserEntity;
 
-import java.time.LocalDate;
-
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
@@ -41,26 +39,15 @@ public class SessionalPlanEntity extends BaseTimeEntity {
     @Column(length = 100, nullable = false)
     private String sessionName;
 
-    @Column(nullable = false)
-    private LocalDate sessionStartOn;
-
-    @Column(nullable = false)
-    private LocalDate sessionEndOn;
-
-    public static SessionalPlanEntity reference(Long sessionalPlanId) {
-        SessionalPlanEntity sessionalPlanEntity = new SessionalPlanEntity();
-        sessionalPlanEntity.sessionalPlanId = sessionalPlanId;
-
-        return sessionalPlanEntity;
-    }
+    @Embedded
+    private SessionPeriodEntity sessionPeriod;
 
     public static SessionalPlanEntity fromModel(SessionalPlan sessionalPlan) {
         SessionalPlanEntity sessionalPlanEntity = new SessionalPlanEntity();
         sessionalPlanEntity.sessionalPlanId = sessionalPlan.getSessionalPlanId();
         sessionalPlanEntity.user = UserEntity.reference(sessionalPlan.getUserId());
         sessionalPlanEntity.sessionName = sessionalPlan.getSessionName();
-        sessionalPlanEntity.sessionStartOn = sessionalPlan.getSessionStartOn();
-        sessionalPlanEntity.sessionEndOn = sessionalPlan.getSessionEndOn();
+        sessionalPlanEntity.sessionPeriod = SessionPeriodEntity.fromModel(sessionalPlan.getSessionPeriod());
 
         return sessionalPlanEntity;
     }
@@ -70,8 +57,7 @@ public class SessionalPlanEntity extends BaseTimeEntity {
                 this.sessionalPlanId,
                 this.user.getUserId(),
                 this.sessionName,
-                this.sessionStartOn,
-                this.sessionEndOn
+                this.sessionPeriod.toModel()
         );
     }
 }

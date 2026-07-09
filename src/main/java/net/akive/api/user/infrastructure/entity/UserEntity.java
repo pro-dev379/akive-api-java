@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.domain.Email;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.user.domain.LoginType;
 import net.akive.api.user.domain.User;
@@ -69,7 +70,7 @@ public class UserEntity extends BaseTimeEntity {
     public static UserEntity fromModel(User user) {
         UserEntity userEntity = new UserEntity();
         userEntity.userId = user.getUserId();
-        userEntity.email = user.getEmail();
+        userEntity.email = user.getEmail().value();
         userEntity.roleType = user.getRoleType();
         userEntity.loginType = user.getLoginType();
         userEntity.nickname = user.getNickname();
@@ -85,7 +86,7 @@ public class UserEntity extends BaseTimeEntity {
     public User toModel() {
         return User.create(
                 this.userId,
-                this.email,
+                Email.of(this.email),
                 this.roleType,
                 this.loginType,
                 this.nickname,

@@ -1,13 +1,14 @@
 package net.akive.api.plan.application.dto.command;
 
+import net.akive.api.plan.domain.SessionPeriod;
+
 import java.time.LocalDate;
 
 public record UpdateSessionalPlanCommand(
         Long sessionalPlanId,
         Long userId,
         String sessionName,
-        LocalDate sessionStartOn,
-        LocalDate sessionEndOn
+        SessionPeriod sessionPeriod
 ) {
 
     public static UpdateSessionalPlanCommand of(
@@ -21,8 +22,7 @@ public record UpdateSessionalPlanCommand(
                 sessionalPlanId,
                 userId,
                 sessionName,
-                sessionStartOn,
-                sessionEndOn
+                SessionPeriod.of(sessionStartOn, sessionEndOn)
         );
     }
 }

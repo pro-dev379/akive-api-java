@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.port.out.login.LoadEmailLoginUserPort;
 import net.akive.api.auth.domain.login.LoginUser;
 import net.akive.api.auth.domain.login.exception.LoginException;
+import net.akive.api.common.domain.Email;
 import net.akive.api.user.infrastructure.UserJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,11 +17,11 @@ class LoginUserJpaAdapter implements LoadEmailLoginUserPort {
     private final UserJpaRepository userJpaRepository;
 
     @Override
-    public LoginUser loadByEmailAndLeaveFalse(String email) {
-        return userJpaRepository.findByEmailAndLeaveFalse(email)
-                .map(user -> new LoginUser(
+    public LoginUser loadByEmailAndLeaveFalse(Email email) {
+        return userJpaRepository.findByEmailAndLeaveFalse(email.value())
+                .map(user -> LoginUser.create(
                         user.getUserId(),
-                        user.getEmail(),
+                        Email.of(user.getEmail()),
                         user.getPassword(),
                         user.getRoleType()
                 ))

@@ -1,14 +1,15 @@
 package net.akive.api.auth.application.dto.command.emailverification;
 
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+import net.akive.api.common.domain.Email;
 
 public record EnsureEmailVerifiedCommand(
-        String email,
+        Email email,
         EmailVerificationPurpose verificationPurpose
 ) {
 
     public static EnsureEmailVerifiedCommand of(
-            String email,
+            Email email,
             EmailVerificationPurpose verificationPurpose
     ) {
         return new EnsureEmailVerifiedCommand(email, verificationPurpose);

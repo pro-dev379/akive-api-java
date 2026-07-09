@@ -1,11 +1,13 @@
 package net.akive.api.auth.application.dto.command.emailverification;
 
+import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+import net.akive.api.common.domain.Email;
 
 public record VerifyEmailVerificationCodeCommand(
-        String email,
+        Email email,
         EmailVerificationPurpose verificationPurpose,
-        String verificationCode
+        EmailVerificationCode verificationCode
 ) {
 
     public static VerifyEmailVerificationCodeCommand of(
@@ -13,6 +15,10 @@ public record VerifyEmailVerificationCodeCommand(
             EmailVerificationPurpose verificationPurpose,
             String verificationCode
     ) {
-        return new VerifyEmailVerificationCodeCommand(email, verificationPurpose, verificationCode);
+        return new VerifyEmailVerificationCodeCommand(
+                Email.of(email),
+                verificationPurpose,
+                EmailVerificationCode.of(verificationCode)
+        );
     }
 }

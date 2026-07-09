@@ -6,8 +6,10 @@ import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.DailyTodoResult;
 import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
+import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.exception.SessionalPlanException;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
+import net.akive.api.plan.presentation.dto.request.SessionPeriodRequest;
 import net.akive.api.plan.presentation.dto.request.UpdateSessionalPlanRequest;
 import net.akive.api.support.PrivateControllerTestSupport;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import java.util.List;
 import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.NOT_FOUND;
 import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
 import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
+import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -42,14 +45,18 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 new SessionalPlanSummaryResult(
                         2L,
                         "2회차",
-                        LocalDate.of(2026, 7, 8),
-                        LocalDate.of(2026, 7, 14)
+                        SessionPeriod.of(
+                                LocalDate.of(2026, 7, 8),
+                                LocalDate.of(2026, 7, 14)
+                        )
                 ),
                 new SessionalPlanSummaryResult(
                         1L,
                         "1회차",
-                        LocalDate.of(2026, 7, 1),
-                        LocalDate.of(2026, 7, 7)
+                        SessionPeriod.of(
+                                LocalDate.of(2026, 7, 1),
+                                LocalDate.of(2026, 7, 7)
+                        )
                 )
         );
 
@@ -62,12 +69,12 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sessionalPlans[0].sessionalPlanId").value(2L))
                 .andExpect(jsonPath("$.sessionalPlans[0].sessionName").value("2회차"))
-                .andExpect(jsonPath("$.sessionalPlans[0].sessionStartOn").value("2026-07-08"))
-                .andExpect(jsonPath("$.sessionalPlans[0].sessionEndOn").value("2026-07-14"))
+                .andExpect(jsonPath("$.sessionalPlans[0].sessionPeriod.startOn").value("2026-07-08"))
+                .andExpect(jsonPath("$.sessionalPlans[0].sessionPeriod.endOn").value("2026-07-14"))
                 .andExpect(jsonPath("$.sessionalPlans[1].sessionalPlanId").value(1L))
                 .andExpect(jsonPath("$.sessionalPlans[1].sessionName").value("1회차"))
-                .andExpect(jsonPath("$.sessionalPlans[1].sessionStartOn").value("2026-07-01"))
-                .andExpect(jsonPath("$.sessionalPlans[1].sessionEndOn").value("2026-07-07"));
+                .andExpect(jsonPath("$.sessionalPlans[1].sessionPeriod.startOn").value("2026-07-01"))
+                .andExpect(jsonPath("$.sessionalPlans[1].sessionPeriod.endOn").value("2026-07-07"));
 
         then(getSessionalPlansUseCase).should().getAll(userId);
     }
@@ -174,15 +181,19 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
-                LocalDate.of(2026, 7, 7),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2026, 7, 14)
+                )
         );
         CreateSessionalPlanCommand command = request.toCommand(userId);
         SessionalPlanSummaryResult result = new SessionalPlanSummaryResult(
                 1L,
                 "1회차",
-                LocalDate.of(2026, 7, 7),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriod.of(
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2026, 7, 14)
+                )
         );
 
         given(createSessionalPlanUseCase.create(command))
@@ -206,8 +217,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "",
-                LocalDate.of(2026, 7, 7),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2026, 7, 14)
+                )
         );
 
         // when & then
@@ -227,8 +240,30 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "a".repeat(101),
-                LocalDate.of(2026, 7, 7),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2026, 7, 14)
+                )
+        );
+
+        // when & then
+        mockMvc.perform(post("/sessional-plans")
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+
+        then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
+    }
+
+    @Test
+    void 세셔널_플랜_생성_요청_시_세션_기간이_없으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
+                "1회차",
+                null
         );
 
         // when & then
@@ -248,8 +283,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
-                null,
-                LocalDate.of(2026, 7, 14)
+                SessionPeriodRequest.of(
+                        null,
+                        LocalDate.of(2026, 7, 14)
+                )
         );
 
         // when & then
@@ -258,7 +295,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value(REQUIRED_VALUE_MISSING.getCode()));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -269,8 +306,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
-                LocalDate.of(2026, 7, 7),
-                null
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 7),
+                        null
+                )
         );
 
         // when & then
@@ -279,7 +318,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value(REQUIRED_VALUE_MISSING.getCode()));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -291,8 +330,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         String request = """
                 {
                   "sessionName": "1회차",
-                  "sessionStartOn": "2026/07/07",
-                  "sessionEndOn": "2026-07-14"
+                  "sessionPeriod": {
+                    "startOn": "2026/07/07",
+                    "endOn": "2026-07-14"
+                  }
                 }
                 """;
 
@@ -313,8 +354,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
-                LocalDate.of(2026, 7, 7),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2026, 7, 14)
+                )
         );
 
         willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS))
@@ -337,8 +380,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "수정된 1회차",
-                LocalDate.of(2026, 7, 8),
-                LocalDate.of(2026, 7, 15)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 15)
+                )
         );
 
         // when & then
@@ -359,8 +404,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "",
-                LocalDate.of(2026, 7, 8),
-                LocalDate.of(2026, 7, 15)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 15)
+                )
         );
 
         // when & then
@@ -381,30 +428,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "a".repeat(101),
-                LocalDate.of(2026, 7, 7),
-                LocalDate.of(2026, 7, 14)
-        );
-
-        // when & then
-        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
-                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
-
-        then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
-    }
-
-    @Test
-    void 세셔널_플랜_수정_요청_시_시작일이_없으면_400을_응답한다() throws Exception {
-        // given
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
-                "수정된 1회차",
-                null,
-                LocalDate.of(2026, 7, 15)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 15)
+                )
         );
 
         // when & then
@@ -419,13 +446,12 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
-    void 세셔널_플랜_수정_요청_시_종료일이_없으면_400을_응답한다() throws Exception {
+    void 세셔널_플랜_수정_요청_시_세션_기간이_없으면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "수정된 1회차",
-                LocalDate.of(2026, 7, 8),
                 null
         );
 
@@ -441,6 +467,54 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
+    void 세셔널_플랜_수정_요청_시_시작일이_없으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "수정된 1회차",
+                SessionPeriodRequest.of(
+                        null,
+                        LocalDate.of(2026, 7, 15)
+                )
+        );
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(REQUIRED_VALUE_MISSING.getCode()));
+
+        then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
+    }
+
+    @Test
+    void 세셔널_플랜_수정_요청_시_종료일이_없으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
+                "수정된 1회차",
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 8),
+                        null
+                )
+        );
+
+        // when & then
+        mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(REQUIRED_VALUE_MISSING.getCode()));
+
+        then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
+    }
+
+    @Test
     void 세셔널_플랜_수정_요청_시_날짜_형식이_올바르지_않으면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
@@ -448,8 +522,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         String request = """
                 {
                   "sessionName": "1회차",
-                  "sessionStartOn": "2026/07/07",
-                  "sessionEndOn": "2026-07-14"
+                  "sessionPeriod": {
+                    "startOn": "2026/07/07",
+                    "endOn": "2026-07-14"
+                  }
                 }
                 """;
 
@@ -471,8 +547,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "수정된 1회차",
-                LocalDate.of(2026, 7, 8),
-                LocalDate.of(2026, 7, 15)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 15)
+                )
         );
 
         willThrow(new SessionalPlanException(NOT_FOUND))
@@ -497,8 +575,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "2회차",
-                LocalDate.of(2026, 7, 8),
-                LocalDate.of(2026, 7, 15)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 15)
+                )
         );
 
         willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS))
@@ -523,8 +603,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "1회차",
-                LocalDate.of(2026, 7, 8),
-                LocalDate.of(2026, 7, 15)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 15)
+                )
         );
 
         willThrow(new SessionalPlanException(SESSION_PERIOD_CHANGE_NOT_ALLOWED))
@@ -549,8 +631,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "수정된 1회차",
-                LocalDate.of(2026, 7, 7),
-                LocalDate.of(2026, 7, 14)
+                SessionPeriodRequest.of(
+                        LocalDate.of(2026, 7, 8),
+                        LocalDate.of(2026, 7, 15)
+                )
         );
 
         // when & then

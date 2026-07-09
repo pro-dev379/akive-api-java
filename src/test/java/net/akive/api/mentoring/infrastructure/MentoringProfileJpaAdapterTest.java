@@ -1,5 +1,6 @@
 package net.akive.api.mentoring.infrastructure;
 
+import net.akive.api.common.domain.Email;
 import net.akive.api.mentoring.domain.MentoringProfile;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
@@ -14,7 +15,7 @@ class MentoringProfileJpaAdapterTest extends RepositoryTestSupport {
     void 멘토링_프로필을_저장한다() {
         // given
         User user = User.signUpByEmail(
-                "test@test.com",
+                Email.of("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER

@@ -8,6 +8,7 @@ import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.common.cache.CacheKeyProvider;
 import net.akive.api.common.cache.RedisTemplateClient;
+import net.akive.api.common.domain.Email;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -24,11 +25,11 @@ class EmailVerificationRedisAdapter implements
 
     @Override
     public Optional<EmailVerification> loadByEmailAndVerificationPurpose(
-            String email,
+            Email email,
             EmailVerificationPurpose verificationPurpose
     ) {
         return redisTemplateClient.get(
-                createKey(verificationPurpose, email),
+                createKey(verificationPurpose, email.value()),
                 EmailVerification.class
         );
     }
@@ -36,7 +37,7 @@ class EmailVerificationRedisAdapter implements
     @Override
     public void save(EmailVerification emailVerification, Duration ttl) {
         EmailVerificationPurpose verificationPurpose = emailVerification.getVerificationPurpose();
-        String email = emailVerification.getEmail();
+        String email = emailVerification.getEmail().value();
         redisTemplateClient.set(
                 createKey(verificationPurpose, email),
                 emailVerification,
@@ -47,7 +48,7 @@ class EmailVerificationRedisAdapter implements
     @Override
     public void delete(EmailVerification emailVerification) {
         EmailVerificationPurpose verificationPurpose = emailVerification.getVerificationPurpose();
-        String email = emailVerification.getEmail();
+        String email = emailVerification.getEmail().value();
         redisTemplateClient.delete(createKey(verificationPurpose, email));
     }
 
