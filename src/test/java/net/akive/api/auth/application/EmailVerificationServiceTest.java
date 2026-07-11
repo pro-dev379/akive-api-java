@@ -2,7 +2,7 @@ package net.akive.api.auth.application;
 
 import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
-import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCodeCommand;
+import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCommand;
 import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
 import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 import net.akive.api.auth.application.port.out.emailverification.SaveEmailVerificationPort;
@@ -145,8 +145,8 @@ class EmailVerificationServiceTest {
         then(emailVerificationDomainService).should().ensureVerified(Email.of(EMAIL), SIGN_UP);
     }
 
-    private SendEmailVerificationCodeCommand sendCommand(EmailVerificationPurpose verificationPurpose) {
-        return new SendEmailVerificationCodeCommand(Email.of(EMAIL), verificationPurpose);
+    private SendEmailVerificationCommand sendCommand(EmailVerificationPurpose verificationPurpose) {
+        return new SendEmailVerificationCommand(Email.of(EMAIL), verificationPurpose);
     }
 
     private VerifyEmailVerificationCodeCommand verifyCommand(

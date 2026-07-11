@@ -1,6 +1,6 @@
 package net.akive.api.auth.presentation;
 
-import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCodeCommand;
+import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCommand;
 import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
@@ -52,7 +52,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(sendEmailVerificationCodeUseCase)
                 .should()
-                .send(SendEmailVerificationCodeCommand.of("test@test.com", SIGN_UP));
+                .send(SendEmailVerificationCommand.of("test@test.com", SIGN_UP));
     }
 
     @Test
@@ -68,7 +68,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(sendEmailVerificationCodeUseCase)
                 .should(never())
-                .send(any(SendEmailVerificationCodeCommand.class));
+                .send(any(SendEmailVerificationCommand.class));
     }
 
     @Test
@@ -84,7 +84,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(sendEmailVerificationCodeUseCase)
                 .should(never())
-                .send(any(SendEmailVerificationCodeCommand.class));
+                .send(any(SendEmailVerificationCommand.class));
     }
 
     @Test
@@ -100,7 +100,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         then(sendEmailVerificationCodeUseCase)
                 .should(never())
-                .send(any(SendEmailVerificationCodeCommand.class));
+                .send(any(SendEmailVerificationCommand.class));
     }
 
     @Test
@@ -156,7 +156,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         willThrow(new UserException(UserErrorCode.NOT_FOUND))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(any(SendEmailVerificationCodeCommand.class));
+                .send(any(SendEmailVerificationCommand.class));
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -176,7 +176,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         willThrow(new UserException(UserErrorCode.EMAIL_ALREADY_EXISTS))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(any(SendEmailVerificationCodeCommand.class));
+                .send(any(SendEmailVerificationCommand.class));
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")

@@ -3,15 +3,15 @@ package net.akive.api.auth.application.dto.command.emailverification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.common.domain.Email;
 
-public record SendEmailVerificationCodeCommand(
+public record SendEmailVerificationCommand(
         Email email,
         EmailVerificationPurpose verificationPurpose
 ) {
 
-    public static SendEmailVerificationCodeCommand of(
+    public static SendEmailVerificationCommand of(
             String email,
             EmailVerificationPurpose verificationPurpose
     ) {
-        return new SendEmailVerificationCodeCommand(Email.of(email), verificationPurpose);
+        return new SendEmailVerificationCommand(Email.of(email), verificationPurpose);
     }
 }
