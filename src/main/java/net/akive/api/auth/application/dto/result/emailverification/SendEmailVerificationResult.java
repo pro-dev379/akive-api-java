@@ -4,20 +4,20 @@ import net.akive.api.common.domain.Email;
 
 import java.time.LocalDateTime;
 
-public record SendEmailVerificationCodeResult(
+public record SendEmailVerificationResult(
         Email email,
         LocalDateTime expiresAt,
         long expireSeconds,
         long resendIntervalSeconds
 ) {
 
-    public static SendEmailVerificationCodeResult of(
+    public static SendEmailVerificationResult of(
             Email email,
             LocalDateTime expiresAt,
             long expiresInSeconds,
             long resendAfterSeconds
     ) {
-        return new SendEmailVerificationCodeResult(
+        return new SendEmailVerificationResult(
                 email,
                 expiresAt,
                 expiresInSeconds,
@@ -25,13 +25,13 @@ public record SendEmailVerificationCodeResult(
         );
     }
 
-    public static SendEmailVerificationCodeResult of(
+    public static SendEmailVerificationResult of(
             String email,
             LocalDateTime expiresAt,
             long expiresInSeconds,
             long resendAfterSeconds
     ) {
-        return new SendEmailVerificationCodeResult(
+        return new SendEmailVerificationResult(
                 Email.of(email),
                 expiresAt,
                 expiresInSeconds,

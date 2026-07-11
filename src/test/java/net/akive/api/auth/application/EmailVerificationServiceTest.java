@@ -4,7 +4,7 @@ import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
 import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCodeCommand;
 import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
-import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationCodeResult;
+import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 import net.akive.api.auth.application.port.out.emailverification.SaveEmailVerificationPort;
 import net.akive.api.auth.application.port.out.emailverification.SendEmailVerificationMailPort;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
@@ -61,7 +61,7 @@ class EmailVerificationServiceTest {
                 .willReturn(emailVerification);
 
         // when
-        SendEmailVerificationCodeResult result = emailVerificationService.send(sendCommand(SIGN_UP));
+        SendEmailVerificationResult result = emailVerificationService.send(sendCommand(SIGN_UP));
 
         // then
         assertThat(result.email()).isEqualTo(Email.of(EMAIL));

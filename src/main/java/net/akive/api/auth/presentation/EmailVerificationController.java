@@ -1,7 +1,7 @@
 package net.akive.api.auth.presentation;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationCodeResult;
+import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 import net.akive.api.auth.application.port.in.emailverification.SendEmailVerificationCodeUseCase;
 import net.akive.api.auth.application.port.in.emailverification.VerifyEmailVerificationCodeUseCase;
 import net.akive.api.auth.presentation.dto.request.emailverification.SendEmailVerificationCodeRequest;
@@ -22,7 +22,7 @@ public class EmailVerificationController {
 
     @PostMapping
     public SendEmailVerificationCodeResponse send(@RequestBody @Validated SendEmailVerificationCodeRequest request) {
-        SendEmailVerificationCodeResult result = sendEmailVerificationCodeUseCase.send(request.toCommand());
+        SendEmailVerificationResult result = sendEmailVerificationCodeUseCase.send(request.toCommand());
         return SendEmailVerificationCodeResponse.from(result);
     }
 

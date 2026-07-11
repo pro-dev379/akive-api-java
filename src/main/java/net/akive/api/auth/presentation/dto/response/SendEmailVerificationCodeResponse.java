@@ -1,7 +1,7 @@
 package net.akive.api.auth.presentation.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationCodeResult;
+import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +15,7 @@ public record SendEmailVerificationCodeResponse(
         long resendIntervalSeconds
 ) {
 
-    public static SendEmailVerificationCodeResponse from(SendEmailVerificationCodeResult result) {
+    public static SendEmailVerificationCodeResponse from(SendEmailVerificationResult result) {
         return new SendEmailVerificationCodeResponse(
                 result.email().value(),
                 result.expiresAt(),

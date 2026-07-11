@@ -1,7 +1,7 @@
 package net.akive.api.auth.presentation;
 
 import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCodeCommand;
-import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationCodeResult;
+import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
@@ -30,7 +30,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     void 인증번호_전송을_요청하면_인증정보를_응답한다() throws Exception {
         // given
         SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
-        SendEmailVerificationCodeResult result = SendEmailVerificationCodeResult.of(
+        SendEmailVerificationResult result = SendEmailVerificationResult.of(
                 "test@test.com",
                 LocalDateTime.of(2025, 5, 21, 10, 5),
                 300,

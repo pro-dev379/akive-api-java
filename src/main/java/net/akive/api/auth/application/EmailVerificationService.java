@@ -1,7 +1,7 @@
 package net.akive.api.auth.application;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationCodeResult;
+import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCodeCommand;
 import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
 import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
@@ -27,13 +27,13 @@ class EmailVerificationService implements
     private final EmailVerificationDomainService emailVerificationDomainService;
 
     @Override
-    public SendEmailVerificationCodeResult send(SendEmailVerificationCodeCommand command) {
+    public SendEmailVerificationResult send(SendEmailVerificationCodeCommand command) {
         EmailVerification emailVerification = emailVerificationDomainService.issue(command.email(), command.verificationPurpose());
 
         sendEmailVerificationMailPort.send(emailVerification, EXPIRE_DURATION);
         saveEmailVerificationPort.save(emailVerification, EXPIRE_DURATION);
 
-        return SendEmailVerificationCodeResult.of(
+        return SendEmailVerificationResult.of(
                 command.email(),
                 emailVerification.getExpiresAt(),
                 EXPIRE_DURATION.toSeconds(),
