@@ -58,6 +58,6 @@ class SignUpPolicyTest {
         // then
         then(ensureEmailVerifiedUseCase)
                 .should()
-                .ensureVerified(EnsureEmailVerifiedCommand.of(email, SIGN_UP));
+                .ensureVerified(new EnsureEmailVerifiedCommand(email, SIGN_UP));
     }
 }

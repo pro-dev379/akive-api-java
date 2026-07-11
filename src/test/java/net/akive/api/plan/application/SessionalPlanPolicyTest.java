@@ -66,7 +66,7 @@ class SessionalPlanPolicyTest {
         // given
         SessionalPlan currentSessionalPlan = currentSessionalPlan();
         SessionPeriod requestedSessionPeriod =
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 );
@@ -99,7 +99,7 @@ class SessionalPlanPolicyTest {
         // given
         SessionalPlan currentSessionalPlan = currentSessionalPlan();
         SessionPeriod requestedSessionPeriod =
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 );
@@ -128,7 +128,7 @@ class SessionalPlanPolicyTest {
         // given
         SessionalPlan currentSessionalPlan = currentSessionalPlan();
         SessionPeriod requestedSessionPeriod =
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 );
@@ -156,7 +156,7 @@ class SessionalPlanPolicyTest {
         // given
         SessionalPlan currentSessionalPlan = currentSessionalPlan();
         SessionPeriod requestedSessionPeriod =
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 );
@@ -182,7 +182,7 @@ class SessionalPlanPolicyTest {
                 10L,
                 1L,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )

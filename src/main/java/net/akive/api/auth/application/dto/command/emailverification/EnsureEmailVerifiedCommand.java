@@ -7,11 +7,4 @@ public record EnsureEmailVerifiedCommand(
         Email email,
         EmailVerificationPurpose verificationPurpose
 ) {
-
-    public static EnsureEmailVerifiedCommand of(
-            Email email,
-            EmailVerificationPurpose verificationPurpose
-    ) {
-        return new EnsureEmailVerifiedCommand(email, verificationPurpose);
-    }
 }

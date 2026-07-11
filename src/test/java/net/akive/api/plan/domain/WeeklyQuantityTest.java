@@ -20,7 +20,7 @@ class WeeklyQuantityTest {
             2L,
             1L,
             "세션",
-            SessionPeriod.of(LocalDate.of(2026, 7, 7), LocalDate.of(2026, 7, 14))
+            new SessionPeriod(LocalDate.of(2026, 7, 7), LocalDate.of(2026, 7, 14))
     );
     private static final TotalQuantity VALID_TOTAL_QUANTITY = TotalQuantity.create(
             2L,
@@ -31,7 +31,7 @@ class WeeklyQuantityTest {
             "문제",
             null
     );
-    private static final WeekPeriod VALID_WEEK_PERIOD = WeekPeriod.of(
+    private static final WeekPeriod VALID_WEEK_PERIOD = new WeekPeriod(
             LocalDate.of(2026, 7, 7),
             LocalDate.of(2026, 7, 14)
     );
@@ -120,7 +120,7 @@ class WeeklyQuantityTest {
                 .isThrownBy(() -> WeeklyQuantity.create(
                         1L,
                         VALID_TOTAL_QUANTITY,
-                        WeekPeriod.of(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 13)),
+                        new WeekPeriod(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 13)),
                         10,
                         null
                 ))
@@ -134,7 +134,7 @@ class WeeklyQuantityTest {
                 .isThrownBy(() -> WeeklyQuantity.create(
                         1L,
                         VALID_TOTAL_QUANTITY,
-                        WeekPeriod.of(LocalDate.of(2026, 7, 8), LocalDate.of(2026, 7, 15)),
+                        new WeekPeriod(LocalDate.of(2026, 7, 8), LocalDate.of(2026, 7, 15)),
                         10,
                         null
                 ))

@@ -45,7 +45,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 new SessionalPlanSummaryResult(
                         2L,
                         "2회차",
-                        SessionPeriod.of(
+                        new SessionPeriod(
                                 LocalDate.of(2026, 7, 8),
                                 LocalDate.of(2026, 7, 14)
                         )
@@ -53,7 +53,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 new SessionalPlanSummaryResult(
                         1L,
                         "1회차",
-                        SessionPeriod.of(
+                        new SessionPeriod(
                                 LocalDate.of(2026, 7, 1),
                                 LocalDate.of(2026, 7, 7)
                         )
@@ -119,7 +119,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 )
         );
 
-        given(getDailyTodosUseCase.getTodosByDate(GetDailyTodosCommand.of(userId, date)))
+        given(getDailyTodosUseCase.getTodosByDate(new GetDailyTodosCommand(userId, date)))
                 .willReturn(results);
 
         // when & then
@@ -139,7 +139,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.todos[0].dailyQuantityMemo").value("단어 암기"))
                 .andExpect(jsonPath("$.todos[0].date").value("2026-07-07"));
 
-        then(getDailyTodosUseCase).should().getTodosByDate(GetDailyTodosCommand.of(userId, date));
+        then(getDailyTodosUseCase).should().getTodosByDate(new GetDailyTodosCommand(userId, date));
     }
 
     @Test
@@ -148,7 +148,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         LocalDate date = LocalDate.of(2026, 7, 7);
 
-        given(getDailyTodosUseCase.getTodosByDate(GetDailyTodosCommand.of(userId, date)))
+        given(getDailyTodosUseCase.getTodosByDate(new GetDailyTodosCommand(userId, date)))
                 .willReturn(List.of());
 
         // when & then
@@ -158,7 +158,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.todos").isArray())
                 .andExpect(jsonPath("$.todos").isEmpty());
 
-        then(getDailyTodosUseCase).should().getTodosByDate(GetDailyTodosCommand.of(userId, date));
+        then(getDailyTodosUseCase).should().getTodosByDate(new GetDailyTodosCommand(userId, date));
     }
 
     @Test
@@ -181,7 +181,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -190,7 +190,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         SessionalPlanSummaryResult result = new SessionalPlanSummaryResult(
                 1L,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -217,7 +217,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -240,7 +240,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "a".repeat(101),
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -283,7 +283,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         null,
                         LocalDate.of(2026, 7, 14)
                 )
@@ -306,7 +306,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 7),
                         null
                 )
@@ -354,7 +354,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
                 "1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -380,7 +380,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "수정된 1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -404,7 +404,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -428,7 +428,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "a".repeat(101),
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -473,7 +473,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "수정된 1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         null,
                         LocalDate.of(2026, 7, 15)
                 )
@@ -497,7 +497,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "수정된 1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 8),
                         null
                 )
@@ -547,7 +547,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "수정된 1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -575,7 +575,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "2회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -603,7 +603,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -631,7 +631,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
                 "수정된 1회차",
-                SessionPeriodRequest.of(
+                new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -660,7 +660,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isNoContent());
 
         then(deleteSessionalPlanUseCase).should()
-                .delete(DeleteSessionalPlanCommand.of(userId, sessionalPlanId));
+                .delete(new DeleteSessionalPlanCommand(userId, sessionalPlanId));
     }
 
     @Test
@@ -668,7 +668,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 10L;
-        DeleteSessionalPlanCommand command = DeleteSessionalPlanCommand.of(userId, sessionalPlanId);
+        DeleteSessionalPlanCommand command = new DeleteSessionalPlanCommand(userId, sessionalPlanId);
 
         willThrow(new SessionalPlanException(NOT_FOUND))
                 .given(deleteSessionalPlanUseCase)

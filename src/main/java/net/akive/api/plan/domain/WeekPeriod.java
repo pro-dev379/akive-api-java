@@ -20,8 +20,4 @@ public record WeekPeriod(LocalDate startOn, LocalDate endOn) {
             throw new WeekPeriodException(INVALID_WEEK_PERIOD);
         }
     }
-
-    public static WeekPeriod of(LocalDate startOn, LocalDate endOn) {
-        return new WeekPeriod(startOn, endOn);
-    }
 }

@@ -22,7 +22,7 @@ public record UpdateSessionalPlanCommand(
                 sessionalPlanId,
                 userId,
                 sessionName,
-                SessionPeriod.of(sessionStartOn, sessionEndOn)
+                new SessionPeriod(sessionStartOn, sessionEndOn)
         );
     }
 }

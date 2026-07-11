@@ -28,7 +28,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -42,7 +42,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         assertThat(savedSessionalPlan.getUserId()).isEqualTo(savedUser.getUserId());
         assertThat(savedSessionalPlan.getSessionName()).isEqualTo("1회차");
         assertThat(savedSessionalPlan.getSessionPeriod()).isEqualTo(
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -63,7 +63,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -72,7 +72,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "2회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -110,7 +110,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -130,7 +130,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         assertThat(loadedSessionalPlan.getUserId()).isEqualTo(savedUser.getUserId());
         assertThat(loadedSessionalPlan.getSessionName()).isEqualTo("1회차");
         assertThat(loadedSessionalPlan.getSessionPeriod()).isEqualTo(
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -156,7 +156,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -190,7 +190,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -226,7 +226,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -235,7 +235,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "2회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -244,7 +244,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 anotherUser.getUserId(),
                 "2회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -285,7 +285,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -323,7 +323,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 null,
                 savedUser.getUserId(),
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )

@@ -18,7 +18,7 @@ class TotalQuantityTest {
             2L,
             1L,
             "세션",
-            SessionPeriod.of(
+            new SessionPeriod(
                     LocalDate.of(2026, 7, 7),
                     LocalDate.of(2026, 7, 14)
             )

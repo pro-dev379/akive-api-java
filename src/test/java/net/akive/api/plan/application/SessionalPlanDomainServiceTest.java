@@ -45,7 +45,7 @@ class SessionalPlanDomainServiceTest {
         SessionalPlan createdSessionalPlan = sessionalPlanDomainService.createForUser(
                 1L,
                 "  1회차  ",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -55,7 +55,7 @@ class SessionalPlanDomainServiceTest {
         assertThat(createdSessionalPlan.getUserId()).isEqualTo(1L);
         assertThat(createdSessionalPlan.getSessionName()).isEqualTo("1회차");
         assertThat(createdSessionalPlan.getSessionPeriod()).isEqualTo(
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -76,7 +76,7 @@ class SessionalPlanDomainServiceTest {
                 .isThrownBy(() -> sessionalPlanDomainService.createForUser(
                         1L,
                         "  1회차  ",
-                        SessionPeriod.of(
+                        new SessionPeriod(
                                 LocalDate.of(2026, 7, 7),
                                 LocalDate.of(2026, 7, 14)
                         )
@@ -94,12 +94,12 @@ class SessionalPlanDomainServiceTest {
                 10L,
                 1L,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
         );
-        SessionPeriod requestedSessionPeriod = SessionPeriod.of(
+        SessionPeriod requestedSessionPeriod = new SessionPeriod(
                 LocalDate.of(2026, 7, 8),
                 LocalDate.of(2026, 7, 15)
         );
@@ -116,7 +116,7 @@ class SessionalPlanDomainServiceTest {
         assertThat(updatedSessionalPlan.getUserId()).isEqualTo(1L);
         assertThat(updatedSessionalPlan.getSessionName()).isEqualTo("수정된 1회차");
         assertThat(updatedSessionalPlan.getSessionPeriod()).isEqualTo(
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -136,7 +136,7 @@ class SessionalPlanDomainServiceTest {
                 10L,
                 1L,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -146,7 +146,7 @@ class SessionalPlanDomainServiceTest {
                 .validateUpdatable(
                         createdSessionalPlan,
                         "  수정된 1회차  ",
-                        SessionPeriod.of(
+                        new SessionPeriod(
                                 LocalDate.of(2026, 7, 8),
                                 LocalDate.of(2026, 7, 15)
                         )
@@ -157,7 +157,7 @@ class SessionalPlanDomainServiceTest {
                 .isThrownBy(() -> sessionalPlanDomainService.update(
                         createdSessionalPlan,
                         "  수정된 1회차  ",
-                        SessionPeriod.of(
+                        new SessionPeriod(
                                 LocalDate.of(2026, 7, 8),
                                 LocalDate.of(2026, 7, 15)
                         )
@@ -168,7 +168,7 @@ class SessionalPlanDomainServiceTest {
         then(sessionalPlanPolicy).should().validateUpdatable(
                 createdSessionalPlan,
                 "  수정된 1회차  ",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )

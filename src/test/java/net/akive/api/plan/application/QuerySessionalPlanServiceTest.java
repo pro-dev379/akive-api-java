@@ -41,7 +41,7 @@ class QuerySessionalPlanServiceTest {
                 2L,
                 userId,
                 "2회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -50,7 +50,7 @@ class QuerySessionalPlanServiceTest {
                 1L,
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 7)
                 )
@@ -73,7 +73,7 @@ class QuerySessionalPlanServiceTest {
                         tuple(
                                 2L,
                                 "2회차",
-                                SessionPeriod.of(
+                                new SessionPeriod(
                                         LocalDate.of(2026, 7, 8),
                                         LocalDate.of(2026, 7, 14)
                                 )
@@ -81,7 +81,7 @@ class QuerySessionalPlanServiceTest {
                         tuple(
                                 1L,
                                 "1회차",
-                                SessionPeriod.of(
+                                new SessionPeriod(
                                         LocalDate.of(2026, 7, 1),
                                         LocalDate.of(2026, 7, 7)
                                 )
@@ -129,7 +129,7 @@ class QuerySessionalPlanServiceTest {
                         date
                 )
         );
-        GetDailyTodosCommand command = GetDailyTodosCommand.of(userId, date);
+        GetDailyTodosCommand command = new GetDailyTodosCommand(userId, date);
 
         given(loadDailyTodosPort.loadDailyTodosByUserIdAndDate(userId, date))
                 .willReturn(dailyTodos);
@@ -148,7 +148,7 @@ class QuerySessionalPlanServiceTest {
         // given
         Long userId = 1L;
         LocalDate date = LocalDate.of(2026, 7, 7);
-        GetDailyTodosCommand command = GetDailyTodosCommand.of(userId, date);
+        GetDailyTodosCommand command = new GetDailyTodosCommand(userId, date);
 
         given(loadDailyTodosPort.loadDailyTodosByUserIdAndDate(userId, date))
                 .willReturn(List.of());

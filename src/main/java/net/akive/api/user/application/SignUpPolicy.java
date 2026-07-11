@@ -24,7 +24,7 @@ class SignUpPolicy {
         }
 
         ensureEmailVerifiedUseCase.ensureVerified(
-                EnsureEmailVerifiedCommand.of(email, SIGN_UP)
+                new EnsureEmailVerifiedCommand(email, SIGN_UP)
         );
     }
 }

@@ -12,7 +12,7 @@ public record SessionalPlanItemResponse(
         return new SessionalPlanItemResponse(
                 result.sessionalPlanId(),
                 result.sessionName(),
-                SessionPeriodResponse.of(
+                new SessionPeriodResponse(
                         result.sessionPeriod().startOn(),
                         result.sessionPeriod().endOn()
                 )

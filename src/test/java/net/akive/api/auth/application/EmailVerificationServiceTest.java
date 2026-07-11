@@ -161,7 +161,7 @@ class EmailVerificationServiceTest {
     }
 
     private EnsureEmailVerifiedCommand ensureVerifiedCommand(EmailVerificationPurpose verificationPurpose) {
-        return EnsureEmailVerifiedCommand.of(Email.of(EMAIL), verificationPurpose);
+        return new EnsureEmailVerifiedCommand(Email.of(EMAIL), verificationPurpose);
     }
 
     private EmailVerification emailVerification(

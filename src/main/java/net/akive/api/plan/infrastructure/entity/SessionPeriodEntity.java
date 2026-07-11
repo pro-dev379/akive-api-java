@@ -29,6 +29,6 @@ public class SessionPeriodEntity {
     }
 
     public SessionPeriod toModel() {
-        return SessionPeriod.of(this.startOn, this.endOn);
+        return new SessionPeriod(this.startOn, this.endOn);
     }
 }

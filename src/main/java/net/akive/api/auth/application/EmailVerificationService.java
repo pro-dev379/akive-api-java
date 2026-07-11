@@ -33,7 +33,7 @@ class EmailVerificationService implements
         sendEmailVerificationMailPort.send(emailVerification, EXPIRE_DURATION);
         saveEmailVerificationPort.save(emailVerification, EXPIRE_DURATION);
 
-        return SendEmailVerificationResult.of(
+        return new SendEmailVerificationResult(
                 command.email(),
                 emailVerification.getExpiresAt(),
                 EXPIRE_DURATION.toSeconds(),

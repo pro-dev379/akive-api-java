@@ -12,20 +12,6 @@ public record SendEmailVerificationResult(
 ) {
 
     public static SendEmailVerificationResult of(
-            Email email,
-            LocalDateTime expiresAt,
-            long expiresInSeconds,
-            long resendAfterSeconds
-    ) {
-        return new SendEmailVerificationResult(
-                email,
-                expiresAt,
-                expiresInSeconds,
-                resendAfterSeconds
-        );
-    }
-
-    public static SendEmailVerificationResult of(
             String email,
             LocalDateTime expiresAt,
             long expiresInSeconds,

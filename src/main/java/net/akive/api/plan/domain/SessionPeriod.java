@@ -17,8 +17,4 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
             throw new SessionalPlanException(INVALID_SESSION_PERIOD);
         }
     }
-
-    public static SessionPeriod of(LocalDate startOn, LocalDate endOn) {
-        return new SessionPeriod(startOn, endOn);
-    }
 }

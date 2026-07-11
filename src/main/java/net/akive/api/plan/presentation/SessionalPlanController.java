@@ -44,7 +44,7 @@ public class SessionalPlanController {
             @AuthenticatedUserId Long userId,
             @PathVariable LocalDate date
     ) {
-        List<DailyTodoResult> results = getDailyTodosUseCase.getTodosByDate(GetDailyTodosCommand.of(userId, date));
+        List<DailyTodoResult> results = getDailyTodosUseCase.getTodosByDate(new GetDailyTodosCommand(userId, date));
 
         return GetDailyTodosResponse.from(results);
     }
@@ -76,6 +76,6 @@ public class SessionalPlanController {
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId
     ) {
-        deleteSessionalPlanUseCase.delete(DeleteSessionalPlanCommand.of(userId, sessionalPlanId));
+        deleteSessionalPlanUseCase.delete(new DeleteSessionalPlanCommand(userId, sessionalPlanId));
     }
 }

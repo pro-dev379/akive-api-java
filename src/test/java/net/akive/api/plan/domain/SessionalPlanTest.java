@@ -27,7 +27,7 @@ class SessionalPlanTest {
         SessionalPlan sessionalPlan = SessionalPlan.createForUser(
                 userId,
                 sessionName,
-                SessionPeriod.of(sessionStartOn, sessionEndOn),
+                new SessionPeriod(sessionStartOn, sessionEndOn),
                 requestedAt
         );
 
@@ -35,7 +35,7 @@ class SessionalPlanTest {
         assertThat(sessionalPlan.getSessionalPlanId()).isNull();
         assertThat(sessionalPlan.getUserId()).isEqualTo(userId);
         assertThat(sessionalPlan.getSessionName()).isEqualTo(sessionName);
-        assertThat(sessionalPlan.getSessionPeriod()).isEqualTo(SessionPeriod.of(sessionStartOn, sessionEndOn));
+        assertThat(sessionalPlan.getSessionPeriod()).isEqualTo(new SessionPeriod(sessionStartOn, sessionEndOn));
     }
 
     @Test
@@ -47,7 +47,7 @@ class SessionalPlanTest {
         SessionalPlan sessionalPlan = SessionalPlan.createForUser(
                 2L,
                 "  1회차  ",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 ),
@@ -68,7 +68,7 @@ class SessionalPlanTest {
                 .isThrownBy(() -> SessionalPlan.createForUser(
                         2L,
                 "   ",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 ),
@@ -88,7 +88,7 @@ class SessionalPlanTest {
                 .isThrownBy(() -> SessionalPlan.createForUser(
                         2L,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 5),
                         LocalDate.of(2026, 7, 7)
                 ),
@@ -108,7 +108,7 @@ class SessionalPlanTest {
                 .isThrownBy(() -> SessionalPlan.createForUser(
                         2L,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 5),
                         LocalDate.of(2026, 7, 6)
                 ),
@@ -132,7 +132,7 @@ class SessionalPlanTest {
                 persistedSessionalPlanId,
                 persistedUserId,
                 persistedSessionName,
-                SessionPeriod.of(persistedSessionStartOn, persistedSessionEndOn)
+                new SessionPeriod(persistedSessionStartOn, persistedSessionEndOn)
         );
 
         // then
@@ -140,7 +140,7 @@ class SessionalPlanTest {
         assertThat(sessionalPlan.getUserId()).isEqualTo(persistedUserId);
         assertThat(sessionalPlan.getSessionName()).isEqualTo(persistedSessionName);
         assertThat(sessionalPlan.getSessionPeriod()).isEqualTo(
-                SessionPeriod.of(persistedSessionStartOn, persistedSessionEndOn)
+                new SessionPeriod(persistedSessionStartOn, persistedSessionEndOn)
         );
     }
 
@@ -151,7 +151,7 @@ class SessionalPlanTest {
                 1L,
                 2L,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -161,7 +161,7 @@ class SessionalPlanTest {
         // when
         SessionalPlan updatedSessionalPlan = sessionalPlan.update(
                 "수정된 1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 ),
@@ -173,7 +173,7 @@ class SessionalPlanTest {
         assertThat(updatedSessionalPlan.getUserId()).isEqualTo(2L);
         assertThat(updatedSessionalPlan.getSessionName()).isEqualTo("수정된 1회차");
         assertThat(updatedSessionalPlan.getSessionPeriod()).isEqualTo(
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -187,7 +187,7 @@ class SessionalPlanTest {
                 1L,
                 2L,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -197,7 +197,7 @@ class SessionalPlanTest {
         // when
         SessionalPlan updatedSessionalPlan = sessionalPlan.update(
                 "수정된 1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 ),
@@ -207,7 +207,7 @@ class SessionalPlanTest {
         // then
         assertThat(updatedSessionalPlan.getSessionName()).isEqualTo("수정된 1회차");
         assertThat(updatedSessionalPlan.getSessionPeriod()).isEqualTo(
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )

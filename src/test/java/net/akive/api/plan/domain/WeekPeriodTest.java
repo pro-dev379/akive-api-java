@@ -21,7 +21,7 @@ class WeekPeriodTest {
         LocalDate endOn = LocalDate.of(2026, 7, 14);
 
         // when
-        WeekPeriod weekPeriod = WeekPeriod.of(startOn, endOn);
+        WeekPeriod weekPeriod = new WeekPeriod(startOn, endOn);
 
         // then
         assertThat(weekPeriod.startOn()).isEqualTo(startOn);
@@ -31,7 +31,7 @@ class WeekPeriodTest {
     @Test
     void 시작일이_null이면_주간_기간_생성에_실패한다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> WeekPeriod.of(null, LocalDate.of(2026, 7, 14)))
+                .isThrownBy(() -> new WeekPeriod(null, LocalDate.of(2026, 7, 14)))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
@@ -39,7 +39,7 @@ class WeekPeriodTest {
     @Test
     void 종료일이_null이면_주간_기간_생성에_실패한다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> WeekPeriod.of(LocalDate.of(2026, 7, 7), null))
+                .isThrownBy(() -> new WeekPeriod(LocalDate.of(2026, 7, 7), null))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
@@ -47,7 +47,7 @@ class WeekPeriodTest {
     @Test
     void 주간_기간은_7일을_초과할_수_없다() {
         assertThatExceptionOfType(WeekPeriodException.class)
-                .isThrownBy(() -> WeekPeriod.of(
+                .isThrownBy(() -> new WeekPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 15)
                 ))
@@ -57,7 +57,7 @@ class WeekPeriodTest {
 
     @Test
     void 주간_기간은_7일보다_짧을_수_있다() {
-        WeekPeriod weekPeriod = WeekPeriod.of(
+        WeekPeriod weekPeriod = new WeekPeriod(
                 LocalDate.of(2026, 7, 7),
                 LocalDate.of(2026, 7, 13)
         );
@@ -69,7 +69,7 @@ class WeekPeriodTest {
     @Test
     void 시작일이_종료일보다_이후이면_주간_기간_생성에_실패한다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> WeekPeriod.of(
+                .isThrownBy(() -> new WeekPeriod(
                         LocalDate.of(2026, 7, 13),
                         LocalDate.of(2026, 7, 12)
                 ))
@@ -79,19 +79,19 @@ class WeekPeriodTest {
 
     @Test
     void 시작일과_종료일이_같으면_같은_주간_기간이다() {
-        WeekPeriod weekPeriod = WeekPeriod.of(
+        WeekPeriod weekPeriod = new WeekPeriod(
                 LocalDate.of(2026, 7, 7),
                 LocalDate.of(2026, 7, 14)
         );
 
         assertThat(weekPeriod).isNotEqualTo(
-                WeekPeriod.of(
+                new WeekPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 14)
                 )
         );
         assertThat(weekPeriod).isEqualTo(
-                WeekPeriod.of(
+                new WeekPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )

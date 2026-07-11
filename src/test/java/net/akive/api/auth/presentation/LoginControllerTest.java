@@ -19,7 +19,7 @@ class LoginControllerTest extends PublicControllerTestSupport {
     void 이메일_로그인_요청_시_올바른_이메일과_패스워드를_전달하면_토큰을_발급한다() throws Exception {
         // given
         LoginByEmailRequest request = new LoginByEmailRequest("test@test.com", "password123!");
-        LoginResult result = LoginResult.of("access-token", "refresh-token");
+        LoginResult result = new LoginResult("access-token", "refresh-token");
 
         given(loginByEmailUseCase.login(request.toCommand())).willReturn(result);
 

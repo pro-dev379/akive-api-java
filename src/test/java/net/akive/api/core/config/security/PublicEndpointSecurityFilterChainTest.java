@@ -49,7 +49,7 @@ class PublicEndpointSecurityFilterChainTest {
     @Test
     void 퍼블릭_엔드포인트는_Authorization_헤더가_있어도_액세스_토큰을_검증하지_않는다() throws Exception {
         given(loginByEmailUseCase.login(any()))
-                .willReturn(LoginResult.of("access-token", "refresh-token"));
+                .willReturn(new LoginResult("access-token", "refresh-token"));
 
         mockMvc.perform(post("/login/email")
                         .header(AUTHORIZATION, "Bearer invalid-access-token")

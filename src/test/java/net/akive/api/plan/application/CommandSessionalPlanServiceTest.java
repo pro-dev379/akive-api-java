@@ -53,7 +53,7 @@ class CommandSessionalPlanServiceTest {
         CreateSessionalPlanCommand command = new CreateSessionalPlanCommand(
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -62,7 +62,7 @@ class CommandSessionalPlanServiceTest {
                 1L,
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -71,7 +71,7 @@ class CommandSessionalPlanServiceTest {
                 1L,
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -80,7 +80,7 @@ class CommandSessionalPlanServiceTest {
         given(sessionalPlanDomainService.createForUser(
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -95,7 +95,7 @@ class CommandSessionalPlanServiceTest {
         assertThat(result.sessionalPlanId()).isEqualTo(1L);
         assertThat(result.sessionName()).isEqualTo("1회차");
         assertThat(result.sessionPeriod()).isEqualTo(
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -104,7 +104,7 @@ class CommandSessionalPlanServiceTest {
         then(sessionalPlanDomainService).should().createForUser(
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -119,7 +119,7 @@ class CommandSessionalPlanServiceTest {
         CreateSessionalPlanCommand command = new CreateSessionalPlanCommand(
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -128,7 +128,7 @@ class CommandSessionalPlanServiceTest {
         given(sessionalPlanDomainService.createForUser(
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -143,7 +143,7 @@ class CommandSessionalPlanServiceTest {
         then(sessionalPlanDomainService).should().createForUser(
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -156,7 +156,7 @@ class CommandSessionalPlanServiceTest {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 10L;
-        DeleteSessionalPlanCommand command = DeleteSessionalPlanCommand.of(userId, sessionalPlanId);
+        DeleteSessionalPlanCommand command = new DeleteSessionalPlanCommand(userId, sessionalPlanId);
 
         given(deleteSessionalPlanPort.deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(1L);
@@ -173,7 +173,7 @@ class CommandSessionalPlanServiceTest {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 10L;
-        DeleteSessionalPlanCommand command = DeleteSessionalPlanCommand.of(userId, sessionalPlanId);
+        DeleteSessionalPlanCommand command = new DeleteSessionalPlanCommand(userId, sessionalPlanId);
 
         given(deleteSessionalPlanPort.deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(0L);
@@ -203,7 +203,7 @@ class CommandSessionalPlanServiceTest {
                 sessionalPlanId,
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -215,7 +215,7 @@ class CommandSessionalPlanServiceTest {
                 sessionalPlanId,
                 userId,
                 "수정된 1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -223,7 +223,7 @@ class CommandSessionalPlanServiceTest {
         given(sessionalPlanDomainService.update(
                 sessionalPlan,
                 "수정된 1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -237,7 +237,7 @@ class CommandSessionalPlanServiceTest {
         then(sessionalPlanDomainService).should().update(
                 sessionalPlan,
                 "수정된 1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -288,7 +288,7 @@ class CommandSessionalPlanServiceTest {
                 sessionalPlanId,
                 userId,
                 "1회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
@@ -299,7 +299,7 @@ class CommandSessionalPlanServiceTest {
         given(sessionalPlanDomainService.update(
                 sessionalPlan,
                 "2회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
@@ -315,7 +315,7 @@ class CommandSessionalPlanServiceTest {
         then(sessionalPlanDomainService).should().update(
                 sessionalPlan,
                 "2회차",
-                SessionPeriod.of(
+                new SessionPeriod(
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )

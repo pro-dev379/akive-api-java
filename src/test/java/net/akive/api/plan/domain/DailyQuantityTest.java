@@ -20,7 +20,7 @@ class DailyQuantityTest {
             2L,
             1L,
             "세션",
-            SessionPeriod.of(LocalDate.of(2026, 7, 7), LocalDate.of(2026, 7, 14))
+            new SessionPeriod(LocalDate.of(2026, 7, 7), LocalDate.of(2026, 7, 14))
     );
     private static final TotalQuantity VALID_TOTAL_QUANTITY = TotalQuantity.create(
             2L,
@@ -34,7 +34,7 @@ class DailyQuantityTest {
     private static final WeeklyQuantity VALID_WEEKLY_QUANTITY = WeeklyQuantity.create(
             2L,
             VALID_TOTAL_QUANTITY,
-            WeekPeriod.of(
+            new WeekPeriod(
                     LocalDate.of(2026, 7, 7),
                     LocalDate.of(2026, 7, 14)
             ),

@@ -29,6 +29,6 @@ public class WeekPeriodEntity {
     }
 
     public WeekPeriod toModel() {
-        return WeekPeriod.of(this.startOn, this.endOn);
+        return new WeekPeriod(this.startOn, this.endOn);
     }
 }
