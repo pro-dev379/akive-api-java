@@ -4,7 +4,7 @@ import net.akive.api.common.domain.Email;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import net.akive.api.support.StoreTestSupport;
+import net.akive.api.support.RedisTestSupport;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -15,7 +15,7 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpo
 import static org.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class EmailVerificationRedisAdapterTest extends StoreTestSupport {
+class EmailVerificationRedisAdapterTest extends RedisTestSupport {
 
     @Test
     void 이메일_인증_정보를_저장하고_조회한다() {

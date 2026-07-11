@@ -1,6 +1,6 @@
 package net.akive.api.auth.infrastructure.token;
 
-import net.akive.api.support.StoreTestSupport;
+import net.akive.api.support.RedisTestSupport;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -9,7 +9,7 @@ import java.util.Optional;
 import static org.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RefreshTokenRedisAdapterTest extends StoreTestSupport {
+class RefreshTokenRedisAdapterTest extends RedisTestSupport {
 
     @Test
     void 리프레시_토큰을_저장하고_조회한다() {

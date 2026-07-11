@@ -19,7 +19,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.Objects;
 
 @Testcontainers
-public class StoreTestSupport extends IntegrationTestSupport{
+public class RedisTestSupport extends IntegrationTestSupport{
 
     static final GenericContainer<?> redis = new GenericContainer<>("redis:7.2").withExposedPorts(6379);
 
