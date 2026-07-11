@@ -29,15 +29,16 @@ public class GoalEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
+    @Column(nullable = false)
     private LocalTime attendOn;
 
     @Column(name = "rest_10min_sec")
-    private Integer rest10MinSec;
+    private long rest10MinSec;
 
-    private Integer mealNum;
+    private int mealNum;
 
     @Column(name = "meal_1time_sec")
-    private Integer meal1TimeSec;
+    private long meal1TimeSec;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

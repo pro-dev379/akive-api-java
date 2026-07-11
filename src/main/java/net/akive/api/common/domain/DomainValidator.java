@@ -52,6 +52,16 @@ public final class DomainValidator {
         return value;
     }
 
+    public static Integer requirePositive(Integer value) {
+        requireNonNull(value);
+
+        if (value <= 0) {
+            throw new DomainValidationException(VALUE_NOT_POSITIVE);
+        }
+
+        return value;
+    }
+
     public static Long requirePositive(Long value) {
         requireNonNull(value);
 
@@ -72,11 +82,11 @@ public final class DomainValidator {
         return value;
     }
 
-    public static Integer requirePositive(Integer value) {
+    public static Long requireNonNegative(Long value) {
         requireNonNull(value);
 
-        if (value <= 0) {
-            throw new DomainValidationException(VALUE_NOT_POSITIVE);
+        if (value < 0) {
+            throw new DomainValidationException(VALUE_NEGATIVE);
         }
 
         return value;

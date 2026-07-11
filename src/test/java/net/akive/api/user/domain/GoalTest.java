@@ -18,9 +18,9 @@ class GoalTest {
         Long goalId = 1L;
         Long userId = 2L;
         LocalTime attendOn = LocalTime.of(9, 30);
-        Integer rest10MinSec = 180;
-        Integer mealNum = 2;
-        Integer meal1TimeSec = 1_800;
+        long rest10MinSec = 180L;
+        int mealNum = 2;
+        long meal1TimeSec = 1_800L;
 
         // when
         Goal goal = Goal.create(
@@ -52,9 +52,9 @@ class GoalTest {
         // then
         assertThat(goal.getUserId()).isEqualTo(userId);
         assertThat(goal.getAttendOn()).isEqualTo(LocalTime.of(20, 0));
-        assertThat(goal.getRest10MinSec()).isEqualTo(120);
+        assertThat(goal.getRest10MinSec()).isEqualTo(120L);
         assertThat(goal.getMealNum()).isEqualTo(3);
-        assertThat(goal.getMeal1TimeSec()).isEqualTo(3_600);
+        assertThat(goal.getMeal1TimeSec()).isEqualTo(3_600L);
     }
 
     @Test
@@ -72,9 +72,9 @@ class GoalTest {
                         1L,
                         2L,
                         LocalTime.of(9, 30),
-                        -1,
+                        -1L,
                         2,
-                        1_800
+                        1_800L
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(VALUE_NEGATIVE);
