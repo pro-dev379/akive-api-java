@@ -24,11 +24,11 @@ public class SessionPeriodEntity {
     @Column(name = "session_end_on", nullable = false)
     private LocalDate endOn;
 
-    public static SessionPeriodEntity fromModel(SessionPeriod sessionPeriod) {
+    public static SessionPeriodEntity from(SessionPeriod sessionPeriod) {
         return new SessionPeriodEntity(sessionPeriod.startOn(), sessionPeriod.endOn());
     }
 
-    public SessionPeriod toModel() {
+    public SessionPeriod to() {
         return new SessionPeriod(this.startOn, this.endOn);
     }
 }

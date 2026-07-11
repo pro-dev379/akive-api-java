@@ -59,6 +59,6 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
 
     private void saveLegacyPassword(User savedUser) {
         LegacyUserPassword legacyUserPassword = new LegacyUserPassword(savedUser.getUserId(), "hashed-password", "salt");
-        legacyUserPasswordJpaRepository.save(LegacyUserPasswordEntity.fromModel(legacyUserPassword));
+        legacyUserPasswordJpaRepository.save(LegacyUserPasswordEntity.from(legacyUserPassword));
     }
 }

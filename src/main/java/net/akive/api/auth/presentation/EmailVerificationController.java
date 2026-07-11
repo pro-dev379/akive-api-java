@@ -22,13 +22,13 @@ public class EmailVerificationController {
 
     @PostMapping
     public SendEmailVerificationCodeResponse send(@RequestBody @Validated SendEmailVerificationCodeRequest request) {
-        SendEmailVerificationResult result = sendEmailVerificationCodeUseCase.send(request.toCommand());
+        SendEmailVerificationResult result = sendEmailVerificationCodeUseCase.send(request.to());
         return SendEmailVerificationCodeResponse.from(result);
     }
 
     @PostMapping("/verifications")
     @ResponseStatus(NO_CONTENT)
     public void verify(@RequestBody @Validated VerifyEmailVerificationCodeRequest request) {
-        verifyEmailVerificationCodeUseCase.verify(request.toCommand());
+        verifyEmailVerificationCodeUseCase.verify(request.to());
     }
 }

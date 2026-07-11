@@ -10,7 +10,7 @@ public record VerifyEmailVerificationCodeRequest(
     @NotBlank @Pattern(regexp = "\\d{6}") String verificationCode
 ) {
 
-    public VerifyEmailVerificationCodeCommand toCommand() {
+    public VerifyEmailVerificationCodeCommand to() {
         return VerifyEmailVerificationCodeCommand.of(email, verificationPurpose, verificationCode);
     }
 }

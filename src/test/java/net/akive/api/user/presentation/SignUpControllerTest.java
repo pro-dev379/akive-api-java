@@ -122,7 +122,7 @@ class SignUpControllerTest extends PublicControllerTestSupport {
 
         willThrow(new EmailVerificationException(NOT_VERIFIED))
                 .given(signUpByEmailUseCase)
-                .signUp(request.toCommand());
+                .signUp(request.to());
 
         // when & then
         mockMvc.perform(post("/users/email")
@@ -142,7 +142,7 @@ class SignUpControllerTest extends PublicControllerTestSupport {
 
         willThrow(new UserException(EMAIL_ALREADY_EXISTS))
                 .given(signUpByEmailUseCase)
-                .signUp(request.toCommand());
+                .signUp(request.to());
 
         // when & then
         mockMvc.perform(post("/users/email")

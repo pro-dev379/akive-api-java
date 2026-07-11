@@ -66,7 +66,7 @@ public class MentoringProfileEntity extends BaseTimeEntity {
     @Column(length = 140)
     private String effectiveAdvice;
 
-    public static MentoringProfileEntity fromModel(MentoringProfile mentoringProfile) {
+    public static MentoringProfileEntity from(MentoringProfile mentoringProfile) {
         MentoringProfileEntity mentoringProfileEntity = new MentoringProfileEntity();
         mentoringProfileEntity.mentoringProfileId = mentoringProfile.getMentoringProfileId();
         mentoringProfileEntity.user = UserEntity.reference(mentoringProfile.getUserId());
@@ -84,7 +84,7 @@ public class MentoringProfileEntity extends BaseTimeEntity {
         return mentoringProfileEntity;
     }
 
-    public MentoringProfile toModel() {
+    public MentoringProfile to() {
         return MentoringProfile.create(
                 this.mentoringProfileId,
                 this.getUser().getUserId(),

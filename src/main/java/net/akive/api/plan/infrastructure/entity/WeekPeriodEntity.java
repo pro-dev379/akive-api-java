@@ -24,11 +24,11 @@ public class WeekPeriodEntity {
     @Column(name = "week_end_on", nullable = false)
     private LocalDate endOn;
 
-    public static WeekPeriodEntity fromModel(WeekPeriod weekPeriod) {
+    public static WeekPeriodEntity from(WeekPeriod weekPeriod) {
         return new WeekPeriodEntity(weekPeriod.startOn(), weekPeriod.endOn());
     }
 
-    public WeekPeriod toModel() {
+    public WeekPeriod to() {
         return new WeekPeriod(this.startOn, this.endOn);
     }
 }

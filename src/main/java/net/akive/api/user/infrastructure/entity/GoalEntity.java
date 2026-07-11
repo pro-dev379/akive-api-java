@@ -48,7 +48,7 @@ public class GoalEntity {
         createdAt = LocalDateTime.now();
     }
 
-    public static GoalEntity fromModel(Goal goal) {
+    public static GoalEntity from(Goal goal) {
         GoalEntity goalEntity = new GoalEntity();
         goalEntity.goalId = goal.getGoalId();
         goalEntity.user = UserEntity.reference(goal.getUserId());
@@ -60,7 +60,7 @@ public class GoalEntity {
         return goalEntity;
     }
 
-    public Goal toModel() {
+    public Goal to() {
         return Goal.create(
                 this.goalId,
                 this.user.getUserId(),

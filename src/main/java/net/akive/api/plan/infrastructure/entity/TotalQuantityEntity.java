@@ -52,10 +52,10 @@ public class TotalQuantityEntity extends BaseTimeEntity {
     @Column(length = 25)
     private String totalQuantityMemo;
 
-    public static TotalQuantityEntity fromModel(TotalQuantity totalQuantity) {
+    public static TotalQuantityEntity from(TotalQuantity totalQuantity) {
         TotalQuantityEntity totalQuantityEntity = new TotalQuantityEntity();
         totalQuantityEntity.totalQuantityId = totalQuantity.getTotalQuantityId();
-        totalQuantityEntity.sessionalPlan = SessionalPlanEntity.fromModel(totalQuantity.getSessionalPlan());
+        totalQuantityEntity.sessionalPlan = SessionalPlanEntity.from(totalQuantity.getSessionalPlan());
         totalQuantityEntity.subject = totalQuantity.getSubject();
         totalQuantityEntity.subjectCategory = totalQuantity.getSubjectCategory();
         totalQuantityEntity.totalQuantityAmount = totalQuantity.getTotalQuantityAmount();
@@ -65,10 +65,10 @@ public class TotalQuantityEntity extends BaseTimeEntity {
         return totalQuantityEntity;
     }
 
-    public TotalQuantity toModel() {
+    public TotalQuantity to() {
         return TotalQuantity.create(
                 this.totalQuantityId,
-                this.sessionalPlan.toModel(),
+                this.sessionalPlan.to(),
                 this.subject,
                 this.subjectCategory,
                 this.totalQuantityAmount,

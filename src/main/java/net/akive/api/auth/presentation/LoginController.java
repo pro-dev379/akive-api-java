@@ -17,7 +17,7 @@ public class LoginController {
 
     @PostMapping("/email")
     public LoginResponse loginByEmail(@RequestBody @Validated LoginByEmailRequest request) {
-        LoginResult result = loginByEmailUseCase.login(request.toCommand());
+        LoginResult result = loginByEmailUseCase.login(request.to());
         return LoginResponse.from(result);
     }
 }

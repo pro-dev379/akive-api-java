@@ -28,7 +28,7 @@ class SessionalPlanJpaAdapter implements
     public Optional<SessionalPlan> loadBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId) {
         return sessionalPlanJpaRepository
                 .findBySessionalPlanIdAndUser_userId(sessionalPlanId, userId)
-                .map(SessionalPlanEntity::toModel);
+                .map(SessionalPlanEntity::to);
     }
 
     @Override
@@ -36,7 +36,7 @@ class SessionalPlanJpaAdapter implements
         return sessionalPlanJpaRepository
                 .findByUser_userIdOrderBySessionalPlanIdDesc(userId)
                 .stream()
-                .map(SessionalPlanEntity::toModel)
+                .map(SessionalPlanEntity::to)
                 .toList();
     }
 
@@ -51,7 +51,7 @@ class SessionalPlanJpaAdapter implements
 
     @Override
     public SessionalPlan save(SessionalPlan sessionalPlan) {
-        return sessionalPlanJpaRepository.save(SessionalPlanEntity.fromModel(sessionalPlan)).toModel();
+        return sessionalPlanJpaRepository.save(SessionalPlanEntity.from(sessionalPlan)).to();
     }
 
     @Override

@@ -42,22 +42,22 @@ public class SessionalPlanEntity extends BaseTimeEntity {
     @Embedded
     private SessionPeriodEntity sessionPeriod;
 
-    public static SessionalPlanEntity fromModel(SessionalPlan sessionalPlan) {
+    public static SessionalPlanEntity from(SessionalPlan sessionalPlan) {
         SessionalPlanEntity sessionalPlanEntity = new SessionalPlanEntity();
         sessionalPlanEntity.sessionalPlanId = sessionalPlan.getSessionalPlanId();
         sessionalPlanEntity.user = UserEntity.reference(sessionalPlan.getUserId());
         sessionalPlanEntity.sessionName = sessionalPlan.getSessionName();
-        sessionalPlanEntity.sessionPeriod = SessionPeriodEntity.fromModel(sessionalPlan.getSessionPeriod());
+        sessionalPlanEntity.sessionPeriod = SessionPeriodEntity.from(sessionalPlan.getSessionPeriod());
 
         return sessionalPlanEntity;
     }
 
-    public SessionalPlan toModel() {
+    public SessionalPlan to() {
         return SessionalPlan.create(
                 this.sessionalPlanId,
                 this.user.getUserId(),
                 this.sessionName,
-                this.sessionPeriod.toModel()
+                this.sessionPeriod.to()
         );
     }
 }

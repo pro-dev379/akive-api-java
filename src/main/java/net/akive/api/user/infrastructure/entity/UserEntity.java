@@ -67,7 +67,7 @@ public class UserEntity extends BaseTimeEntity {
         return userEntity;
     }
 
-    public static UserEntity fromModel(User user) {
+    public static UserEntity from(User user) {
         UserEntity userEntity = new UserEntity();
         userEntity.userId = user.getUserId();
         userEntity.email = user.getEmail().value();
@@ -83,7 +83,7 @@ public class UserEntity extends BaseTimeEntity {
         return userEntity;
     }
 
-    public User toModel() {
+    public User to() {
         return User.create(
                 this.userId,
                 Email.of(this.email),

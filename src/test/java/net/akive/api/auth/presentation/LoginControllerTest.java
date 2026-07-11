@@ -21,7 +21,7 @@ class LoginControllerTest extends PublicControllerTestSupport {
         LoginByEmailRequest request = new LoginByEmailRequest("test@test.com", "password123!");
         LoginResult result = new LoginResult("access-token", "refresh-token");
 
-        given(loginByEmailUseCase.login(request.toCommand())).willReturn(result);
+        given(loginByEmailUseCase.login(request.to())).willReturn(result);
 
         // when
         mockMvc.perform(post("/login/email")
@@ -31,7 +31,7 @@ class LoginControllerTest extends PublicControllerTestSupport {
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
                 .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
 
-        then(loginByEmailUseCase).should().login(request.toCommand());
+        then(loginByEmailUseCase).should().login(request.to());
     }
 
     @Test
@@ -66,7 +66,7 @@ class LoginControllerTest extends PublicControllerTestSupport {
     void 이메일_로그인_요청_시_존재하지_않는_이메일이면_401을_응답한다() throws Exception {
         // given
         LoginByEmailRequest request = new LoginByEmailRequest("none@test.com", "password123!");
-        given(loginByEmailUseCase.login(request.toCommand()))
+        given(loginByEmailUseCase.login(request.to()))
                 .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
 
         // when
@@ -75,14 +75,14 @@ class LoginControllerTest extends PublicControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
 
-        then(loginByEmailUseCase).should().login(request.toCommand());
+        then(loginByEmailUseCase).should().login(request.to());
     }
 
     @Test
     void 이메일_로그인_요청_시_패스워드가_일치하지_않으면_401을_응답한다() throws Exception {
         // given
         LoginByEmailRequest request = new LoginByEmailRequest("test@test.com", "wrong-password");
-        given(loginByEmailUseCase.login(request.toCommand()))
+        given(loginByEmailUseCase.login(request.to()))
                 .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
 
         // when
@@ -91,6 +91,6 @@ class LoginControllerTest extends PublicControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
 
-        then(loginByEmailUseCase).should().login(request.toCommand());
+        then(loginByEmailUseCase).should().login(request.to());
     }
 }

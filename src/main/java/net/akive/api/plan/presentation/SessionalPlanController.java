@@ -55,7 +55,7 @@ public class SessionalPlanController {
             @AuthenticatedUserId Long userId,
             @Validated @RequestBody CreateSessionalPlanRequest request
     ) {
-        SessionalPlanSummaryResult result = createSessionalPlanUseCase.create(request.toCommand(userId));
+        SessionalPlanSummaryResult result = createSessionalPlanUseCase.create(request.to(userId));
 
         return CreateSessionalPlanResponse.from(result);
     }
@@ -67,7 +67,7 @@ public class SessionalPlanController {
             @PathVariable Long sessionalPlanId,
             @Validated @RequestBody UpdateSessionalPlanRequest request
     ) {
-        updateSessionalPlanUseCase.update(request.toCommand(sessionalPlanId, userId));
+        updateSessionalPlanUseCase.update(request.to(sessionalPlanId, userId));
     }
 
     @DeleteMapping("/{sessionalPlanId}")

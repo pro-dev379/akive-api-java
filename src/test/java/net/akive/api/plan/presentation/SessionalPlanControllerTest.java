@@ -186,7 +186,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         LocalDate.of(2026, 7, 14)
                 )
         );
-        CreateSessionalPlanCommand command = request.toCommand(userId);
+        CreateSessionalPlanCommand command = request.to(userId);
         SessionalPlanSummaryResult result = new SessionalPlanSummaryResult(
                 1L,
                 "1회차",
@@ -362,7 +362,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
 
         willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS))
                 .given(createSessionalPlanUseCase)
-                .create(request.toCommand(userId));
+                .create(request.to(userId));
 
         // when & then
         mockMvc.perform(post("/sessional-plans")
@@ -394,7 +394,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isNoContent());
 
         then(updateSessionalPlanUseCase).should()
-                .update(request.toCommand(sessionalPlanId, userId));
+                .update(request.to(sessionalPlanId, userId));
     }
 
     @Test
@@ -555,7 +555,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
 
         willThrow(new SessionalPlanException(NOT_FOUND))
                 .given(updateSessionalPlanUseCase)
-                .update(request.toCommand(sessionalPlanId, userId));
+                .update(request.to(sessionalPlanId, userId));
 
         // when & then
         mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
@@ -565,7 +565,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("SESSIONAL_PLAN_404_1"));
 
-        then(updateSessionalPlanUseCase).should().update(request.toCommand(sessionalPlanId, userId));
+        then(updateSessionalPlanUseCase).should().update(request.to(sessionalPlanId, userId));
     }
 
     @Test
@@ -583,7 +583,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
 
         willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS))
                 .given(updateSessionalPlanUseCase)
-                .update(request.toCommand(sessionalPlanId, userId));
+                .update(request.to(sessionalPlanId, userId));
 
         // when & then
         mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
@@ -593,7 +593,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("SESSIONAL_PLAN_409_1"));
 
-        then(updateSessionalPlanUseCase).should().update(request.toCommand(sessionalPlanId, userId));
+        then(updateSessionalPlanUseCase).should().update(request.to(sessionalPlanId, userId));
     }
 
     @Test
@@ -611,7 +611,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
 
         willThrow(new SessionalPlanException(SESSION_PERIOD_CHANGE_NOT_ALLOWED))
                 .given(updateSessionalPlanUseCase)
-                .update(request.toCommand(sessionalPlanId, userId));
+                .update(request.to(sessionalPlanId, userId));
 
         // when & then
         mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
@@ -621,7 +621,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("SESSIONAL_PLAN_400_2"));
 
-        then(updateSessionalPlanUseCase).should().update(request.toCommand(sessionalPlanId, userId));
+        then(updateSessionalPlanUseCase).should().update(request.to(sessionalPlanId, userId));
     }
 
     @Test
@@ -645,7 +645,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isNoContent());
 
         then(updateSessionalPlanUseCase).should()
-                .update(request.toCommand(sessionalPlanId, userId));
+                .update(request.to(sessionalPlanId, userId));
     }
 
     @Test

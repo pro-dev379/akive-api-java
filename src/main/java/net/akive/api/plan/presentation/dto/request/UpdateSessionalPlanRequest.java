@@ -10,7 +10,7 @@ public record UpdateSessionalPlanRequest(
         @NotNull SessionPeriodRequest sessionPeriod
 ) {
 
-    public UpdateSessionalPlanCommand toCommand(Long sessionalPlanId, Long userId) {
+    public UpdateSessionalPlanCommand to(Long sessionalPlanId, Long userId) {
         return UpdateSessionalPlanCommand.of(
                 sessionalPlanId,
                 userId,

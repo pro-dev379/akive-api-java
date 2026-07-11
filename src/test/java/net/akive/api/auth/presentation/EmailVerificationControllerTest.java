@@ -37,7 +37,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                 30
         );
 
-        given(sendEmailVerificationCodeUseCase.send(request.toCommand()))
+        given(sendEmailVerificationCodeUseCase.send(request.to()))
                 .willReturn(result);
 
         // when & then
@@ -113,7 +113,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         willThrow(new EmailVerificationException(RESEND_LIMIT_EXCEEDED))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(request.toCommand());
+                .send(request.to());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -134,7 +134,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         willThrow(new EmailVerificationException(RESEND_TOO_SOON))
                 .given(sendEmailVerificationCodeUseCase)
-                .send(request.toCommand());
+                .send(request.to());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes")
@@ -321,7 +321,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         willThrow(new EmailVerificationException(CODE_MISMATCH))
                 .given(verifyEmailVerificationCodeUseCase)
-                .verify(request.toCommand());
+                .verify(request.to());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
@@ -343,7 +343,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         willThrow(new EmailVerificationException(NOT_FOUND))
                 .given(verifyEmailVerificationCodeUseCase)
-                .verify(request.toCommand());
+                .verify(request.to());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
@@ -365,7 +365,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         willThrow(new EmailVerificationException(EXPIRED))
                 .given(verifyEmailVerificationCodeUseCase)
-                .verify(request.toCommand());
+                .verify(request.to());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")
@@ -387,7 +387,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
 
         willThrow(new EmailVerificationException(ALREADY_VERIFIED))
                 .given(verifyEmailVerificationCodeUseCase)
-                .verify(request.toCommand());
+                .verify(request.to());
 
         // when & then
         mockMvc.perform(post("/emails/verification-codes/verifications")

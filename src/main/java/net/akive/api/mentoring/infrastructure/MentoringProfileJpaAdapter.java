@@ -15,7 +15,7 @@ class MentoringProfileJpaAdapter implements SaveMentoringProfilePort {
     @Override
     public MentoringProfile save(MentoringProfile mentoringProfile) {
         return mentoringProfileJpaRepository
-                .save(MentoringProfileEntity.fromModel(mentoringProfile))
-                .toModel();
+                .save(MentoringProfileEntity.from(mentoringProfile))
+                .to();
     }
 }

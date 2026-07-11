@@ -10,7 +10,7 @@ public record CreateSessionalPlanRequest(
         @NotNull SessionPeriodRequest sessionPeriod
 ) {
 
-    public CreateSessionalPlanCommand toCommand(Long userId) {
+    public CreateSessionalPlanCommand to(Long userId) {
         return CreateSessionalPlanCommand.of(
                 userId,
                 sessionName,

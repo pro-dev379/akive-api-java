@@ -17,7 +17,7 @@ public record SignUpByEmailRequest(
         @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d]).*$")
         String password
 ) {
-        public SignUpByEmailCommand toCommand() {
+        public SignUpByEmailCommand to() {
                 return SignUpByEmailCommand.of(email, roleType, password);
         }
 }

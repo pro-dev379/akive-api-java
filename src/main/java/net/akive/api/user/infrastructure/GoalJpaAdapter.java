@@ -14,6 +14,6 @@ class GoalJpaAdapter implements SaveGoalPort {
 
     @Override
     public Goal save(Goal goal) {
-        return goalJpaRepository.save(GoalEntity.fromModel(goal)).toModel();
+        return goalJpaRepository.save(GoalEntity.from(goal)).to();
     }
 }

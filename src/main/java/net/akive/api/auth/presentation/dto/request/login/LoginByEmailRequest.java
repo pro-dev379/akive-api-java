@@ -8,7 +8,7 @@ public record LoginByEmailRequest(
         @NotBlank String password
 ) {
 
-    public LoginByEmailCommand toCommand() {
+    public LoginByEmailCommand to() {
         return LoginByEmailCommand.of(email, password);
     }
 }

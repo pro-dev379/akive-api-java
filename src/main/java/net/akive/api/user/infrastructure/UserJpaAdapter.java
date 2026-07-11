@@ -19,12 +19,12 @@ class UserJpaAdapter implements LoadUserPort, SaveUserPort, ValidateUserPort {
 
     @Override
     public Optional<User> loadByUserIdAndLeaveFalse(Long userId) {
-        return userJpaRepository.findByUserIdAndLeaveFalse(userId).map(UserEntity::toModel);
+        return userJpaRepository.findByUserIdAndLeaveFalse(userId).map(UserEntity::to);
     }
 
     @Override
     public User save(User user) {
-        return userJpaRepository.save(UserEntity.fromModel(user)).toModel();
+        return userJpaRepository.save(UserEntity.from(user)).to();
     }
 
     @Override

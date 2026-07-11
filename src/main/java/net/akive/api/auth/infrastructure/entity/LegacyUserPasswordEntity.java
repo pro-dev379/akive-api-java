@@ -31,7 +31,7 @@ public class LegacyUserPasswordEntity extends BaseTimeEntity {
     @Embedded
     private LegacyPasswordHash legacyPasswordHash;
 
-    public static LegacyUserPasswordEntity fromModel(LegacyUserPassword legacyUserPassword) {
+    public static LegacyUserPasswordEntity from(LegacyUserPassword legacyUserPassword) {
         LegacyUserPasswordEntity legacyUserPasswordEntity = new LegacyUserPasswordEntity();
         legacyUserPasswordEntity.user = UserEntity.reference(legacyUserPassword.userId());
         legacyUserPasswordEntity.legacyPasswordHash = LegacyPasswordHash.of(legacyUserPassword.hash(), legacyUserPassword.salt());
@@ -39,7 +39,7 @@ public class LegacyUserPasswordEntity extends BaseTimeEntity {
         return legacyUserPasswordEntity;
     }
 
-    public LegacyUserPassword toModel() {
+    public LegacyUserPassword to() {
         return new LegacyUserPassword(
                 user.getUserId(),
                 legacyPasswordHash.getHash(),
