@@ -19,7 +19,7 @@ class LegacyPasswordVerifier {
     private static final int ITERATIONS = 104_906;
     private static final int KEY_LENGTH_BITS = 64 * 8;
 
-    public boolean matches(String rawPassword, LegacyUserPassword legacyUserPassword) {
+    boolean matches(String rawPassword, LegacyUserPassword legacyUserPassword) {
         String hashedPassword = hash(rawPassword, legacyUserPassword.salt());
 
         return MessageDigest.isEqual(
