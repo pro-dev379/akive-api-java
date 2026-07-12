@@ -8,6 +8,7 @@ import java.time.LocalDate;
 
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.INVALID_SESSION_PERIOD;
+import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_PERIOD_TOO_LONG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -67,6 +68,28 @@ class SessionPeriodTest {
                 ))
                 .extracting(SessionalPlanException::getErrorCode)
                 .isEqualTo(INVALID_SESSION_PERIOD);
+    }
+
+    @Test
+    void 세션_기간이_12개월이면_세션_기간을_생성한다() {
+        SessionPeriod sessionPeriod = new SessionPeriod(
+                LocalDate.of(2026, 7, 7),
+                LocalDate.of(2027, 7, 7)
+        );
+
+        assertThat(sessionPeriod.startOn()).isEqualTo(LocalDate.of(2026, 7, 7));
+        assertThat(sessionPeriod.endOn()).isEqualTo(LocalDate.of(2027, 7, 7));
+    }
+
+    @Test
+    void 세션_기간이_12개월을_초과하면_세션_기간_생성에_실패한다() {
+        assertThatExceptionOfType(SessionalPlanException.class)
+                .isThrownBy(() -> new SessionPeriod(
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2027, 7, 8)
+                ))
+                .extracting(SessionalPlanException::getErrorCode)
+                .isEqualTo(SESSION_PERIOD_TOO_LONG);
     }
 
     @Test

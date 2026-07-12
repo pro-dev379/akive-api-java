@@ -8,23 +8,30 @@ import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.exception.SessionalPlanException;
 import org.springframework.stereotype.Component;
 
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
+import java.time.LocalDate;
+
 import static net.akive.api.common.domain.DomainValidator.requireMaxLength;
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
+import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.*;
 
 @Component
 @RequiredArgsConstructor
 class SessionalPlanPolicy {
 
+    private static final int MAX_IN_PROGRESS_SESSIONAL_PLAN_COUNT = 5;
+
     private final ValidateSessionalPlanPort validateSessionalPlanPort;
     private final ValidateTotalQuantityPort validateTotalQuantityPort;
 
-    void validateCreatable(Long userId, String requestedSessionName) {
+    void validateCreatable(Long userId, String requestedSessionName, LocalDate now) {
         String normalizedSessionName = validateSessionName(requestedSessionName);
-
         if (validateSessionalPlanPort.existsByUserIdAndSessionName(userId, normalizedSessionName)) {
             throw new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS);
+        }
+
+        int inProgressSessionalPlanCount = validateSessionalPlanPort.countInProgressByUserId(userId, now);
+        if (MAX_IN_PROGRESS_SESSIONAL_PLAN_COUNT <= inProgressSessionalPlanCount) {
+            throw new SessionalPlanException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
         }
     }
 

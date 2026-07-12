@@ -23,6 +23,12 @@ import static org.mockito.BDDMockito.willThrow;
 @ExtendWith(MockitoExtension.class)
 class SessionalPlanDomainServiceTest {
 
+    private static final Long USER_ID = 1L;
+    private static final Long SESSIONAL_PLAN_ID = 10L;
+    private static final LocalDate REQUESTED_ON = LocalDate.of(2026, 7, 6);
+    private static final String REQUESTED_SESSION_NAME = "  1회차  ";
+    private static final String REQUESTED_UPDATE_SESSION_NAME = "  수정된 1회차  ";
+
     @Mock
     SessionalPlanPolicy sessionalPlanPolicy;
 
@@ -40,91 +46,85 @@ class SessionalPlanDomainServiceTest {
     }
 
     @Test
-    void 세셔널_플랜명_정규화와_생성_가능_검증_후_세셔널_플랜을_생성한다() {
+    void 생성_가능_검증_후_세셔널_플랜을_생성한다() {
+        // given
+        SessionPeriod requestedSessionPeriod = sessionPeriod(
+                LocalDate.of(2026, 7, 7),
+                LocalDate.of(2026, 7, 14)
+        );
+
         // when
         SessionalPlan createdSessionalPlan = sessionalPlanDomainService.createForUser(
-                1L,
-                "  1회차  ",
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 7),
-                        LocalDate.of(2026, 7, 14)
-                )
+                USER_ID,
+                REQUESTED_SESSION_NAME,
+                requestedSessionPeriod
         );
 
         // then
-        assertThat(createdSessionalPlan.getUserId()).isEqualTo(1L);
+        assertThat(createdSessionalPlan.getUserId()).isEqualTo(USER_ID);
         assertThat(createdSessionalPlan.getSessionName()).isEqualTo("1회차");
-        assertThat(createdSessionalPlan.getSessionPeriod()).isEqualTo(
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 7),
-                        LocalDate.of(2026, 7, 14)
-                )
-        );
+        assertThat(createdSessionalPlan.getSessionPeriod()).isEqualTo(requestedSessionPeriod);
 
-        then(sessionalPlanPolicy).should().validateCreatable(1L, "  1회차  ");
+        then(sessionalPlanPolicy).should().validateCreatable(
+                USER_ID,
+                REQUESTED_SESSION_NAME,
+                REQUESTED_ON
+        );
     }
 
     @Test
     void 생성_가능_검증이_실패하면_세셔널_플랜_생성에_실패한다() {
         // given
+        SessionPeriod requestedSessionPeriod = sessionPeriod(
+                LocalDate.of(2026, 7, 7),
+                LocalDate.of(2026, 7, 14)
+        );
         willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS))
                 .given(sessionalPlanPolicy)
-                .validateCreatable(1L, "  1회차  ");
+                .validateCreatable(USER_ID, REQUESTED_SESSION_NAME, REQUESTED_ON);
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
                 .isThrownBy(() -> sessionalPlanDomainService.createForUser(
-                        1L,
-                        "  1회차  ",
-                        new SessionPeriod(
-                                LocalDate.of(2026, 7, 7),
-                                LocalDate.of(2026, 7, 14)
-                        )
+                        USER_ID,
+                        REQUESTED_SESSION_NAME,
+                        requestedSessionPeriod
                 ))
                 .extracting(SessionalPlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
-        then(sessionalPlanPolicy).should().validateCreatable(1L, "  1회차  ");
+        then(sessionalPlanPolicy).should().validateCreatable(
+                USER_ID,
+                REQUESTED_SESSION_NAME,
+                REQUESTED_ON
+        );
     }
 
     @Test
-    void 세셔널_플랜명_정규화와_수정_가능_검증_후_세셔널_플랜을_수정한다() {
+    void 수정_가능_검증_후_세셔널_플랜을_수정한다() {
         // given
-        SessionalPlan createdSessionalPlan = SessionalPlan.create(
-                10L,
-                1L,
-                "1회차",
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 7),
-                        LocalDate.of(2026, 7, 14)
-                )
-        );
-        SessionPeriod requestedSessionPeriod = new SessionPeriod(
+        SessionalPlan currentSessionalPlan = currentSessionalPlan();
+        SessionPeriod requestedSessionPeriod = sessionPeriod(
                 LocalDate.of(2026, 7, 8),
                 LocalDate.of(2026, 7, 15)
         );
 
         // when
         SessionalPlan updatedSessionalPlan = sessionalPlanDomainService.update(
-                createdSessionalPlan,
-                "  수정된 1회차  ",
+                currentSessionalPlan,
+                REQUESTED_UPDATE_SESSION_NAME,
                 requestedSessionPeriod
         );
 
         // then
-        assertThat(updatedSessionalPlan.getSessionalPlanId()).isEqualTo(10L);
-        assertThat(updatedSessionalPlan.getUserId()).isEqualTo(1L);
+        assertThat(updatedSessionalPlan.getSessionalPlanId()).isEqualTo(SESSIONAL_PLAN_ID);
+        assertThat(updatedSessionalPlan.getUserId()).isEqualTo(USER_ID);
         assertThat(updatedSessionalPlan.getSessionName()).isEqualTo("수정된 1회차");
-        assertThat(updatedSessionalPlan.getSessionPeriod()).isEqualTo(
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 8),
-                        LocalDate.of(2026, 7, 15)
-                )
-        );
+        assertThat(updatedSessionalPlan.getSessionPeriod()).isEqualTo(requestedSessionPeriod);
 
         then(sessionalPlanPolicy).should().validateUpdatable(
-                createdSessionalPlan,
-                "  수정된 1회차  ",
+                currentSessionalPlan,
+                REQUESTED_UPDATE_SESSION_NAME,
                 requestedSessionPeriod
         );
     }
@@ -132,46 +132,49 @@ class SessionalPlanDomainServiceTest {
     @Test
     void 수정_가능_검증이_실패하면_세셔널_플랜_수정에_실패한다() {
         // given
-        SessionalPlan createdSessionalPlan = SessionalPlan.create(
-                10L,
-                1L,
-                "1회차",
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 7),
-                        LocalDate.of(2026, 7, 14)
-                )
+        SessionalPlan currentSessionalPlan = currentSessionalPlan();
+        SessionPeriod requestedSessionPeriod = sessionPeriod(
+                LocalDate.of(2026, 7, 8),
+                LocalDate.of(2026, 7, 15)
         );
         willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS))
                 .given(sessionalPlanPolicy)
                 .validateUpdatable(
-                        createdSessionalPlan,
-                        "  수정된 1회차  ",
-                        new SessionPeriod(
-                                LocalDate.of(2026, 7, 8),
-                                LocalDate.of(2026, 7, 15)
-                        )
+                        currentSessionalPlan,
+                        REQUESTED_UPDATE_SESSION_NAME,
+                        requestedSessionPeriod
                 );
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
                 .isThrownBy(() -> sessionalPlanDomainService.update(
-                        createdSessionalPlan,
-                        "  수정된 1회차  ",
-                        new SessionPeriod(
-                                LocalDate.of(2026, 7, 8),
-                                LocalDate.of(2026, 7, 15)
-                        )
+                        currentSessionalPlan,
+                        REQUESTED_UPDATE_SESSION_NAME,
+                        requestedSessionPeriod
                 ))
                 .extracting(SessionalPlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(sessionalPlanPolicy).should().validateUpdatable(
-                createdSessionalPlan,
-                "  수정된 1회차  ",
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 8),
-                        LocalDate.of(2026, 7, 15)
+                currentSessionalPlan,
+                REQUESTED_UPDATE_SESSION_NAME,
+                requestedSessionPeriod
+        );
+    }
+
+    private SessionalPlan currentSessionalPlan() {
+        return SessionalPlan.create(
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                "1회차",
+                sessionPeriod(
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2026, 7, 14)
                 )
         );
+    }
+
+    private SessionPeriod sessionPeriod(LocalDate startOn, LocalDate endOn) {
+        return new SessionPeriod(startOn, endOn);
     }
 }

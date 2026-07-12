@@ -273,6 +273,67 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
+    void 회원의_진행_중인_세셔널_플랜_개수를_조회한다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                Email.of("test@test.com"),
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        User anotherUser = saveUserPort.save(User.signUpByEmail(
+                Email.of("another@test.com"),
+                "USER@fghij",
+                "password123!",
+                USER
+        ));
+        LocalDate baseDate = LocalDate.of(2026, 7, 12);
+
+        saveSessionalPlanPort.save(SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "종료된 회차",
+                new SessionPeriod(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 11)
+                )
+        ));
+        saveSessionalPlanPort.save(SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "오늘 종료 회차",
+                new SessionPeriod(
+                        LocalDate.of(2026, 7, 5),
+                        baseDate
+                )
+        ));
+        saveSessionalPlanPort.save(SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "예정 회차",
+                new SessionPeriod(
+                        LocalDate.of(2026, 7, 13),
+                        LocalDate.of(2026, 7, 20)
+                )
+        ));
+        saveSessionalPlanPort.save(SessionalPlan.create(
+                null,
+                anotherUser.getUserId(),
+                "다른 회원 회차",
+                new SessionPeriod(
+                        LocalDate.of(2026, 7, 5),
+                        LocalDate.of(2026, 7, 20)
+                )
+        ));
+
+        // when
+        int count = validateSessionalPlanPort.countInProgressByUserId(savedUser.getUserId(), baseDate);
+
+        // then
+        assertThat(count).isEqualTo(2);
+    }
+
+    @Test
     void 회원의_세셔널_플랜을_삭제한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(

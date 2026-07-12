@@ -27,14 +27,14 @@ class SessionalPlanJpaAdapter implements
     @Override
     public Optional<SessionalPlan> loadBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId) {
         return sessionalPlanJpaRepository
-                .findBySessionalPlanIdAndUser_userId(sessionalPlanId, userId)
+                .findBySessionalPlanIdAndUser_UserId(sessionalPlanId, userId)
                 .map(SessionalPlanEntity::to);
     }
 
     @Override
     public List<SessionalPlan> loadAllByUserIdOrderBySessionalPlanIdDesc(Long userId) {
         return sessionalPlanJpaRepository
-                .findByUser_userIdOrderBySessionalPlanIdDesc(userId)
+                .findByUser_UserIdOrderBySessionalPlanIdDesc(userId)
                 .stream()
                 .map(SessionalPlanEntity::to)
                 .toList();
@@ -61,13 +61,20 @@ class SessionalPlanJpaAdapter implements
 
     @Override
     public boolean existsByUserIdAndSessionName(Long userId, String sessionName) {
-        return sessionalPlanJpaRepository.existsByUser_userIdAndSessionName(userId, sessionName);
+        return sessionalPlanJpaRepository.existsByUser_UserIdAndSessionName(userId, sessionName);
     }
 
     @Override
     public boolean existsByUserIdAndSessionNameAndSessionalPlanIdNot(Long userId, String sessionName, Long sessionalPlanId) {
         return sessionalPlanJpaRepository
-                .existsByUser_userIdAndSessionNameAndSessionalPlanIdNot(userId, sessionName, sessionalPlanId);
+                .existsByUser_UserIdAndSessionNameAndSessionalPlanIdNot(userId, sessionName, sessionalPlanId);
+    }
+
+    @Override
+    public int countInProgressByUserId(Long userId, LocalDate now) {
+        return Math.toIntExact(
+                sessionalPlanJpaRepository.countByUser_UserIdAndSessionPeriod_EndOnGreaterThanEqual(userId, now)
+        );
     }
 
     private DailyTodoResult toDailyTodoResult(DailyTodoProjection projection) {

@@ -6,6 +6,8 @@ import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 class SessionalPlanDomainService {
@@ -18,13 +20,14 @@ class SessionalPlanDomainService {
             String requestedSessionName,
             SessionPeriod requestedSessionPeriod
     ) {
-        sessionalPlanPolicy.validateCreatable(userId, requestedSessionName);
+        LocalDateTime now = currentTimeProvider.now();
+        sessionalPlanPolicy.validateCreatable(userId, requestedSessionName, now.toLocalDate());
 
         return SessionalPlan.createForUser(
                 userId,
                 requestedSessionName,
                 requestedSessionPeriod,
-                currentTimeProvider.now()
+                now
         );
     }
 
