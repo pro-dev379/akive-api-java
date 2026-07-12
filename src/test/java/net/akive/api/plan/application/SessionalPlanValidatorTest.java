@@ -22,7 +22,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
-class SessionalPlanPolicyTest {
+class SessionalPlanValidatorTest {
 
     private static final Long USER_ID = 1L;
     private static final LocalDate REQUESTED_ON = LocalDate.of(2026, 7, 12);
@@ -34,7 +34,7 @@ class SessionalPlanPolicyTest {
     ValidateTotalQuantityPort validateTotalQuantityPort;
 
     @InjectMocks
-    SessionalPlanPolicy sessionalPlanPolicy;
+    SessionalPlanValidator sessionalPlanValidator;
 
     @Test
     void 중복된_세셔널_플랜명이_아니고_진행_중인_세셔널_플랜이_5개_미만이면_생성할_수_있다() {
@@ -45,7 +45,7 @@ class SessionalPlanPolicyTest {
                 .willReturn(4);
 
         // when & then
-        assertThatCode(() -> sessionalPlanPolicy.validateCreatable(USER_ID, "  1회차  ", REQUESTED_ON))
+        assertThatCode(() -> sessionalPlanValidator.validateCreatable(USER_ID, "  1회차  ", REQUESTED_ON))
                 .doesNotThrowAnyException();
 
         then(validateSessionalPlanPort).should().existsByUserIdAndSessionName(USER_ID, "1회차");
@@ -61,7 +61,7 @@ class SessionalPlanPolicyTest {
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
-                .isThrownBy(() -> sessionalPlanPolicy.validateCreatable(USER_ID, "  1회차  ", REQUESTED_ON))
+                .isThrownBy(() -> sessionalPlanValidator.validateCreatable(USER_ID, "  1회차  ", REQUESTED_ON))
                 .extracting(SessionalPlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
@@ -79,7 +79,7 @@ class SessionalPlanPolicyTest {
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
-                .isThrownBy(() -> sessionalPlanPolicy.validateCreatable(USER_ID, "1회차", REQUESTED_ON))
+                .isThrownBy(() -> sessionalPlanValidator.validateCreatable(USER_ID, "1회차", REQUESTED_ON))
                 .extracting(SessionalPlanException::getErrorCode)
                 .isEqualTo(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
 
@@ -107,7 +107,7 @@ class SessionalPlanPolicyTest {
                 .willReturn(false);
 
         // when & then
-        assertThatCode(() -> sessionalPlanPolicy.validateUpdatable(
+        assertThatCode(() -> sessionalPlanValidator.validateUpdatable(
                 currentSessionalPlan,
                 requestedSessionName,
                 requestedSessionPeriod
@@ -139,7 +139,7 @@ class SessionalPlanPolicyTest {
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
-                .isThrownBy(() -> sessionalPlanPolicy.validateUpdatable(
+                .isThrownBy(() -> sessionalPlanValidator.validateUpdatable(
                         currentSessionalPlan,
                         requestedSessionName,
                         requestedSessionPeriod
@@ -169,7 +169,7 @@ class SessionalPlanPolicyTest {
 
         // when & then
         assertThatExceptionOfType(SessionalPlanException.class)
-                .isThrownBy(() -> sessionalPlanPolicy.validateUpdatable(
+                .isThrownBy(() -> sessionalPlanValidator.validateUpdatable(
                         currentSessionalPlan,
                         "1회차",
                         requestedSessionPeriod
@@ -194,7 +194,7 @@ class SessionalPlanPolicyTest {
         )).willReturn(false);
 
         // when
-        sessionalPlanPolicy.validateUpdatable(
+        sessionalPlanValidator.validateUpdatable(
                 currentSessionalPlan,
                 "수정된 1회차",
                 requestedSessionPeriod

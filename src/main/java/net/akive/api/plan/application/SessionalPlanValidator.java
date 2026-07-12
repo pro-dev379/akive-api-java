@@ -16,7 +16,7 @@ import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.*;
 
 @Component
 @RequiredArgsConstructor
-class SessionalPlanPolicy {
+class SessionalPlanValidator {
 
     private static final int MAX_IN_PROGRESS_SESSIONAL_PLAN_COUNT = 5;
 

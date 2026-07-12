@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 class SessionalPlanDomainService {
 
-    private final SessionalPlanPolicy sessionalPlanPolicy;
+    private final SessionalPlanValidator sessionalPlanValidator;
     private final CurrentTimeProvider currentTimeProvider;
 
     SessionalPlan createForUser(
@@ -21,7 +21,7 @@ class SessionalPlanDomainService {
             SessionPeriod requestedSessionPeriod
     ) {
         LocalDateTime now = currentTimeProvider.now();
-        sessionalPlanPolicy.validateCreatable(userId, requestedSessionName, now.toLocalDate());
+        sessionalPlanValidator.validateCreatable(userId, requestedSessionName, now.toLocalDate());
 
         return SessionalPlan.createForUser(
                 userId,
@@ -36,7 +36,7 @@ class SessionalPlanDomainService {
             String requestedSessionName,
             SessionPeriod requestedSessionPeriod
     ) {
-        sessionalPlanPolicy.validateUpdatable(
+        sessionalPlanValidator.validateUpdatable(
                 currentSessionalPlan,
                 requestedSessionName,
                 requestedSessionPeriod

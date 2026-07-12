@@ -30,7 +30,7 @@ class SessionalPlanDomainServiceTest {
     private static final String REQUESTED_UPDATE_SESSION_NAME = "  수정된 1회차  ";
 
     @Mock
-    SessionalPlanPolicy sessionalPlanPolicy;
+    SessionalPlanValidator sessionalPlanValidator;
 
     CurrentTimeProvider currentTimeProvider;
 
@@ -40,7 +40,7 @@ class SessionalPlanDomainServiceTest {
     void setUp() {
         currentTimeProvider = new FixedCurrentTimeProvider(Instant.parse("2026-07-06T12:00:00Z"));
         sessionalPlanDomainService = new SessionalPlanDomainService(
-                sessionalPlanPolicy,
+                sessionalPlanValidator,
                 currentTimeProvider
         );
     }
@@ -65,7 +65,7 @@ class SessionalPlanDomainServiceTest {
         assertThat(createdSessionalPlan.getSessionName()).isEqualTo("1회차");
         assertThat(createdSessionalPlan.getSessionPeriod()).isEqualTo(requestedSessionPeriod);
 
-        then(sessionalPlanPolicy).should().validateCreatable(
+        then(sessionalPlanValidator).should().validateCreatable(
                 USER_ID,
                 REQUESTED_SESSION_NAME,
                 REQUESTED_ON
@@ -80,7 +80,7 @@ class SessionalPlanDomainServiceTest {
                 LocalDate.of(2026, 7, 14)
         );
         willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS))
-                .given(sessionalPlanPolicy)
+                .given(sessionalPlanValidator)
                 .validateCreatable(USER_ID, REQUESTED_SESSION_NAME, REQUESTED_ON);
 
         // when & then
@@ -93,7 +93,7 @@ class SessionalPlanDomainServiceTest {
                 .extracting(SessionalPlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
-        then(sessionalPlanPolicy).should().validateCreatable(
+        then(sessionalPlanValidator).should().validateCreatable(
                 USER_ID,
                 REQUESTED_SESSION_NAME,
                 REQUESTED_ON
@@ -122,7 +122,7 @@ class SessionalPlanDomainServiceTest {
         assertThat(updatedSessionalPlan.getSessionName()).isEqualTo("수정된 1회차");
         assertThat(updatedSessionalPlan.getSessionPeriod()).isEqualTo(requestedSessionPeriod);
 
-        then(sessionalPlanPolicy).should().validateUpdatable(
+        then(sessionalPlanValidator).should().validateUpdatable(
                 currentSessionalPlan,
                 REQUESTED_UPDATE_SESSION_NAME,
                 requestedSessionPeriod
@@ -138,7 +138,7 @@ class SessionalPlanDomainServiceTest {
                 LocalDate.of(2026, 7, 15)
         );
         willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS))
-                .given(sessionalPlanPolicy)
+                .given(sessionalPlanValidator)
                 .validateUpdatable(
                         currentSessionalPlan,
                         REQUESTED_UPDATE_SESSION_NAME,
@@ -155,7 +155,7 @@ class SessionalPlanDomainServiceTest {
                 .extracting(SessionalPlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
-        then(sessionalPlanPolicy).should().validateUpdatable(
+        then(sessionalPlanValidator).should().validateUpdatable(
                 currentSessionalPlan,
                 REQUESTED_UPDATE_SESSION_NAME,
                 requestedSessionPeriod
