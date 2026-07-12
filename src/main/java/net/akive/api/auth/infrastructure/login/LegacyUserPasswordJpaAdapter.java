@@ -20,12 +20,12 @@ class LegacyUserPasswordJpaAdapter implements
     @Override
     public Optional<LegacyUserPassword> loadByUserId(Long userId) {
         return legacyUserPasswordJpaRepository
-                .findByUser_userId(userId)
+                .findByUser_UserId(userId)
                 .map(LegacyUserPasswordEntity::to);
     }
 
     @Override
     public void deleteByUserId(Long userId) {
-        legacyUserPasswordJpaRepository.deleteByUser_userId(userId);
+        legacyUserPasswordJpaRepository.deleteByUser_UserId(userId);
     }
 }

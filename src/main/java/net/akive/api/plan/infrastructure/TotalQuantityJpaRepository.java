@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TotalQuantityJpaRepository extends JpaRepository<TotalQuantityEntity, Long> {
 
-    boolean existsBySessionalPlan_sessionalPlanId(Long sessionalPlanId);
+    boolean existsBySessionalPlan_SessionalPlanId(Long sessionalPlanId);
 }

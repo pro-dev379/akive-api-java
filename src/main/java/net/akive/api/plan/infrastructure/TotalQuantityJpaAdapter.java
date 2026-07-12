@@ -12,6 +12,6 @@ class TotalQuantityJpaAdapter implements ValidateTotalQuantityPort {
 
     @Override
     public boolean existsBySessionalPlanId(Long sessionalPlanId) {
-        return totalQuantityJpaRepository.existsBySessionalPlan_sessionalPlanId(sessionalPlanId);
+        return totalQuantityJpaRepository.existsBySessionalPlan_SessionalPlanId(sessionalPlanId);
     }
 }
