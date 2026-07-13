@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.port.out.login.DeleteLegacyUserPasswordPort;
 import net.akive.api.auth.application.port.out.login.LoadLegacyUserPasswordPort;
 import net.akive.api.auth.domain.login.LegacyUserPassword;
-import net.akive.api.auth.infrastructure.entity.LegacyUserPasswordEntity;
+import net.akive.api.auth.infrastructure.login.entity.LegacyUserPasswordEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
