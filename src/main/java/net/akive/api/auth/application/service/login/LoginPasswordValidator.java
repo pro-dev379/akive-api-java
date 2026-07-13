@@ -12,7 +12,7 @@ import static net.akive.api.auth.domain.login.exception.LoginErrorCode.INVALID_E
 
 @Component
 @RequiredArgsConstructor
-class LoginPasswordPolicy {
+class LoginPasswordValidator {
 
     private final LoadLegacyUserPasswordPort loadLegacyUserPasswordPort;
     private final PasswordEncoder passwordEncoder;

@@ -25,7 +25,7 @@ class LoginDomainServiceTest {
     private static final String WRONG_PASSWORD = "wrong-password";
 
     @Mock
-    LoginPasswordPolicy loginPasswordPolicy;
+    LoginPasswordValidator loginPasswordValidator;
 
     @InjectMocks
     LoginDomainService loginDomainService;
@@ -36,7 +36,7 @@ class LoginDomainServiceTest {
         // given
         LoginUser user = loginUser("encoded-password");
 
-        given(loginPasswordPolicy.validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD))
+        given(loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD))
                 .willReturn(legacyPasswordUsed);
 
         // when
@@ -46,7 +46,7 @@ class LoginDomainServiceTest {
         // then
         assertThat(loginAuthentication.user()).isEqualTo(user);
         assertThat(loginAuthentication.legacyPasswordUsed()).isEqualTo(legacyPasswordUsed);
-        then(loginPasswordPolicy).should().validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD);
+        then(loginPasswordValidator).should().validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD);
     }
 
     @Test
@@ -54,7 +54,7 @@ class LoginDomainServiceTest {
         // given
         LoginUser user = loginUser("encoded-password");
 
-        given(loginPasswordPolicy.validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD))
+        given(loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD))
                 .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
 
         // when & then
@@ -63,7 +63,7 @@ class LoginDomainServiceTest {
                 .extracting(LoginException::getErrorCode)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
-        then(loginPasswordPolicy).should().validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD);
+        then(loginPasswordValidator).should().validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD);
     }
 
     private LoginUser loginUser(String password) {

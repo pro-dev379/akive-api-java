@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class LoginDomainService {
 
-    private final LoginPasswordPolicy loginPasswordPolicy;
+    private final LoginPasswordValidator loginPasswordValidator;
 
     LoginAuthentication authenticate(LoginUser user, String rawPassword) {
-        boolean legacyPasswordUsed = loginPasswordPolicy.validateAndCheckLegacyPasswordUsed(user, rawPassword);
+        boolean legacyPasswordUsed = loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, rawPassword);
 
         return new LoginAuthentication(user, legacyPasswordUsed);
     }

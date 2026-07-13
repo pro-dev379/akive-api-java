@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-class EmailVerificationRequestPolicy {
+class EmailVerificationRequestValidator {
 
     private final ValidateUserUseCase validateUserUseCase;
 

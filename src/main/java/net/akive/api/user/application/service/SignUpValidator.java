@@ -13,7 +13,7 @@ import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
 
 @Component
 @RequiredArgsConstructor
-class SignUpPolicy {
+class SignUpValidator {
 
     private final ValidateUserPort validateUserPort;
     private final EnsureEmailVerifiedUseCase ensureEmailVerifiedUseCase;

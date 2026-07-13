@@ -20,7 +20,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
-class SignUpPolicyTest {
+class SignUpValidatorTest {
 
     @Mock
     ValidateUserPort validateUserPort;
@@ -29,7 +29,7 @@ class SignUpPolicyTest {
     EnsureEmailVerifiedUseCase ensureEmailVerifiedUseCase;
 
     @InjectMocks
-    SignUpPolicy signUpPolicy;
+    SignUpValidator signUpValidator;
 
     @Test
     void 이미_가입된_이메일이면_회원가입할_수_없다() {
@@ -39,7 +39,7 @@ class SignUpPolicyTest {
 
         // when & then
         assertThatExceptionOfType(UserException.class)
-                .isThrownBy(() -> signUpPolicy.validateEmailSignUpAvailable(email))
+                .isThrownBy(() -> signUpValidator.validateEmailSignUpAvailable(email))
                 .extracting(UserException::getErrorCode)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
 
@@ -53,7 +53,7 @@ class SignUpPolicyTest {
         given(validateUserPort.existsByEmail(email)).willReturn(false);
 
         // when
-        signUpPolicy.validateEmailSignUpAvailable(email);
+        signUpValidator.validateEmailSignUpAvailable(email);
 
         // then
         then(ensureEmailVerifiedUseCase)

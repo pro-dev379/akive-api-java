@@ -22,7 +22,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
-class LoginPasswordPolicyTest {
+class LoginPasswordValidatorTest {
 
     private static final String RAW_PASSWORD = "password123!";
     private static final String WRONG_PASSWORD = "wrong-password";
@@ -37,7 +37,7 @@ class LoginPasswordPolicyTest {
     LegacyPasswordVerifier legacyPasswordVerifier;
 
     @InjectMocks
-    LoginPasswordPolicy loginPasswordPolicy;
+    LoginPasswordValidator loginPasswordValidator;
 
     @Test
     void 신규_패스워드와_일치하면_레거시_패스워드_사용_여부를_false로_반환한다() {
@@ -47,7 +47,7 @@ class LoginPasswordPolicyTest {
                 .willReturn(true);
 
         // when
-        boolean legacyPasswordUsed = loginPasswordPolicy.validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD);
+        boolean legacyPasswordUsed = loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD);
 
         // then
         assertThat(legacyPasswordUsed).isFalse();
@@ -64,7 +64,7 @@ class LoginPasswordPolicyTest {
 
         // when & then
         assertThatExceptionOfType(LoginException.class)
-                .isThrownBy(() -> loginPasswordPolicy.validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD))
+                .isThrownBy(() -> loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD))
                 .extracting(LoginException::getErrorCode)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
@@ -84,7 +84,7 @@ class LoginPasswordPolicyTest {
                 .willReturn(true);
 
         // when
-        boolean legacyPasswordUsed = loginPasswordPolicy.validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD);
+        boolean legacyPasswordUsed = loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD);
 
         // then
         assertThat(legacyPasswordUsed).isTrue();
@@ -100,7 +100,7 @@ class LoginPasswordPolicyTest {
 
         // when & then
         assertThatExceptionOfType(LoginException.class)
-                .isThrownBy(() -> loginPasswordPolicy.validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD))
+                .isThrownBy(() -> loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD))
                 .extracting(LoginException::getErrorCode)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
@@ -121,7 +121,7 @@ class LoginPasswordPolicyTest {
 
         // when & then
         assertThatExceptionOfType(LoginException.class)
-                .isThrownBy(() -> loginPasswordPolicy.validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD))
+                .isThrownBy(() -> loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD))
                 .extracting(LoginException::getErrorCode)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 

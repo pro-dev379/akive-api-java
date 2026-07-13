@@ -20,20 +20,20 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
-class EmailVerificationRequestPolicyTest {
+class EmailVerificationRequestValidatorTest {
 
     @Mock
     ValidateUserUseCase validateUserUseCase;
 
     @InjectMocks
-    EmailVerificationRequestPolicy emailVerificationRequestPolicy;
+    EmailVerificationRequestValidator emailVerificationRequestValidator;
 
     @Test
     void 회원가입_인증은_이메일_중복을_검증한다() {
         // when
         Email email = Email.of("test@test.com");
 
-        emailVerificationRequestPolicy.validateRequestAvailable(email, SIGN_UP);
+        emailVerificationRequestValidator.validateRequestAvailable(email, SIGN_UP);
 
         // then
         then(validateUserUseCase).should().validateEmailNotDuplicate(email);
@@ -50,7 +50,7 @@ class EmailVerificationRequestPolicyTest {
         // when & then
         assertThatExceptionOfType(UserException.class)
                 .isThrownBy(() ->
-                        emailVerificationRequestPolicy.validateRequestAvailable(
+                        emailVerificationRequestValidator.validateRequestAvailable(
                                 Email.of("test@test.com"),
                                 SIGN_UP
                         )
@@ -67,7 +67,7 @@ class EmailVerificationRequestPolicyTest {
         // when
         Email email = Email.of("test@test.com");
 
-        emailVerificationRequestPolicy.validateRequestAvailable(email, FIND_PASSWORD);
+        emailVerificationRequestValidator.validateRequestAvailable(email, FIND_PASSWORD);
 
         // then
         then(validateUserUseCase).should().validateUserExistsByEmail(email);
@@ -84,7 +84,7 @@ class EmailVerificationRequestPolicyTest {
         // when & then
         assertThatExceptionOfType(UserException.class)
                 .isThrownBy(() ->
-                        emailVerificationRequestPolicy.validateRequestAvailable(
+                        emailVerificationRequestValidator.validateRequestAvailable(
                                 Email.of("test@test.com"),
                                 FIND_PASSWORD
                         )

@@ -29,7 +29,7 @@ class SignUpDomainServiceTest {
     private static final String VALID_PASSWORD = "password123!";
 
     @Mock
-    SignUpPolicy signUpPolicy;
+    SignUpValidator signUpValidator;
 
     @Mock
     GenerateNicknamePort generateNicknamePort;
@@ -56,7 +56,7 @@ class SignUpDomainServiceTest {
         assertThat(user.getPassword()).isEqualTo("encoded-password");
         assertThat(user.getRoleType()).isEqualTo(USER);
 
-        then(signUpPolicy).should().validateEmailSignUpAvailable(VALID_EMAIL);
+        then(signUpValidator).should().validateEmailSignUpAvailable(VALID_EMAIL);
         then(generateNicknamePort).should().generate(USER);
         then(passwordEncoder).should().encode(VALID_PASSWORD);
     }
@@ -65,7 +65,7 @@ class SignUpDomainServiceTest {
     void 이미_가입된_이메일이면_회원_생성에_실패한다() {
         // given
         willThrow(new UserException(EMAIL_ALREADY_EXISTS))
-                .given(signUpPolicy)
+                .given(signUpValidator)
                 .validateEmailSignUpAvailable(VALID_EMAIL);
 
         // when & then
@@ -74,7 +74,7 @@ class SignUpDomainServiceTest {
                 .extracting(UserException::getErrorCode)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
 
-        then(signUpPolicy).should().validateEmailSignUpAvailable(VALID_EMAIL);
+        then(signUpValidator).should().validateEmailSignUpAvailable(VALID_EMAIL);
         then(generateNicknamePort).shouldHaveNoInteractions();
         then(passwordEncoder).shouldHaveNoInteractions();
     }
@@ -83,7 +83,7 @@ class SignUpDomainServiceTest {
     void 이메일_인증이_완료되지_않으면_회원_생성에_실패한다() {
         // given
         willThrow(new EmailVerificationException(NOT_VERIFIED))
-                .given(signUpPolicy)
+                .given(signUpValidator)
                 .validateEmailSignUpAvailable(VALID_EMAIL);
 
         // when & then
@@ -92,7 +92,7 @@ class SignUpDomainServiceTest {
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(NOT_VERIFIED);
 
-        then(signUpPolicy).should().validateEmailSignUpAvailable(VALID_EMAIL);
+        then(signUpValidator).should().validateEmailSignUpAvailable(VALID_EMAIL);
         then(generateNicknamePort).shouldHaveNoInteractions();
         then(passwordEncoder).shouldHaveNoInteractions();
     }

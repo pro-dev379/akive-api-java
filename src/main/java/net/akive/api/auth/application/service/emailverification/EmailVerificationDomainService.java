@@ -20,13 +20,13 @@ import static net.akive.api.auth.domain.emailverification.exception.EmailVerific
 @RequiredArgsConstructor
 class EmailVerificationDomainService {
 
-    private final EmailVerificationRequestPolicy emailVerificationRequestPolicy;
+    private final EmailVerificationRequestValidator emailVerificationRequestValidator;
     private final GenerateEmailVerificationCodePort generateEmailVerificationCodePort;
     private final LoadEmailVerificationPort loadEmailVerificationPort;
     private final CurrentTimeProvider currentTimeProvider;
 
     EmailVerification issue(Email email, EmailVerificationPurpose verificationPurpose) {
-        emailVerificationRequestPolicy.validateRequestAvailable(email, verificationPurpose);
+        emailVerificationRequestValidator.validateRequestAvailable(email, verificationPurpose);
 
         LocalDateTime requestedAt = currentTimeProvider.now();
         EmailVerificationCode verificationCode = generateEmailVerificationCodePort.generate();

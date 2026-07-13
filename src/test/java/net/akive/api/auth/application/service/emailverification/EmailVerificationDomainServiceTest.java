@@ -34,7 +34,7 @@ class EmailVerificationDomainServiceTest {
     private static final EmailVerificationCode VERIFICATION_CODE = EmailVerificationCode.of("123456");
 
     @Mock
-    EmailVerificationRequestPolicy emailVerificationRequestPolicy;
+    EmailVerificationRequestValidator emailVerificationRequestValidator;
 
     @Mock
     GenerateEmailVerificationCodePort generateEmailVerificationCodePort;
@@ -50,7 +50,7 @@ class EmailVerificationDomainServiceTest {
     void setUp() {
         currentTimeProvider = new FixedCurrentTimeProvider(Instant.parse("2025-05-21T01:00:00Z"));
         emailVerificationDomainService = new EmailVerificationDomainService(
-                emailVerificationRequestPolicy,
+                emailVerificationRequestValidator,
                 generateEmailVerificationCodePort,
                 loadEmailVerificationPort,
                 currentTimeProvider
@@ -76,7 +76,7 @@ class EmailVerificationDomainServiceTest {
         assertThat(emailVerification.getLastSentAt()).isEqualTo(currentTimeProvider.now());
         assertThat(emailVerification.getExpiresAt()).isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
 
-        then(emailVerificationRequestPolicy).should().validateRequestAvailable(Email.of(EMAIL), SIGN_UP);
+        then(emailVerificationRequestValidator).should().validateRequestAvailable(Email.of(EMAIL), SIGN_UP);
     }
 
     @Test

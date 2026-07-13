@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class SignUpDomainService {
 
-    private final SignUpPolicy signUpPolicy;
+    private final SignUpValidator signUpValidator;
     private final GenerateNicknamePort generateNicknamePort;
     private final PasswordEncoder passwordEncoder;
 
     User signUpByEmail(Email email, String password, RoleType roleType) {
-        signUpPolicy.validateEmailSignUpAvailable(email);
+        signUpValidator.validateEmailSignUpAvailable(email);
 
         String nickname = generateNicknamePort.generate(roleType);
         String encodedPassword = passwordEncoder.encode(password);
