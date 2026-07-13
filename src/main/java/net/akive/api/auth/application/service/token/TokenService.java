@@ -15,6 +15,7 @@ import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -22,6 +23,7 @@ import java.time.Instant;
 import static net.akive.api.auth.domain.token.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 class TokenService implements IssueTokenUseCase {
 

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 class EmailVerificationService implements
         SendEmailVerificationCodeUseCase,

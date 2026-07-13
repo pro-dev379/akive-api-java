@@ -5,8 +5,10 @@ import net.akive.api.mentoring.application.port.in.CreateDefaultMentoringProfile
 import net.akive.api.mentoring.application.port.out.SaveMentoringProfilePort;
 import net.akive.api.mentoring.domain.MentoringProfile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 class CreateDefaultMentoringProfileService implements CreateDefaultMentoringProfileUseCase {
 

@@ -1,6 +1,5 @@
 package net.akive.api.user.application.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
@@ -13,8 +12,10 @@ import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 class SignUpService implements SignUpByEmailUseCase {
 
@@ -26,7 +27,6 @@ class SignUpService implements SignUpByEmailUseCase {
     private final IssueTokenUseCase issueTokenUseCase;
 
     @Override
-    @Transactional
     public SignUpResult signUp(SignUpByEmailCommand command) {
         User savedUser = saveUserPort.save(
                 signUpDomainService.signUpByEmail(
