@@ -3,10 +3,14 @@ package net.akive.api.plan.presentation;
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
+import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
-import net.akive.api.plan.application.dto.result.DailyTodoResult;
-import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
-import net.akive.api.plan.domain.SessionPeriod;
+import net.akive.api.plan.application.dto.result.common.SessionPeriodResult;
+import net.akive.api.plan.application.dto.result.common.SubjectResult;
+import net.akive.api.plan.application.dto.result.common.TotalQuantityAmountResult;
+import net.akive.api.plan.application.dto.result.common.WeekPeriodResult;
+import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
+import net.akive.api.plan.application.dto.result.sessionalplan.*;
 import net.akive.api.plan.domain.exception.SessionalPlanException;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
 import net.akive.api.plan.presentation.dto.request.SessionPeriodRequest;
@@ -41,27 +45,27 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     void 세셔널_플랜_목록을_조회한다() throws Exception {
         // given
         Long userId = 1L;
-        List<SessionalPlanSummaryResult> results = List.of(
-                new SessionalPlanSummaryResult(
+        GetSessionalPlansResult result = new GetSessionalPlansResult(List.of(
+                new GetSessionalPlansResult.SessionalPlanResult(
                         2L,
                         "2회차",
-                        new SessionPeriod(
+                        new SessionPeriodResult(
                                 LocalDate.of(2026, 7, 8),
                                 LocalDate.of(2026, 7, 14)
                         )
                 ),
-                new SessionalPlanSummaryResult(
+                new GetSessionalPlansResult.SessionalPlanResult(
                         1L,
                         "1회차",
-                        new SessionPeriod(
+                        new SessionPeriodResult(
                                 LocalDate.of(2026, 7, 1),
                                 LocalDate.of(2026, 7, 7)
                         )
                 )
-        );
+        ));
 
         given(getSessionalPlansUseCase.getAll(userId))
-                .willReturn(results);
+                .willReturn(result);
 
         // when & then
         mockMvc.perform(get("/sessional-plans")
@@ -85,7 +89,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
 
         given(getSessionalPlansUseCase.getAll(userId))
-                .willReturn(List.of());
+                .willReturn(new GetSessionalPlansResult(List.of()));
 
         // when & then
         mockMvc.perform(get("/sessional-plans")
@@ -98,29 +102,125 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
+    void 세셔널_플랜_상세를_조회한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        GetSessionalPlanDetailCommand command = new GetSessionalPlanDetailCommand(userId, sessionalPlanId);
+        GetSessionalPlanDetailResult result = new GetSessionalPlanDetailResult(
+                sessionalPlanId,
+                "1회차",
+                new SessionPeriodResult(
+                        LocalDate.of(2026, 7, 6),
+                        LocalDate.of(2026, 7, 14)
+                ),
+                List.of(
+                        new GetSessionalPlanDetailResult.SessionWeekResult(
+                                1,
+                                new WeekPeriodResult(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12))
+                        ),
+                        new GetSessionalPlanDetailResult.SessionWeekResult(
+                                2,
+                                new WeekPeriodResult(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14))
+                        )
+                ),
+                List.of(
+                        new GetSessionalPlanDetailResult.TotalQuantityResult(
+                                10L,
+                                new SubjectResult("수학", "학습"),
+                                new TotalQuantityAmountResult(100, "문제", "총량 메모"),
+                                List.of(
+                                        new GetSessionalPlanDetailResult.WeeklyQuantityResult(
+                                                100L,
+                                                new GetSessionalPlanDetailResult.SessionWeekResult(
+                                                        1,
+                                                        new WeekPeriodResult(
+                                                                LocalDate.of(2026, 7, 6),
+                                                                LocalDate.of(2026, 7, 12)
+                                                        )
+                                                ),
+                                                new GetSessionalPlanDetailResult.WeeklyQuantityAmountResult(
+                                                        70,
+                                                        30,
+                                                        40,
+                                                        "1주차 메모"
+                                                )
+                                        )
+                                )
+                        )
+                )
+        );
+
+        given(getSessionalPlanDetailUseCase.getDetail(command))
+                .willReturn(result);
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sessionalPlanId").value(sessionalPlanId))
+                .andExpect(jsonPath("$.sessionName").value("1회차"))
+                .andExpect(jsonPath("$.sessionPeriod.startOn").value("2026-07-06"))
+                .andExpect(jsonPath("$.sessionPeriod.endOn").value("2026-07-14"))
+                .andExpect(jsonPath("$.weeks[0].weekNum").value(1))
+                .andExpect(jsonPath("$.weeks[0].weekPeriod.startOn").value("2026-07-06"))
+                .andExpect(jsonPath("$.weeks[0].weekPeriod.endOn").value("2026-07-12"))
+                .andExpect(jsonPath("$.weeks[1].weekNum").value(2))
+                .andExpect(jsonPath("$.weeks[1].weekPeriod.startOn").value("2026-07-13"))
+                .andExpect(jsonPath("$.weeks[1].weekPeriod.endOn").value("2026-07-14"))
+                .andExpect(jsonPath("$.totalQuantities[0].totalQuantityId").value(10L))
+                .andExpect(jsonPath("$.totalQuantities[0].subject.name").value("수학"))
+                .andExpect(jsonPath("$.totalQuantities[0].subject.category").value("학습"))
+                .andExpect(jsonPath("$.totalQuantities[0].totalQuantityAmount.quantityAmount").value(100))
+                .andExpect(jsonPath("$.totalQuantities[0].totalQuantityAmount.unit").value("문제"))
+                .andExpect(jsonPath("$.totalQuantities[0].totalQuantityAmount.quantityMemo").value("총량 메모"))
+                .andExpect(jsonPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityId").value(100L))
+                .andExpect(jsonPath("$.totalQuantities[0].weeklyQuantities[0].sessionWeek.weekNum").value(1))
+                .andExpect(jsonPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityAmount.quantityAmount").value(70))
+                .andExpect(jsonPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityAmount.completedQuantityAmount").value(30))
+                .andExpect(jsonPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityAmount.delayedQuantityAmount").value(40))
+                .andExpect(jsonPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityAmount.quantityMemo").value("1주차 메모"));
+
+        then(getSessionalPlanDetailUseCase).should().getDetail(command);
+    }
+
+    @Test
+    void 세셔널_플랜_상세_조회_시_대상이_없으면_404를_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        GetSessionalPlanDetailCommand command = new GetSessionalPlanDetailCommand(userId, sessionalPlanId);
+
+        given(getSessionalPlanDetailUseCase.getDetail(command))
+                .willThrow(new SessionalPlanException(NOT_FOUND));
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(NOT_FOUND.getCode()));
+
+        then(getSessionalPlanDetailUseCase).should().getDetail(command);
+    }
+
+    @Test
     void 날짜별_투두_리스트를_조회한다() throws Exception {
         // given
         Long userId = 1L;
         LocalDate date = LocalDate.of(2026, 7, 7);
-        List<DailyTodoResult> results = List.of(
-                new DailyTodoResult(
+        GetDailyTodosResult result = new GetDailyTodosResult(List.of(
+                new GetDailyTodosResult.DailyTodoResult(
                         1L,
                         10L,
                         100L,
                         1000L,
-                        "영어",
-                        "학습",
-                        30,
-                        10,
-                        0,
-                        "분",
-                        "단어 암기",
-                        date
+                        new SubjectResult("영어", "학습"),
+                        new GetDailyTodosResult.DailyTodoResult.DailyTodoAmountResult(30, 10, 20, "분", "메모")
                 )
-        );
+        ));
 
         given(getDailyTodosUseCase.getTodosByDate(new GetDailyTodosCommand(userId, date)))
-                .willReturn(results);
+                .willReturn(result);
 
         // when & then
         mockMvc.perform(get("/sessional-plans/todos/{date}", date)
@@ -130,14 +230,13 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.todos[0].totalQuantityId").value(10L))
                 .andExpect(jsonPath("$.todos[0].weeklyQuantityId").value(100L))
                 .andExpect(jsonPath("$.todos[0].dailyQuantityId").value(1000L))
-                .andExpect(jsonPath("$.todos[0].subject").value("영어"))
-                .andExpect(jsonPath("$.todos[0].subjectCategory").value("학습"))
-                .andExpect(jsonPath("$.todos[0].dailyQuantityAmount").value(30))
-                .andExpect(jsonPath("$.todos[0].completedQuantityAmount").value(10))
-                .andExpect(jsonPath("$.todos[0].delayQuantityAmount").value(0))
-                .andExpect(jsonPath("$.todos[0].unit").value("분"))
-                .andExpect(jsonPath("$.todos[0].dailyQuantityMemo").value("단어 암기"))
-                .andExpect(jsonPath("$.todos[0].date").value("2026-07-07"));
+                .andExpect(jsonPath("$.todos[0].subject.name").value("영어"))
+                .andExpect(jsonPath("$.todos[0].subject.category").value("학습"))
+                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.quantityAmount").value(30))
+                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.completedQuantityAmount").value(10))
+                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.delayedQuantityAmount").value(20))
+                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.unit").value("분"))
+                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.quantityMemo").value("메모"));
 
         then(getDailyTodosUseCase).should().getTodosByDate(new GetDailyTodosCommand(userId, date));
     }
@@ -149,7 +248,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         LocalDate date = LocalDate.of(2026, 7, 7);
 
         given(getDailyTodosUseCase.getTodosByDate(new GetDailyTodosCommand(userId, date)))
-                .willReturn(List.of());
+                .willReturn(new GetDailyTodosResult(List.of()));
 
         // when & then
         mockMvc.perform(get("/sessional-plans/todos/{date}", date)
@@ -187,17 +286,9 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 )
         );
         CreateSessionalPlanCommand command = request.to(userId);
-        SessionalPlanSummaryResult result = new SessionalPlanSummaryResult(
-                1L,
-                "1회차",
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 7),
-                        LocalDate.of(2026, 7, 14)
-                )
-        );
 
         given(createSessionalPlanUseCase.create(command))
-                .willReturn(result);
+                .willReturn(1L);
 
         // when & then
         mockMvc.perform(post("/sessional-plans")

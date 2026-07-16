@@ -19,42 +19,21 @@ public class TotalQuantity {
 
     private Long totalQuantityId;
     private SessionalPlan sessionalPlan;
-    private String subject;
-    private String subjectCategory;
-    private int totalQuantityAmount;
-    private String unit;
-    private String totalQuantityMemo;
+    private Subject subject;
+    private TotalQuantityAmount totalQuantityAmount;
     private List<WeeklyQuantity> weeklyQuantities;
 
     public static TotalQuantity create(
             Long totalQuantityId,
             SessionalPlan sessionalPlan,
-            String subject,
-            String subjectCategory,
-            int totalQuantityAmount,
-            String unit,
-            String totalQuantityMemo
+            Subject subject,
+            TotalQuantityAmount totalQuantityAmount
     ) {
         return TotalQuantity.builder()
                 .totalQuantityId(totalQuantityId)
                 .sessionalPlan(requireNonNull(sessionalPlan))
-                .subject(validateSubject(subject))
-                .subjectCategory(validateSubjectCategory(subjectCategory))
-                .totalQuantityAmount(requirePositive(totalQuantityAmount))
-                .unit(validateUnit(unit))
-                .totalQuantityMemo(requireMaxLengthIfPresent(totalQuantityMemo, 25))
+                .subject(requireNonNull(subject))
+                .totalQuantityAmount(requireNonNull(totalQuantityAmount))
                 .build();
-    }
-
-    private static String validateSubject(String subject) {
-        return requireMaxLength(requireNotBlank(subject), 100);
-    }
-
-    private static String validateSubjectCategory(String subjectCategory) {
-        return requireMaxLength(requireNotBlank(subjectCategory), 10);
-    }
-
-    private static String validateUnit(String unit) {
-        return requireMaxLength(requireNotBlank(unit), 10);
     }
 }

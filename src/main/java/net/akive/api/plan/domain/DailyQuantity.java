@@ -23,24 +23,20 @@ public class DailyQuantity {
     private Long dailyQuantityId;
     private WeeklyQuantity weeklyQuantity;
     private LocalDate date;
-    private int dailyQuantityAmount;
-    private int completedQuantityAmount;
-    private int delayQuantityAmount;
-    private String dailyQuantityMemo;
+    private DailyQuantityAmount dailyQuantityAmount;
 
     public static DailyQuantity create(
             Long dailyQuantityId,
             WeeklyQuantity weeklyQuantity,
             LocalDate date,
-            int dailyQuantityAmount,
-            int completedQuantityAmount,
-            int delayQuantityAmount,
-            String dailyQuantityMemo
+            DailyQuantityAmount dailyQuantityAmount
     ) {
         requireNonNull(weeklyQuantity);
         requireNonNull(date);
         validateDateInWeekPeriod(date, weeklyQuantity.getWeekPeriod());
-        validateWeeklyQuantityAmountInTotalQuantityAmount(
+        requireNonNull(dailyQuantityAmount);
+
+        validateDailyQuantityAmountInWeeklyQuantityAmount(
                 dailyQuantityAmount,
                 weeklyQuantity.getWeeklyQuantityAmount()
         );
@@ -49,10 +45,7 @@ public class DailyQuantity {
                 .dailyQuantityId(dailyQuantityId)
                 .weeklyQuantity(weeklyQuantity)
                 .date(date)
-                .dailyQuantityAmount(requireNonNegative(dailyQuantityAmount))
-                .completedQuantityAmount(requireNonNegative(completedQuantityAmount))
-                .delayQuantityAmount(requireNonNegative(delayQuantityAmount))
-                .dailyQuantityMemo(requireMaxLengthIfPresent(dailyQuantityMemo, 25))
+                .dailyQuantityAmount(dailyQuantityAmount)
                 .build();
     }
 
@@ -62,11 +55,11 @@ public class DailyQuantity {
         }
     }
 
-    private static void validateWeeklyQuantityAmountInTotalQuantityAmount(
-            int dailyQuantityAmount,
-            int weeklyQuantityAmount
+    private static void validateDailyQuantityAmountInWeeklyQuantityAmount(
+            DailyQuantityAmount dailyQuantityAmount,
+            WeeklyQuantityAmount weeklyQuantityAmount
     ) {
-        if (weeklyQuantityAmount < dailyQuantityAmount) {
+        if (weeklyQuantityAmount.quantityAmount().value() < dailyQuantityAmount.quantityAmount().value()) {
             throw new DailyQuantityException(AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
         }
     }

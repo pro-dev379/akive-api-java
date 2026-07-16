@@ -1,6 +1,7 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.plan.domain.exception.DailyQuantityAmountException;
 import net.akive.api.plan.domain.exception.DailyQuantityException;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
+import static net.akive.api.plan.domain.exception.DailyQuantityAmountErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
 import static net.akive.api.plan.domain.exception.DailyQuantityErrorCode.AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
 import static net.akive.api.plan.domain.exception.DailyQuantityErrorCode.DATE_OUT_OF_WEEK_PERIOD;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,11 +27,8 @@ class DailyQuantityTest {
     private static final TotalQuantity VALID_TOTAL_QUANTITY = TotalQuantity.create(
             2L,
             VALID_SESSIONAL_PLAN,
-            "수학",
-            "과목",
-            100,
-            "문제",
-            null
+            new Subject("수학", "과목"),
+            TotalQuantityAmount.of(100, "문제", null)
     );
     private static final WeeklyQuantity VALID_WEEKLY_QUANTITY = WeeklyQuantity.create(
             2L,
@@ -38,8 +37,7 @@ class DailyQuantityTest {
                     LocalDate.of(2026, 7, 7),
                     LocalDate.of(2026, 7, 14)
             ),
-            10,
-            null
+            WeeklyQuantityAmount.of(10, null)
     );
 
     @Test
@@ -49,20 +47,35 @@ class DailyQuantityTest {
                 1L,
                 VALID_WEEKLY_QUANTITY,
                 LocalDate.of(2026, 7, 7),
-                10,
-                6,
-                1,
-                "메모"
+                DailyQuantityAmount.of(10, 6, 4, "메모")
         );
 
         // then
         assertThat(dailyQuantity.getDailyQuantityId()).isEqualTo(1L);
         assertThat(dailyQuantity.getWeeklyQuantity()).isEqualTo(VALID_WEEKLY_QUANTITY);
         assertThat(dailyQuantity.getDate()).isEqualTo(LocalDate.of(2026, 7, 7));
-        assertThat(dailyQuantity.getDailyQuantityAmount()).isEqualTo(10);
-        assertThat(dailyQuantity.getCompletedQuantityAmount()).isEqualTo(6);
-        assertThat(dailyQuantity.getDelayQuantityAmount()).isEqualTo(1);
-        assertThat(dailyQuantity.getDailyQuantityMemo()).isEqualTo("메모");
+        assertThat(dailyQuantity.getDailyQuantityAmount().quantityAmount().value()).isEqualTo(10);
+        assertThat(dailyQuantity.getDailyQuantityAmount().completedQuantityAmount().value()).isEqualTo(6);
+        assertThat(dailyQuantity.getDailyQuantityAmount().delayedQuantityAmount().value()).isEqualTo(4);
+        assertThat(dailyQuantity.getDailyQuantityAmount().quantityMemo().value()).isEqualTo("메모");
+    }
+
+    @Test
+    void 하루_계획량의_메모가_null이면_빈_메모_값_객체로_생성한다() {
+        // when
+        DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(10, 6, 4, null);
+
+        // then
+        assertThat(dailyQuantityAmount.quantityMemo()).isNotNull();
+        assertThat(dailyQuantityAmount.quantityMemo().value()).isNull();
+    }
+
+    @Test
+    void 하루_계획량이_완수량과_딜레이량의_합과_같지_않으면_안_된다() {
+        assertThatExceptionOfType(DailyQuantityAmountException.class)
+                .isThrownBy(() -> DailyQuantityAmount.of(10, 6, 3, null))
+                .extracting(DailyQuantityAmountException::getErrorCode)
+                .isEqualTo(DAILY_QUANTITY_AMOUNT_MISMATCH);
     }
 
     @Test
@@ -72,10 +85,7 @@ class DailyQuantityTest {
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 7),
-                        -1,
-                        0,
-                        0,
-                        null
+                        DailyQuantityAmount.of(-1, 0, 0, null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(VALUE_NEGATIVE);
@@ -88,10 +98,7 @@ class DailyQuantityTest {
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 7),
-                        11,
-                        0,
-                        0,
-                        null
+                        DailyQuantityAmount.of(11, 0, 11, null)
                 ))
                 .extracting(DailyQuantityException::getErrorCode)
                 .isEqualTo(AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
@@ -104,10 +111,7 @@ class DailyQuantityTest {
                         1L,
                         null,
                         LocalDate.of(2026, 7, 7),
-                        10,
-                        0,
-                        0,
-                        null
+                        DailyQuantityAmount.of(10, 0, 10, null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
@@ -120,10 +124,7 @@ class DailyQuantityTest {
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         null,
-                        10,
-                        0,
-                        0,
-                        null
+                        DailyQuantityAmount.of(10, 0, 10, null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
@@ -136,10 +137,7 @@ class DailyQuantityTest {
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 6),
-                        10,
-                        0,
-                        0,
-                        null
+                        DailyQuantityAmount.of(10, 0, 10, null)
                 ))
                 .extracting(DailyQuantityException::getErrorCode)
                 .isEqualTo(DATE_OUT_OF_WEEK_PERIOD);
@@ -152,10 +150,7 @@ class DailyQuantityTest {
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 15),
-                        10,
-                        0,
-                        0,
-                        null
+                        DailyQuantityAmount.of(10, 0, 10, null)
                 ))
                 .extracting(DailyQuantityException::getErrorCode)
                 .isEqualTo(DATE_OUT_OF_WEEK_PERIOD);
@@ -168,10 +163,7 @@ class DailyQuantityTest {
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 7),
-                        10,
-                        -1,
-                        0,
-                        null
+                        DailyQuantityAmount.of(10, -1, 0, null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(VALUE_NEGATIVE);
@@ -184,10 +176,7 @@ class DailyQuantityTest {
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 7),
-                        10,
-                        0,
-                        -1,
-                        null
+                        DailyQuantityAmount.of(10, 0, -1, null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(VALUE_NEGATIVE);
@@ -200,10 +189,7 @@ class DailyQuantityTest {
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 7),
-                        10,
-                        0,
-                        0,
-                        "가".repeat(26)
+                        DailyQuantityAmount.of(10, 0, 0, "가".repeat(26))
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);

@@ -5,6 +5,7 @@ import net.akive.api.plan.application.port.in.CreateSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.DeleteSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
 import net.akive.api.plan.application.port.in.GetDailyTodosUseCase;
+import net.akive.api.plan.application.port.in.GetSessionalPlanDetailUseCase;
 import net.akive.api.plan.application.port.in.UpdateSessionalPlanUseCase;
 import net.akive.api.plan.presentation.SessionalPlanController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public abstract class PrivateControllerTestSupport {
 
     @MockitoBean
     protected GetDailyTodosUseCase getDailyTodosUseCase;
+
+    @MockitoBean
+    protected GetSessionalPlanDetailUseCase getSessionalPlanDetailUseCase;
 
     @MockitoBean
     protected CreateSessionalPlanUseCase createSessionalPlanUseCase;

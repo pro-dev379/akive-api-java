@@ -38,42 +38,27 @@ public class TotalQuantityEntity extends BaseTimeEntity {
     @JoinColumn(name = "sessional_plan_id", nullable = false)
     private SessionalPlanEntity sessionalPlan;
 
-    @Column(length = 100, nullable = false)
-    private String subject;
+    @Embedded
+    private SubjectEntity subject;
 
-    @Column(length = 10, nullable = false)
-    private String subjectCategory;
-
-    private int totalQuantityAmount;
-
-    @Column(length = 10, nullable = false)
-    private String unit;
-
-    @Column(length = 25)
-    private String totalQuantityMemo;
+    @Embedded
+    private TotalQuantityAmountEntity totalQuantityAmount;
 
     public static TotalQuantityEntity from(TotalQuantity totalQuantity) {
-        TotalQuantityEntity totalQuantityEntity = new TotalQuantityEntity();
-        totalQuantityEntity.totalQuantityId = totalQuantity.getTotalQuantityId();
-        totalQuantityEntity.sessionalPlan = SessionalPlanEntity.from(totalQuantity.getSessionalPlan());
-        totalQuantityEntity.subject = totalQuantity.getSubject();
-        totalQuantityEntity.subjectCategory = totalQuantity.getSubjectCategory();
-        totalQuantityEntity.totalQuantityAmount = totalQuantity.getTotalQuantityAmount();
-        totalQuantityEntity.unit = totalQuantity.getUnit();
-        totalQuantityEntity.totalQuantityMemo = totalQuantity.getTotalQuantityMemo();
-
-        return totalQuantityEntity;
+        return new TotalQuantityEntity(
+                totalQuantity.getTotalQuantityId(),
+                SessionalPlanEntity.from(totalQuantity.getSessionalPlan()),
+                SubjectEntity.from(totalQuantity.getSubject()),
+                TotalQuantityAmountEntity.from(totalQuantity.getTotalQuantityAmount())
+        );
     }
 
     public TotalQuantity to() {
         return TotalQuantity.create(
                 this.totalQuantityId,
                 this.sessionalPlan.to(),
-                this.subject,
-                this.subjectCategory,
-                this.totalQuantityAmount,
-                this.unit,
-                this.totalQuantityMemo
+                this.subject.to(),
+                this.totalQuantityAmount.to()
         );
     }
 }

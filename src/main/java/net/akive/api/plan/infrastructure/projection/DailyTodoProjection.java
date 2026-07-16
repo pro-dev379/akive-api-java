@@ -9,11 +9,11 @@ public record DailyTodoProjection(
         Long totalQuantityId,
         Long weeklyQuantityId,
         Long dailyQuantityId,
-        String subject,
+        String subjectName,
         String subjectCategory,
         int dailyQuantityAmount,
         int completedQuantityAmount,
-        int delayQuantityAmount,
+        int delayedQuantityAmount,
         String unit,
         String dailyQuantityMemo,
         LocalDate date

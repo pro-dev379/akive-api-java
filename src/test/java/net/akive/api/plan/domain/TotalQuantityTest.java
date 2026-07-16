@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.BLANK_VALUE;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NOT_POSITIVE;
+import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -30,19 +30,27 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = TotalQuantity.create(
                 1L,
                 VALID_SESSIONAL_PLAN,
-                "수학",
-                "과목",
-                100,
-                "문제",
-                "메모"
+                new Subject("수학", "과목"),
+                TotalQuantityAmount.of(100, "문제", "메모")
         );
 
         // then
         assertThat(totalQuantity.getSessionalPlan()).isEqualTo(VALID_SESSIONAL_PLAN);
-        assertThat(totalQuantity.getSubject()).isEqualTo("수학");
-        assertThat(totalQuantity.getSubjectCategory()).isEqualTo("과목");
-        assertThat(totalQuantity.getTotalQuantityAmount()).isEqualTo(100);
-        assertThat(totalQuantity.getUnit()).isEqualTo("문제");
+        assertThat(totalQuantity.getSubject().name()).isEqualTo("수학");
+        assertThat(totalQuantity.getSubject().category()).isEqualTo("과목");
+        assertThat(totalQuantity.getTotalQuantityAmount().quantityAmount().value()).isEqualTo(100);
+        assertThat(totalQuantity.getTotalQuantityAmount().unit()).isEqualTo("문제");
+        assertThat(totalQuantity.getTotalQuantityAmount().quantityMemo().value()).isEqualTo("메모");
+    }
+
+    @Test
+    void 세션_총량의_메모는_null이면_빈_메모_값_객체로_생성한다() {
+        // when
+        TotalQuantityAmount totalQuantityAmount = TotalQuantityAmount.of(100, "문제", null);
+
+        // then
+        assertThat(totalQuantityAmount.quantityMemo()).isNotNull();
+        assertThat(totalQuantityAmount.quantityMemo().value()).isNull();
     }
 
     @Test
@@ -51,11 +59,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         null,
-                        "수학",
-                        "과목",
-                        100,
-                        "문제",
-                        null
+                        new Subject("수학", "과목"),
+                        TotalQuantityAmount.of(100, "문제", null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
@@ -67,14 +72,11 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        "수학",
-                        "과목",
-                        -1,
-                        "문제",
-                        null
+                        new Subject("수학", "과목"),
+                        TotalQuantityAmount.of(-1, "문제", null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
-                .isEqualTo(VALUE_NOT_POSITIVE);
+                .isEqualTo(VALUE_NEGATIVE);
     }
 
     @Test
@@ -83,11 +85,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        null,
-                        "과목",
-                        100,
-                        "문제",
-                        null
+                        new Subject(null, "과목"),
+                        TotalQuantityAmount.of(100, "문제", null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
@@ -99,11 +98,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        " ",
-                        "과목",
-                        100,
-                        "문제",
-                        null
+                        new Subject(" ", "과목"),
+                        TotalQuantityAmount.of(100, "문제", null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(BLANK_VALUE);
@@ -115,11 +111,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        "가".repeat(101),
-                        "과목",
-                        100,
-                        "문제",
-                        null
+                        new Subject("가".repeat(101), "과목"),
+                        TotalQuantityAmount.of(100, "문제", null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
@@ -131,11 +124,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        "수학",
-                        null,
-                        100,
-                        "문제",
-                        null
+                        new Subject("수학", null),
+                        TotalQuantityAmount.of(100, "문제", null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
@@ -147,11 +137,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        "수학",
-                        " ",
-                        100,
-                        "문제",
-                        null
+                        new Subject("수학", " "),
+                        TotalQuantityAmount.of(100, "문제", null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(BLANK_VALUE);
@@ -163,11 +150,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        "수학",
-                        "가".repeat(11),
-                        100,
-                        "문제",
-                        null
+                        new Subject("수학", "가".repeat(11)),
+                        TotalQuantityAmount.of(100, "문제", null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
@@ -179,11 +163,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        "수학",
-                        "과목",
-                        100,
-                        null,
-                        null
+                        new Subject("수학", "과목"),
+                        TotalQuantityAmount.of(100, null, null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
@@ -195,11 +176,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        "수학",
-                        "과목",
-                        100,
-                        " ",
-                        null
+                        new Subject("수학", "과목"),
+                        TotalQuantityAmount.of(100, " ", null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(BLANK_VALUE);
@@ -211,11 +189,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        "수학",
-                        "과목",
-                        100,
-                        "가".repeat(11),
-                        null
+                        new Subject("수학", "과목"),
+                        TotalQuantityAmount.of(100, "가".repeat(11), null)
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
@@ -227,11 +202,8 @@ class TotalQuantityTest {
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
-                        "수학",
-                        "과목",
-                        100,
-                        "문제",
-                        "가".repeat(26)
+                        new Subject("수학", "과목"),
+                        TotalQuantityAmount.of(100, "문제", "가".repeat(26))
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
-import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.application.port.in.CreateSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.DeleteSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.UpdateSessionalPlanUseCase;
@@ -30,7 +29,7 @@ class CommandSessionalPlanService implements
     private final SessionalPlanDomainService sessionalPlanDomainService;
 
     @Override
-    public SessionalPlanSummaryResult create(CreateSessionalPlanCommand command) {
+    public Long create(CreateSessionalPlanCommand command) {
         SessionalPlan sessionalPlan = sessionalPlanDomainService.createForUser(
                 command.userId(),
                 command.sessionName(),
@@ -39,7 +38,7 @@ class CommandSessionalPlanService implements
 
         SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
 
-        return SessionalPlanSummaryResult.from(savedSessionalPlan);
+        return savedSessionalPlan.getSessionalPlanId();
     }
 
     @Override

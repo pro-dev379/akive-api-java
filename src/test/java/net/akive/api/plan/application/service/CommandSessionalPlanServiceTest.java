@@ -3,7 +3,6 @@ package net.akive.api.plan.application.service;
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
-import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
 import net.akive.api.plan.application.port.out.DeleteSessionalPlanPort;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.SaveSessionalPlanPort;
@@ -89,17 +88,10 @@ class CommandSessionalPlanServiceTest {
                 .willReturn(savedSessionalPlan);
 
         // when
-        SessionalPlanSummaryResult result = commandSessionalPlanService.create(command);
+        Long result = commandSessionalPlanService.create(command);
 
         // then
-        assertThat(result.sessionalPlanId()).isEqualTo(1L);
-        assertThat(result.sessionName()).isEqualTo("1회차");
-        assertThat(result.sessionPeriod()).isEqualTo(
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 7),
-                        LocalDate.of(2026, 7, 14)
-                )
-        );
+        assertThat(result).isEqualTo(1L);
 
         then(sessionalPlanDomainService).should().createForUser(
                 userId,

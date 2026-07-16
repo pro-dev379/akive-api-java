@@ -1,11 +1,9 @@
 package net.akive.api.plan.application.port.in;
 
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
-import net.akive.api.plan.application.dto.result.DailyTodoResult;
-
-import java.util.List;
+import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 
 public interface GetDailyTodosUseCase {
 
-    List<DailyTodoResult> getTodosByDate(GetDailyTodosCommand command);
+    GetDailyTodosResult getTodosByDate(GetDailyTodosCommand command);
 }

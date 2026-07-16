@@ -34,20 +34,16 @@ public class WeeklyQuantityEntity extends BaseTimeEntity {
     @Embedded
     private WeekPeriodEntity weekPeriod;
 
-    private int weeklyQuantityAmount;
-
-    @Column(length = 25)
-    private String weeklyQuantityMemo;
+    @Embedded
+    private WeeklyQuantityAmountEntity weeklyQuantityAmount;
 
     public static WeeklyQuantityEntity from(WeeklyQuantity weeklyQuantity) {
-        WeeklyQuantityEntity weeklyQuantityEntity = new WeeklyQuantityEntity();
-        weeklyQuantityEntity.weeklyQuantityId = weeklyQuantity.getWeeklyQuantityId();
-        weeklyQuantityEntity.totalQuantity = TotalQuantityEntity.from(weeklyQuantity.getTotalQuantity());
-        weeklyQuantityEntity.weekPeriod = WeekPeriodEntity.from(weeklyQuantity.getWeekPeriod());
-        weeklyQuantityEntity.weeklyQuantityAmount = weeklyQuantity.getWeeklyQuantityAmount();
-        weeklyQuantityEntity.weeklyQuantityMemo = weeklyQuantity.getWeeklyQuantityMemo();
-
-        return weeklyQuantityEntity;
+        return new WeeklyQuantityEntity(
+                weeklyQuantity.getWeeklyQuantityId(),
+                TotalQuantityEntity.from(weeklyQuantity.getTotalQuantity()),
+                WeekPeriodEntity.from(weeklyQuantity.getWeekPeriod()),
+                WeeklyQuantityAmountEntity.from(weeklyQuantity.getWeeklyQuantityAmount())
+        );
     }
 
     public WeeklyQuantity to() {
@@ -57,8 +53,7 @@ public class WeeklyQuantityEntity extends BaseTimeEntity {
                 this.weeklyQuantityId,
                 totalQuantity,
                 this.weekPeriod.to(),
-                this.weeklyQuantityAmount,
-                this.weeklyQuantityMemo
+                this.weeklyQuantityAmount.to()
         );
     }
 }

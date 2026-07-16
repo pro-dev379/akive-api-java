@@ -4,19 +4,18 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
-import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
-import net.akive.api.plan.application.dto.result.DailyTodoResult;
+import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
+import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
+import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
+import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
 import net.akive.api.plan.application.port.in.*;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
 import net.akive.api.plan.presentation.dto.request.UpdateSessionalPlanRequest;
 import net.akive.api.plan.presentation.dto.response.CreateSessionalPlanResponse;
-import net.akive.api.plan.presentation.dto.response.GetSessionalPlansResponse;
-import net.akive.api.plan.presentation.dto.response.GetDailyTodosResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -27,26 +26,31 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 public class SessionalPlanController {
 
     private final GetSessionalPlansUseCase getSessionalPlansUseCase;
+    private final GetSessionalPlanDetailUseCase getSessionalPlanDetailUseCase;
     private final GetDailyTodosUseCase getDailyTodosUseCase;
     private final CreateSessionalPlanUseCase createSessionalPlanUseCase;
     private final UpdateSessionalPlanUseCase updateSessionalPlanUseCase;
     private final DeleteSessionalPlanUseCase deleteSessionalPlanUseCase;
 
     @GetMapping
-    public GetSessionalPlansResponse getAll(@AuthenticatedUserId Long userId) {
-        List<SessionalPlanSummaryResult> results = getSessionalPlansUseCase.getAll(userId);
+    public GetSessionalPlansResult getAll(@AuthenticatedUserId Long userId) {
+        return getSessionalPlansUseCase.getAll(userId);
+    }
 
-        return GetSessionalPlansResponse.from(results);
+    @GetMapping("/{sessionalPlanId}")
+    public GetSessionalPlanDetailResult getDetail(
+            @AuthenticatedUserId Long userId,
+            @PathVariable Long sessionalPlanId
+    ) {
+        return getSessionalPlanDetailUseCase.getDetail(new GetSessionalPlanDetailCommand(userId, sessionalPlanId));
     }
 
     @GetMapping("/todos/{date}")
-    public GetDailyTodosResponse getTodosByDate(
+    public GetDailyTodosResult getTodosByDate(
             @AuthenticatedUserId Long userId,
             @PathVariable LocalDate date
     ) {
-        List<DailyTodoResult> results = getDailyTodosUseCase.getTodosByDate(new GetDailyTodosCommand(userId, date));
-
-        return GetDailyTodosResponse.from(results);
+        return getDailyTodosUseCase.getTodosByDate(new GetDailyTodosCommand(userId, date));
     }
 
     @PostMapping
@@ -55,9 +59,7 @@ public class SessionalPlanController {
             @AuthenticatedUserId Long userId,
             @Validated @RequestBody CreateSessionalPlanRequest request
     ) {
-        SessionalPlanSummaryResult result = createSessionalPlanUseCase.create(request.to(userId));
-
-        return CreateSessionalPlanResponse.from(result);
+       return new CreateSessionalPlanResponse(createSessionalPlanUseCase.create(request.to(userId)));
     }
 
     @PutMapping("/{sessionalPlanId}")

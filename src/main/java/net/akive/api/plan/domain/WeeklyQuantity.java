@@ -20,19 +20,18 @@ public class WeeklyQuantity {
     private Long weeklyQuantityId;
     private TotalQuantity totalQuantity;
     private WeekPeriod weekPeriod;
-    private int weeklyQuantityAmount;
-    private String weeklyQuantityMemo;
+    private WeeklyQuantityAmount weeklyQuantityAmount;
     private List<DailyQuantity> dailyQuantities;
 
     public static WeeklyQuantity create(
             Long weeklyQuantityId,
             TotalQuantity totalQuantity,
             WeekPeriod weekPeriod,
-            int weeklyQuantityAmount,
-            String weeklyQuantityMemo
+            WeeklyQuantityAmount weeklyQuantityAmount
     ) {
         requireNonNull(totalQuantity);
         requireNonNull(weekPeriod);
+        requireNonNull(weeklyQuantityAmount);
 
         validateWeekPeriodInSessionPeriod(
                 weekPeriod,
@@ -48,8 +47,7 @@ public class WeeklyQuantity {
                 .weeklyQuantityId(requirePositive(weeklyQuantityId))
                 .totalQuantity(requireNonNull(totalQuantity))
                 .weekPeriod(requireNonNull(weekPeriod))
-                .weeklyQuantityAmount(requireNonNegative(weeklyQuantityAmount))
-                .weeklyQuantityMemo(requireMaxLengthIfPresent(weeklyQuantityMemo, 25))
+                .weeklyQuantityAmount(weeklyQuantityAmount)
                 .build();
     }
 
@@ -64,10 +62,10 @@ public class WeeklyQuantity {
     }
 
     private static void validateWeeklyQuantityAmountInTotalQuantityAmount(
-            int weeklyQuantityAmount,
-            int totalQuantityAmount
+            WeeklyQuantityAmount weeklyQuantityAmount,
+            TotalQuantityAmount totalQuantityAmount
     ) {
-        if (totalQuantityAmount < weeklyQuantityAmount) {
+        if (totalQuantityAmount.quantityAmount().value() < weeklyQuantityAmount.quantityAmount().value()) {
             throw new WeeklyQuantityException(AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT);
         }
     }

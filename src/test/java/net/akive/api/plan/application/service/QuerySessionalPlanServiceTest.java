@@ -1,12 +1,26 @@
 package net.akive.api.plan.application.service;
 
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
-import net.akive.api.plan.application.dto.result.DailyTodoResult;
-import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
+import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
+import net.akive.api.plan.application.dto.result.common.SessionPeriodResult;
+import net.akive.api.plan.application.dto.result.common.SubjectResult;
+import net.akive.api.plan.application.dto.result.common.TotalQuantityAmountResult;
+import net.akive.api.plan.application.dto.result.common.WeekPeriodResult;
+import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
+import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
+import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
 import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
+import net.akive.api.plan.application.port.out.LoadSessionalPlanTotalQuantitiesPort;
+import net.akive.api.plan.application.port.out.dto.DailyTodoData;
+import net.akive.api.plan.application.port.out.dto.SessionalPlanTotalQuantityData;
+import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityAmountData;
+import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityData;
+import net.akive.api.plan.domain.DailyQuantityAmount;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
+import net.akive.api.plan.domain.Subject;
+import net.akive.api.plan.domain.exception.SessionalPlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,11 +29,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
+import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.NOT_FOUND;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class QuerySessionalPlanServiceTest {
@@ -29,6 +48,9 @@ class QuerySessionalPlanServiceTest {
 
     @Mock
     LoadDailyTodosPort loadDailyTodosPort;
+
+    @Mock
+    LoadSessionalPlanTotalQuantitiesPort loadSessionalPlanTotalQuantitiesPort;
 
     @InjectMocks
     QuerySessionalPlanService querySessionalPlanService;
@@ -60,20 +82,20 @@ class QuerySessionalPlanServiceTest {
                 .willReturn(List.of(firstPlan, secondPlan));
 
         // when
-        List<SessionalPlanSummaryResult> results = querySessionalPlanService.getAll(userId);
+        GetSessionalPlansResult result = querySessionalPlanService.getAll(userId);
 
         // then
-        assertThat(results)
+        assertThat(result.sessionalPlans())
                 .extracting(
-                        SessionalPlanSummaryResult::sessionalPlanId,
-                        SessionalPlanSummaryResult::sessionName,
-                        SessionalPlanSummaryResult::sessionPeriod
+                        GetSessionalPlansResult.SessionalPlanResult::sessionalPlanId,
+                        GetSessionalPlansResult.SessionalPlanResult::sessionName,
+                        GetSessionalPlansResult.SessionalPlanResult::sessionPeriod
                 )
                 .containsExactly(
                         tuple(
                                 2L,
                                 "2회차",
-                                new SessionPeriod(
+                                new SessionPeriodResult(
                                         LocalDate.of(2026, 7, 8),
                                         LocalDate.of(2026, 7, 14)
                                 )
@@ -81,7 +103,7 @@ class QuerySessionalPlanServiceTest {
                         tuple(
                                 1L,
                                 "1회차",
-                                new SessionPeriod(
+                                new SessionPeriodResult(
                                         LocalDate.of(2026, 7, 1),
                                         LocalDate.of(2026, 7, 7)
                                 )
@@ -100,12 +122,149 @@ class QuerySessionalPlanServiceTest {
                 .willReturn(List.of());
 
         // when
-        List<SessionalPlanSummaryResult> results = querySessionalPlanService.getAll(userId);
+        GetSessionalPlansResult result = querySessionalPlanService.getAll(userId);
 
         // then
-        assertThat(results).isEmpty();
+        assertThat(result.sessionalPlans()).isEmpty();
 
         then(loadSessionalPlanPort).should().loadAllByUserIdOrderBySessionalPlanIdDesc(userId);
+    }
+
+    @Test
+    void 회원의_세셔널_플랜_상세를_조회한다() {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        SessionalPlan sessionalPlan = SessionalPlan.create(
+                sessionalPlanId,
+                userId,
+                "1회차",
+                new SessionPeriod(
+                        LocalDate.of(2026, 7, 6),
+                        LocalDate.of(2026, 7, 14)
+                )
+        );
+        List<SessionalPlanTotalQuantityData> totalQuantities = List.of(
+                new SessionalPlanTotalQuantityData(
+                        10L,
+                        sessionalPlanId,
+                        "수학",
+                        "학습",
+                        100,
+                        "문제",
+                        "총량 메모",
+                        List.of(
+                                new SessionalPlanWeeklyQuantityData(
+                                        100L,
+                                        10L,
+                                        1,
+                                        LocalDate.of(2026, 7, 6),
+                                        LocalDate.of(2026, 7, 12),
+                                        new SessionalPlanWeeklyQuantityAmountData(70, 30, 40, "1주차 메모")
+                                ),
+                                new SessionalPlanWeeklyQuantityData(
+                                        101L,
+                                        10L,
+                                        2,
+                                        LocalDate.of(2026, 7, 13),
+                                        LocalDate.of(2026, 7, 14),
+                                        new SessionalPlanWeeklyQuantityAmountData(30, 10, 20, "2주차 메모")
+                                )
+                        )
+                )
+        );
+
+        given(loadSessionalPlanPort.loadBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(Optional.of(sessionalPlan));
+        given(loadSessionalPlanTotalQuantitiesPort.loadSessionalPlanTotalQuantities(
+                sessionalPlanId,
+                sessionalPlan.getSessionPeriod().splitIntoWeeks()
+        )).willReturn(totalQuantities);
+
+        // when
+        GetSessionalPlanDetailResult result = querySessionalPlanService.getDetail(
+                new GetSessionalPlanDetailCommand(userId, sessionalPlanId)
+        );
+
+        // then
+        assertThat(result.sessionalPlanId()).isEqualTo(sessionalPlanId);
+        assertThat(result.sessionName()).isEqualTo("1회차");
+        assertThat(result.sessionPeriod()).isEqualTo(new SessionPeriodResult(
+                LocalDate.of(2026, 7, 6),
+                LocalDate.of(2026, 7, 14)
+        ));
+        assertThat(result.weeks())
+                .extracting(
+                        GetSessionalPlanDetailResult.SessionWeekResult::weekNum,
+                        GetSessionalPlanDetailResult.SessionWeekResult::weekPeriod
+                )
+                .containsExactly(
+                        tuple(1, new WeekPeriodResult(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12))),
+                        tuple(2, new WeekPeriodResult(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14)))
+                );
+        assertThat(result.totalQuantities())
+                .extracting(
+                        GetSessionalPlanDetailResult.TotalQuantityResult::totalQuantityId,
+                        GetSessionalPlanDetailResult.TotalQuantityResult::subject,
+                        GetSessionalPlanDetailResult.TotalQuantityResult::totalQuantityAmount
+                )
+                .containsExactly(tuple(
+                        10L,
+                        new SubjectResult("수학", "학습"),
+                        new TotalQuantityAmountResult(100, "문제", "총량 메모")
+                ));
+        assertThat(result.totalQuantities().getFirst().weeklyQuantities())
+                .extracting(
+                        GetSessionalPlanDetailResult.WeeklyQuantityResult::weeklyQuantityId,
+                        GetSessionalPlanDetailResult.WeeklyQuantityResult::sessionWeek,
+                        GetSessionalPlanDetailResult.WeeklyQuantityResult::weeklyQuantityAmount
+                )
+                .containsExactly(
+                        tuple(
+                                100L,
+                                new GetSessionalPlanDetailResult.SessionWeekResult(
+                                        1,
+                                        new WeekPeriodResult(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12))
+                                ),
+                                new GetSessionalPlanDetailResult.WeeklyQuantityAmountResult(70, 30, 40, "1주차 메모")
+                        ),
+                        tuple(
+                                101L,
+                                new GetSessionalPlanDetailResult.SessionWeekResult(
+                                        2,
+                                        new WeekPeriodResult(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14))
+                                ),
+                                new GetSessionalPlanDetailResult.WeeklyQuantityAmountResult(30, 10, 20, "2주차 메모")
+                        )
+                );
+
+        then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(loadSessionalPlanTotalQuantitiesPort).should().loadSessionalPlanTotalQuantities(
+                sessionalPlanId,
+                sessionalPlan.getSessionPeriod().splitIntoWeeks()
+        );
+    }
+
+    @Test
+    void 세셔널_플랜_상세_조회_시_대상_세셔널_플랜이_없으면_예외가_발생한다() {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+
+        given(loadSessionalPlanPort.loadBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatExceptionOfType(SessionalPlanException.class)
+                .isThrownBy(() -> querySessionalPlanService.getDetail(
+                        new GetSessionalPlanDetailCommand(userId, sessionalPlanId)
+                ))
+                .extracting(SessionalPlanException::getErrorCode)
+                .isEqualTo(NOT_FOUND);
+
+        then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(loadSessionalPlanTotalQuantitiesPort).should(never())
+                .loadSessionalPlanTotalQuantities(any(), any());
     }
 
     @Test
@@ -113,19 +272,15 @@ class QuerySessionalPlanServiceTest {
         // given
         Long userId = 1L;
         LocalDate date = LocalDate.of(2026, 7, 7);
-        List<DailyTodoResult> dailyTodos = List.of(
-                new DailyTodoResult(
+        List<DailyTodoData> dailyTodos = List.of(
+                new DailyTodoData(
                         1L,
                         10L,
                         100L,
                         1000L,
-                        "영어",
-                        "학습",
-                        30,
-                        10,
-                        0,
+                        new Subject("영어", "학습"),
+                        DailyQuantityAmount.of(30, 10, 20, "단어 암기"),
                         "분",
-                        "단어 암기",
                         date
                 )
         );
@@ -135,10 +290,10 @@ class QuerySessionalPlanServiceTest {
                 .willReturn(dailyTodos);
 
         // when
-        List<DailyTodoResult> results = querySessionalPlanService.getTodosByDate(command);
+        GetDailyTodosResult result = querySessionalPlanService.getTodosByDate(command);
 
         // then
-        assertThat(results).isEqualTo(dailyTodos);
+        assertThat(result.todos()).isEqualTo(dailyTodos.stream().map(GetDailyTodosResult.DailyTodoResult::from).toList());
 
         then(loadDailyTodosPort).should().loadDailyTodosByUserIdAndDate(userId, date);
     }
@@ -154,10 +309,10 @@ class QuerySessionalPlanServiceTest {
                 .willReturn(List.of());
 
         // when
-        List<DailyTodoResult> results = querySessionalPlanService.getTodosByDate(command);
+        GetDailyTodosResult result = querySessionalPlanService.getTodosByDate(command);
 
         // then
-        assertThat(results).isEqualTo(List.of());
+        assertThat(result.todos()).isEqualTo(List.of());
 
         then(loadDailyTodosPort).should().loadDailyTodosByUserIdAndDate(userId, date);
     }

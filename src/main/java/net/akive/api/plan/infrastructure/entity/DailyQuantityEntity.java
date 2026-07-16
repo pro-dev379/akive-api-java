@@ -43,24 +43,16 @@ public class DailyQuantityEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDate date;
 
-    private int dailyQuantityAmount;
-    private int completedQuantityAmount;
-    private int delayQuantityAmount;
-
-    @Column(length = 25)
-    private String dailyQuantityMemo;
+    @Embedded
+    private DailyQuantityAmountEntity dailyQuantityAmount;
 
     public static DailyQuantityEntity from(DailyQuantity dailyQuantity) {
-        DailyQuantityEntity dailyQuantityEntity = new DailyQuantityEntity();
-        dailyQuantityEntity.dailyQuantityId = dailyQuantity.getDailyQuantityId();
-        dailyQuantityEntity.weeklyQuantity = WeeklyQuantityEntity.from(dailyQuantity.getWeeklyQuantity());
-        dailyQuantityEntity.date = dailyQuantity.getDate();
-        dailyQuantityEntity.dailyQuantityAmount = dailyQuantity.getDailyQuantityAmount();
-        dailyQuantityEntity.completedQuantityAmount = dailyQuantity.getCompletedQuantityAmount();
-        dailyQuantityEntity.delayQuantityAmount = dailyQuantity.getDelayQuantityAmount();
-        dailyQuantityEntity.dailyQuantityMemo = dailyQuantity.getDailyQuantityMemo();
-
-        return dailyQuantityEntity;
+        return new DailyQuantityEntity(
+                dailyQuantity.getDailyQuantityId(),
+                WeeklyQuantityEntity.from(dailyQuantity.getWeeklyQuantity()),
+                dailyQuantity.getDate(),
+                DailyQuantityAmountEntity.from(dailyQuantity.getDailyQuantityAmount())
+        );
     }
 
     public DailyQuantity to() {
@@ -68,10 +60,7 @@ public class DailyQuantityEntity extends BaseTimeEntity {
                 this.dailyQuantityId,
                 this.weeklyQuantity.to(),
                 this.date,
-                this.dailyQuantityAmount,
-                this.completedQuantityAmount,
-                this.delayQuantityAmount,
-                this.dailyQuantityMemo
+                this.dailyQuantityAmount.to()
         );
     }
 

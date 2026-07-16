@@ -1,10 +1,8 @@
 package net.akive.api.plan.application.port.in;
 
-import net.akive.api.plan.application.dto.result.SessionalPlanSummaryResult;
-
-import java.util.List;
+import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
 
 public interface GetSessionalPlansUseCase {
 
-    List<SessionalPlanSummaryResult> getAll(Long userId);
+    GetSessionalPlansResult getAll(Long userId);
 }

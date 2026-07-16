@@ -5,6 +5,7 @@ import net.akive.api.plan.domain.exception.SessionalPlanException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.INVALID_SESSION_PERIOD;
@@ -112,6 +113,90 @@ class SessionPeriodTest {
                 new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
+                )
+        );
+    }
+
+    @Test
+    void 세션_기간을_주차별_기간으로_나눈다() {
+        // given
+        SessionPeriod sessionPeriod = new SessionPeriod(
+                LocalDate.of(2024, 3, 24),
+                LocalDate.of(2024, 4, 24)
+        );
+
+        // when
+        List<SessionWeek> sessionWeeks = sessionPeriod.splitIntoWeeks();
+
+        // then
+        assertThat(sessionWeeks).containsExactly(
+                new SessionWeek(
+                        1,
+                        new WeekPeriod(LocalDate.of(2024, 3, 24), LocalDate.of(2024, 3, 24))
+                ),
+                new SessionWeek(
+                        2,
+                        new WeekPeriod(LocalDate.of(2024, 3, 25), LocalDate.of(2024, 3, 31))
+                ),
+                new SessionWeek(
+                        3,
+                        new WeekPeriod(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 7))
+                ),
+                new SessionWeek(
+                        4,
+                        new WeekPeriod(LocalDate.of(2024, 4, 8), LocalDate.of(2024, 4, 14))
+                ),
+                new SessionWeek(
+                        5,
+                        new WeekPeriod(LocalDate.of(2024, 4, 15), LocalDate.of(2024, 4, 21))
+                ),
+                new SessionWeek(
+                        6,
+                        new WeekPeriod(LocalDate.of(2024, 4, 22), LocalDate.of(2024, 4, 24))
+                )
+        );
+    }
+
+    @Test
+    void 한_주의_시작일이_월요일이_아니더라도_하나의_주차로_인정한다() {
+        // given
+        SessionPeriod sessionPeriod = new SessionPeriod(
+                LocalDate.of(2026, 7, 8),
+                LocalDate.of(2026, 7, 12)
+        );
+
+        // when
+        List<SessionWeek> sessionWeeks = sessionPeriod.splitIntoWeeks();
+
+        // then
+        assertThat(sessionWeeks).containsExactly(
+                new SessionWeek(
+                        1,
+                        new WeekPeriod(LocalDate.of(2026, 7, 8), LocalDate.of(2026, 7, 12))
+                )
+        );
+    }
+
+    @Test
+    void 한_주의_종료일이_일요일이_아니더라도_하나의_주차로_인정한다() {
+        // given
+        SessionPeriod sessionPeriod = new SessionPeriod(
+                LocalDate.of(2026, 7, 6),
+                LocalDate.of(2026, 7, 14)
+        );
+
+        // when
+        List<SessionWeek> sessionWeeks = sessionPeriod.splitIntoWeeks();
+
+        // then
+        assertThat(sessionWeeks).containsExactly(
+                new SessionWeek(
+                        1,
+                        new WeekPeriod(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12))
+                ),
+                new SessionWeek(
+                        2,
+                        new WeekPeriod(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14))
                 )
         );
     }
