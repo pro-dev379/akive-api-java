@@ -15,7 +15,7 @@ class MentoringProfileJpaAdapterTest extends RepositoryTestSupport {
     void 멘토링_프로필을_저장한다() {
         // given
         User user = User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER

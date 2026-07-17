@@ -86,7 +86,7 @@ public class UserEntity extends BaseTimeEntity {
     public User to() {
         return User.create(
                 this.userId,
-                Email.of(this.email),
+                new Email(this.email),
                 this.roleType,
                 this.loginType,
                 this.nickname,

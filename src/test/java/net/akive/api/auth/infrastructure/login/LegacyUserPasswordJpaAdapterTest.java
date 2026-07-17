@@ -18,7 +18,7 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_기존_패스워드가_존재하면_조회할_수_있다() {
         // given
         User user = User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -41,7 +41,7 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_기존_패스워드를_삭제할_수_있다() {
         // given
         User user = User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER

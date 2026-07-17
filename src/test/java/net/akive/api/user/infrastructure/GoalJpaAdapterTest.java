@@ -26,7 +26,7 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
 
     private User saveUser() {
         User user = User.signUpByEmail(
-                Email.of("test@example.com"),
+                new Email("test@example.com"),
                 "nickname",
                 "encodedPassword",
                 USER

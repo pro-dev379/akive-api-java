@@ -131,7 +131,7 @@ class LoginPasswordValidatorTest {
     private LoginUser loginUser(String password) {
         return LoginUser.create(
                 1L,
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 password,
                 USER
         );

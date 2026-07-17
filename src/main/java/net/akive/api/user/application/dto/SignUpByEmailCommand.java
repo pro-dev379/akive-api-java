@@ -10,6 +10,6 @@ public record SignUpByEmailCommand(
 ) {
 
     public static SignUpByEmailCommand of(String email, RoleType roleType, String password) {
-        return new SignUpByEmailCommand(Email.of(email), roleType, password);
+        return new SignUpByEmailCommand(new Email(email), roleType, password);
     }
 }

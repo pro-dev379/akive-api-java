@@ -16,9 +16,9 @@ public record VerifyEmailVerificationCodeCommand(
             String verificationCode
     ) {
         return new VerifyEmailVerificationCodeCommand(
-                Email.of(email),
+                new Email(email),
                 verificationPurpose,
-                EmailVerificationCode.of(verificationCode)
+                new EmailVerificationCode(verificationCode)
         );
     }
 }

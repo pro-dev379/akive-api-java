@@ -17,11 +17,11 @@ class LoginUserTest {
     @Test
     void 로그인_회원을_생성한다() {
         // when
-        LoginUser loginUser = LoginUser.create(1L, Email.of("test@test.com"), "encoded", USER);
+        LoginUser loginUser = LoginUser.create(1L, new Email("test@test.com"), "encoded", USER);
 
         // then
         assertThat(loginUser.userId()).isEqualTo(1L);
-        assertThat(loginUser.email()).isEqualTo(Email.of("test@test.com"));
+        assertThat(loginUser.email()).isEqualTo(new Email("test@test.com"));
         assertThat(loginUser.passwordValue()).isEqualTo("encoded");
         assertThat(loginUser.roleType()).isEqualTo(USER);
         assertThat(loginUser.hasPassword()).isTrue();
@@ -30,7 +30,7 @@ class LoginUserTest {
     @Test
     void 회원_식별자가_없으면_로그인_회원_생성에_실패한다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> LoginUser.create(null, Email.of("test@test.com"), "encoded", USER))
+                .isThrownBy(() -> LoginUser.create(null, new Email("test@test.com"), "encoded", USER))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
@@ -38,7 +38,7 @@ class LoginUserTest {
     @Test
     void 회원_식별자가_양수가_아니면_로그인_회원_생성에_실패한다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> LoginUser.create(0L, Email.of("test@test.com"), "encoded", USER))
+                .isThrownBy(() -> LoginUser.create(0L, new Email("test@test.com"), "encoded", USER))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(VALUE_NOT_POSITIVE);
     }
@@ -46,7 +46,7 @@ class LoginUserTest {
     @Test
     void 이메일_형식이_올바르지_않으면_로그인_회원_생성에_실패한다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> LoginUser.create(1L, Email.of("invalid-email"), "encoded", USER))
+                .isThrownBy(() -> LoginUser.create(1L, new Email("invalid-email"), "encoded", USER))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(INVALID_EMAIL_FORMAT);
     }
@@ -54,7 +54,7 @@ class LoginUserTest {
     @Test
     void 회원_패스워드가_공백이면_로그인_회원_생성에_실패한다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> LoginUser.create(1L, Email.of("test@test.com"), "   ", USER))
+                .isThrownBy(() -> LoginUser.create(1L, new Email("test@test.com"), "   ", USER))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(BLANK_VALUE);
     }
@@ -62,7 +62,7 @@ class LoginUserTest {
     @Test
     void 회원_역할이_없으면_로그인_회원_생성에_실패한다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> LoginUser.create(1L, Email.of("test@test.com"), "encoded", null))
+                .isThrownBy(() -> LoginUser.create(1L, new Email("test@test.com"), "encoded", null))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
@@ -70,7 +70,7 @@ class LoginUserTest {
     @Test
     void 레거시_패스워드를_사용하는_회원은_신규_패스워드_값이_null일_수_있다() {
         // when
-        LoginUser loginUser = LoginUser.create(1L, Email.of("test@test.com"), null, USER);
+        LoginUser loginUser = LoginUser.create(1L, new Email("test@test.com"), null, USER);
 
         // then
         assertThat(loginUser.password()).isNull();

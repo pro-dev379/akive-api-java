@@ -12,7 +12,7 @@ class EmailTest {
     @Test
     void 이메일_값_객체를_생성한다() {
         // when
-        Email email = Email.of("test@test.com");
+        Email email = new Email("test@test.com");
 
         // then
         assertThat(email.value()).isEqualTo("test@test.com");
@@ -22,7 +22,7 @@ class EmailTest {
     void 이메일_형식이_올바르지_않으면_생성이_거부된다() {
         // when & then
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> Email.of("invalid-email"))
+                .isThrownBy(() -> new Email("invalid-email"))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(INVALID_EMAIL_FORMAT);
     }
@@ -31,7 +31,7 @@ class EmailTest {
     void 이메일이_비어있으면_생성이_거부된다() {
         // when & then
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> Email.of("   "))
+                .isThrownBy(() -> new Email("   "))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(BLANK_VALUE);
     }
@@ -40,7 +40,7 @@ class EmailTest {
     void 이메일이_null이면_생성이_거부된다() {
         // when & then
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> Email.of(null))
+                .isThrownBy(() -> new Email(null))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
@@ -52,7 +52,7 @@ class EmailTest {
 
         // when & then
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> Email.of(email))
+                .isThrownBy(() -> new Email(email))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }

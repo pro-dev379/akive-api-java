@@ -27,8 +27,4 @@ public record EmailVerificationCode(String value) {
     public String value() {
         return value;
     }
-
-    public static EmailVerificationCode of(String value) {
-        return new EmailVerificationCode(value);
-    }
 }

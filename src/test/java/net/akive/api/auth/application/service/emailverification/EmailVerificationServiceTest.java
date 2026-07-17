@@ -38,7 +38,7 @@ import static org.mockito.Mockito.never;
 class EmailVerificationServiceTest {
 
     private static final String EMAIL = "test@test.com";
-    private static final EmailVerificationCode VERIFICATION_CODE = EmailVerificationCode.of("123456");
+    private static final EmailVerificationCode VERIFICATION_CODE = new EmailVerificationCode("123456");
     private static final LocalDateTime REQUESTED_AT = LocalDateTime.of(2025, 5, 21, 10, 0);
 
     @Mock
@@ -57,19 +57,19 @@ class EmailVerificationServiceTest {
     void 이메일_인증번호를_발급하고_전송한다() {
         // given
         EmailVerification emailVerification = emailVerification(SIGN_UP, REQUESTED_AT);
-        given(emailVerificationDomainService.issue(Email.of(EMAIL), SIGN_UP))
+        given(emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP))
                 .willReturn(emailVerification);
 
         // when
         SendEmailVerificationResult result = emailVerificationService.send(sendCommand(SIGN_UP));
 
         // then
-        assertThat(result.email()).isEqualTo(Email.of(EMAIL));
+        assertThat(result.email()).isEqualTo(new Email(EMAIL));
         assertThat(result.expiresAt()).isEqualTo(REQUESTED_AT.plus(EXPIRE_DURATION));
         assertThat(result.expireSeconds()).isEqualTo(EXPIRE_DURATION.toSeconds());
         assertThat(result.resendIntervalSeconds()).isEqualTo(RESEND_INTERVAL.toSeconds());
 
-        then(emailVerificationDomainService).should().issue(Email.of(EMAIL), SIGN_UP);
+        then(emailVerificationDomainService).should().issue(new Email(EMAIL), SIGN_UP);
         then(sendEmailVerificationMailPort).should().send(emailVerification, EXPIRE_DURATION);
         then(saveEmailVerificationPort).should().save(emailVerification, EXPIRE_DURATION);
     }
@@ -77,7 +77,7 @@ class EmailVerificationServiceTest {
     @Test
     void 인증번호_발급에_실패하면_전송하지_않고_저장하지_않는다() {
         // given
-        given(emailVerificationDomainService.issue(Email.of(EMAIL), SIGN_UP))
+        given(emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP))
                 .willThrow(new EmailVerificationException(RESEND_TOO_SOON));
 
         // when & then
@@ -94,21 +94,21 @@ class EmailVerificationServiceTest {
     void 인증번호를_검증하고_인증정보를_저장한다() {
         // given
         EmailVerification emailVerification = emailVerification(SIGN_UP, REQUESTED_AT);
-        given(emailVerificationDomainService.verify(Email.of(EMAIL), SIGN_UP, VERIFICATION_CODE))
+        given(emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
                 .willReturn(emailVerification);
 
         // when
         emailVerificationService.verify(verifyCommand(SIGN_UP, VERIFICATION_CODE.value()));
 
         // then
-        then(emailVerificationDomainService).should().verify(Email.of(EMAIL), SIGN_UP, VERIFICATION_CODE);
+        then(emailVerificationDomainService).should().verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE);
         then(saveEmailVerificationPort).should().save(emailVerification, VERIFIED_EXPIRATION_DURATION);
     }
 
     @Test
     void 인증번호_검증에_실패하면_인증정보를_저장하지_않는다() {
         // given
-        given(emailVerificationDomainService.verify(Email.of(EMAIL), SIGN_UP, VERIFICATION_CODE))
+        given(emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
                 .willThrow(new EmailVerificationException(NOT_FOUND));
 
         // when & then
@@ -126,7 +126,7 @@ class EmailVerificationServiceTest {
         emailVerificationService.ensureVerified(ensureVerifiedCommand(SIGN_UP));
 
         // then
-        then(emailVerificationDomainService).should().ensureVerified(Email.of(EMAIL), SIGN_UP);
+        then(emailVerificationDomainService).should().ensureVerified(new Email(EMAIL), SIGN_UP);
     }
 
     @Test
@@ -134,7 +134,7 @@ class EmailVerificationServiceTest {
         // given
         willThrow(new EmailVerificationException(NOT_VERIFIED))
                 .given(emailVerificationDomainService)
-                .ensureVerified(Email.of(EMAIL), SIGN_UP);
+                .ensureVerified(new Email(EMAIL), SIGN_UP);
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
@@ -142,11 +142,11 @@ class EmailVerificationServiceTest {
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(NOT_VERIFIED);
 
-        then(emailVerificationDomainService).should().ensureVerified(Email.of(EMAIL), SIGN_UP);
+        then(emailVerificationDomainService).should().ensureVerified(new Email(EMAIL), SIGN_UP);
     }
 
     private SendEmailVerificationCommand sendCommand(EmailVerificationPurpose verificationPurpose) {
-        return new SendEmailVerificationCommand(Email.of(EMAIL), verificationPurpose);
+        return new SendEmailVerificationCommand(new Email(EMAIL), verificationPurpose);
     }
 
     private VerifyEmailVerificationCodeCommand verifyCommand(
@@ -154,20 +154,20 @@ class EmailVerificationServiceTest {
             String verificationCode
     ) {
         return new VerifyEmailVerificationCodeCommand(
-                Email.of(EMAIL),
+                new Email(EMAIL),
                 verificationPurpose,
-                EmailVerificationCode.of(verificationCode)
+                new EmailVerificationCode(verificationCode)
         );
     }
 
     private EnsureEmailVerifiedCommand ensureVerifiedCommand(EmailVerificationPurpose verificationPurpose) {
-        return new EnsureEmailVerifiedCommand(Email.of(EMAIL), verificationPurpose);
+        return new EnsureEmailVerifiedCommand(new Email(EMAIL), verificationPurpose);
     }
 
     private EmailVerification emailVerification(
             EmailVerificationPurpose verificationPurpose,
             LocalDateTime requestedAt
     ) {
-        return EmailVerification.create(Email.of(EMAIL), verificationPurpose, VERIFICATION_CODE, requestedAt);
+        return EmailVerification.create(new Email(EMAIL), verificationPurpose, VERIFICATION_CODE, requestedAt);
     }
 }

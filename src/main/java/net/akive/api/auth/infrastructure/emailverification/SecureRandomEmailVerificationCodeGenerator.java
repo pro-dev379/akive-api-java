@@ -14,6 +14,6 @@ class SecureRandomEmailVerificationCodeGenerator implements GenerateEmailVerific
     @Override
     public EmailVerificationCode generate() {
         int verificationCode = secureRandom.nextInt(1_000_000);
-        return EmailVerificationCode.of(String.format("%06d", verificationCode));
+        return new EmailVerificationCode(String.format("%06d", verificationCode));
     }
 }

@@ -31,7 +31,7 @@ import static org.mockito.BDDMockito.then;
 class EmailVerificationDomainServiceTest {
 
     private static final String EMAIL = "test@test.com";
-    private static final EmailVerificationCode VERIFICATION_CODE = EmailVerificationCode.of("123456");
+    private static final EmailVerificationCode VERIFICATION_CODE = new EmailVerificationCode("123456");
 
     @Mock
     EmailVerificationRequestValidator emailVerificationRequestValidator;
@@ -61,14 +61,14 @@ class EmailVerificationDomainServiceTest {
     void 새로운_이메일_인증번호를_발급한다() {
         // given
         given(generateEmailVerificationCodePort.generate()).willReturn(VERIFICATION_CODE);
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.empty());
 
         // when
-        EmailVerification emailVerification = emailVerificationDomainService.issue(Email.of(EMAIL), SIGN_UP);
+        EmailVerification emailVerification = emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP);
 
         // then
-        assertThat(emailVerification.getEmail()).isEqualTo(Email.of(EMAIL));
+        assertThat(emailVerification.getEmail()).isEqualTo(new Email(EMAIL));
         assertThat(emailVerification.getVerificationPurpose()).isEqualTo(SIGN_UP);
         assertThat(emailVerification.getVerificationCode()).isEqualTo(VERIFICATION_CODE);
         assertThat(emailVerification.isVerified()).isFalse();
@@ -76,7 +76,7 @@ class EmailVerificationDomainServiceTest {
         assertThat(emailVerification.getLastSentAt()).isEqualTo(currentTimeProvider.now());
         assertThat(emailVerification.getExpiresAt()).isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
 
-        then(emailVerificationRequestValidator).should().validateRequestAvailable(Email.of(EMAIL), SIGN_UP);
+        then(emailVerificationRequestValidator).should().validateRequestAvailable(new Email(EMAIL), SIGN_UP);
     }
 
     @Test
@@ -85,11 +85,11 @@ class EmailVerificationDomainServiceTest {
         EmailVerification previous = emailVerification(SIGN_UP, LocalDateTime.of(2025, 5, 21, 9, 55));
 
         given(generateEmailVerificationCodePort.generate()).willReturn(VERIFICATION_CODE);
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.of(previous));
 
         // when
-        EmailVerification emailVerification = emailVerificationDomainService.issue(Email.of(EMAIL), SIGN_UP);
+        EmailVerification emailVerification = emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP);
 
         // then
         assertThat(emailVerification.getVerificationCode()).isEqualTo(VERIFICATION_CODE);
@@ -103,12 +103,12 @@ class EmailVerificationDomainServiceTest {
     void 재전송_가능시간_이전에_인증번호를_요청하면_재전송이_거부된다() {
         // given
         given(generateEmailVerificationCodePort.generate()).willReturn(VERIFICATION_CODE);
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.of(emailVerification(SIGN_UP, currentTimeProvider.now())));
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerificationDomainService.issue(Email.of(EMAIL), SIGN_UP))
+                .isThrownBy(() -> emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(RESEND_TOO_SOON);
     }
@@ -118,17 +118,17 @@ class EmailVerificationDomainServiceTest {
         // given
         LocalDateTime requestedAt = currentTimeProvider.now();
         EmailVerification emailVerification = emailVerification(SIGN_UP, requestedAt);
-        emailVerification.renew(EmailVerificationCode.of("111111"), requestedAt.plusMinutes(1));
-        emailVerification.renew(EmailVerificationCode.of("222222"), requestedAt.plusMinutes(2));
-        emailVerification.renew(EmailVerificationCode.of("333333"), requestedAt.plusMinutes(3));
+        emailVerification.renew(new EmailVerificationCode("111111"), requestedAt.plusMinutes(1));
+        emailVerification.renew(new EmailVerificationCode("222222"), requestedAt.plusMinutes(2));
+        emailVerification.renew(new EmailVerificationCode("333333"), requestedAt.plusMinutes(3));
 
         given(generateEmailVerificationCodePort.generate()).willReturn(VERIFICATION_CODE);
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerificationDomainService.issue(Email.of(EMAIL), SIGN_UP))
+                .isThrownBy(() -> emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(RESEND_LIMIT_EXCEEDED);
     }
@@ -138,12 +138,12 @@ class EmailVerificationDomainServiceTest {
         // given
         EmailVerification emailVerification = emailVerification(SIGN_UP, currentTimeProvider.now().minusMinutes(1));
 
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
         // when
         EmailVerification verifiedEmailVerification =
-                emailVerificationDomainService.verify(Email.of(EMAIL), SIGN_UP, VERIFICATION_CODE);
+                emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE);
 
         // then
         assertThat(verifiedEmailVerification.isVerified()).isTrue();
@@ -152,12 +152,12 @@ class EmailVerificationDomainServiceTest {
     @Test
     void 인증정보가_존재하지_않으면_인증번호_검증이_실패한다() {
         // given
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.empty());
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerificationDomainService.verify(Email.of(EMAIL), SIGN_UP, VERIFICATION_CODE))
+                .isThrownBy(() -> emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(NOT_FOUND);
     }
@@ -167,15 +167,15 @@ class EmailVerificationDomainServiceTest {
         // given
         EmailVerification emailVerification = emailVerification(SIGN_UP, currentTimeProvider.now().minusMinutes(1));
 
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
                 .isThrownBy(() -> emailVerificationDomainService.verify(
-                        Email.of(EMAIL),
+                        new Email(EMAIL),
                         SIGN_UP,
-                        EmailVerificationCode.of("000000")
+                        new EmailVerificationCode("000000")
                 ))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(CODE_MISMATCH);
@@ -189,12 +189,12 @@ class EmailVerificationDomainServiceTest {
                 currentTimeProvider.now().minus(EXPIRE_DURATION).minusSeconds(1)
         );
 
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerificationDomainService.verify(Email.of(EMAIL), SIGN_UP, VERIFICATION_CODE))
+                .isThrownBy(() -> emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(EXPIRED);
     }
@@ -205,12 +205,12 @@ class EmailVerificationDomainServiceTest {
         EmailVerification emailVerification = emailVerification(SIGN_UP, currentTimeProvider.now().minusMinutes(2));
         emailVerification.verify(VERIFICATION_CODE, currentTimeProvider.now().minusMinutes(1));
 
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerificationDomainService.verify(Email.of(EMAIL), SIGN_UP, VERIFICATION_CODE))
+                .isThrownBy(() -> emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(ALREADY_VERIFIED);
     }
@@ -221,25 +221,25 @@ class EmailVerificationDomainServiceTest {
         EmailVerification emailVerification = emailVerification(SIGN_UP, currentTimeProvider.now().minusMinutes(2));
         emailVerification.verify(VERIFICATION_CODE, currentTimeProvider.now().minusMinutes(1));
 
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
         // when
-        emailVerificationDomainService.ensureVerified(Email.of(EMAIL), SIGN_UP);
+        emailVerificationDomainService.ensureVerified(new Email(EMAIL), SIGN_UP);
 
         // then
-        then(loadEmailVerificationPort).should().loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP);
+        then(loadEmailVerificationPort).should().loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP);
     }
 
     @Test
     void 인증정보가_존재하지_않으면_인증_완료_확인이_실패한다() {
         // given
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.empty());
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerificationDomainService.ensureVerified(Email.of(EMAIL), SIGN_UP))
+                .isThrownBy(() -> emailVerificationDomainService.ensureVerified(new Email(EMAIL), SIGN_UP))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(NOT_VERIFIED);
     }
@@ -249,12 +249,12 @@ class EmailVerificationDomainServiceTest {
         // given
         EmailVerification emailVerification = emailVerification(SIGN_UP, currentTimeProvider.now().minusMinutes(1));
 
-        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(EMAIL), SIGN_UP))
+        given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
         assertThatExceptionOfType(EmailVerificationException.class)
-                .isThrownBy(() -> emailVerificationDomainService.ensureVerified(Email.of(EMAIL), SIGN_UP))
+                .isThrownBy(() -> emailVerificationDomainService.ensureVerified(new Email(EMAIL), SIGN_UP))
                 .extracting(EmailVerificationException::getErrorCode)
                 .isEqualTo(NOT_VERIFIED);
     }
@@ -263,6 +263,6 @@ class EmailVerificationDomainServiceTest {
             EmailVerificationPurpose verificationPurpose,
             LocalDateTime requestedAt
     ) {
-        return EmailVerification.create(Email.of(EMAIL), verificationPurpose, VERIFICATION_CODE, requestedAt);
+        return EmailVerification.create(new Email(EMAIL), verificationPurpose, VERIFICATION_CODE, requestedAt);
     }
 }

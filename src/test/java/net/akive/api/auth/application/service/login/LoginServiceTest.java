@@ -53,7 +53,7 @@ class LoginServiceTest {
     @Test
     void 로그인_인증에_성공하면_토큰을_발급한다() {
         // given
-        LoginByEmailCommand command = new LoginByEmailCommand(Email.of("test@test.com"), "password123!");
+        LoginByEmailCommand command = new LoginByEmailCommand(new Email("test@test.com"), "password123!");
         LoginUser user = loginUser("encoded-password");
         IssueTokenResult token = new IssueTokenResult("access-token", "refresh-token");
 
@@ -81,7 +81,7 @@ class LoginServiceTest {
     @Test
     void 레거시_패스워드로_인증되면_패스워드를_마이그레이션하고_토큰을_발급한다() {
         // given
-        LoginByEmailCommand command = new LoginByEmailCommand(Email.of("test@test.com"), "password123!");
+        LoginByEmailCommand command = new LoginByEmailCommand(new Email("test@test.com"), "password123!");
         LoginUser user = loginUser(null);
         IssueTokenResult token = new IssueTokenResult("access-token", "refresh-token");
 
@@ -109,7 +109,7 @@ class LoginServiceTest {
     @Test
     void 존재하지_않는_이메일이라면_로그인할_수_없다() {
         // given
-        LoginByEmailCommand command = new LoginByEmailCommand(Email.of("not-found@test.com"), "password123!");
+        LoginByEmailCommand command = new LoginByEmailCommand(new Email("not-found@test.com"), "password123!");
 
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
@@ -129,7 +129,7 @@ class LoginServiceTest {
     @Test
     void 로그인_인증에_실패하면_토큰을_발급하지_않는다() {
         // given
-        LoginByEmailCommand command = new LoginByEmailCommand(Email.of("test@test.com"), "wrong-password");
+        LoginByEmailCommand command = new LoginByEmailCommand(new Email("test@test.com"), "wrong-password");
         LoginUser user = loginUser("encoded-password");
 
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
@@ -151,7 +151,7 @@ class LoginServiceTest {
     private LoginUser loginUser(String password) {
         return LoginUser.create(
                 1L,
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 password,
                 USER
         );

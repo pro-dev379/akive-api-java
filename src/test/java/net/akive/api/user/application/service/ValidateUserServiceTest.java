@@ -27,7 +27,7 @@ class ValidateUserServiceTest {
     @Test
     void 이메일로_회원_존재_검증에_성공한다() {
         // given
-        Email email = Email.of("test@example.com");
+        Email email = new Email("test@example.com");
         given(validateUserPort.existsByEmailAndLeaveFalse(email)).willReturn(true);
 
         // when
@@ -40,7 +40,7 @@ class ValidateUserServiceTest {
     @Test
     void 이메일에_해당하는_회원이_없으면_회원_존재_검증이_실패한다() {
         // given
-        Email email = Email.of("test@example.com");
+        Email email = new Email("test@example.com");
         given(validateUserPort.existsByEmailAndLeaveFalse(email)).willReturn(false);
 
         // when & then
@@ -79,7 +79,7 @@ class ValidateUserServiceTest {
     @Test
     void 이메일_중복_검증에_성공한다() {
         // given
-        Email email = Email.of("test@example.com");
+        Email email = new Email("test@example.com");
         given(validateUserPort.existsByEmail(email)).willReturn(false);
 
         // when
@@ -92,7 +92,7 @@ class ValidateUserServiceTest {
     @Test
     void 이미_존재하는_이메일이면_이메일_중복_검증이_실패한다() {
         // given
-        Email email = Email.of("test@example.com");
+        Email email = new Email("test@example.com");
         given(validateUserPort.existsByEmail(email)).willReturn(true);
 
         // when & then

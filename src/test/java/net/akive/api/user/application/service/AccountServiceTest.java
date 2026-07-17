@@ -41,7 +41,7 @@ class AccountServiceTest {
 
         User user = User.create(
                 userId,
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 USER,
                 EMAIL,
                 "USER@abcde",

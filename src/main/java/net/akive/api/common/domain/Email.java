@@ -29,8 +29,4 @@ public record Email(String value) {
     public String value() {
         return value;
     }
-
-    public static Email of(String value) {
-        return new Email(value);
-    }
 }

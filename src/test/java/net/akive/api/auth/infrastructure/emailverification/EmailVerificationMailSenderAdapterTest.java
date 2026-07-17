@@ -32,10 +32,10 @@ class EmailVerificationMailSenderAdapterTest {
     void 이메일_인증_메일을_발송한다() {
         // given
         String email = "test@test.com";
-        EmailVerificationCode verificationCode = EmailVerificationCode.of("123456");
+        EmailVerificationCode verificationCode = new EmailVerificationCode("123456");
         Duration expireDuration = Duration.ofMinutes(5);
         EmailVerification emailVerification = EmailVerification.create(
-                Email.of(email),
+                new Email(email),
                 EmailVerificationPurpose.SIGN_UP,
                 verificationCode,
                 LocalDateTime.of(2025, 5, 21, 10, 0)

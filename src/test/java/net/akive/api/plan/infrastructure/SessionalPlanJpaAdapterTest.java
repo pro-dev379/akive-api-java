@@ -19,7 +19,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 세셔널_플랜을_저장한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -53,7 +53,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_세셔널_플랜_목록을_식별자_역순으로_조회한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -101,7 +101,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_세셔널_플랜을_조회한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -141,13 +141,13 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 다른_회원의_세셔널_플랜은_조회되지_않는다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
         ));
         User anotherUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("another@test.com"),
+                new Email("another@test.com"),
                 "USER@fghij",
                 "password123!",
                 USER
@@ -174,13 +174,13 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_세셔널_플랜명이_이미_존재하는지_확인한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
         ));
         User anotherUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("another@test.com"),
+                new Email("another@test.com"),
                 "USER@fghij",
                 "password123!",
                 USER
@@ -210,13 +210,13 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 현재_세셔널_플랜을_제외하고_회원의_세셔널_플랜명이_이미_존재하는지_확인한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
         ));
         User anotherUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("another@test.com"),
+                new Email("another@test.com"),
                 "USER@fghij",
                 "password123!",
                 USER
@@ -276,13 +276,13 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_진행_중인_세셔널_플랜_개수를_조회한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
         ));
         User anotherUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("another@test.com"),
+                new Email("another@test.com"),
                 "USER@fghij",
                 "password123!",
                 USER
@@ -337,7 +337,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 회원의_세셔널_플랜을_삭제한다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
@@ -369,13 +369,13 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     void 다른_회원의_세셔널_플랜은_삭제하지_않는다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "password123!",
                 USER
         ));
         User anotherUser = saveUserPort.save(User.signUpByEmail(
-                Email.of("another@test.com"),
+                new Email("another@test.com"),
                 "USER@fghij",
                 "password123!",
                 USER

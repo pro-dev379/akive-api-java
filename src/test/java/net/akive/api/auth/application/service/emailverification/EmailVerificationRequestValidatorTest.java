@@ -31,7 +31,7 @@ class EmailVerificationRequestValidatorTest {
     @Test
     void 회원가입_인증은_이메일_중복을_검증한다() {
         // when
-        Email email = Email.of("test@test.com");
+        Email email = new Email("test@test.com");
 
         emailVerificationRequestValidator.validateRequestAvailable(email, SIGN_UP);
 
@@ -45,27 +45,27 @@ class EmailVerificationRequestValidatorTest {
         // given
         willThrow(new UserException(EMAIL_ALREADY_EXISTS))
                 .given(validateUserUseCase)
-                .validateEmailNotDuplicate(Email.of("test@test.com"));
+                .validateEmailNotDuplicate(new Email("test@test.com"));
 
         // when & then
         assertThatExceptionOfType(UserException.class)
                 .isThrownBy(() ->
                         emailVerificationRequestValidator.validateRequestAvailable(
-                                Email.of("test@test.com"),
+                                new Email("test@test.com"),
                                 SIGN_UP
                         )
                 )
                 .extracting(UserException::getErrorCode)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
 
-        then(validateUserUseCase).should().validateEmailNotDuplicate(Email.of("test@test.com"));
+        then(validateUserUseCase).should().validateEmailNotDuplicate(new Email("test@test.com"));
         then(validateUserUseCase).should(never()).validateUserExistsByEmail(any());
     }
 
     @Test
     void 패스워드_찾기_인증은_기존_회원을_검증한다() {
         // when
-        Email email = Email.of("test@test.com");
+        Email email = new Email("test@test.com");
 
         emailVerificationRequestValidator.validateRequestAvailable(email, FIND_PASSWORD);
 
@@ -79,20 +79,20 @@ class EmailVerificationRequestValidatorTest {
         // given
         willThrow(new UserException(NOT_FOUND))
                 .given(validateUserUseCase)
-                .validateUserExistsByEmail(Email.of("test@test.com"));
+                .validateUserExistsByEmail(new Email("test@test.com"));
 
         // when & then
         assertThatExceptionOfType(UserException.class)
                 .isThrownBy(() ->
                         emailVerificationRequestValidator.validateRequestAvailable(
-                                Email.of("test@test.com"),
+                                new Email("test@test.com"),
                                 FIND_PASSWORD
                         )
                 )
                 .extracting(UserException::getErrorCode)
                 .isEqualTo(NOT_FOUND);
 
-        then(validateUserUseCase).should().validateUserExistsByEmail(Email.of("test@test.com"));
+        then(validateUserUseCase).should().validateUserExistsByEmail(new Email("test@test.com"));
         then(validateUserUseCase).should(never()).validateEmailNotDuplicate(any());
     }
 }

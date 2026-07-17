@@ -18,7 +18,7 @@ class LoginUserJpaAdapterTest extends RepositoryTestSupport {
     void 이메일_로그인_회원이_존재하면_조회할_수_있다() {
         // given
         User user = User.signUpByEmail(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 "USER@abcde",
                 "encoded-password",
                 USER
@@ -39,7 +39,7 @@ class LoginUserJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 이메일_로그인_회원이_존재하지_않으면_로그인할_수_없다() {
         // given
-        Email email = Email.of("none@test.com");
+        Email email = new Email("none@test.com");
 
         // when & then
         assertThatExceptionOfType(LoginException.class)

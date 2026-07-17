@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class UserTest {
 
-    private static final Email VALID_EMAIL = Email.of("test@test.com");
+    private static final Email VALID_EMAIL = new Email("test@test.com");
     private static final String VALID_NICKNAME = "akive";
     private static final String VALID_ENCODED_PASSWORD = "encoded-password";
 

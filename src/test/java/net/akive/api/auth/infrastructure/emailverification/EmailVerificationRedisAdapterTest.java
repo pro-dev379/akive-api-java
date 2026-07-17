@@ -24,20 +24,20 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         LocalDateTime requestedAt = LocalDateTime.of(2025, 5, 21, 10, 0);
         EmailVerification emailVerification = EmailVerification.create(
-                Email.of(email),
+                new Email(email),
                 verificationPurpose,
-                EmailVerificationCode.of("123456"),
+                new EmailVerificationCode("123456"),
                 requestedAt
         );
 
         // when
         saveEmailVerificationPort.save(emailVerification, Duration.ofMinutes(5));
         Optional<EmailVerification> found =
-                loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(email), verificationPurpose);
+                loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(email), verificationPurpose);
 
         // then
         assertThat(found).isPresent();
-        assertThat(found.get().getVerificationCode()).isEqualTo(EmailVerificationCode.of("123456"));
+        assertThat(found.get().getVerificationCode()).isEqualTo(new EmailVerificationCode("123456"));
         assertThat(found.get().getResendCount()).isZero();
         assertThat(found.get().isVerified()).isFalse();
         assertThat(found.get().getExpiresAt()).isEqualTo(requestedAt.plusMinutes(5));
@@ -51,9 +51,9 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
         String email = "test@test.com";
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         EmailVerification emailVerification = EmailVerification.create(
-                Email.of(email),
+                new Email(email),
                 verificationPurpose,
-                EmailVerificationCode.of("123456"),
+                new EmailVerificationCode("123456"),
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
@@ -64,7 +64,7 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
 
         // then
         Optional<EmailVerification> found =
-                loadEmailVerificationPort.loadByEmailAndVerificationPurpose(Email.of(email), verificationPurpose);
+                loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(email), verificationPurpose);
 
         assertThat(found).isEmpty();
     }
@@ -75,9 +75,9 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
         String email = "test@test.com";
         EmailVerificationPurpose verificationPurpose = SIGN_UP;
         EmailVerification emailVerification = EmailVerification.create(
-                Email.of(email),
+                new Email(email),
                 verificationPurpose,
-                EmailVerificationCode.of("123456"),
+                new EmailVerificationCode("123456"),
                 LocalDateTime.of(2025, 5, 21, 10, 0)
         );
 
@@ -90,7 +90,7 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
                 .untilAsserted(() -> {
                     Optional<EmailVerification> found =
                             loadEmailVerificationPort.loadByEmailAndVerificationPurpose(
-                                    Email.of(email),
+                                    new Email(email),
                                     verificationPurpose
                             );
 

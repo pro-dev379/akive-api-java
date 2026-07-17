@@ -12,6 +12,6 @@ public record SendEmailVerificationCommand(
             String email,
             EmailVerificationPurpose verificationPurpose
     ) {
-        return new SendEmailVerificationCommand(Email.of(email), verificationPurpose);
+        return new SendEmailVerificationCommand(new Email(email), verificationPurpose);
     }
 }

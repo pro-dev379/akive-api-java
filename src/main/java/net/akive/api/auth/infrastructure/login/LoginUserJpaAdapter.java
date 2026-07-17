@@ -21,7 +21,7 @@ class LoginUserJpaAdapter implements LoadEmailLoginUserPort {
         return userJpaRepository.findByEmailAndLeaveFalse(email.value())
                 .map(user -> LoginUser.create(
                         user.getUserId(),
-                        Email.of(user.getEmail()),
+                        new Email(user.getEmail()),
                         user.getPassword(),
                         user.getRoleType()
                 ))

@@ -52,7 +52,7 @@ class SignUpServiceTest {
     void 이메일로_회원가입하면_회원_정보와_기본_데이터를_생성하고_토큰을_발급한다() {
         // given
         SignUpByEmailCommand command = new SignUpByEmailCommand(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 USER,
                 "password123!"
         );
@@ -115,7 +115,7 @@ class SignUpServiceTest {
     void 회원가입할_수_없으면_회원_정보와_기본_데이터를_생성하지_않고_토큰을_발급하지_않는다() {
         // given
         SignUpByEmailCommand command = new SignUpByEmailCommand(
-                Email.of("test@test.com"),
+                new Email("test@test.com"),
                 USER,
                 "password123!"
         );

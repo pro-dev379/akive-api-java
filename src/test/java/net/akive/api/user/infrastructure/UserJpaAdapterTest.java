@@ -38,7 +38,7 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 아직_가입되지_않은_이메일은_중복_검증을_통과한다() {
         // when
-        boolean exists = validateUserPort.existsByEmail(Email.of("none@example.com"));
+        boolean exists = validateUserPort.existsByEmail(new Email("none@example.com"));
 
         // then
         assertThat(exists).isFalse();
@@ -60,7 +60,7 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 가입되지_않은_이메일로는_활성_회원을_조회할_수_없다() {
         // when
-        boolean exists = validateUserPort.existsByEmailAndLeaveFalse(Email.of("none@example.com"));
+        boolean exists = validateUserPort.existsByEmailAndLeaveFalse(new Email("none@example.com"));
 
         // then
         assertThat(exists).isFalse();
@@ -90,7 +90,7 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
 
     private User signUpByEmail() {
         return User.signUpByEmail(
-                Email.of("test@example.com"),
+                new Email("test@example.com"),
                 "nickname",
                 "encodedPassword",
                 USER

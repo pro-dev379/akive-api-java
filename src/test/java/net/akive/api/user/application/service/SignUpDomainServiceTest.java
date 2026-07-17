@@ -25,7 +25,7 @@ import static org.mockito.BDDMockito.willThrow;
 @ExtendWith(MockitoExtension.class)
 class SignUpDomainServiceTest {
 
-    private static final Email VALID_EMAIL = Email.of("test@test.com");
+    private static final Email VALID_EMAIL = new Email("test@test.com");
     private static final String VALID_PASSWORD = "password123!";
 
     @Mock

@@ -34,7 +34,7 @@ class SignUpValidatorTest {
     @Test
     void 이미_가입된_이메일이면_회원가입할_수_없다() {
         // given
-        Email email = Email.of("test@test.com");
+        Email email = new Email("test@test.com");
         given(validateUserPort.existsByEmail(email)).willReturn(true);
 
         // when & then
@@ -49,7 +49,7 @@ class SignUpValidatorTest {
     @Test
     void 이메일_중복이_아니면_인증_완료_여부를_확인한다() {
         // given
-        Email email = Email.of("test@test.com");
+        Email email = new Email("test@test.com");
         given(validateUserPort.existsByEmail(email)).willReturn(false);
 
         // when

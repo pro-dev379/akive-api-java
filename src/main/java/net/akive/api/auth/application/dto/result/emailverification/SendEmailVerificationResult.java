@@ -18,7 +18,7 @@ public record SendEmailVerificationResult(
             long resendAfterSeconds
     ) {
         return new SendEmailVerificationResult(
-                Email.of(email),
+                new Email(email),
                 expiresAt,
                 expiresInSeconds,
                 resendAfterSeconds
