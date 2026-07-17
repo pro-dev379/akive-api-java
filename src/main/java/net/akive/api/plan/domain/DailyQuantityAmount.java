@@ -1,9 +1,9 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
+import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
 
 public record DailyQuantityAmount(
         QuantityAmount quantityAmount,

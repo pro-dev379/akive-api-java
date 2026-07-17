@@ -1,4 +1,4 @@
-package net.akive.api.plan.domain.exception;
+package net.akive.api.plan.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

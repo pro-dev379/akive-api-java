@@ -1,13 +1,13 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
+import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

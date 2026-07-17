@@ -9,11 +9,11 @@ import net.akive.api.plan.application.port.in.DeleteSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.UpdateSessionalPlanUseCase;
 import net.akive.api.plan.application.port.out.*;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
 
 @Service
 @Transactional

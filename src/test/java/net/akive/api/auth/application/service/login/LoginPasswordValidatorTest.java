@@ -4,7 +4,7 @@ import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.port.out.login.LoadLegacyUserPasswordPort;
 import net.akive.api.auth.domain.login.LegacyUserPassword;
 import net.akive.api.auth.domain.login.LoginUser;
-import net.akive.api.auth.domain.login.exception.LoginException;
+import net.akive.api.auth.exception.LoginException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static net.akive.api.auth.domain.login.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.auth.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

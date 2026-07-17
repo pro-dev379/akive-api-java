@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.domain.token.exception.TokenErrorCode;
+import net.akive.api.auth.exception.TokenErrorCode;
 import net.akive.api.common.response.ApiErrorResponse;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.EXPIRED_ACCESS_TOKEN;
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.INVALID_ACCESS_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.EXPIRED_ACCESS_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.INVALID_ACCESS_TOKEN;
 
 @Component
 @RequiredArgsConstructor

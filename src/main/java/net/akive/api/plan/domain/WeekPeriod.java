@@ -1,12 +1,12 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 import static net.akive.api.common.domain.DomainValidator.requireStartNotAfterEnd;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.INVALID_WEEK_PERIOD;
+import static net.akive.api.plan.exception.PlanErrorCode.INVALID_WEEK_PERIOD;
 
 public record WeekPeriod(LocalDate startOn, LocalDate endOn) {
 

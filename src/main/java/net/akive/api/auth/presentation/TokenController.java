@@ -3,14 +3,14 @@ package net.akive.api.auth.presentation;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.dto.result.token.ReissueTokenResult;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
-import net.akive.api.auth.domain.token.exception.TokenException;
+import net.akive.api.auth.exception.TokenException;
 import net.akive.api.auth.presentation.dto.response.ReissueTokenResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
 
 @RestController
 @RequestMapping("/tokens")

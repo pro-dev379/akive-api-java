@@ -1,4 +1,4 @@
-package net.akive.api.auth.domain.emailverification.exception;
+package net.akive.api.auth.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +16,7 @@ public enum EmailVerificationErrorCode implements ErrorCode {
     NOT_FOUND(HttpStatus.NOT_FOUND, "EMAIL_VERIFICATION_404_1", "Verification code not found."),
     ALREADY_VERIFIED(HttpStatus.CONFLICT, "EMAIL_VERIFICATION_409_1", "Verification code already verified."),
     RESEND_TOO_SOON(HttpStatus.TOO_MANY_REQUESTS, "EMAIL_VERIFICATION_429_2", "Resend request too soon."),
-    RESEND_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "EMAIL_VERIFICATION_429_1", "Resend limit exceeded."),
-    ;
+    RESEND_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "EMAIL_VERIFICATION_429_1", "Resend limit exceeded.");
 
     private final HttpStatus status;
     private final String code;

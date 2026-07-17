@@ -1,4 +1,4 @@
-package net.akive.api.auth.domain.login.exception;
+package net.akive.api.auth.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

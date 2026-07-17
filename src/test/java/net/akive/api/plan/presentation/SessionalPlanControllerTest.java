@@ -11,7 +11,7 @@ import net.akive.api.plan.application.dto.result.common.TotalQuantityAmountResul
 import net.akive.api.plan.application.dto.result.common.WeekPeriodResult;
 import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.*;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
 import net.akive.api.plan.presentation.dto.request.SessionPeriodRequest;
 import net.akive.api.plan.presentation.dto.request.UpdateSessionalPlanRequest;
@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
+import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.plan.exception.PlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.plan.exception.PlanErrorCode.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;

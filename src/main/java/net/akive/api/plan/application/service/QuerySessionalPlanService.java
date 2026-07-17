@@ -15,13 +15,13 @@ import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanTotalQuantitiesPort;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.SessionWeek;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
 
 @Service
 @Transactional(readOnly = true)

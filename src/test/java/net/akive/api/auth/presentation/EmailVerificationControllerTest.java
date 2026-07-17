@@ -4,7 +4,7 @@ import net.akive.api.auth.application.dto.command.emailverification.SendEmailVer
 import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
+import net.akive.api.auth.exception.EmailVerificationException;
 import net.akive.api.auth.presentation.dto.request.emailverification.SendEmailVerificationCodeRequest;
 import net.akive.api.auth.presentation.dto.request.emailverification.VerifyEmailVerificationCodeRequest;
 import net.akive.api.support.PublicControllerTestSupport;
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.*;
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;

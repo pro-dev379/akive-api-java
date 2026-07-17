@@ -15,7 +15,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.INVALID_ACCESS_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.INVALID_ACCESS_TOKEN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;

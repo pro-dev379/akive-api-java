@@ -7,8 +7,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
 
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.EXPIRED_ACCESS_TOKEN;
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.INVALID_ACCESS_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.EXPIRED_ACCESS_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.INVALID_ACCESS_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TokenAuthenticationEntryPointTest {

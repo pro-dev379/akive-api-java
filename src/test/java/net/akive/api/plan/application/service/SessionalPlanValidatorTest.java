@@ -4,7 +4,7 @@ import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
 import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
-import static net.akive.api.plan.domain.exception.PlanErrorCode.*;
+import static net.akive.api.plan.exception.PlanErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;

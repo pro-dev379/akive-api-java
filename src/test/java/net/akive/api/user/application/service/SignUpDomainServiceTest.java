@@ -1,7 +1,7 @@
 package net.akive.api.user.application.service;
 
 import net.akive.api.common.domain.Email;
-import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
+import net.akive.api.auth.exception.EmailVerificationException;
 import net.akive.api.user.application.port.out.GenerateNicknamePort;
 import net.akive.api.user.domain.User;
 import net.akive.api.user.exception.UserException;
@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.NOT_VERIFIED;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_VERIFIED;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
 import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;

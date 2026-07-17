@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.port.out.token.CreateTokenPort;
 import net.akive.api.auth.domain.token.TokenPayload;
 import net.akive.api.auth.application.port.out.token.ValidateTokenPort;
-import net.akive.api.auth.domain.token.exception.TokenException;
+import net.akive.api.auth.exception.TokenException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
@@ -17,8 +17,8 @@ import java.time.Instant;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static net.akive.api.auth.domain.token.TokenType.*;
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
 import static org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256;
 
 @Component

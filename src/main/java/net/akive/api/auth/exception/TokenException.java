@@ -1,4 +1,4 @@
-package net.akive.api.auth.domain.token.exception;
+package net.akive.api.auth.exception;
 
 import net.akive.api.common.exception.BusinessException;
 

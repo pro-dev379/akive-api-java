@@ -6,15 +6,15 @@ import net.akive.api.auth.application.port.out.emailverification.LoadEmailVerifi
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
+import net.akive.api.auth.exception.EmailVerificationException;
 import net.akive.api.common.domain.Email;
 import net.akive.api.common.time.CurrentTimeProvider;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.NOT_FOUND;
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.NOT_VERIFIED;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_FOUND;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_VERIFIED;
 
 @Component
 @RequiredArgsConstructor

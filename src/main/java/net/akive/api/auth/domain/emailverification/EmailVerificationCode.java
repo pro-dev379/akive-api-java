@@ -2,12 +2,12 @@ package net.akive.api.auth.domain.emailverification;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
+import net.akive.api.auth.exception.EmailVerificationException;
 
 import java.util.regex.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonCreator.Mode.DELEGATING;
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.INVALID_CODE_FORMAT;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.INVALID_CODE_FORMAT;
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
 
 public record EmailVerificationCode(String value) {

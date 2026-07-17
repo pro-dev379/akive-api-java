@@ -1,12 +1,12 @@
 package net.akive.api.auth.presentation;
 
 import net.akive.api.auth.application.dto.result.token.ReissueTokenResult;
-import net.akive.api.auth.domain.token.exception.TokenException;
+import net.akive.api.auth.exception.TokenException;
 import net.akive.api.support.PublicControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
-import static net.akive.api.auth.domain.token.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.auth.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
 import static net.akive.api.common.exception.CommonErrorCode.INVALID_INPUT_VALUE;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;

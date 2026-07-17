@@ -6,7 +6,7 @@ import net.akive.api.auth.application.port.out.emailverification.LoadEmailVerifi
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
+import net.akive.api.auth.exception.EmailVerificationException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.common.time.FixedCurrentTimeProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EXPIRE_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;

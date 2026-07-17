@@ -4,15 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 
 import java.time.LocalDate;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD;
+import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
+import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD;
 
 @Getter
 @Builder(access = PRIVATE)

@@ -10,7 +10,7 @@ import net.akive.api.auth.application.port.out.emailverification.SendEmailVerifi
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
+import net.akive.api.auth.exception.EmailVerificationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,9 +23,9 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPolic
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.RESEND_INTERVAL;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFIED_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.NOT_FOUND;
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.NOT_VERIFIED;
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.RESEND_TOO_SOON;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_FOUND;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_VERIFIED;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.RESEND_TOO_SOON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;

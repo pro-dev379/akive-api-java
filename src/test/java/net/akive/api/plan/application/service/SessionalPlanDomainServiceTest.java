@@ -4,7 +4,7 @@ import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.common.time.FixedCurrentTimeProvider;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.plan.exception.PlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.then;

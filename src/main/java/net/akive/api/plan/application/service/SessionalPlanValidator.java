@@ -5,14 +5,14 @@ import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
 import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
 import static net.akive.api.common.domain.DomainValidator.requireMaxLength;
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.*;
+import static net.akive.api.plan.exception.PlanErrorCode.*;
 
 @Component
 @RequiredArgsConstructor

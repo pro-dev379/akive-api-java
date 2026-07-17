@@ -1,4 +1,4 @@
-package net.akive.api.auth.domain.emailverification.exception;
+package net.akive.api.auth.exception;
 
 import net.akive.api.common.exception.BusinessException;
 

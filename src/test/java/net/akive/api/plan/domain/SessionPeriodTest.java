@@ -1,15 +1,15 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSION_PERIOD_TOO_LONG;
+import static net.akive.api.plan.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
+import static net.akive.api.plan.exception.PlanErrorCode.SESSION_PERIOD_TOO_LONG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

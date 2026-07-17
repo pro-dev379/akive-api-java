@@ -1,4 +1,4 @@
-package net.akive.api.plan.domain.exception;
+package net.akive.api.plan.exception;
 
 import net.akive.api.common.exception.BusinessException;
 import net.akive.api.common.exception.ErrorCode;

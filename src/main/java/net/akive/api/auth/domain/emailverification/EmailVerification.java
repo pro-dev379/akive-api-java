@@ -2,7 +2,7 @@ package net.akive.api.auth.domain.emailverification;
 
 import lombok.*;
 import net.akive.api.common.domain.Email;
-import net.akive.api.auth.domain.emailverification.exception.EmailVerificationException;
+import net.akive.api.auth.exception.EmailVerificationException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -11,7 +11,7 @@ import java.util.Objects;
 import static lombok.AccessLevel.*;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
-import static net.akive.api.auth.domain.emailverification.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.auth.exception.EmailVerificationErrorCode.*;
 
 @Getter
 @Builder(access = PRIVATE)

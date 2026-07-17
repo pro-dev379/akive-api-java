@@ -1,7 +1,7 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -9,9 +9,9 @@ import java.time.LocalDate;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD;
+import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
+import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
+import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

@@ -1,6 +1,6 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.plan.domain.exception.PlanException;
+import net.akive.api.plan.exception.PlanException;
 import net.akive.api.common.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.BLANK_VALUE;
-import static net.akive.api.plan.domain.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
+import static net.akive.api.plan.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
