@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.user.application.dto.SignUpResult;
 import net.akive.api.user.application.port.in.SignUpByEmailUseCase;
 import net.akive.api.user.presentation.dto.request.SignUpByEmailRequest;
-import net.akive.api.user.presentation.dto.response.SignUpResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +18,7 @@ public class SignUpController {
 
     @PostMapping("/email")
     @ResponseStatus(CREATED)
-    public SignUpResponse signUpByEmail(@Validated @RequestBody SignUpByEmailRequest request) {
-        SignUpResult result = signUpByEmailUseCase.signUp(request.to());
-        return SignUpResponse.from(result);
+    public SignUpResult signUpByEmail(@Validated @RequestBody SignUpByEmailRequest request) {
+        return signUpByEmailUseCase.signUp(request.to());
     }
 }
