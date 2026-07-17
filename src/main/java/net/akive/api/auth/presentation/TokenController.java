@@ -34,6 +34,6 @@ public class TokenController {
 
         ReissueTokenResult result = issueTokenUseCase.reissue(refreshToken);
 
-        return new ReissueTokenResponse(result.accessToken(), result.refreshToken());
+        return ReissueTokenResponse.from(result);
     }
 }
