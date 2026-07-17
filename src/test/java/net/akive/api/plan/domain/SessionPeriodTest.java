@@ -96,11 +96,10 @@ class SessionPeriodTest {
     @Test
     void 시작일과_종료일이_같으면_같은_세션_기간이다() {
         // given
-        SessionPeriod sessionPeriod =
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 7),
-                        LocalDate.of(2026, 7, 14)
-                );
+        SessionPeriod sessionPeriod = new SessionPeriod(
+                LocalDate.of(2026, 7, 7),
+                LocalDate.of(2026, 7, 14)
+        );
 
         // when & then
         assertThat(sessionPeriod).isNotEqualTo(
@@ -130,30 +129,12 @@ class SessionPeriodTest {
 
         // then
         assertThat(sessionWeeks).containsExactly(
-                new SessionWeek(
-                        1,
-                        new WeekPeriod(LocalDate.of(2024, 3, 24), LocalDate.of(2024, 3, 24))
-                ),
-                new SessionWeek(
-                        2,
-                        new WeekPeriod(LocalDate.of(2024, 3, 25), LocalDate.of(2024, 3, 31))
-                ),
-                new SessionWeek(
-                        3,
-                        new WeekPeriod(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 7))
-                ),
-                new SessionWeek(
-                        4,
-                        new WeekPeriod(LocalDate.of(2024, 4, 8), LocalDate.of(2024, 4, 14))
-                ),
-                new SessionWeek(
-                        5,
-                        new WeekPeriod(LocalDate.of(2024, 4, 15), LocalDate.of(2024, 4, 21))
-                ),
-                new SessionWeek(
-                        6,
-                        new WeekPeriod(LocalDate.of(2024, 4, 22), LocalDate.of(2024, 4, 24))
-                )
+                SessionWeek.of(1, LocalDate.of(2024, 3, 24), LocalDate.of(2024, 3, 24)),
+                SessionWeek.of(2, LocalDate.of(2024, 3, 25), LocalDate.of(2024, 3, 31)),
+                SessionWeek.of(3, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 7)),
+                SessionWeek.of(4, LocalDate.of(2024, 4, 8), LocalDate.of(2024, 4, 14)),
+                SessionWeek.of(5, LocalDate.of(2024, 4, 15), LocalDate.of(2024, 4, 21)),
+                SessionWeek.of(6, LocalDate.of(2024, 4, 22), LocalDate.of(2024, 4, 24))
         );
     }
 
@@ -170,10 +151,7 @@ class SessionPeriodTest {
 
         // then
         assertThat(sessionWeeks).containsExactly(
-                new SessionWeek(
-                        1,
-                        new WeekPeriod(LocalDate.of(2026, 7, 8), LocalDate.of(2026, 7, 12))
-                )
+                SessionWeek.of(1, LocalDate.of(2026, 7, 8), LocalDate.of(2026, 7, 12))
         );
     }
 
@@ -190,14 +168,8 @@ class SessionPeriodTest {
 
         // then
         assertThat(sessionWeeks).containsExactly(
-                new SessionWeek(
-                        1,
-                        new WeekPeriod(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12))
-                ),
-                new SessionWeek(
-                        2,
-                        new WeekPeriod(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14))
-                )
+                SessionWeek.of(1, LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12)),
+                SessionWeek.of(2, LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14))
         );
     }
 }

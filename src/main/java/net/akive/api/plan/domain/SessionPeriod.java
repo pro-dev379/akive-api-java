@@ -41,10 +41,7 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
                 weekEndOn = this.endOn;
             }
 
-            sessionWeeks.add(new SessionWeek(
-                    weekNum++,
-                    new WeekPeriod(weekStartOn, weekEndOn)
-            ));
+            sessionWeeks.add(SessionWeek.of(weekNum++, weekStartOn, weekEndOn));
             weekStartOn = weekEndOn.plusDays(1);
         }
 
