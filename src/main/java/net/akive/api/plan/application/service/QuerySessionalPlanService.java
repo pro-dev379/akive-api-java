@@ -12,7 +12,7 @@ import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
 import net.akive.api.plan.application.port.in.GetDailyTodosUseCase;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
-import net.akive.api.plan.application.port.out.LoadSessionalPlanTotalQuantitiesPort;
+import net.akive.api.plan.application.port.out.LoadTotalQuantitiesPort;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.SessionWeek;
 import net.akive.api.plan.exception.PlanException;
@@ -30,7 +30,7 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
 
     private final LoadSessionalPlanPort loadSessionalPlanPort;
     private final LoadDailyTodosPort loadDailyTodosPort;
-    private final LoadSessionalPlanTotalQuantitiesPort loadSessionalPlanTotalQuantitiesPort;
+    private final LoadTotalQuantitiesPort loadTotalQuantitiesPort;
 
     @Override
     public GetSessionalPlansResult getAll(Long userId) {
@@ -49,7 +49,7 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
                 sessionalPlan.getSessionName(),
                 SessionPeriodResult.from(sessionalPlan.getSessionPeriod()),
                 weeks.stream().map(GetSessionalPlanDetailResult.SessionWeekResult::from).toList(),
-                loadSessionalPlanTotalQuantitiesPort.loadSessionalPlanTotalQuantities(
+                loadTotalQuantitiesPort.loadSessionalPlanTotalQuantitiesBySessionalPlanId(
                         sessionalPlan.getSessionalPlanId(),
                         weeks
                 ).stream()

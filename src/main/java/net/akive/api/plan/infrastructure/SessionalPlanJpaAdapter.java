@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class SessionalPlanJpaAdapter implements
         LoadSessionalPlanPort,
-        LoadSessionalPlanTotalQuantitiesPort,
+        LoadTotalQuantitiesPort,
         LoadDailyTodosPort,
         SaveSessionalPlanPort,
         DeleteSessionalPlanPort,
@@ -53,7 +53,7 @@ class SessionalPlanJpaAdapter implements
     }
 
     @Override
-    public List<SessionalPlanTotalQuantityData> loadSessionalPlanTotalQuantities(
+    public List<SessionalPlanTotalQuantityData> loadSessionalPlanTotalQuantitiesBySessionalPlanId(
             Long sessionalPlanId,
             List<SessionWeek> sessionWeeks
     ) {
