@@ -8,7 +8,7 @@ import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.SaveSessionalPlanPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.exception.SessionalPlanException;
+import net.akive.api.plan.domain.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,8 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.NOT_FOUND;
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -124,12 +124,12 @@ class CommandSessionalPlanServiceTest {
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
-        )).willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS));
+        )).willThrow(new PlanException(SESSION_NAME_ALREADY_EXISTS));
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> commandSessionalPlanService.create(command))
-                .extracting(SessionalPlanException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(sessionalPlanDomainService).should().createForUser(
@@ -171,10 +171,10 @@ class CommandSessionalPlanServiceTest {
                 .willReturn(0L);
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> commandSessionalPlanService.delete(command))
-                .extracting(SessionalPlanException::getErrorCode)
-                .isEqualTo(NOT_FOUND);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(deleteSessionalPlanPort).should().deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId);
     }
@@ -254,10 +254,10 @@ class CommandSessionalPlanServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> commandSessionalPlanService.update(command))
-                .extracting(SessionalPlanException::getErrorCode)
-                .isEqualTo(NOT_FOUND);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(sessionalPlanDomainService).should(never()).update(any(), any(), any());
@@ -295,12 +295,12 @@ class CommandSessionalPlanServiceTest {
                         LocalDate.of(2026, 7, 8),
                         LocalDate.of(2026, 7, 15)
                 )
-        )).willThrow(new SessionalPlanException(SESSION_NAME_ALREADY_EXISTS));
+        )).willThrow(new PlanException(SESSION_NAME_ALREADY_EXISTS));
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> commandSessionalPlanService.update(command))
-                .extracting(SessionalPlanException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);

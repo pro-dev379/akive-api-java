@@ -1,8 +1,7 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.domain.exception.DailyQuantityAmountException;
-import net.akive.api.plan.domain.exception.DailyQuantityException;
+import net.akive.api.plan.domain.exception.PlanException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -10,9 +9,9 @@ import java.time.LocalDate;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
-import static net.akive.api.plan.domain.exception.DailyQuantityAmountErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
-import static net.akive.api.plan.domain.exception.DailyQuantityErrorCode.AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
-import static net.akive.api.plan.domain.exception.DailyQuantityErrorCode.DATE_OUT_OF_WEEK_PERIOD;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -72,9 +71,9 @@ class DailyQuantityTest {
 
     @Test
     void 하루_계획량이_완수량과_딜레이량의_합과_같지_않으면_안_된다() {
-        assertThatExceptionOfType(DailyQuantityAmountException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> DailyQuantityAmount.of(10, 6, 3, null))
-                .extracting(DailyQuantityAmountException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(DAILY_QUANTITY_AMOUNT_MISMATCH);
     }
 
@@ -93,15 +92,15 @@ class DailyQuantityTest {
 
     @Test
     void 하루_계획량은_주간_계획량보다_클_수_없다() {
-        assertThatExceptionOfType(DailyQuantityException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 7),
                         DailyQuantityAmount.of(11, 0, 11, null)
                 ))
-                .extracting(DailyQuantityException::getErrorCode)
-                .isEqualTo(AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
     }
 
     @Test
@@ -132,28 +131,28 @@ class DailyQuantityTest {
 
     @Test
     void 하루_계획량의_날짜는_주간_계획량의_시작일보다_빠를_수_없다() {
-        assertThatExceptionOfType(DailyQuantityException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 6),
                         DailyQuantityAmount.of(10, 0, 10, null)
                 ))
-                .extracting(DailyQuantityException::getErrorCode)
-                .isEqualTo(DATE_OUT_OF_WEEK_PERIOD);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD);
     }
 
     @Test
     void 하루_계획량의_날짜는_주간_계획량의_종료일보다_늦을_수_없다() {
-        assertThatExceptionOfType(DailyQuantityException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         LocalDate.of(2026, 7, 15),
                         DailyQuantityAmount.of(10, 0, 10, null)
                 ))
-                .extracting(DailyQuantityException::getErrorCode)
-                .isEqualTo(DATE_OUT_OF_WEEK_PERIOD);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD);
     }
 
     @Test

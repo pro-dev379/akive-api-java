@@ -9,11 +9,11 @@ import net.akive.api.plan.application.port.in.DeleteSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.UpdateSessionalPlanUseCase;
 import net.akive.api.plan.application.port.out.*;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.exception.SessionalPlanException;
+import net.akive.api.plan.domain.exception.PlanException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.NOT_FOUND;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
 
 @Service
 @Transactional
@@ -45,7 +45,7 @@ class CommandSessionalPlanService implements
     public void delete(DeleteSessionalPlanCommand command) {
         long deletedCount = deleteSessionalPlanPort.deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
         if (deletedCount == 0) {
-            throw new SessionalPlanException(NOT_FOUND);
+            throw new PlanException(SESSIONAL_PLAN_NOT_FOUND);
         }
     }
 
@@ -65,6 +65,6 @@ class CommandSessionalPlanService implements
     private SessionalPlan loadSessionalPlan(Long sessionalPlanId, Long userId) {
         return loadSessionalPlanPort
                 .loadBySessionalPlanIdAndUserId(sessionalPlanId, userId)
-                .orElseThrow(() -> new SessionalPlanException(NOT_FOUND));
+                .orElseThrow(() -> new PlanException(SESSIONAL_PLAN_NOT_FOUND));
     }
 }

@@ -1,7 +1,7 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.domain.exception.WeeklyQuantityException;
+import net.akive.api.plan.domain.exception.PlanException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -9,8 +9,8 @@ import java.time.LocalDate;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
-import static net.akive.api.plan.domain.exception.WeeklyQuantityErrorCode.AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT;
-import static net.akive.api.plan.domain.exception.WeeklyQuantityErrorCode.PERIOD_OUT_OF_SESSION_PERIOD;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.WEEKLY_QUANTITY_AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION_PERIOD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -92,15 +92,15 @@ class WeeklyQuantityTest {
 
     @Test
     void 주간_계획량은_세션_총량보다_클_수_없다() {
-        assertThatExceptionOfType(WeeklyQuantityException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> WeeklyQuantity.create(
                         1L,
                         VALID_TOTAL_QUANTITY,
                         VALID_WEEK_PERIOD,
                         WeeklyQuantityAmount.of(101, null)
                 ))
-                .extracting(WeeklyQuantityException::getErrorCode)
-                .isEqualTo(AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(WEEKLY_QUANTITY_AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT);
     }
 
     @Test
@@ -118,28 +118,28 @@ class WeeklyQuantityTest {
 
     @Test
     void 주간_계획량의_기간은_세션_기간_시작일보다_빠를_수_없다() {
-        assertThatExceptionOfType(WeeklyQuantityException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> WeeklyQuantity.create(
                         1L,
                         VALID_TOTAL_QUANTITY,
                         new WeekPeriod(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 13)),
                         WeeklyQuantityAmount.of(10, null)
                 ))
-                .extracting(WeeklyQuantityException::getErrorCode)
-                .isEqualTo(PERIOD_OUT_OF_SESSION_PERIOD);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION_PERIOD);
     }
 
     @Test
     void 주간_계획량의_기간은_세션_기간_종료일보다_늦을_수_없다() {
-        assertThatExceptionOfType(WeeklyQuantityException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> WeeklyQuantity.create(
                         1L,
                         VALID_TOTAL_QUANTITY,
                         new WeekPeriod(LocalDate.of(2026, 7, 8), LocalDate.of(2026, 7, 15)),
                         WeeklyQuantityAmount.of(10, null)
                 ))
-                .extracting(WeeklyQuantityException::getErrorCode)
-                .isEqualTo(PERIOD_OUT_OF_SESSION_PERIOD);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION_PERIOD);
     }
 
     @Test

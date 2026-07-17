@@ -6,11 +6,11 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.akive.api.plan.domain.exception.SessionalPlanException;
+import net.akive.api.plan.domain.exception.PlanException;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.INVALID_SESSION_PERIOD;
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_PERIOD_TOO_LONG;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSION_PERIOD_TOO_LONG;
 
 public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
 
@@ -21,11 +21,11 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
         requireNonNull(endOn);
 
         if (!startOn.isBefore(endOn)) {
-            throw new SessionalPlanException(INVALID_SESSION_PERIOD);
+            throw new PlanException(INVALID_SESSION_PERIOD);
         }
 
         if (endOn.isAfter(startOn.plusMonths(MAX_DURATION_MONTHS))) {
-            throw new SessionalPlanException(SESSION_PERIOD_TOO_LONG);
+            throw new PlanException(SESSION_PERIOD_TOO_LONG);
         }
     }
 

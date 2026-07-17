@@ -1,7 +1,7 @@
 package net.akive.api.plan.domain;
 
 import lombok.*;
-import net.akive.api.plan.domain.exception.SessionalPlanException;
+import net.akive.api.plan.domain.exception.PlanException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.INVALID_SESSION_PERIOD;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -76,7 +76,7 @@ public class SessionalPlan {
 
         if (sessionPeriod.startOn().isBefore(requestedAt.toLocalDate()) ||
                 !sessionPeriod.endOn().isAfter(requestedAt.toLocalDate())) {
-            throw new SessionalPlanException(INVALID_SESSION_PERIOD);
+            throw new PlanException(INVALID_SESSION_PERIOD);
         }
     }
 }

@@ -4,7 +4,7 @@ import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
 import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.exception.SessionalPlanException;
+import net.akive.api.plan.domain.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.*;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,9 +60,9 @@ class SessionalPlanValidatorTest {
                 .willReturn(true);
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> sessionalPlanValidator.validateCreatable(USER_ID, "  1회차  ", REQUESTED_ON))
-                .extracting(SessionalPlanException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(validateSessionalPlanPort).should(never()).countInProgressByUserId(any(), any());
@@ -78,9 +78,9 @@ class SessionalPlanValidatorTest {
                 .willReturn(5);
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> sessionalPlanValidator.validateCreatable(USER_ID, "1회차", REQUESTED_ON))
-                .extracting(SessionalPlanException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
 
         then(validateSessionalPlanPort).should().existsByUserIdAndSessionName(USER_ID, "1회차");
@@ -138,13 +138,13 @@ class SessionalPlanValidatorTest {
         )).willReturn(true);
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> sessionalPlanValidator.validateUpdatable(
                         currentSessionalPlan,
                         requestedSessionName,
                         requestedSessionPeriod
                 ))
-                .extracting(SessionalPlanException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(validateTotalQuantityPort).should(never()).existsBySessionalPlanId(any());
@@ -168,13 +168,13 @@ class SessionalPlanValidatorTest {
                 .willReturn(true);
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> sessionalPlanValidator.validateUpdatable(
                         currentSessionalPlan,
                         "1회차",
                         requestedSessionPeriod
                 ))
-                .extracting(SessionalPlanException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(SESSION_PERIOD_CHANGE_NOT_ALLOWED);
     }
 

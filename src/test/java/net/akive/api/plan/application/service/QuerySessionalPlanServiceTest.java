@@ -20,7 +20,7 @@ import net.akive.api.plan.domain.DailyQuantityAmount;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.Subject;
-import net.akive.api.plan.domain.exception.SessionalPlanException;
+import net.akive.api.plan.domain.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +34,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.NOT_FOUND;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -255,12 +255,12 @@ class QuerySessionalPlanServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> querySessionalPlanService.getDetail(
                         new GetSessionalPlanDetailCommand(userId, sessionalPlanId)
                 ))
-                .extracting(SessionalPlanException::getErrorCode)
-                .isEqualTo(NOT_FOUND);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(loadSessionalPlanTotalQuantitiesPort).should(never())

@@ -1,15 +1,15 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.domain.exception.SessionalPlanException;
+import net.akive.api.plan.domain.exception.PlanException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.INVALID_SESSION_PERIOD;
-import static net.akive.api.plan.domain.exception.SessionalPlanErrorCode.SESSION_PERIOD_TOO_LONG;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.SESSION_PERIOD_TOO_LONG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -53,21 +53,21 @@ class SessionPeriodTest {
         LocalDate sessionOn = LocalDate.of(2026, 7, 7);
 
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> new SessionPeriod(sessionOn, sessionOn))
-                .extracting(SessionalPlanException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 
     @Test
     void 시작일이_종료일보다_이후이면_세션_기간_생성에_실패한다() {
         // when & then
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> new SessionPeriod(
                         LocalDate.of(2026, 7, 14),
                         LocalDate.of(2026, 7, 7)
                 ))
-                .extracting(SessionalPlanException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 
@@ -84,12 +84,12 @@ class SessionPeriodTest {
 
     @Test
     void 세션_기간이_12개월을_초과하면_세션_기간_생성에_실패한다() {
-        assertThatExceptionOfType(SessionalPlanException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2027, 7, 8)
                 ))
-                .extracting(SessionalPlanException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(SESSION_PERIOD_TOO_LONG);
     }
 

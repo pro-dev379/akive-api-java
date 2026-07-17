@@ -1,14 +1,14 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.domain.exception.WeekPeriodException;
+import net.akive.api.plan.domain.exception.PlanException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.INVALID_DATE_RANGE;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.plan.domain.exception.WeekPeriodErrorCode.INVALID_WEEK_PERIOD;
+import static net.akive.api.plan.domain.exception.PlanErrorCode.INVALID_WEEK_PERIOD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -46,12 +46,12 @@ class WeekPeriodTest {
 
     @Test
     void 주간_기간은_7일을_초과할_수_없다() {
-        assertThatExceptionOfType(WeekPeriodException.class)
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> new WeekPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 15)
                 ))
-                .extracting(WeekPeriodException::getErrorCode)
+                .extracting(PlanException::getErrorCode)
                 .isEqualTo(INVALID_WEEK_PERIOD);
     }
 
