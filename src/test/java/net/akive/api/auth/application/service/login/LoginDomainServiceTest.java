@@ -40,8 +40,7 @@ class LoginDomainServiceTest {
                 .willReturn(legacyPasswordUsed);
 
         // when
-        LoginDomainService.LoginAuthentication loginAuthentication =
-                loginDomainService.authenticate(user, RAW_PASSWORD);
+        LoginDomainService.LoginAuthentication loginAuthentication = loginDomainService.authenticate(user, RAW_PASSWORD);
 
         // then
         assertThat(loginAuthentication.user()).isEqualTo(user);

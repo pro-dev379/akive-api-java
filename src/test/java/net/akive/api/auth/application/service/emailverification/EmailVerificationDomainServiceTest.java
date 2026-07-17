@@ -142,8 +142,7 @@ class EmailVerificationDomainServiceTest {
                 .willReturn(Optional.of(emailVerification));
 
         // when
-        EmailVerification verifiedEmailVerification =
-                emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE);
+        EmailVerification verifiedEmailVerification = emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE);
 
         // then
         assertThat(verifiedEmailVerification.isVerified()).isTrue();

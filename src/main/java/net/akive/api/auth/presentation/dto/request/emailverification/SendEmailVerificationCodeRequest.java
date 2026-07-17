@@ -8,7 +8,7 @@ import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 
 public record SendEmailVerificationCodeRequest(
         @Email @NotBlank String email,
-    @NotNull EmailVerificationPurpose verificationPurpose
+        @NotNull EmailVerificationPurpose verificationPurpose
 ) {
     public SendEmailVerificationCommand to() {
         return SendEmailVerificationCommand.of(email, verificationPurpose);

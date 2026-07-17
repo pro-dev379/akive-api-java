@@ -28,7 +28,6 @@ public class EmailSender {
         return Destination.builder()
                 .toAddresses(emailMessage.to())
                 .build();
-
     }
 
     private Message toSesMessage(EmailMessage emailMessage) {

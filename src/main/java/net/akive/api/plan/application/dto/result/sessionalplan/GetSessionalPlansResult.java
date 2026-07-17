@@ -8,9 +8,7 @@ import java.util.List;
 public record GetSessionalPlansResult(List<SessionalPlanResult> sessionalPlans) {
 
     public static GetSessionalPlansResult from(List<SessionalPlan> sessionalPlans) {
-        return new GetSessionalPlansResult(
-                sessionalPlans.stream().map(SessionalPlanResult::from).toList()
-        );
+        return new GetSessionalPlansResult(sessionalPlans.stream().map(SessionalPlanResult::from).toList());
     }
 
     public record SessionalPlanResult(

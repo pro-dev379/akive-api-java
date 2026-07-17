@@ -31,8 +31,7 @@ class LoginService implements LoginByEmailUseCase {
     @Transactional
     public LoginResult login(LoginByEmailCommand command) {
         LoginUser user = loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email());
-        LoginDomainService.LoginAuthentication loginAuthentication =
-                loginDomainService.authenticate(user, command.password());
+        LoginDomainService.LoginAuthentication loginAuthentication = loginDomainService.authenticate(user, command.password());
 
         if (loginAuthentication.legacyPasswordUsed()) {
             migratePassword(user, command.password());

@@ -32,8 +32,7 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
 
         // when
         saveEmailVerificationPort.save(emailVerification, Duration.ofMinutes(5));
-        Optional<EmailVerification> found =
-                loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(email), verificationPurpose);
+        Optional<EmailVerification> found = loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(email), verificationPurpose);
 
         // then
         assertThat(found).isPresent();
@@ -63,8 +62,7 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
         deleteEmailVerificationPort.delete(emailVerification);
 
         // then
-        Optional<EmailVerification> found =
-                loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(email), verificationPurpose);
+        Optional<EmailVerification> found = loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(email), verificationPurpose);
 
         assertThat(found).isEmpty();
     }

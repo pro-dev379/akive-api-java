@@ -86,7 +86,6 @@ class EmailVerificationTest {
                 .isEqualTo(RESEND_LIMIT_EXCEEDED);
     }
 
-
     @Test
     void 유효한_인증번호를_입력하면_이메일_인증이_완료된다() {
         // given

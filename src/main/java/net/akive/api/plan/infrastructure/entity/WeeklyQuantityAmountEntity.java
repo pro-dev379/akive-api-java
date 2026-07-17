@@ -30,9 +30,6 @@ public class WeeklyQuantityAmountEntity {
     }
 
     public WeeklyQuantityAmount to() {
-        return WeeklyQuantityAmount.of(
-                this.quantityAmount,
-                this.quantityMemo
-        );
+        return WeeklyQuantityAmount.of(this.quantityAmount, this.quantityMemo);
     }
 }

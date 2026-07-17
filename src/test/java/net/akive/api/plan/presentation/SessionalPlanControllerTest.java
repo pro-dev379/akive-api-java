@@ -301,7 +301,6 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         then(createSessionalPlanUseCase).should().create(command);
     }
 
-
     @Test
     void 세셔널_플랜_생성_요청_시_세셔널_플랜명이_비어있으면_400을_응답한다() throws Exception {
         // given
@@ -352,10 +351,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     void 세셔널_플랜_생성_요청_시_세션_기간이_없으면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
-        CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
-                "1회차",
-                null
-        );
+        CreateSessionalPlanRequest request = new CreateSessionalPlanRequest("1회차", null);
 
         // when & then
         mockMvc.perform(post("/sessional-plans")
@@ -541,10 +537,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 10L;
-        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest(
-                "수정된 1회차",
-                null
-        );
+        UpdateSessionalPlanRequest request = new UpdateSessionalPlanRequest("수정된 1회차", null);
 
         // when & then
         mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)

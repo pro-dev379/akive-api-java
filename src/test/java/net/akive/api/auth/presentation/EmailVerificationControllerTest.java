@@ -3,7 +3,6 @@ package net.akive.api.auth.presentation;
 import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCommand;
 import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
-import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.auth.exception.EmailVerificationException;
 import net.akive.api.auth.presentation.dto.request.emailverification.SendEmailVerificationCodeRequest;
 import net.akive.api.auth.presentation.dto.request.emailverification.VerifyEmailVerificationCodeRequest;
@@ -106,10 +105,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 인증번호_전송_요청_시_재전송_횟수를_초과하면_429를_응답한다() throws Exception {
         // given
-        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest(
-                "test@test.com",
-                SIGN_UP
-        );
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
 
         willThrow(new EmailVerificationException(RESEND_LIMIT_EXCEEDED))
                 .given(sendEmailVerificationCodeUseCase)
@@ -127,10 +123,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 인증번호_전송_요청_시_재전송_가능시간_이전이면_429를_응답한다() throws Exception {
         // given
-        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest(
-                "test@test.com",
-                SIGN_UP
-        );
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
 
         willThrow(new EmailVerificationException(RESEND_TOO_SOON))
                 .given(sendEmailVerificationCodeUseCase)
@@ -148,11 +141,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 인증번호_전송_요청_시_패스워드를_찾을_회원이_없으면_404를_응답한다() throws Exception {
         // given
-        EmailVerificationPurpose verificationPurpose = FIND_PASSWORD;
-        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest(
-                "test@test.com",
-                verificationPurpose
-        );
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", FIND_PASSWORD);
 
         willThrow(new UserException(UserErrorCode.NOT_FOUND))
                 .given(sendEmailVerificationCodeUseCase)
@@ -168,11 +157,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
     @Test
     void 인증번호_전송_요청_시_회원가입_이메일이_중복되면_409를_응답한다() throws Exception {
         // given
-        EmailVerificationPurpose verificationPurpose = SIGN_UP;
-        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest(
-                "test@test.com",
-                verificationPurpose
-        );
+        SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
 
         willThrow(new UserException(UserErrorCode.EMAIL_ALREADY_EXISTS))
                 .given(sendEmailVerificationCodeUseCase)

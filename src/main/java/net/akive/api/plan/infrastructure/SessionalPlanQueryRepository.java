@@ -9,8 +9,5 @@ import java.util.List;
 public interface SessionalPlanQueryRepository {
 
     List<DailyTodoProjection> findDailyTodosByUserIdAndDate(Long userId, LocalDate date);
-
-    List<SessionalPlanTotalQuantityProjection> findSessionalPlanTotalQuantityDetailsBySessionalPlanId(
-            Long sessionalPlanId
-    );
+    List<SessionalPlanTotalQuantityProjection> findSessionalPlanTotalQuantityDetailsBySessionalPlanId(Long sessionalPlanId);
 }

@@ -7,5 +7,4 @@ import java.time.Duration;
 public interface SaveEmailVerificationPort {
 
     void save(EmailVerification emailVerification, Duration ttl);
-
 }

@@ -9,9 +9,7 @@ import java.util.List;
 public record GetDailyTodosResult(List<DailyTodoResult> todos) {
 
     public static GetDailyTodosResult from(List<DailyTodoData> data) {
-        return new GetDailyTodosResult(
-                data.stream().map(DailyTodoResult::from).toList()
-        );
+        return new GetDailyTodosResult(data.stream().map(DailyTodoResult::from).toList());
     }
 
     public record DailyTodoResult(
