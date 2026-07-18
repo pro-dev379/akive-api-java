@@ -1,4 +1,4 @@
-package net.akive.api.auth.infrastructure.token;
+package net.akive.api.auth.infrastructure.adapter.token;
 
 import net.akive.api.support.RedisTestSupport;
 import org.junit.jupiter.api.Test;

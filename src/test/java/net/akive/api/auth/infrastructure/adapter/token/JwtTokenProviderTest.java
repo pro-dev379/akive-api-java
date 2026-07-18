@@ -1,4 +1,4 @@
-package net.akive.api.auth.infrastructure.token;
+package net.akive.api.auth.infrastructure.adapter.token;
 
 import net.akive.api.auth.exception.TokenException;
 import net.akive.api.common.time.CurrentTimeProvider;

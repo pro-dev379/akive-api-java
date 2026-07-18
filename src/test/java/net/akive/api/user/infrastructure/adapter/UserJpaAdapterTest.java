@@ -1,4 +1,4 @@
-package net.akive.api.user.infrastructure;
+package net.akive.api.user.infrastructure.adapter;
 
 import net.akive.api.common.domain.Email;
 import net.akive.api.support.RepositoryTestSupport;

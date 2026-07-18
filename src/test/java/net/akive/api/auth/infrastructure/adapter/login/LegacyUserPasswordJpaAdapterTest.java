@@ -1,8 +1,8 @@
-package net.akive.api.auth.infrastructure.login;
+package net.akive.api.auth.infrastructure.adapter.login;
 
 import net.akive.api.common.domain.Email;
 import net.akive.api.auth.domain.login.LegacyUserPassword;
-import net.akive.api.auth.infrastructure.login.entity.LegacyUserPasswordEntity;
+import net.akive.api.auth.infrastructure.entity.LegacyUserPasswordEntity;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;

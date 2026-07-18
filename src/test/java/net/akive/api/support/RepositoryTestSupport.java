@@ -3,7 +3,7 @@ package net.akive.api.support;
 import net.akive.api.auth.application.port.out.login.DeleteLegacyUserPasswordPort;
 import net.akive.api.auth.application.port.out.login.LoadEmailLoginUserPort;
 import net.akive.api.auth.application.port.out.login.LoadLegacyUserPasswordPort;
-import net.akive.api.auth.infrastructure.login.LegacyUserPasswordJpaRepository;
+import net.akive.api.auth.infrastructure.repository.LegacyUserPasswordJpaRepository;
 import net.akive.api.mentoring.application.port.out.SaveMentoringProfilePort;
 import net.akive.api.plan.application.port.out.DeleteSessionalPlanPort;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;

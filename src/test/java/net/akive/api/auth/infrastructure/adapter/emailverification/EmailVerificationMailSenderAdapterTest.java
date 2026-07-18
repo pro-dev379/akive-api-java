@@ -1,4 +1,4 @@
-package net.akive.api.auth.infrastructure.emailverification;
+package net.akive.api.auth.infrastructure.adapter.emailverification;
 
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationCode;

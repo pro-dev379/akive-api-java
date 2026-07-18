@@ -1,4 +1,4 @@
-package net.akive.api.plan.infrastructure;
+package net.akive.api.plan.infrastructure.adapter;
 
 import net.akive.api.common.domain.Email;
 import net.akive.api.plan.domain.SessionPeriod;

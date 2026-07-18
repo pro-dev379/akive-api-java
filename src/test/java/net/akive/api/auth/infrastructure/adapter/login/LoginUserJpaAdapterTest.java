@@ -1,4 +1,4 @@
-package net.akive.api.auth.infrastructure.login;
+package net.akive.api.auth.infrastructure.adapter.login;
 
 import net.akive.api.common.domain.Email;
 import net.akive.api.auth.domain.login.LoginUser;

@@ -1,4 +1,4 @@
-package net.akive.api.mentoring.infrastructure;
+package net.akive.api.mentoring.infrastructure.adapter;
 
 import net.akive.api.common.domain.Email;
 import net.akive.api.mentoring.domain.MentoringProfile;
