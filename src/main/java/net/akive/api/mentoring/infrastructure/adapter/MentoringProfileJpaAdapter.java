@@ -1,8 +1,9 @@
-package net.akive.api.mentoring.infrastructure;
+package net.akive.api.mentoring.infrastructure.adapter;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.mentoring.application.port.out.SaveMentoringProfilePort;
 import net.akive.api.mentoring.domain.MentoringProfile;
+import net.akive.api.mentoring.infrastructure.repository.MentoringProfileJpaRepository;
 import net.akive.api.mentoring.infrastructure.entity.MentoringProfileEntity;
 import org.springframework.stereotype.Repository;
 
