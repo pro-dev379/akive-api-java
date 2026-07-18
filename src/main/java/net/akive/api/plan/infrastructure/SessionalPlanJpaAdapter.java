@@ -13,7 +13,9 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Repository
@@ -59,10 +61,10 @@ class SessionalPlanJpaAdapter implements
         List<SessionalPlanTotalQuantityProjection> projections = sessionalPlanQueryRepository
                 .findSessionalPlanTotalQuantityDetailsBySessionalPlanId(sessionalPlanId);
 
-        Map<WeekPeriod, Integer> weekNumByPeriod = sessionWeeks.stream()
+        Map<WeekPeriod, SessionWeek> sessionWeekByPeriod = sessionWeeks.stream()
                 .collect(Collectors.toMap(
                         SessionWeek::weekPeriod,
-                        SessionWeek::weekNum
+                        Function.identity()
                 ));
 
         return projections.stream()
@@ -73,7 +75,7 @@ class SessionalPlanJpaAdapter implements
                 ))
                 .values()
                 .stream()
-                .map(group -> toSessionalPlanTotalQuantityData(group, weekNumByPeriod))
+                .map(group -> toSessionalPlanTotalQuantityData(group, sessionWeekByPeriod))
                 .toList();
     }
 
@@ -107,42 +109,38 @@ class SessionalPlanJpaAdapter implements
 
     private SessionalPlanTotalQuantityData toSessionalPlanTotalQuantityData(
             List<SessionalPlanTotalQuantityProjection> projections,
-            Map<WeekPeriod, Integer> weekNumByPeriod
+            Map<WeekPeriod, SessionWeek> sessionWeekByPeriod
     ) {
         SessionalPlanTotalQuantityProjection first = projections.getFirst();
 
         return new SessionalPlanTotalQuantityData(
                 first.totalQuantityId(),
                 first.sessionalPlanId(),
-                first.subject(),
-                first.subjectCategory(),
-                first.totalQuantityAmount(),
-                first.unit(),
-                first.totalQuantityMemo(),
+                first.subject().to(),
+                first.totalQuantityAmount().to(),
                 projections.stream()
-                        .map(projection -> toSessionalPlanWeeklyQuantityData(projection, weekNumByPeriod))
+                        .map(projection -> toSessionalPlanWeeklyQuantityData(projection, sessionWeekByPeriod))
                         .toList()
         );
     }
 
     private SessionalPlanWeeklyQuantityData toSessionalPlanWeeklyQuantityData(
             SessionalPlanTotalQuantityProjection projection,
-            Map<WeekPeriod, Integer> weekNumByPeriod
+            Map<WeekPeriod, SessionWeek> sessionWeekByPeriod
     ) {
-        WeekPeriod weekPeriod = new WeekPeriod(projection.weekStartOn(), projection.weekEndOn());
+        WeekPeriod weekPeriod = projection.weekPeriod().to();
+        SessionWeek sessionWeek = Objects.requireNonNull(sessionWeekByPeriod.get(weekPeriod));
         SessionalPlanWeeklyQuantityAmountData weeklyQuantityAmount = new SessionalPlanWeeklyQuantityAmountData(
-                projection.weeklyQuantityAmount(),
+                projection.weeklyQuantityAmount().getQuantityAmount(),
                 Math.toIntExact(projection.weeklyCompletedQuantityAmount()),
                 Math.toIntExact(projection.weeklyDelayAmount()),
-                projection.weeklyQuantityMemo()
+                projection.weeklyQuantityAmount().getQuantityMemo()
         );
 
         return new SessionalPlanWeeklyQuantityData(
                 projection.weeklyQuantityId(),
                 projection.totalQuantityId(),
-                weekNumByPeriod.get(weekPeriod),
-                weekPeriod.startOn(),
-                weekPeriod.endOn(),
+                sessionWeek,
                 weeklyQuantityAmount
         );
     }

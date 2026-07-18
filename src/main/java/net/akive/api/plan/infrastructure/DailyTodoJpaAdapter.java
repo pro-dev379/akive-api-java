@@ -3,8 +3,6 @@ package net.akive.api.plan.infrastructure;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
 import net.akive.api.plan.application.port.out.dto.DailyTodoData;
-import net.akive.api.plan.domain.DailyQuantityAmount;
-import net.akive.api.plan.domain.Subject;
 import net.akive.api.plan.infrastructure.projection.DailyTodoProjection;
 import org.springframework.stereotype.Repository;
 
@@ -32,16 +30,8 @@ public class DailyTodoJpaAdapter implements LoadDailyTodosPort {
                 projection.totalQuantityId(),
                 projection.weeklyQuantityId(),
                 projection.dailyQuantityId(),
-                new Subject(
-                        projection.subjectName(),
-                        projection.subjectCategory()
-                ),
-                DailyQuantityAmount.of(
-                        projection.dailyQuantityAmount(),
-                        projection.completedQuantityAmount(),
-                        projection.delayedQuantityAmount(),
-                        projection.dailyQuantityMemo()
-                ),
+                projection.subject().to(),
+                projection.dailyQuantityAmount().to(),
                 projection.unit(),
                 projection.date()
         );

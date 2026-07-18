@@ -10,7 +10,10 @@ import net.akive.api.plan.application.port.out.dto.SessionalPlanTotalQuantityDat
 import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityAmountData;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityData;
 import net.akive.api.plan.domain.SessionPeriod;
+import net.akive.api.plan.domain.SessionWeek;
 import net.akive.api.plan.domain.SessionalPlan;
+import net.akive.api.plan.domain.Subject;
+import net.akive.api.plan.domain.TotalQuantityAmount;
 import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -136,26 +139,27 @@ class QuerySessionalPlanServiceTest {
                 new SessionalPlanTotalQuantityData(
                         10L,
                         sessionalPlanId,
-                        "수학",
-                        "학습",
-                        100,
-                        "문제",
-                        "총량 메모",
+                        new Subject("수학", "학습"),
+                        TotalQuantityAmount.of(100, "문제", "총량 메모"),
                         List.of(
                                 new SessionalPlanWeeklyQuantityData(
                                         100L,
                                         10L,
-                                        1,
-                                        LocalDate.of(2026, 7, 6),
-                                        LocalDate.of(2026, 7, 12),
+                                        SessionWeek.of(
+                                                1,
+                                                LocalDate.of(2026, 7, 6),
+                                                LocalDate.of(2026, 7, 12)
+                                        ),
                                         new SessionalPlanWeeklyQuantityAmountData(70, 30, 40, "1주차 메모")
                                 ),
                                 new SessionalPlanWeeklyQuantityData(
                                         101L,
                                         10L,
-                                        2,
-                                        LocalDate.of(2026, 7, 13),
-                                        LocalDate.of(2026, 7, 14),
+                                        SessionWeek.of(
+                                                2,
+                                                LocalDate.of(2026, 7, 13),
+                                                LocalDate.of(2026, 7, 14)
+                                        ),
                                         new SessionalPlanWeeklyQuantityAmountData(30, 10, 20, "2주차 메모")
                                 )
                         )

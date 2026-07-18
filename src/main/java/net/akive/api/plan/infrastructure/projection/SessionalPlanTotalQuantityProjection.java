@@ -1,22 +1,19 @@
 package net.akive.api.plan.infrastructure.projection;
 
 import com.querydsl.core.annotations.QueryProjection;
-
-import java.time.LocalDate;
+import net.akive.api.plan.infrastructure.entity.SubjectEntity;
+import net.akive.api.plan.infrastructure.entity.TotalQuantityAmountEntity;
+import net.akive.api.plan.infrastructure.entity.WeekPeriodEntity;
+import net.akive.api.plan.infrastructure.entity.WeeklyQuantityAmountEntity;
 
 public record SessionalPlanTotalQuantityProjection(
         Long totalQuantityId,
         Long sessionalPlanId,
-        String subject,
-        String subjectCategory,
-        int totalQuantityAmount,
-        String unit,
-        String totalQuantityMemo,
+        SubjectEntity subject,
+        TotalQuantityAmountEntity totalQuantityAmount,
         Long weeklyQuantityId,
-        LocalDate weekStartOn,
-        LocalDate weekEndOn,
-        int weeklyQuantityAmount,
-        String weeklyQuantityMemo,
+        WeekPeriodEntity weekPeriod,
+        WeeklyQuantityAmountEntity weeklyQuantityAmount,
         long weeklyCompletedQuantityAmount,
         long weeklyDelayAmount
 ) {

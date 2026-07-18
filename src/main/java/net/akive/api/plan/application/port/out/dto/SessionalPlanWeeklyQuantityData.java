@@ -1,13 +1,11 @@
 package net.akive.api.plan.application.port.out.dto;
 
-import java.time.LocalDate;
+import net.akive.api.plan.domain.SessionWeek;
 
 public record SessionalPlanWeeklyQuantityData(
         Long weeklyQuantityId,
         Long totalQuantityId,
-        int weekNum,
-        LocalDate weekStartOn,
-        LocalDate weekEndOn,
+        SessionWeek sessionWeek,
         SessionalPlanWeeklyQuantityAmountData weeklyQuantityAmount
 ) {
 }

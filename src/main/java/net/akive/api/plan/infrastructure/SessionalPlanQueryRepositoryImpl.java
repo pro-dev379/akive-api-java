@@ -28,16 +28,11 @@ class SessionalPlanQueryRepositoryImpl implements SessionalPlanQueryRepository {
                         new QSessionalPlanTotalQuantityProjection(
                                 tq.totalQuantityId,
                                 tq.sessionalPlan.sessionalPlanId,
-                                tq.subject.name,
-                                tq.subject.category,
-                                tq.totalQuantityAmount.quantityAmount,
-                                tq.totalQuantityAmount.unit,
-                                tq.totalQuantityAmount.memo,
+                                tq.subject,
+                                tq.totalQuantityAmount,
                                 wq.weeklyQuantityId,
-                                wq.weekPeriod.startOn,
-                                wq.weekPeriod.endOn,
-                                wq.weeklyQuantityAmount.quantityAmount,
-                                wq.weeklyQuantityAmount.quantityMemo,
+                                wq.weekPeriod,
+                                wq.weeklyQuantityAmount,
                                 dq.dailyQuantityAmount.completedQuantityAmount.sumLong(),
                                 dq.dailyQuantityAmount.delayedQuantityAmount.sumLong()
                         )
@@ -49,16 +44,11 @@ class SessionalPlanQueryRepositoryImpl implements SessionalPlanQueryRepository {
                 .groupBy(
                         tq.totalQuantityId,
                         tq.sessionalPlan.sessionalPlanId,
-                        tq.subject.name,
-                        tq.subject.category,
-                        tq.totalQuantityAmount.quantityAmount,
-                        tq.totalQuantityAmount.unit,
-                        tq.totalQuantityAmount.memo,
+                        tq.subject,
+                        tq.totalQuantityAmount,
                         wq.weeklyQuantityId,
-                        wq.weekPeriod.startOn,
-                        wq.weekPeriod.endOn,
-                        wq.weeklyQuantityAmount.quantityAmount,
-                        wq.weeklyQuantityAmount.quantityMemo
+                        wq.weekPeriod,
+                        wq.weeklyQuantityAmount
                 )
                 .orderBy(
                         tq.totalQuantityId.asc(),

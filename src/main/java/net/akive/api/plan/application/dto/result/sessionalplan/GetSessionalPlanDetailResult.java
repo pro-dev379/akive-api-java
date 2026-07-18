@@ -25,8 +25,12 @@ public record GetSessionalPlanDetailResult(
         public static TotalQuantityResult from(SessionalPlanTotalQuantityData data) {
             return new TotalQuantityResult(
                     data.totalQuantityId(),
-                    new SubjectResult(data.subject(), data.subjectCategory()),
-                    new TotalQuantityAmountResult(data.totalQuantityAmount(), data.unit(), data.totalQuantityMemo()),
+                    SubjectResult.from(data.subject()),
+                    new TotalQuantityAmountResult(
+                            data.totalQuantityAmount().quantityAmount().value(),
+                            data.totalQuantityAmount().unit(),
+                            data.totalQuantityAmount().quantityMemo().value()
+                    ),
                     data.weeklyQuantities().stream().map(WeeklyQuantityResult::from).toList()
             );
         }
@@ -41,7 +45,7 @@ public record GetSessionalPlanDetailResult(
         public static WeeklyQuantityResult from(SessionalPlanWeeklyQuantityData data) {
             return new WeeklyQuantityResult(
                     data.weeklyQuantityId(),
-                    new SessionWeekResult(data.weekNum(), new WeekPeriodResult(data.weekStartOn(), data.weekEndOn())),
+                    SessionWeekResult.from(data.sessionWeek()),
                     WeeklyQuantityAmountResult.from(data.weeklyQuantityAmount())
             );
         }

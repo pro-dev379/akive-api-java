@@ -33,13 +33,9 @@ public class DailyTodoQueryRepositoryImpl implements DailyTodoQueryRepository {
                                 tq.totalQuantityId,
                                 wq.weeklyQuantityId,
                                 dq.dailyQuantityId,
-                                tq.subject.name,
-                                tq.subject.category,
-                                dq.dailyQuantityAmount.quantityAmount,
-                                dq.dailyQuantityAmount.completedQuantityAmount,
-                                dq.dailyQuantityAmount.delayedQuantityAmount,
+                                tq.subject,
+                                dq.dailyQuantityAmount,
                                 tq.totalQuantityAmount.unit,
-                                dq.dailyQuantityAmount.quantityMemo,
                                 dq.date
                         )
                 )
