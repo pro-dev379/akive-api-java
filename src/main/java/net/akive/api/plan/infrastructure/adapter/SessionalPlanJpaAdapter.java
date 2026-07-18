@@ -5,7 +5,6 @@ import net.akive.api.plan.application.port.out.*;
 import net.akive.api.plan.application.port.out.dto.*;
 import net.akive.api.plan.domain.*;
 import net.akive.api.plan.infrastructure.repository.SessionalPlanJpaRepository;
-import net.akive.api.plan.infrastructure.repository.SessionalPlanQueryRepository;
 import net.akive.api.plan.infrastructure.entity.SessionPeriodEntity;
 import net.akive.api.plan.infrastructure.entity.SessionalPlanEntity;
 import net.akive.api.plan.infrastructure.projection.SessionalPlanTotalQuantityProjection;
@@ -30,7 +29,6 @@ class SessionalPlanJpaAdapter implements
         ValidateSessionalPlanPort {
 
     private final SessionalPlanJpaRepository sessionalPlanJpaRepository;
-    private final SessionalPlanQueryRepository sessionalPlanQueryRepository;
 
     @Override
     public Optional<SessionalPlan> loadBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId) {
@@ -60,7 +58,7 @@ class SessionalPlanJpaAdapter implements
             Long sessionalPlanId,
             List<SessionWeek> sessionWeeks
     ) {
-        List<SessionalPlanTotalQuantityProjection> projections = sessionalPlanQueryRepository
+        List<SessionalPlanTotalQuantityProjection> projections = sessionalPlanJpaRepository
                 .findSessionalPlanTotalQuantityDetailsBySessionalPlanId(sessionalPlanId);
 
         Map<WeekPeriod, SessionWeek> sessionWeekByPeriod = sessionWeeks.stream()
