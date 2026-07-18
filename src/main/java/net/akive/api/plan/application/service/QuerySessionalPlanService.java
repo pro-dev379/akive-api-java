@@ -37,7 +37,7 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
 
     @Override
     public GetSessionalPlanDetailResult getDetail(GetSessionalPlanDetailCommand command) {
-        SessionalPlan sessionalPlan = loadSessionalPlan(command.sessionalPlanId(), command.userId());
+        SessionalPlan sessionalPlan = loadSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
         List<SessionWeek> weeks = sessionalPlan.getSessionPeriod().splitIntoWeeks();
 
         return new GetSessionalPlanDetailResult(
@@ -54,7 +54,7 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
         );
     }
 
-    private SessionalPlan loadSessionalPlan(Long sessionalPlanId, Long userId) {
+    private SessionalPlan loadSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {
         return loadSessionalPlanPort
                 .loadBySessionalPlanIdAndUserId(sessionalPlanId, userId)
                 .orElseThrow(() -> new PlanException(SESSIONAL_PLAN_NOT_FOUND));

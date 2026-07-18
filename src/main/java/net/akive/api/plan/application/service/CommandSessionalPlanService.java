@@ -51,7 +51,7 @@ class CommandSessionalPlanService implements
 
     @Override
     public void update(UpdateSessionalPlanCommand command) {
-        SessionalPlan sessionalPlan = loadSessionalPlan(command.sessionalPlanId(), command.userId());
+        SessionalPlan sessionalPlan = loadSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
 
         SessionalPlan updatedSessionalPlan = sessionalPlanDomainService.update(
                 sessionalPlan,
@@ -62,7 +62,7 @@ class CommandSessionalPlanService implements
         saveSessionalPlanPort.save(updatedSessionalPlan);
     }
 
-    private SessionalPlan loadSessionalPlan(Long sessionalPlanId, Long userId) {
+    private SessionalPlan loadSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {
         return loadSessionalPlanPort
                 .loadBySessionalPlanIdAndUserId(sessionalPlanId, userId)
                 .orElseThrow(() -> new PlanException(SESSIONAL_PLAN_NOT_FOUND));
