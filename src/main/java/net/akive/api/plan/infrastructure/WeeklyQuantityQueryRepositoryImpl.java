@@ -3,8 +3,8 @@ package net.akive.api.plan.infrastructure;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.infrastructure.entity.*;
-import net.akive.api.plan.infrastructure.projection.QWeeklyPlanWeeklyQuantitiesProjection;
-import net.akive.api.plan.infrastructure.projection.WeeklyPlanWeeklyQuantitiesProjection;
+import net.akive.api.plan.infrastructure.projection.QWeeklyPlanWeeklyQuantityProjection;
+import net.akive.api.plan.infrastructure.projection.WeeklyPlanWeeklyQuantityProjection;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public class WeeklyQuantityQueryRepositoryImpl implements WeeklyQuantityQueryRep
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<WeeklyPlanWeeklyQuantitiesProjection> findWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
+    public List<WeeklyPlanWeeklyQuantityProjection> findWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
             Long sessionPlanId,
             WeekPeriodEntity weekPeriod
     ) {
@@ -26,7 +26,7 @@ public class WeeklyQuantityQueryRepositoryImpl implements WeeklyQuantityQueryRep
 
         return jpaQueryFactory
                 .select(
-                        new QWeeklyPlanWeeklyQuantitiesProjection(
+                        new QWeeklyPlanWeeklyQuantityProjection(
                                 tq.sessionalPlan.sessionalPlanId,
                                 tq.totalQuantityId,
                                 wq.weeklyQuantityId,

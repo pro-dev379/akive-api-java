@@ -7,7 +7,7 @@ import net.akive.api.plan.application.port.out.dto.WeeklyPlanWeeklyQuantityData;
 import net.akive.api.plan.domain.PlanDate;
 import net.akive.api.plan.domain.WeekPeriod;
 import net.akive.api.plan.infrastructure.entity.WeekPeriodEntity;
-import net.akive.api.plan.infrastructure.projection.WeeklyPlanWeeklyQuantitiesProjection;
+import net.akive.api.plan.infrastructure.projection.WeeklyPlanWeeklyQuantityProjection;
 import org.springframework.stereotype.Repository;
 
 import java.util.LinkedHashMap;
@@ -25,7 +25,7 @@ public class WeeklyQuantityJpaAdapter implements LoadWeeklyQuantitiesPort {
             Long sessionalPlanId,
             WeekPeriod weekPeriod
     ) {
-        List<WeeklyPlanWeeklyQuantitiesProjection> projections =
+        List<WeeklyPlanWeeklyQuantityProjection> projections =
                 weeklyQuantityQueryRepository.findWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
                         sessionalPlanId,
                         WeekPeriodEntity.from(weekPeriod)
@@ -33,7 +33,7 @@ public class WeeklyQuantityJpaAdapter implements LoadWeeklyQuantitiesPort {
 
         return projections.stream()
                 .collect(Collectors.groupingBy(
-                        WeeklyPlanWeeklyQuantitiesProjection::weeklyQuantityId,
+                        WeeklyPlanWeeklyQuantityProjection::weeklyQuantityId,
                         LinkedHashMap::new,
                         Collectors.toList()
                 ))
@@ -43,8 +43,8 @@ public class WeeklyQuantityJpaAdapter implements LoadWeeklyQuantitiesPort {
                 .toList();
     }
 
-    private WeeklyPlanWeeklyQuantityData toWeeklyPlanWeeklyQuantityDate(List<WeeklyPlanWeeklyQuantitiesProjection> projections) {
-        WeeklyPlanWeeklyQuantitiesProjection first = projections.getFirst();
+    private WeeklyPlanWeeklyQuantityData toWeeklyPlanWeeklyQuantityDate(List<WeeklyPlanWeeklyQuantityProjection> projections) {
+        WeeklyPlanWeeklyQuantityProjection first = projections.getFirst();
 
         return new WeeklyPlanWeeklyQuantityData(
                 first.sessionalPlanId(),
@@ -59,7 +59,7 @@ public class WeeklyQuantityJpaAdapter implements LoadWeeklyQuantitiesPort {
         );
     }
 
-    private WeeklyPlanDailyQuantityData toWeeklyPlanDailyQuantityData(WeeklyPlanWeeklyQuantitiesProjection projection) {
+    private WeeklyPlanDailyQuantityData toWeeklyPlanDailyQuantityData(WeeklyPlanWeeklyQuantityProjection projection) {
 
         return new WeeklyPlanDailyQuantityData(
                 projection.DailyQuantityId(),

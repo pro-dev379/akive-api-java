@@ -1,13 +1,13 @@
 package net.akive.api.plan.infrastructure;
 
 import net.akive.api.plan.infrastructure.entity.WeekPeriodEntity;
-import net.akive.api.plan.infrastructure.projection.WeeklyPlanWeeklyQuantitiesProjection;
+import net.akive.api.plan.infrastructure.projection.WeeklyPlanWeeklyQuantityProjection;
 
 import java.util.List;
 
 public interface WeeklyQuantityQueryRepository {
 
-    List<WeeklyPlanWeeklyQuantitiesProjection> findWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
+    List<WeeklyPlanWeeklyQuantityProjection> findWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
             Long sessionPlanId,
             WeekPeriodEntity weekPeriod
     );

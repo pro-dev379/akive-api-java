@@ -8,7 +8,7 @@ import net.akive.api.plan.infrastructure.entity.WeeklyQuantityAmountEntity;
 
 import java.time.LocalDate;
 
-public record WeeklyPlanWeeklyQuantitiesProjection(
+public record WeeklyPlanWeeklyQuantityProjection(
         Long sessionalPlanId,
         Long totalQuantityId,
         Long weeklyQuantityId,
@@ -22,6 +22,6 @@ public record WeeklyPlanWeeklyQuantitiesProjection(
 ) {
 
     @QueryProjection
-    public WeeklyPlanWeeklyQuantitiesProjection {
+    public WeeklyPlanWeeklyQuantityProjection {
     }
 }
