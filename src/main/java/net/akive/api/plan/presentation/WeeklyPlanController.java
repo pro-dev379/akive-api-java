@@ -8,13 +8,13 @@ import net.akive.api.plan.application.port.in.GetWeeklyPlanUseCase;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/sessional-plans/{sessionalPlanId}/weekly-plans/{weekNum}")
+@RequestMapping("/sessional-plans/{sessionalPlanId}/weekly-plans")
 @RequiredArgsConstructor
 public class WeeklyPlanController {
 
     private final GetWeeklyPlanUseCase getWeeklyPlanUseCase;
 
-    @GetMapping
+    @GetMapping("/{weekNum}")
     public GetWeeklyPlanResult get(
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId,

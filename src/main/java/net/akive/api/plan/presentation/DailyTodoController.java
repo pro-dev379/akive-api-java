@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
-@RequestMapping("/sessional-plans/todos/{date}")
+@RequestMapping("/sessional-plans/todos")
 @RestController
 @RequiredArgsConstructor
 public class DailyTodoController {
 
     private final GetDailyTodosUseCase getDailyTodosUseCase;
 
-    @GetMapping
+    @GetMapping("/{date}")
     public GetDailyTodosResult getByDate(@AuthenticatedUserId Long userId, @PathVariable LocalDate date) {
         return getDailyTodosUseCase.getByDate(new GetDailyTodosCommand(userId, date));
     }
