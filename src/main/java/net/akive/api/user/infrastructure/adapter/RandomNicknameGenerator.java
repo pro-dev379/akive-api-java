@@ -1,4 +1,4 @@
-package net.akive.api.user.infrastructure;
+package net.akive.api.user.infrastructure.adapter;
 
 import net.akive.api.user.application.port.out.GenerateNicknamePort;
 import net.akive.api.user.domain.RoleType;

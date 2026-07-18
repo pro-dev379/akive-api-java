@@ -1,4 +1,4 @@
-package net.akive.api.user.infrastructure;
+package net.akive.api.user.infrastructure.adapter;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.domain.Email;
@@ -6,6 +6,7 @@ import net.akive.api.user.application.port.out.LoadUserPort;
 import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.application.port.out.ValidateUserPort;
 import net.akive.api.user.domain.User;
+import net.akive.api.user.infrastructure.repository.UserJpaRepository;
 import net.akive.api.user.infrastructure.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 
