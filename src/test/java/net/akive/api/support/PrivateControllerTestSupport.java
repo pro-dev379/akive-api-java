@@ -1,19 +1,18 @@
 package net.akive.api.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.akive.api.plan.application.port.in.CreateSessionalPlanUseCase;
-import net.akive.api.plan.application.port.in.DeleteSessionalPlanUseCase;
-import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
-import net.akive.api.plan.application.port.in.GetDailyTodosUseCase;
-import net.akive.api.plan.application.port.in.GetSessionalPlanDetailUseCase;
-import net.akive.api.plan.application.port.in.UpdateSessionalPlanUseCase;
+import net.akive.api.plan.application.port.in.*;
 import net.akive.api.plan.presentation.SessionalPlanController;
+import net.akive.api.plan.presentation.WeeklyPlanController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = SessionalPlanController.class)
+@WebMvcTest(controllers = {
+        SessionalPlanController.class,
+        WeeklyPlanController.class
+})
 public abstract class PrivateControllerTestSupport {
 
     @Autowired
@@ -30,6 +29,9 @@ public abstract class PrivateControllerTestSupport {
 
     @MockitoBean
     protected GetSessionalPlanDetailUseCase getSessionalPlanDetailUseCase;
+
+    @MockitoBean
+    protected GetWeeklyPlanUseCase getWeeklyPlanUseCase;
 
     @MockitoBean
     protected CreateSessionalPlanUseCase createSessionalPlanUseCase;

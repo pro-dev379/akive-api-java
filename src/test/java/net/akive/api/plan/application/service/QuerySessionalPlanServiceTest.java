@@ -2,10 +2,7 @@ package net.akive.api.plan.application.service;
 
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
 import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
-import net.akive.api.plan.application.dto.result.common.SessionPeriodResult;
-import net.akive.api.plan.application.dto.result.common.SubjectResult;
-import net.akive.api.plan.application.dto.result.common.TotalQuantityAmountResult;
-import net.akive.api.plan.application.dto.result.common.WeekPeriodResult;
+import net.akive.api.plan.application.dto.result.common.*;
 import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
@@ -195,8 +192,8 @@ class QuerySessionalPlanServiceTest {
         ));
         assertThat(result.weeks())
                 .extracting(
-                        GetSessionalPlanDetailResult.SessionWeekResult::weekNum,
-                        GetSessionalPlanDetailResult.SessionWeekResult::weekPeriod
+                        SessionWeekResult::weekNum,
+                        SessionWeekResult::weekPeriod
                 )
                 .containsExactly(
                         tuple(1, new WeekPeriodResult(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12))),
@@ -222,7 +219,7 @@ class QuerySessionalPlanServiceTest {
                 .containsExactly(
                         tuple(
                                 100L,
-                                new GetSessionalPlanDetailResult.SessionWeekResult(
+                                new SessionWeekResult(
                                         1,
                                         new WeekPeriodResult(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12))
                                 ),
@@ -230,7 +227,7 @@ class QuerySessionalPlanServiceTest {
                         ),
                         tuple(
                                 101L,
-                                new GetSessionalPlanDetailResult.SessionWeekResult(
+                                new SessionWeekResult(
                                         2,
                                         new WeekPeriodResult(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14))
                                 ),

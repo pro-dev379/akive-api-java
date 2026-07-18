@@ -23,7 +23,8 @@ public enum PlanErrorCode implements ErrorCode {
     WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION_PERIOD(HttpStatus.BAD_REQUEST, "PLAN_400_8", "Weekly quantity period must be within session period."),
     WEEKLY_QUANTITY_AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT(HttpStatus.BAD_REQUEST, "PLAN_400_9", "Weekly quantity amount exceeds total quantity amount."),
 
-    INVALID_WEEK_PERIOD(HttpStatus.BAD_REQUEST, "PLAN_400_10", "Invalid week period.");
+    INVALID_WEEK_PERIOD(HttpStatus.BAD_REQUEST, "PLAN_400_10", "Invalid week period."),
+    WEEKLY_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN_404_2", "Weekly plan not found");
 
     private final HttpStatus status;
     private final String code;

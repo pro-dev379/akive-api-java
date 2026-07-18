@@ -138,6 +138,72 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
+    void 회원의_세셔널_플랜_세션_기간을_조회한다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                new Email("test@test.com"),
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        SessionPeriod sessionPeriod = new SessionPeriod(
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 7)
+        );
+        SessionalPlan sessionalPlan = SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "1회차",
+                sessionPeriod
+        );
+        SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
+
+        // when
+        SessionPeriod loadedSessionPeriod = loadSessionalPlanPort
+                .loadSessionPeriodBySessionalPlanIdAndUserId(
+                        savedSessionalPlan.getSessionalPlanId(),
+                        savedUser.getUserId()
+                )
+                .orElseThrow();
+
+        // then
+        assertThat(loadedSessionPeriod).isEqualTo(sessionPeriod);
+    }
+
+    @Test
+    void 다른_회원의_세셔널_플랜_세션_기간은_조회되지_않는다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                new Email("test@test.com"),
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        User anotherUser = saveUserPort.save(User.signUpByEmail(
+                new Email("another@test.com"),
+                "USER@fghij",
+                "password123!",
+                USER
+        ));
+        SessionalPlan sessionalPlan = SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "1회차",
+                new SessionPeriod(
+                        LocalDate.of(2026, 7, 1),
+                        LocalDate.of(2026, 7, 7)
+                )
+        );
+        SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(sessionalPlan);
+
+        // when & then
+        assertThat(loadSessionalPlanPort.loadSessionPeriodBySessionalPlanIdAndUserId(
+                savedSessionalPlan.getSessionalPlanId(),
+                anotherUser.getUserId()
+        )).isEmpty();
+    }
+
+    @Test
     void 다른_회원의_세셔널_플랜은_조회되지_않는다() {
         // given
         User savedUser = saveUserPort.save(User.signUpByEmail(

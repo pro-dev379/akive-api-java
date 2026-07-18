@@ -53,5 +53,4 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     @Autowired
     protected ValidateSessionalPlanPort validateSessionalPlanPort;
-
 }

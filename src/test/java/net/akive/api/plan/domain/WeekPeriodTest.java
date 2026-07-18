@@ -5,7 +5,9 @@ import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import static java.time.DayOfWeek.*;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.INVALID_DATE_RANGE;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static net.akive.api.plan.exception.PlanErrorCode.INVALID_WEEK_PERIOD;
@@ -64,6 +66,26 @@ class WeekPeriodTest {
 
         assertThat(weekPeriod.startOn()).isEqualTo(LocalDate.of(2026, 7, 7));
         assertThat(weekPeriod.endOn()).isEqualTo(LocalDate.of(2026, 7, 13));
+    }
+
+    @Test
+    void 주간_기간을_날짜와_요일_목록으로_나눈다() {
+        WeekPeriod weekPeriod = new WeekPeriod(
+                LocalDate.of(2024, 3, 25),
+                LocalDate.of(2024, 3, 31)
+        );
+
+        List<PlanDate> planDates = weekPeriod.splitIntoDates();
+
+        assertThat(planDates).containsExactly(
+                new PlanDate(LocalDate.of(2024, 3, 25), MONDAY),
+                new PlanDate(LocalDate.of(2024, 3, 26), TUESDAY),
+                new PlanDate(LocalDate.of(2024, 3, 27), WEDNESDAY),
+                new PlanDate(LocalDate.of(2024, 3, 28), THURSDAY),
+                new PlanDate(LocalDate.of(2024, 3, 29), FRIDAY),
+                new PlanDate(LocalDate.of(2024, 3, 30), SATURDAY),
+                new PlanDate(LocalDate.of(2024, 3, 31), SUNDAY)
+        );
     }
 
     @Test

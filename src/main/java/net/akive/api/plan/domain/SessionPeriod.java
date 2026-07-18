@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import net.akive.api.plan.exception.PlanException;
 
@@ -46,5 +47,31 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
         }
 
         return List.copyOf(sessionWeeks);
+    }
+
+    public Optional<SessionWeek> findSessionWeek(int weekNum) {
+        if (weekNum < 1) {
+            return Optional.empty();
+        }
+
+        LocalDate firstWeekEndOn = startOn.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        if (weekNum == 1) {
+            return Optional.of(SessionWeek.of(weekNum, startOn, min(firstWeekEndOn, endOn)));
+        }
+
+        LocalDate weekStartOn = firstWeekEndOn.plusDays(1).plusWeeks(weekNum - 2L);
+        if (weekStartOn.isAfter(endOn)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(SessionWeek.of(weekNum, weekStartOn, min(weekStartOn.plusDays(6), endOn)));
+    }
+
+    private static LocalDate min(LocalDate first, LocalDate second) {
+        if (first.isAfter(second)) {
+            return second;
+        }
+
+        return first;
     }
 }

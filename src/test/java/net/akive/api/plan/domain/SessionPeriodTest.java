@@ -172,4 +172,37 @@ class SessionPeriodTest {
                 SessionWeek.of(2, LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14))
         );
     }
+
+    @Test
+    void 주차_번호로_세션_주차를_조회한다() {
+        // given
+        SessionPeriod sessionPeriod = new SessionPeriod(
+                LocalDate.of(2024, 3, 24),
+                LocalDate.of(2024, 4, 24)
+        );
+
+        // when & then
+        assertThat(sessionPeriod.findSessionWeek(1)).contains(
+                SessionWeek.of(1, LocalDate.of(2024, 3, 24), LocalDate.of(2024, 3, 24))
+        );
+        assertThat(sessionPeriod.findSessionWeek(3)).contains(
+                SessionWeek.of(3, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 7))
+        );
+        assertThat(sessionPeriod.findSessionWeek(6)).contains(
+                SessionWeek.of(6, LocalDate.of(2024, 4, 22), LocalDate.of(2024, 4, 24))
+        );
+    }
+
+    @Test
+    void 존재하지_않는_주차_번호이면_빈_값을_반환한다() {
+        // given
+        SessionPeriod sessionPeriod = new SessionPeriod(
+                LocalDate.of(2024, 3, 24),
+                LocalDate.of(2024, 4, 24)
+        );
+
+        // when & then
+        assertThat(sessionPeriod.findSessionWeek(0)).isEmpty();
+        assertThat(sessionPeriod.findSessionWeek(7)).isEmpty();
+    }
 }

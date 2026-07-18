@@ -4,7 +4,6 @@ import net.akive.api.plan.application.dto.result.common.*;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanTotalQuantityData;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityAmountData;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityData;
-import net.akive.api.plan.domain.SessionWeek;
 
 import java.util.List;
 
@@ -15,19 +14,6 @@ public record GetSessionalPlanDetailResult(
         List<SessionWeekResult> weeks,
         List<TotalQuantityResult> totalQuantities
 ) {
-
-    public record SessionWeekResult(
-            int weekNum,
-            WeekPeriodResult weekPeriod
-    ) {
-
-        public static SessionWeekResult from(SessionWeek sessionWeek) {
-            return new SessionWeekResult(
-                    sessionWeek.weekNum(),
-                    new WeekPeriodResult(sessionWeek.weekPeriod().startOn(), sessionWeek.weekPeriod().endOn())
-            );
-        }
-    }
 
     public record TotalQuantityResult(
             Long totalQuantityId,

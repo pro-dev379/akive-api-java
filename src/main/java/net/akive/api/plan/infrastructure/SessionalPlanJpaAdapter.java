@@ -2,15 +2,9 @@ package net.akive.api.plan.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.port.out.*;
-import net.akive.api.plan.application.port.out.dto.DailyTodoData;
-import net.akive.api.plan.application.port.out.dto.SessionalPlanTotalQuantityData;
-import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityAmountData;
-import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityData;
-import net.akive.api.plan.domain.DailyQuantityAmount;
-import net.akive.api.plan.domain.SessionWeek;
-import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.Subject;
-import net.akive.api.plan.domain.WeekPeriod;
+import net.akive.api.plan.application.port.out.dto.*;
+import net.akive.api.plan.domain.*;
+import net.akive.api.plan.infrastructure.entity.SessionPeriodEntity;
 import net.akive.api.plan.infrastructure.entity.SessionalPlanEntity;
 import net.akive.api.plan.infrastructure.projection.DailyTodoProjection;
 import net.akive.api.plan.infrastructure.projection.SessionalPlanTotalQuantityProjection;
@@ -41,6 +35,13 @@ class SessionalPlanJpaAdapter implements
         return sessionalPlanJpaRepository
                 .findBySessionalPlanIdAndUser_UserId(sessionalPlanId, userId)
                 .map(SessionalPlanEntity::to);
+    }
+
+    @Override
+    public Optional<SessionPeriod> loadSessionPeriodBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId) {
+        return sessionalPlanJpaRepository
+                .findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId)
+                .map(SessionPeriodEntity::to);
     }
 
     @Override

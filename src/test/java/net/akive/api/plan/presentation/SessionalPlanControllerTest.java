@@ -5,10 +5,7 @@ import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
 import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
-import net.akive.api.plan.application.dto.result.common.SessionPeriodResult;
-import net.akive.api.plan.application.dto.result.common.SubjectResult;
-import net.akive.api.plan.application.dto.result.common.TotalQuantityAmountResult;
-import net.akive.api.plan.application.dto.result.common.WeekPeriodResult;
+import net.akive.api.plan.application.dto.result.common.*;
 import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.*;
 import net.akive.api.plan.exception.PlanException;
@@ -115,11 +112,11 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         LocalDate.of(2026, 7, 14)
                 ),
                 List.of(
-                        new GetSessionalPlanDetailResult.SessionWeekResult(
+                        new SessionWeekResult(
                                 1,
                                 new WeekPeriodResult(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12))
                         ),
-                        new GetSessionalPlanDetailResult.SessionWeekResult(
+                        new SessionWeekResult(
                                 2,
                                 new WeekPeriodResult(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14))
                         )
@@ -132,7 +129,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                                 List.of(
                                         new GetSessionalPlanDetailResult.WeeklyQuantityResult(
                                                 100L,
-                                                new GetSessionalPlanDetailResult.SessionWeekResult(
+                                                new SessionWeekResult(
                                                         1,
                                                         new WeekPeriodResult(
                                                                 LocalDate.of(2026, 7, 6),
