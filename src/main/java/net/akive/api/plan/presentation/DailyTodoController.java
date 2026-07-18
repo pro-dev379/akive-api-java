@@ -1,0 +1,26 @@
+package net.akive.api.plan.presentation;
+
+import lombok.RequiredArgsConstructor;
+import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
+import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
+import net.akive.api.plan.application.port.in.GetDailyTodosUseCase;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+
+@RequestMapping("/sessional-plans/todos/{date}")
+@RestController
+@RequiredArgsConstructor
+public class DailyTodoController {
+
+    private final GetDailyTodosUseCase getDailyTodosUseCase;
+
+    @GetMapping
+    public GetDailyTodosResult getByDate(@AuthenticatedUserId Long userId, @PathVariable LocalDate date) {
+        return getDailyTodosUseCase.getByDate(new GetDailyTodosCommand(userId, date));
+    }
+}

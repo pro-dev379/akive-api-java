@@ -2,6 +2,7 @@ package net.akive.api.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.plan.application.port.in.*;
+import net.akive.api.plan.presentation.DailyTodoController;
 import net.akive.api.plan.presentation.SessionalPlanController;
 import net.akive.api.plan.presentation.WeeklyPlanController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = {
         SessionalPlanController.class,
+        DailyTodoController.class,
         WeeklyPlanController.class
 })
 public abstract class PrivateControllerTestSupport {

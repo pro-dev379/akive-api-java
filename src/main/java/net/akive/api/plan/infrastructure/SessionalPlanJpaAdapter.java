@@ -6,7 +6,6 @@ import net.akive.api.plan.application.port.out.dto.*;
 import net.akive.api.plan.domain.*;
 import net.akive.api.plan.infrastructure.entity.SessionPeriodEntity;
 import net.akive.api.plan.infrastructure.entity.SessionalPlanEntity;
-import net.akive.api.plan.infrastructure.projection.DailyTodoProjection;
 import net.akive.api.plan.infrastructure.projection.SessionalPlanTotalQuantityProjection;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 class SessionalPlanJpaAdapter implements
         LoadSessionalPlanPort,
         LoadTotalQuantitiesPort,
-        LoadDailyTodosPort,
         SaveSessionalPlanPort,
         DeleteSessionalPlanPort,
         ValidateSessionalPlanPort {
@@ -80,15 +78,6 @@ class SessionalPlanJpaAdapter implements
     }
 
     @Override
-    public List<DailyTodoData> loadDailyTodosByUserIdAndDate(Long userId, LocalDate date) {
-        return sessionalPlanQueryRepository
-                .findDailyTodosByUserIdAndDate(userId, date)
-                .stream()
-                .map(this::toDailyTodoData)
-                .toList();
-    }
-
-    @Override
     public SessionalPlan save(SessionalPlan sessionalPlan) {
         return sessionalPlanJpaRepository.save(SessionalPlanEntity.from(sessionalPlan)).to();
     }
@@ -113,27 +102,6 @@ class SessionalPlanJpaAdapter implements
     public int countInProgressByUserId(Long userId, LocalDate now) {
         return Math.toIntExact(
                 sessionalPlanJpaRepository.countByUser_UserIdAndSessionPeriod_EndOnGreaterThanEqual(userId, now)
-        );
-    }
-
-    private DailyTodoData toDailyTodoData(DailyTodoProjection projection) {
-        return new DailyTodoData(
-                projection.sessionalPlanId(),
-                projection.totalQuantityId(),
-                projection.weeklyQuantityId(),
-                projection.dailyQuantityId(),
-                new Subject(
-                        projection.subjectName(),
-                        projection.subjectCategory()
-                ),
-                DailyQuantityAmount.of(
-                        projection.dailyQuantityAmount(),
-                        projection.completedQuantityAmount(),
-                        projection.delayedQuantityAmount(),
-                        projection.dailyQuantityMemo()
-                ),
-                projection.unit(),
-                projection.date()
         );
     }
 

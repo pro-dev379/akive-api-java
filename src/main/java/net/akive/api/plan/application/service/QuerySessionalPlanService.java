@@ -1,17 +1,14 @@
 package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
 import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
 import net.akive.api.plan.application.dto.result.common.SessionPeriodResult;
-import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
+import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
 import net.akive.api.plan.application.port.in.GetSessionalPlanDetailUseCase;
 import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
-import net.akive.api.plan.application.port.in.GetDailyTodosUseCase;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
-import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
 import net.akive.api.plan.application.port.out.LoadTotalQuantitiesPort;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.SessionWeek;
@@ -26,10 +23,9 @@ import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUN
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessionalPlanDetailUseCase, GetDailyTodosUseCase {
+class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessionalPlanDetailUseCase {
 
     private final LoadSessionalPlanPort loadSessionalPlanPort;
-    private final LoadDailyTodosPort loadDailyTodosPort;
     private final LoadTotalQuantitiesPort loadTotalQuantitiesPort;
 
     @Override
@@ -48,20 +44,13 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
                 sessionalPlan.getSessionalPlanId(),
                 sessionalPlan.getSessionName(),
                 SessionPeriodResult.from(sessionalPlan.getSessionPeriod()),
-                weeks.stream().map(GetSessionalPlanDetailResult.SessionWeekResult::from).toList(),
+                weeks.stream().map(SessionWeekResult::from).toList(),
                 loadTotalQuantitiesPort.loadSessionalPlanTotalQuantitiesBySessionalPlanId(
                         sessionalPlan.getSessionalPlanId(),
                         weeks
                 ).stream()
                         .map(GetSessionalPlanDetailResult.TotalQuantityResult::from)
                         .toList()
-        );
-    }
-
-    @Override
-    public GetDailyTodosResult getTodosByDate(GetDailyTodosCommand command) {
-        return GetDailyTodosResult.from(
-                loadDailyTodosPort.loadDailyTodosByUserIdAndDate(command.userId(), command.date())
         );
     }
 

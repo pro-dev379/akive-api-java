@@ -2,11 +2,9 @@ package net.akive.api.plan.presentation;
 
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
-import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
 import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.common.*;
-import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.*;
 import net.akive.api.plan.exception.PlanException;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
@@ -198,77 +196,6 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.code").value(SESSIONAL_PLAN_NOT_FOUND.getCode()));
 
         then(getSessionalPlanDetailUseCase).should().getDetail(command);
-    }
-
-    @Test
-    void 날짜별_투두_리스트를_조회한다() throws Exception {
-        // given
-        Long userId = 1L;
-        LocalDate date = LocalDate.of(2026, 7, 7);
-        GetDailyTodosResult result = new GetDailyTodosResult(List.of(
-                new GetDailyTodosResult.DailyTodoResult(
-                        1L,
-                        10L,
-                        100L,
-                        1000L,
-                        new SubjectResult("영어", "학습"),
-                        new GetDailyTodosResult.DailyTodoResult.DailyTodoAmountResult(30, 10, 20, "분", "메모")
-                )
-        ));
-
-        given(getDailyTodosUseCase.getTodosByDate(new GetDailyTodosCommand(userId, date)))
-                .willReturn(result);
-
-        // when & then
-        mockMvc.perform(get("/sessional-plans/todos/{date}", date)
-                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.todos[0].sessionalPlanId").value(1L))
-                .andExpect(jsonPath("$.todos[0].totalQuantityId").value(10L))
-                .andExpect(jsonPath("$.todos[0].weeklyQuantityId").value(100L))
-                .andExpect(jsonPath("$.todos[0].dailyQuantityId").value(1000L))
-                .andExpect(jsonPath("$.todos[0].subject.name").value("영어"))
-                .andExpect(jsonPath("$.todos[0].subject.category").value("학습"))
-                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.quantityAmount").value(30))
-                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.completedQuantityAmount").value(10))
-                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.delayedQuantityAmount").value(20))
-                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.unit").value("분"))
-                .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.quantityMemo").value("메모"));
-
-        then(getDailyTodosUseCase).should().getTodosByDate(new GetDailyTodosCommand(userId, date));
-    }
-
-    @Test
-    void 날짜별_투두_리스트가_없으면_빈_목록을_응답한다() throws Exception {
-        // given
-        Long userId = 1L;
-        LocalDate date = LocalDate.of(2026, 7, 7);
-
-        given(getDailyTodosUseCase.getTodosByDate(new GetDailyTodosCommand(userId, date)))
-                .willReturn(new GetDailyTodosResult(List.of()));
-
-        // when & then
-        mockMvc.perform(get("/sessional-plans/todos/{date}", date)
-                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.todos").isArray())
-                .andExpect(jsonPath("$.todos").isEmpty());
-
-        then(getDailyTodosUseCase).should().getTodosByDate(new GetDailyTodosCommand(userId, date));
-    }
-
-    @Test
-    void 날짜별_투두_리스트_요청_시_날짜_형식이_올바르지_않으면_400을_응답한다() throws Exception {
-        // given
-        Long userId = 1L;
-
-        // when & then
-        mockMvc.perform(get("/sessional-plans/todos/{date}", "2026-13-07")
-                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
-
-        then(getDailyTodosUseCase).should(never()).getTodosByDate(any(GetDailyTodosCommand.class));
     }
 
     @Test

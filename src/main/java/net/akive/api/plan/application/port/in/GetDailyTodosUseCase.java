@@ -5,5 +5,5 @@ import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 
 public interface GetDailyTodosUseCase {
 
-    GetDailyTodosResult getTodosByDate(GetDailyTodosCommand command);
+    GetDailyTodosResult getByDate(GetDailyTodosCommand command);
 }

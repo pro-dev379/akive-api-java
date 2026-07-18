@@ -1,22 +1,16 @@
 package net.akive.api.plan.application.service;
 
-import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
 import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
 import net.akive.api.plan.application.dto.result.common.*;
-import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
-import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.LoadTotalQuantitiesPort;
-import net.akive.api.plan.application.port.out.dto.DailyTodoData;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanTotalQuantityData;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityAmountData;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityData;
-import net.akive.api.plan.domain.DailyQuantityAmount;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.Subject;
 import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,9 +36,6 @@ class QuerySessionalPlanServiceTest {
 
     @Mock
     LoadSessionalPlanPort loadSessionalPlanPort;
-
-    @Mock
-    LoadDailyTodosPort loadDailyTodosPort;
 
     @Mock
     LoadTotalQuantitiesPort loadTotalQuantitiesPort;
@@ -262,55 +253,5 @@ class QuerySessionalPlanServiceTest {
         then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(loadTotalQuantitiesPort).should(never())
                 .loadSessionalPlanTotalQuantitiesBySessionalPlanId(any(), any());
-    }
-
-    @Test
-    void 회원의_날짜별_투두_리스트를_조회한다() {
-        // given
-        Long userId = 1L;
-        LocalDate date = LocalDate.of(2026, 7, 7);
-        List<DailyTodoData> dailyTodos = List.of(
-                new DailyTodoData(
-                        1L,
-                        10L,
-                        100L,
-                        1000L,
-                        new Subject("영어", "학습"),
-                        DailyQuantityAmount.of(30, 10, 20, "단어 암기"),
-                        "분",
-                        date
-                )
-        );
-        GetDailyTodosCommand command = new GetDailyTodosCommand(userId, date);
-
-        given(loadDailyTodosPort.loadDailyTodosByUserIdAndDate(userId, date))
-                .willReturn(dailyTodos);
-
-        // when
-        GetDailyTodosResult result = querySessionalPlanService.getTodosByDate(command);
-
-        // then
-        assertThat(result.todos()).isEqualTo(dailyTodos.stream().map(GetDailyTodosResult.DailyTodoResult::from).toList());
-
-        then(loadDailyTodosPort).should().loadDailyTodosByUserIdAndDate(userId, date);
-    }
-
-    @Test
-    void 회원의_날짜별_투두_리스트가_없으면_빈_목록을_반환한다() {
-        // given
-        Long userId = 1L;
-        LocalDate date = LocalDate.of(2026, 7, 7);
-        GetDailyTodosCommand command = new GetDailyTodosCommand(userId, date);
-
-        given(loadDailyTodosPort.loadDailyTodosByUserIdAndDate(userId, date))
-                .willReturn(List.of());
-
-        // when
-        GetDailyTodosResult result = querySessionalPlanService.getTodosByDate(command);
-
-        // then
-        assertThat(result.todos()).isEqualTo(List.of());
-
-        then(loadDailyTodosPort).should().loadDailyTodosByUserIdAndDate(userId, date);
     }
 }
