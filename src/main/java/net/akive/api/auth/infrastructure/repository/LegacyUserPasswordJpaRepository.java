@@ -1,6 +1,6 @@
-package net.akive.api.auth.infrastructure.login;
+package net.akive.api.auth.infrastructure.repository;
 
-import net.akive.api.auth.infrastructure.login.entity.LegacyUserPasswordEntity;
+import net.akive.api.auth.infrastructure.entity.LegacyUserPasswordEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

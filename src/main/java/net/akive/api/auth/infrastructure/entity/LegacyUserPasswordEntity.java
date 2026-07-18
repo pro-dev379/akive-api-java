@@ -1,4 +1,4 @@
-package net.akive.api.auth.infrastructure.login.entity;
+package net.akive.api.auth.infrastructure.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

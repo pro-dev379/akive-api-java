@@ -1,4 +1,4 @@
-package net.akive.api.auth.infrastructure.login;
+package net.akive.api.auth.infrastructure.adapter.login;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.port.out.login.LoadEmailLoginUserPort;

@@ -1,4 +1,4 @@
-package net.akive.api.auth.infrastructure.token;
+package net.akive.api.auth.infrastructure.adapter.token;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.port.out.token.DeleteTokenPort;
