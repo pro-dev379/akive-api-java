@@ -3,7 +3,7 @@ package net.akive.api.plan.presentation;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
-import net.akive.api.plan.application.dto.command.GetSessionalPlanCommand;
+import net.akive.api.plan.application.dto.query.GetSessionalPlanQuery;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
 import net.akive.api.plan.application.port.in.*;
@@ -34,7 +34,7 @@ public class SessionalPlanController {
 
     @GetMapping("/{sessionalPlanId}")
     public GetSessionalPlanDetailResult get(@AuthenticatedUserId Long userId, @PathVariable Long sessionalPlanId) {
-        return getSessionalPlanUseCase.get(new GetSessionalPlanCommand(userId, sessionalPlanId));
+        return getSessionalPlanUseCase.get(new GetSessionalPlanQuery(userId, sessionalPlanId));
     }
 
     @PostMapping

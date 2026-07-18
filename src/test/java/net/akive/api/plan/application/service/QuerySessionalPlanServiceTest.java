@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.service;
 
-import net.akive.api.plan.application.dto.command.GetSessionalPlanCommand;
+import net.akive.api.plan.application.dto.query.GetSessionalPlanQuery;
 import net.akive.api.plan.application.dto.result.common.*;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
@@ -175,7 +175,7 @@ class QuerySessionalPlanServiceTest {
 
         // when
         GetSessionalPlanDetailResult result = querySessionalPlanService.get(
-                new GetSessionalPlanCommand(userId, sessionalPlanId)
+                new GetSessionalPlanQuery(userId, sessionalPlanId)
         );
 
         // then
@@ -249,7 +249,7 @@ class QuerySessionalPlanServiceTest {
         // when & then
         assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> querySessionalPlanService.get(
-                        new GetSessionalPlanCommand(userId, sessionalPlanId)
+                        new GetSessionalPlanQuery(userId, sessionalPlanId)
                 ))
                 .extracting(PlanException::getErrorCode)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);

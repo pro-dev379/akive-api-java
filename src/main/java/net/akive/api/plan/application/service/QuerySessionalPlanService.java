@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.plan.application.dto.command.GetSessionalPlanCommand;
+import net.akive.api.plan.application.dto.query.GetSessionalPlanQuery;
 import net.akive.api.plan.application.dto.result.common.SessionPeriodResult;
 import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
@@ -36,7 +36,7 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
     }
 
     @Override
-    public GetSessionalPlanDetailResult get(GetSessionalPlanCommand command) {
+    public GetSessionalPlanDetailResult get(GetSessionalPlanQuery command) {
         SessionalPlan sessionalPlan = loadSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
         List<SessionWeek> weeks = sessionalPlan.getSessionPeriod().splitIntoWeeks();
 

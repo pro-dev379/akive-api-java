@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.plan.application.dto.command.GetWeeklyPlanCommand;
+import net.akive.api.plan.application.dto.query.GetWeeklyPlanQuery;
 import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
 import net.akive.api.plan.application.dto.result.weeklyplan.GetWeeklyPlanResult;
 import net.akive.api.plan.application.port.in.GetWeeklyPlanUseCase;
@@ -29,7 +29,7 @@ public class QueryWeeklyPlanService implements GetWeeklyPlanUseCase {
     private final LoadWeeklyQuantityPort loadWeeklyQuantityPort;
 
     @Override
-    public GetWeeklyPlanResult getByWeekNum(GetWeeklyPlanCommand command) {
+    public GetWeeklyPlanResult getByWeekNum(GetWeeklyPlanQuery command) {
         SessionPeriod sessionPeriod = loadSessionPeriodOrThrow(command.sessionalPlanId(), command.userId());
         SessionWeek sessionWeek = getSessionWeekOrThrow(sessionPeriod, command.weekNum());
         List<PlanDate> planDates = sessionWeek.weekPeriod().splitIntoDates();

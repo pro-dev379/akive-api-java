@@ -1,6 +1,6 @@
 package net.akive.api.plan.presentation;
 
-import net.akive.api.plan.application.dto.command.GetWeeklyPlanCommand;
+import net.akive.api.plan.application.dto.query.GetWeeklyPlanQuery;
 import net.akive.api.plan.application.dto.result.common.DailyQuantityAmountResult;
 import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
 import net.akive.api.plan.application.dto.result.common.SubjectResult;
@@ -31,7 +31,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         Long sessionalPlanId = 2L;
         Integer weekNum = 1;
-        GetWeeklyPlanCommand command = new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum);
+        GetWeeklyPlanQuery command = new GetWeeklyPlanQuery(sessionalPlanId, userId, weekNum);
         GetWeeklyPlanResult result = new GetWeeklyPlanResult(
                 new SessionWeekResult(
                         weekNum,
@@ -106,7 +106,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         Long sessionalPlanId = 2L;
         Integer weekNum = 1;
-        GetWeeklyPlanCommand command = new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum);
+        GetWeeklyPlanQuery command = new GetWeeklyPlanQuery(sessionalPlanId, userId, weekNum);
 
         given(getWeeklyPlanUseCase.getByWeekNum(command))
                 .willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND));
@@ -129,7 +129,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         Long sessionalPlanId = 2L;
         Integer weekNum = 99;
-        GetWeeklyPlanCommand command = new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum);
+        GetWeeklyPlanQuery command = new GetWeeklyPlanQuery(sessionalPlanId, userId, weekNum);
 
         given(getWeeklyPlanUseCase.getByWeekNum(command))
                 .willThrow(new PlanException(WEEKLY_PLAN_NOT_FOUND));

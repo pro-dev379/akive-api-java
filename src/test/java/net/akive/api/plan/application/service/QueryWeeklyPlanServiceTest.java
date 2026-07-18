@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.service;
 
-import net.akive.api.plan.application.dto.command.GetWeeklyPlanCommand;
+import net.akive.api.plan.application.dto.query.GetWeeklyPlanQuery;
 import net.akive.api.plan.application.dto.result.common.DailyQuantityAmountResult;
 import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
 import net.akive.api.plan.application.dto.result.common.SubjectResult;
@@ -95,7 +95,7 @@ class QueryWeeklyPlanServiceTest {
 
         // when
         GetWeeklyPlanResult result = queryWeeklyPlanService.getByWeekNum(
-                new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum)
+                new GetWeeklyPlanQuery(sessionalPlanId, userId, weekNum)
         );
 
         // then
@@ -190,7 +190,7 @@ class QueryWeeklyPlanServiceTest {
 
         // when
         GetWeeklyPlanResult result = queryWeeklyPlanService.getByWeekNum(
-                new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum)
+                new GetWeeklyPlanQuery(sessionalPlanId, userId, weekNum)
         );
 
         // then
@@ -223,7 +223,7 @@ class QueryWeeklyPlanServiceTest {
         // when & then
         assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> queryWeeklyPlanService.getByWeekNum(
-                        new GetWeeklyPlanCommand(sessionalPlanId, userId, 1)
+                        new GetWeeklyPlanQuery(sessionalPlanId, userId, 1)
                 ))
                 .extracting(PlanException::getErrorCode)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
@@ -250,7 +250,7 @@ class QueryWeeklyPlanServiceTest {
         // when & then
         assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> queryWeeklyPlanService.getByWeekNum(
-                        new GetWeeklyPlanCommand(sessionalPlanId, userId, 99)
+                        new GetWeeklyPlanQuery(sessionalPlanId, userId, 99)
                 ))
                 .extracting(PlanException::getErrorCode)
                 .isEqualTo(WEEKLY_PLAN_NOT_FOUND);

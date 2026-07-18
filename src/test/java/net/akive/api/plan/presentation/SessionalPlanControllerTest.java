@@ -2,7 +2,7 @@ package net.akive.api.plan.presentation;
 
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
-import net.akive.api.plan.application.dto.command.GetSessionalPlanCommand;
+import net.akive.api.plan.application.dto.query.GetSessionalPlanQuery;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.common.*;
 import net.akive.api.plan.application.dto.result.sessionalplan.*;
@@ -101,7 +101,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 2L;
-        GetSessionalPlanCommand command = new GetSessionalPlanCommand(userId, sessionalPlanId);
+        GetSessionalPlanQuery command = new GetSessionalPlanQuery(userId, sessionalPlanId);
         GetSessionalPlanDetailResult result = new GetSessionalPlanDetailResult(
                 sessionalPlanId,
                 "1회차",
@@ -184,7 +184,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 2L;
-        GetSessionalPlanCommand command = new GetSessionalPlanCommand(userId, sessionalPlanId);
+        GetSessionalPlanQuery command = new GetSessionalPlanQuery(userId, sessionalPlanId);
 
         given(getSessionalPlanUseCase.get(command))
                 .willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND));
