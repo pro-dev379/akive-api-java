@@ -58,6 +58,15 @@ class TokenService implements IssueTokenUseCase {
         RoleType roleType = tokenPayload.roleType();
         Instant expiresAt = tokenPayload.expiresAt();
 
+        validateSavedRefreshToken(userId, refreshToken);
+
+        String newAccessToken = createTokenPort.createAccessToken(userId, roleType);
+        String newRefreshToken = rotateRefreshTokenIfRequired(userId, roleType, refreshToken, expiresAt);
+
+        return new ReissueTokenResult(newAccessToken, newRefreshToken);
+    }
+
+    private void validateSavedRefreshToken(Long userId, String refreshToken) {
         String savedRefreshToken = loadTokenPort
                 .loadByUserId(userId)
                 .orElseThrow(() -> new TokenException(INVALID_REFRESH_TOKEN));
@@ -65,26 +74,31 @@ class TokenService implements IssueTokenUseCase {
         if (!savedRefreshToken.equals(refreshToken)) {
             throw new TokenException(INVALID_REFRESH_TOKEN);
         }
+    }
 
-        String newAccessToken = createTokenPort.createAccessToken(userId, roleType);
-        String newRefreshToken = null;
-
-        if (requiresRefreshTokenRotation(expiresAt)) {
-            newRefreshToken = createTokenPort.createRefreshToken(userId, roleType);
-
-            boolean rotated = rotateTokenPort.rotate(
-                    userId,
-                    refreshToken,
-                    newRefreshToken,
-                    jwtProperties.refreshToken().expiration()
-            );
-
-            if (!rotated) {
-                throw new TokenException(INVALID_REFRESH_TOKEN);
-            }
+    private String rotateRefreshTokenIfRequired(
+            Long userId,
+            RoleType roleType,
+            String refreshToken,
+            Instant expiresAt
+    ) {
+        if (!requiresRefreshTokenRotation(expiresAt)) {
+            return null;
         }
 
-        return new ReissueTokenResult(newAccessToken, newRefreshToken);
+        String newRefreshToken = createTokenPort.createRefreshToken(userId, roleType);
+        boolean rotated = rotateTokenPort.rotate(
+                userId,
+                refreshToken,
+                newRefreshToken,
+                jwtProperties.refreshToken().expiration()
+        );
+
+        if (!rotated) {
+            throw new TokenException(INVALID_REFRESH_TOKEN);
+        }
+
+        return newRefreshToken;
     }
 
     private boolean requiresRefreshTokenRotation(Instant expiresAt) {
