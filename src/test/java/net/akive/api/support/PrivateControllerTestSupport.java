@@ -30,7 +30,7 @@ public abstract class PrivateControllerTestSupport {
     protected GetDailyTodosUseCase getDailyTodosUseCase;
 
     @MockitoBean
-    protected GetSessionalPlanDetailUseCase getSessionalPlanDetailUseCase;
+    protected GetSessionalPlanUseCase getSessionalPlanUseCase;
 
     @MockitoBean
     protected GetWeeklyPlanUseCase getWeeklyPlanUseCase;

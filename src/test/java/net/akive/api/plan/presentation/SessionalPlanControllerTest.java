@@ -2,7 +2,7 @@ package net.akive.api.plan.presentation;
 
 import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
-import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
+import net.akive.api.plan.application.dto.command.GetSessionalPlanCommand;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.common.*;
 import net.akive.api.plan.application.dto.result.sessionalplan.*;
@@ -101,7 +101,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 2L;
-        GetSessionalPlanDetailCommand command = new GetSessionalPlanDetailCommand(userId, sessionalPlanId);
+        GetSessionalPlanCommand command = new GetSessionalPlanCommand(userId, sessionalPlanId);
         GetSessionalPlanDetailResult result = new GetSessionalPlanDetailResult(
                 sessionalPlanId,
                 "1회차",
@@ -146,7 +146,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 )
         );
 
-        given(getSessionalPlanDetailUseCase.getDetail(command))
+        given(getSessionalPlanUseCase.get(command))
                 .willReturn(result);
 
         // when & then
@@ -176,7 +176,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityAmount.delayedQuantityAmount").value(40))
                 .andExpect(jsonPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityAmount.quantityMemo").value("1주차 메모"));
 
-        then(getSessionalPlanDetailUseCase).should().getDetail(command);
+        then(getSessionalPlanUseCase).should().get(command);
     }
 
     @Test
@@ -184,9 +184,9 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 2L;
-        GetSessionalPlanDetailCommand command = new GetSessionalPlanDetailCommand(userId, sessionalPlanId);
+        GetSessionalPlanCommand command = new GetSessionalPlanCommand(userId, sessionalPlanId);
 
-        given(getSessionalPlanDetailUseCase.getDetail(command))
+        given(getSessionalPlanUseCase.get(command))
                 .willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND));
 
         // when & then
@@ -195,7 +195,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(SESSIONAL_PLAN_NOT_FOUND.getCode()));
 
-        then(getSessionalPlanDetailUseCase).should().getDetail(command);
+        then(getSessionalPlanUseCase).should().get(command);
     }
 
     @Test

@@ -1,12 +1,12 @@
 package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
+import net.akive.api.plan.application.dto.command.GetSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.common.SessionPeriodResult;
 import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
-import net.akive.api.plan.application.port.in.GetSessionalPlanDetailUseCase;
+import net.akive.api.plan.application.port.in.GetSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.LoadTotalQuantityPort;
@@ -23,7 +23,7 @@ import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUN
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessionalPlanDetailUseCase {
+class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessionalPlanUseCase {
 
     private final LoadSessionalPlanPort loadSessionalPlanPort;
     private final LoadTotalQuantityPort loadTotalQuantityPort;
@@ -36,7 +36,7 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
     }
 
     @Override
-    public GetSessionalPlanDetailResult getDetail(GetSessionalPlanDetailCommand command) {
+    public GetSessionalPlanDetailResult get(GetSessionalPlanCommand command) {
         SessionalPlan sessionalPlan = loadSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
         List<SessionWeek> weeks = sessionalPlan.getSessionPeriod().splitIntoWeeks();
 

@@ -3,7 +3,7 @@ package net.akive.api.plan.presentation;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
-import net.akive.api.plan.application.dto.command.GetSessionalPlanDetailCommand;
+import net.akive.api.plan.application.dto.command.GetSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
 import net.akive.api.plan.application.port.in.*;
@@ -22,7 +22,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 public class SessionalPlanController {
 
     private final GetSessionalPlansUseCase getSessionalPlansUseCase;
-    private final GetSessionalPlanDetailUseCase getSessionalPlanDetailUseCase;
+    private final GetSessionalPlanUseCase getSessionalPlanUseCase;
     private final CreateSessionalPlanUseCase createSessionalPlanUseCase;
     private final UpdateSessionalPlanUseCase updateSessionalPlanUseCase;
     private final DeleteSessionalPlanUseCase deleteSessionalPlanUseCase;
@@ -33,11 +33,8 @@ public class SessionalPlanController {
     }
 
     @GetMapping("/{sessionalPlanId}")
-    public GetSessionalPlanDetailResult getDetail(
-            @AuthenticatedUserId Long userId,
-            @PathVariable Long sessionalPlanId
-    ) {
-        return getSessionalPlanDetailUseCase.getDetail(new GetSessionalPlanDetailCommand(userId, sessionalPlanId));
+    public GetSessionalPlanDetailResult get(@AuthenticatedUserId Long userId, @PathVariable Long sessionalPlanId) {
+        return getSessionalPlanUseCase.get(new GetSessionalPlanCommand(userId, sessionalPlanId));
     }
 
     @PostMapping
@@ -61,10 +58,7 @@ public class SessionalPlanController {
 
     @DeleteMapping("/{sessionalPlanId}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(
-            @AuthenticatedUserId Long userId,
-            @PathVariable Long sessionalPlanId
-    ) {
+    public void delete(@AuthenticatedUserId Long userId, @PathVariable Long sessionalPlanId) {
         deleteSessionalPlanUseCase.delete(new DeleteSessionalPlanCommand(userId, sessionalPlanId));
     }
 }

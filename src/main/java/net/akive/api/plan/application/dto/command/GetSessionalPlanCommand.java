@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.dto.command;
 
-public record GetSessionalPlanDetailCommand(
+public record GetSessionalPlanCommand(
         Long userId,
         Long sessionalPlanId
 ) {
