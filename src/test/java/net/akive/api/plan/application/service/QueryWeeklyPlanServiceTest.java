@@ -94,7 +94,7 @@ class QueryWeeklyPlanServiceTest {
         )).willReturn(weeklyQuantities);
 
         // when
-        GetWeeklyPlanResult result = queryWeeklyPlanService.get(
+        GetWeeklyPlanResult result = queryWeeklyPlanService.getByWeekNum(
                 new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum)
         );
 
@@ -189,7 +189,7 @@ class QueryWeeklyPlanServiceTest {
         )).willReturn(List.of());
 
         // when
-        GetWeeklyPlanResult result = queryWeeklyPlanService.get(
+        GetWeeklyPlanResult result = queryWeeklyPlanService.getByWeekNum(
                 new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum)
         );
 
@@ -222,7 +222,7 @@ class QueryWeeklyPlanServiceTest {
 
         // when & then
         assertThatExceptionOfType(PlanException.class)
-                .isThrownBy(() -> queryWeeklyPlanService.get(
+                .isThrownBy(() -> queryWeeklyPlanService.getByWeekNum(
                         new GetWeeklyPlanCommand(sessionalPlanId, userId, 1)
                 ))
                 .extracting(PlanException::getErrorCode)
@@ -249,7 +249,7 @@ class QueryWeeklyPlanServiceTest {
 
         // when & then
         assertThatExceptionOfType(PlanException.class)
-                .isThrownBy(() -> queryWeeklyPlanService.get(
+                .isThrownBy(() -> queryWeeklyPlanService.getByWeekNum(
                         new GetWeeklyPlanCommand(sessionalPlanId, userId, 99)
                 ))
                 .extracting(PlanException::getErrorCode)

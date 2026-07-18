@@ -15,11 +15,11 @@ public class WeeklyPlanController {
     private final GetWeeklyPlanUseCase getWeeklyPlanUseCase;
 
     @GetMapping("/{weekNum}")
-    public GetWeeklyPlanResult get(
+    public GetWeeklyPlanResult getByWeekNum(
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId,
             @PathVariable Integer weekNum
     ) {
-        return getWeeklyPlanUseCase.get(new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum));
+        return getWeeklyPlanUseCase.getByWeekNum(new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum));
     }
 }

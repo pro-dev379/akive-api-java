@@ -29,7 +29,7 @@ public class QueryWeeklyPlanService implements GetWeeklyPlanUseCase {
     private final LoadWeeklyQuantitiesPort loadWeeklyQuantitiesPort;
 
     @Override
-    public GetWeeklyPlanResult get(GetWeeklyPlanCommand command) {
+    public GetWeeklyPlanResult getByWeekNum(GetWeeklyPlanCommand command) {
         SessionPeriod sessionPeriod = loadSessionPeriodOrThrow(command.sessionalPlanId(), command.userId());
         SessionWeek sessionWeek = getSessionWeekOrThrow(sessionPeriod, command.weekNum());
         List<PlanDate> planDates = sessionWeek.weekPeriod().splitIntoDates();

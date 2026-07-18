@@ -66,7 +66,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
                 )
         );
 
-        given(getWeeklyPlanUseCase.get(command)).willReturn(result);
+        given(getWeeklyPlanUseCase.getByWeekNum(command)).willReturn(result);
 
         // when & then
         mockMvc.perform(get(
@@ -97,7 +97,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.weeklyQuantities[0].dailyQuantities[0].dailyQuantityAmount.delayedQuantityAmount").value(20))
                 .andExpect(jsonPath("$.weeklyQuantities[0].dailyQuantities[0].dailyQuantityAmount.quantityMemo").value("월요일 메모"));
 
-        then(getWeeklyPlanUseCase).should().get(command);
+        then(getWeeklyPlanUseCase).should().getByWeekNum(command);
     }
 
     @Test
@@ -108,7 +108,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
         Integer weekNum = 1;
         GetWeeklyPlanCommand command = new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum);
 
-        given(getWeeklyPlanUseCase.get(command))
+        given(getWeeklyPlanUseCase.getByWeekNum(command))
                 .willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND));
 
         // when & then
@@ -120,7 +120,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(SESSIONAL_PLAN_NOT_FOUND.getCode()));
 
-        then(getWeeklyPlanUseCase).should().get(command);
+        then(getWeeklyPlanUseCase).should().getByWeekNum(command);
     }
 
     @Test
@@ -131,7 +131,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
         Integer weekNum = 99;
         GetWeeklyPlanCommand command = new GetWeeklyPlanCommand(sessionalPlanId, userId, weekNum);
 
-        given(getWeeklyPlanUseCase.get(command))
+        given(getWeeklyPlanUseCase.getByWeekNum(command))
                 .willThrow(new PlanException(WEEKLY_PLAN_NOT_FOUND));
 
         // when & then
@@ -143,6 +143,6 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(WEEKLY_PLAN_NOT_FOUND.getCode()));
 
-        then(getWeeklyPlanUseCase).should().get(command);
+        then(getWeeklyPlanUseCase).should().getByWeekNum(command);
     }
 }
