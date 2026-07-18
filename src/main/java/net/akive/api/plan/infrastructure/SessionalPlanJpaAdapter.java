@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class SessionalPlanJpaAdapter implements
         LoadSessionalPlanPort,
-        LoadTotalQuantitiesPort,
+        LoadTotalQuantityPort,
         SaveSessionalPlanPort,
         DeleteSessionalPlanPort,
         ValidateSessionalPlanPort {

@@ -9,7 +9,7 @@ import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlans
 import net.akive.api.plan.application.port.in.GetSessionalPlanDetailUseCase;
 import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
-import net.akive.api.plan.application.port.out.LoadTotalQuantitiesPort;
+import net.akive.api.plan.application.port.out.LoadTotalQuantityPort;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.SessionWeek;
 import net.akive.api.plan.exception.PlanException;
@@ -26,7 +26,7 @@ import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUN
 class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessionalPlanDetailUseCase {
 
     private final LoadSessionalPlanPort loadSessionalPlanPort;
-    private final LoadTotalQuantitiesPort loadTotalQuantitiesPort;
+    private final LoadTotalQuantityPort loadTotalQuantityPort;
 
     @Override
     public GetSessionalPlansResult getAll(Long userId) {
@@ -45,7 +45,7 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
                 sessionalPlan.getSessionName(),
                 SessionPeriodResult.from(sessionalPlan.getSessionPeriod()),
                 weeks.stream().map(SessionWeekResult::from).toList(),
-                loadTotalQuantitiesPort.loadSessionalPlanTotalQuantitiesBySessionalPlanId(
+                loadTotalQuantityPort.loadSessionalPlanTotalQuantitiesBySessionalPlanId(
                         sessionalPlan.getSessionalPlanId(),
                         weeks
                 ).stream()

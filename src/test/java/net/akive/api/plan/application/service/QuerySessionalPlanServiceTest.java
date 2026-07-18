@@ -5,7 +5,7 @@ import net.akive.api.plan.application.dto.result.common.*;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
-import net.akive.api.plan.application.port.out.LoadTotalQuantitiesPort;
+import net.akive.api.plan.application.port.out.LoadTotalQuantityPort;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanTotalQuantityData;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityAmountData;
 import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityData;
@@ -41,7 +41,7 @@ class QuerySessionalPlanServiceTest {
     LoadSessionalPlanPort loadSessionalPlanPort;
 
     @Mock
-    LoadTotalQuantitiesPort loadTotalQuantitiesPort;
+    LoadTotalQuantityPort loadTotalQuantityPort;
 
     @InjectMocks
     QuerySessionalPlanService querySessionalPlanService;
@@ -168,7 +168,7 @@ class QuerySessionalPlanServiceTest {
 
         given(loadSessionalPlanPort.loadBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(sessionalPlan));
-        given(loadTotalQuantitiesPort.loadSessionalPlanTotalQuantitiesBySessionalPlanId(
+        given(loadTotalQuantityPort.loadSessionalPlanTotalQuantitiesBySessionalPlanId(
                 sessionalPlanId,
                 sessionalPlan.getSessionPeriod().splitIntoWeeks()
         )).willReturn(totalQuantities);
@@ -231,7 +231,7 @@ class QuerySessionalPlanServiceTest {
                 );
 
         then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(loadTotalQuantitiesPort).should().loadSessionalPlanTotalQuantitiesBySessionalPlanId(
+        then(loadTotalQuantityPort).should().loadSessionalPlanTotalQuantitiesBySessionalPlanId(
                 sessionalPlanId,
                 sessionalPlan.getSessionPeriod().splitIntoWeeks()
         );
@@ -255,7 +255,7 @@ class QuerySessionalPlanServiceTest {
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(loadTotalQuantitiesPort).should(never())
+        then(loadTotalQuantityPort).should(never())
                 .loadSessionalPlanTotalQuantitiesBySessionalPlanId(any(), any());
     }
 }

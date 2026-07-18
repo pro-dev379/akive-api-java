@@ -5,7 +5,7 @@ import net.akive.api.plan.domain.SessionWeek;
 
 import java.util.List;
 
-public interface LoadTotalQuantitiesPort {
+public interface LoadTotalQuantityPort {
 
     List<SessionalPlanTotalQuantityData> loadSessionalPlanTotalQuantitiesBySessionalPlanId(
             Long sessionalPlanId,
