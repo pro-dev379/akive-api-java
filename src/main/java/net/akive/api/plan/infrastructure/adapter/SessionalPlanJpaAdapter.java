@@ -1,9 +1,11 @@
-package net.akive.api.plan.infrastructure;
+package net.akive.api.plan.infrastructure.adapter;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.port.out.*;
 import net.akive.api.plan.application.port.out.dto.*;
 import net.akive.api.plan.domain.*;
+import net.akive.api.plan.infrastructure.repository.SessionalPlanJpaRepository;
+import net.akive.api.plan.infrastructure.repository.SessionalPlanQueryRepository;
 import net.akive.api.plan.infrastructure.entity.SessionPeriodEntity;
 import net.akive.api.plan.infrastructure.entity.SessionalPlanEntity;
 import net.akive.api.plan.infrastructure.projection.SessionalPlanTotalQuantityProjection;

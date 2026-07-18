@@ -1,4 +1,4 @@
-package net.akive.api.plan.infrastructure;
+package net.akive.api.plan.infrastructure.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;

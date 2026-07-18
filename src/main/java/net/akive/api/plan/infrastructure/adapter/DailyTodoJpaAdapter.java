@@ -1,8 +1,9 @@
-package net.akive.api.plan.infrastructure;
+package net.akive.api.plan.infrastructure.adapter;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
 import net.akive.api.plan.application.port.out.dto.DailyTodoData;
+import net.akive.api.plan.infrastructure.repository.DailyTodoQueryRepository;
 import net.akive.api.plan.infrastructure.projection.DailyTodoProjection;
 import org.springframework.stereotype.Repository;
 

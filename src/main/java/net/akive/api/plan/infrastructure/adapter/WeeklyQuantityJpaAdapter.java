@@ -1,4 +1,4 @@
-package net.akive.api.plan.infrastructure;
+package net.akive.api.plan.infrastructure.adapter;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.port.out.LoadWeeklyQuantityPort;
@@ -6,6 +6,7 @@ import net.akive.api.plan.application.port.out.dto.WeeklyPlanDailyQuantityData;
 import net.akive.api.plan.application.port.out.dto.WeeklyPlanWeeklyQuantityData;
 import net.akive.api.plan.domain.PlanDate;
 import net.akive.api.plan.domain.WeekPeriod;
+import net.akive.api.plan.infrastructure.repository.WeeklyQuantityQueryRepository;
 import net.akive.api.plan.infrastructure.entity.WeekPeriodEntity;
 import net.akive.api.plan.infrastructure.projection.WeeklyPlanWeeklyQuantityProjection;
 import org.springframework.stereotype.Repository;

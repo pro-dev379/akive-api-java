@@ -1,4 +1,4 @@
-package net.akive.api.plan.infrastructure;
+package net.akive.api.plan.infrastructure.repository;
 
 import net.akive.api.plan.infrastructure.entity.SessionPeriodEntity;
 import net.akive.api.plan.infrastructure.entity.SessionalPlanEntity;

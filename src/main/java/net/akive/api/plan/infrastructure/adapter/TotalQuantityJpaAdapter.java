@@ -1,7 +1,8 @@
-package net.akive.api.plan.infrastructure;
+package net.akive.api.plan.infrastructure.adapter;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
+import net.akive.api.plan.infrastructure.repository.TotalQuantityJpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
