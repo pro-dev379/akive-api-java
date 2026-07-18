@@ -13,7 +13,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Embeddable
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
-public class LegacyPasswordHash {
+public class LegacyPasswordHashEntity {
 
     @Column(name = "password_hash", nullable = false, length = 500)
     private String hash;
@@ -21,7 +21,7 @@ public class LegacyPasswordHash {
     @Column(name = "password_salt", nullable = false, length = 500)
     private String salt;
 
-    public static LegacyPasswordHash of(String hash, String salt) {
-        return new LegacyPasswordHash(hash, salt);
+    public static LegacyPasswordHashEntity of(String hash, String salt) {
+        return new LegacyPasswordHashEntity(hash, salt);
     }
 }
