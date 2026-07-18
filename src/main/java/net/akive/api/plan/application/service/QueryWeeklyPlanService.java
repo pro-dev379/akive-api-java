@@ -6,7 +6,7 @@ import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
 import net.akive.api.plan.application.dto.result.weeklyplan.GetWeeklyPlanResult;
 import net.akive.api.plan.application.port.in.GetWeeklyPlanUseCase;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
-import net.akive.api.plan.application.port.out.LoadWeeklyQuantitiesPort;
+import net.akive.api.plan.application.port.out.LoadWeeklyQuantityPort;
 import net.akive.api.plan.application.port.out.dto.WeeklyPlanWeeklyQuantityData;
 import net.akive.api.plan.domain.PlanDate;
 import net.akive.api.plan.domain.SessionPeriod;
@@ -26,7 +26,7 @@ import static net.akive.api.plan.exception.PlanErrorCode.WEEKLY_PLAN_NOT_FOUND;
 public class QueryWeeklyPlanService implements GetWeeklyPlanUseCase {
 
     private final LoadSessionalPlanPort loadSessionalPlanPort;
-    private final LoadWeeklyQuantitiesPort loadWeeklyQuantitiesPort;
+    private final LoadWeeklyQuantityPort loadWeeklyQuantityPort;
 
     @Override
     public GetWeeklyPlanResult getByWeekNum(GetWeeklyPlanCommand command) {
@@ -35,7 +35,7 @@ public class QueryWeeklyPlanService implements GetWeeklyPlanUseCase {
         List<PlanDate> planDates = sessionWeek.weekPeriod().splitIntoDates();
 
         List<WeeklyPlanWeeklyQuantityData> weeklyQuantities =
-                loadWeeklyQuantitiesPort.loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
+                loadWeeklyQuantityPort.loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
                         command.sessionalPlanId(),
                         sessionWeek.weekPeriod()
                 );

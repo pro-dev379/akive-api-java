@@ -7,7 +7,7 @@ import net.akive.api.plan.application.dto.result.common.SubjectResult;
 import net.akive.api.plan.application.dto.result.common.WeekPeriodResult;
 import net.akive.api.plan.application.dto.result.weeklyplan.GetWeeklyPlanResult;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
-import net.akive.api.plan.application.port.out.LoadWeeklyQuantitiesPort;
+import net.akive.api.plan.application.port.out.LoadWeeklyQuantityPort;
 import net.akive.api.plan.application.port.out.dto.WeeklyPlanDailyQuantityData;
 import net.akive.api.plan.application.port.out.dto.WeeklyPlanWeeklyQuantityData;
 import net.akive.api.plan.domain.DailyQuantityAmount;
@@ -44,7 +44,7 @@ class QueryWeeklyPlanServiceTest {
     LoadSessionalPlanPort loadSessionalPlanPort;
 
     @Mock
-    LoadWeeklyQuantitiesPort loadWeeklyQuantitiesPort;
+    LoadWeeklyQuantityPort loadWeeklyQuantityPort;
 
     @InjectMocks
     QueryWeeklyPlanService queryWeeklyPlanService;
@@ -88,7 +88,7 @@ class QueryWeeklyPlanServiceTest {
 
         given(loadSessionalPlanPort.loadSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(sessionPeriod));
-        given(loadWeeklyQuantitiesPort.loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
+        given(loadWeeklyQuantityPort.loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
                 sessionalPlanId,
                 weekPeriod
         )).willReturn(weeklyQuantities);
@@ -162,7 +162,7 @@ class QueryWeeklyPlanServiceTest {
 
         then(loadSessionalPlanPort).should()
                 .loadSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(loadWeeklyQuantitiesPort).should()
+        then(loadWeeklyQuantityPort).should()
                 .loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(sessionalPlanId, weekPeriod);
     }
 
@@ -183,7 +183,7 @@ class QueryWeeklyPlanServiceTest {
 
         given(loadSessionalPlanPort.loadSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(sessionPeriod));
-        given(loadWeeklyQuantitiesPort.loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
+        given(loadWeeklyQuantityPort.loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
                 sessionalPlanId,
                 weekPeriod
         )).willReturn(List.of());
@@ -207,7 +207,7 @@ class QueryWeeklyPlanServiceTest {
 
         then(loadSessionalPlanPort).should()
                 .loadSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(loadWeeklyQuantitiesPort).should()
+        then(loadWeeklyQuantityPort).should()
                 .loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(sessionalPlanId, weekPeriod);
     }
 
@@ -230,7 +230,7 @@ class QueryWeeklyPlanServiceTest {
 
         then(loadSessionalPlanPort).should()
                 .loadSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(loadWeeklyQuantitiesPort).should(never())
+        then(loadWeeklyQuantityPort).should(never())
                 .loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(any(), any());
     }
 
@@ -257,7 +257,7 @@ class QueryWeeklyPlanServiceTest {
 
         then(loadSessionalPlanPort).should()
                 .loadSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(loadWeeklyQuantitiesPort).should(never())
+        then(loadWeeklyQuantityPort).should(never())
                 .loadWeeklyPlanWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(any(), any());
     }
 }

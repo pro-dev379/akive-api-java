@@ -1,7 +1,7 @@
 package net.akive.api.plan.infrastructure;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.plan.application.port.out.LoadWeeklyQuantitiesPort;
+import net.akive.api.plan.application.port.out.LoadWeeklyQuantityPort;
 import net.akive.api.plan.application.port.out.dto.WeeklyPlanDailyQuantityData;
 import net.akive.api.plan.application.port.out.dto.WeeklyPlanWeeklyQuantityData;
 import net.akive.api.plan.domain.PlanDate;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
-public class WeeklyQuantityJpaAdapter implements LoadWeeklyQuantitiesPort {
+public class WeeklyQuantityJpaAdapter implements LoadWeeklyQuantityPort {
 
     private final WeeklyQuantityQueryRepository weeklyQuantityQueryRepository;
 
