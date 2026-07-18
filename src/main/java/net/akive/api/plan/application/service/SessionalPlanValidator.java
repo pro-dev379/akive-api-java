@@ -30,7 +30,7 @@ class SessionalPlanValidator {
         }
 
         int inProgressSessionalPlanCount = validateSessionalPlanPort.countInProgressByUserId(userId, now);
-        if (MAX_IN_PROGRESS_SESSIONAL_PLAN_COUNT <= inProgressSessionalPlanCount) {
+        if (inProgressSessionalPlanCount >= MAX_IN_PROGRESS_SESSIONAL_PLAN_COUNT) {
             throw new PlanException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
         }
     }

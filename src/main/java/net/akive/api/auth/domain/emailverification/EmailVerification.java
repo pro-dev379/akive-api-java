@@ -79,7 +79,7 @@ public class EmailVerification {
     }
 
     private void validateResendAvailable(LocalDateTime requestedAt) {
-        if (MAX_RESEND_COUNT <= this.resendCount) {
+        if (this.resendCount >= MAX_RESEND_COUNT) {
             throw new EmailVerificationException(RESEND_LIMIT_EXCEEDED);
         }
 
