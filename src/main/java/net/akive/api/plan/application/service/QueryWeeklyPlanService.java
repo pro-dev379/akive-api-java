@@ -23,7 +23,7 @@ import static net.akive.api.plan.exception.PlanErrorCode.WEEKLY_PLAN_NOT_FOUND;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class QueryWeeklyPlanService implements GetWeeklyPlanUseCase {
+class QueryWeeklyPlanService implements GetWeeklyPlanUseCase {
 
     private final LoadSessionalPlanPort loadSessionalPlanPort;
     private final LoadWeeklyQuantityPort loadWeeklyQuantityPort;

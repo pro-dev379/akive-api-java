@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class QueryDailyTodoService implements GetDailyTodosUseCase {
+class QueryDailyTodoService implements GetDailyTodosUseCase {
 
     private final LoadDailyTodosPort loadDailyTodosPort;
 
