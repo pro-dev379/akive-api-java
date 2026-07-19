@@ -16,7 +16,15 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Entity
-@Table(name = "weekly_quantity")
+@Table(
+        name = "weekly_quantity",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "ux-weekly_quantity-total_quantity_id-week_start_on-week_end_on",
+                        columnNames = {"total_quantity_id", "week_start_on", "week_end_on"}
+                )
+        }
+)
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
