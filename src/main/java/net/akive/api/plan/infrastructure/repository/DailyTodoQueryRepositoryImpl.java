@@ -39,10 +39,10 @@ public class DailyTodoQueryRepositoryImpl implements DailyTodoQueryRepository {
                                 dq.date
                         )
                 )
-                .from(dq)
-                .join(dq.weeklyQuantity, wq)
-                .join(wq.totalQuantity, tq)
-                .join(tq.sessionalPlan, sp)
+                .from(sp)
+                .join(tq).on(tq.sessionalPlan.eq(sp))
+                .join(wq).on(wq.totalQuantity.eq(tq))
+                .join(dq).on(dq.weeklyQuantity.eq(wq))
                 .where(
                         sp.user.userId.eq(userId),
                         dq.date.eq(date)
