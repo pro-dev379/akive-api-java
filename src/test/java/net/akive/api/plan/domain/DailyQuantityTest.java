@@ -6,10 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
-import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
+import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NOT_POSITIVE;
 import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
 import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,11 +15,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class DailyQuantityTest {
 
+    private static final LocalDate VALID_WEEK_START_ON = LocalDate.of(2026, 7, 7);
+    private static final LocalDate VALID_WEEK_END_ON = LocalDate.of(2026, 7, 14);
     private static final SessionalPlan VALID_SESSIONAL_PLAN = SessionalPlan.create(
             2L,
             1L,
             "세션",
-            new SessionPeriod(LocalDate.of(2026, 7, 7), LocalDate.of(2026, 7, 14))
+            new SessionPeriod(VALID_WEEK_START_ON, VALID_WEEK_END_ON)
     );
     private static final TotalQuantity VALID_TOTAL_QUANTITY = TotalQuantity.create(
             2L,
@@ -32,12 +32,11 @@ class DailyQuantityTest {
     private static final WeeklyQuantity VALID_WEEKLY_QUANTITY = WeeklyQuantity.create(
             2L,
             VALID_TOTAL_QUANTITY,
-            new WeekPeriod(
-                    LocalDate.of(2026, 7, 7),
-                    LocalDate.of(2026, 7, 14)
-            ),
+            new WeekPeriod(VALID_WEEK_START_ON, VALID_WEEK_END_ON),
             WeeklyQuantityAmount.of(10, null)
     );
+    private static final DailyQuantityAmount VALID_DAILY_QUANTITY_AMOUNT =
+            DailyQuantityAmount.of(10, 6, 4, "메모");
 
     @Test
     void 하루_계획량을_생성한다() {
@@ -45,14 +44,14 @@ class DailyQuantityTest {
         DailyQuantity dailyQuantity = DailyQuantity.create(
                 1L,
                 VALID_WEEKLY_QUANTITY,
-                LocalDate.of(2026, 7, 7),
-                DailyQuantityAmount.of(10, 6, 4, "메모")
+                VALID_WEEK_START_ON,
+                VALID_DAILY_QUANTITY_AMOUNT
         );
 
         // then
         assertThat(dailyQuantity.getDailyQuantityId()).isEqualTo(1L);
         assertThat(dailyQuantity.getWeeklyQuantity()).isEqualTo(VALID_WEEKLY_QUANTITY);
-        assertThat(dailyQuantity.getDate()).isEqualTo(LocalDate.of(2026, 7, 7));
+        assertThat(dailyQuantity.getDate()).isEqualTo(VALID_WEEK_START_ON);
         assertThat(dailyQuantity.getDailyQuantityAmount().quantityAmount().value()).isEqualTo(10);
         assertThat(dailyQuantity.getDailyQuantityAmount().completedQuantityAmount().value()).isEqualTo(6);
         assertThat(dailyQuantity.getDailyQuantityAmount().delayedQuantityAmount().value()).isEqualTo(4);
@@ -60,47 +59,19 @@ class DailyQuantityTest {
     }
 
     @Test
-    void 하루_계획량의_메모가_null이면_빈_메모_값_객체로_생성한다() {
+    void 주간_계획량에_속한_하루_계획량을_생성한다() {
         // when
-        DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(10, 6, 4, null);
+        DailyQuantity dailyQuantity = DailyQuantity.createForWeeklyQuantity(
+                VALID_WEEKLY_QUANTITY,
+                VALID_WEEK_START_ON.plusDays(1),
+                VALID_DAILY_QUANTITY_AMOUNT
+        );
 
         // then
-        assertThat(dailyQuantityAmount.quantityMemo()).isNotNull();
-        assertThat(dailyQuantityAmount.quantityMemo().value()).isNull();
-    }
-
-    @Test
-    void 하루_계획량이_완수량과_딜레이량의_합과_같지_않으면_안_된다() {
-        assertThatExceptionOfType(PlanException.class)
-                .isThrownBy(() -> DailyQuantityAmount.of(10, 6, 3, null))
-                .extracting(PlanException::getErrorCode)
-                .isEqualTo(DAILY_QUANTITY_AMOUNT_MISMATCH);
-    }
-
-    @Test
-    void 하루_계획량은_음수일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> DailyQuantity.create(
-                        1L,
-                        VALID_WEEKLY_QUANTITY,
-                        LocalDate.of(2026, 7, 7),
-                        DailyQuantityAmount.of(-1, 0, 0, null)
-                ))
-                .extracting(DomainValidationException::getErrorCode)
-                .isEqualTo(VALUE_NEGATIVE);
-    }
-
-    @Test
-    void 하루_계획량은_주간_계획량보다_클_수_없다() {
-        assertThatExceptionOfType(PlanException.class)
-                .isThrownBy(() -> DailyQuantity.create(
-                        1L,
-                        VALID_WEEKLY_QUANTITY,
-                        LocalDate.of(2026, 7, 7),
-                        DailyQuantityAmount.of(11, 0, 11, null)
-                ))
-                .extracting(PlanException::getErrorCode)
-                .isEqualTo(DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
+        assertThat(dailyQuantity.getDailyQuantityId()).isNull();
+        assertThat(dailyQuantity.getWeeklyQuantity()).isEqualTo(VALID_WEEKLY_QUANTITY);
+        assertThat(dailyQuantity.getDate()).isEqualTo(VALID_WEEK_START_ON.plusDays(1));
+        assertThat(dailyQuantity.getDailyQuantityAmount()).isEqualTo(VALID_DAILY_QUANTITY_AMOUNT);
     }
 
     @Test
@@ -109,8 +80,8 @@ class DailyQuantityTest {
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         null,
-                        LocalDate.of(2026, 7, 7),
-                        DailyQuantityAmount.of(10, 0, 10, null)
+                        VALID_WEEK_START_ON,
+                        VALID_DAILY_QUANTITY_AMOUNT
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
@@ -123,10 +94,57 @@ class DailyQuantityTest {
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         null,
-                        DailyQuantityAmount.of(10, 0, 10, null)
+                        VALID_DAILY_QUANTITY_AMOUNT
                 ))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
+    }
+
+    @Test
+    void 하루_계획량의_수량은_null일_수_없다() {
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> DailyQuantity.create(
+                        1L,
+                        VALID_WEEKLY_QUANTITY,
+                        VALID_WEEK_START_ON,
+                        null
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(REQUIRED_VALUE_MISSING);
+    }
+
+    @Test
+    void 하루_계획량의_식별자는_양수여야_한다() {
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> DailyQuantity.create(
+                        0L,
+                        VALID_WEEKLY_QUANTITY,
+                        VALID_WEEK_START_ON,
+                        VALID_DAILY_QUANTITY_AMOUNT
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(VALUE_NOT_POSITIVE);
+    }
+
+    @Test
+    void 하루_계획량의_날짜는_주간_계획량_시작일과_종료일을_포함한다() {
+        // when
+        DailyQuantity startDateDailyQuantity = DailyQuantity.create(
+                1L,
+                VALID_WEEKLY_QUANTITY,
+                VALID_WEEK_START_ON,
+                VALID_DAILY_QUANTITY_AMOUNT
+        );
+        DailyQuantity endDateDailyQuantity = DailyQuantity.create(
+                2L,
+                VALID_WEEKLY_QUANTITY,
+                VALID_WEEK_END_ON,
+                VALID_DAILY_QUANTITY_AMOUNT
+        );
+
+        // then
+        assertThat(startDateDailyQuantity.getDate()).isEqualTo(VALID_WEEK_START_ON);
+        assertThat(endDateDailyQuantity.getDate()).isEqualTo(VALID_WEEK_END_ON);
     }
 
     @Test
@@ -135,8 +153,8 @@ class DailyQuantityTest {
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
-                        LocalDate.of(2026, 7, 6),
-                        DailyQuantityAmount.of(10, 0, 10, null)
+                        VALID_WEEK_START_ON.minusDays(1),
+                        VALID_DAILY_QUANTITY_AMOUNT
                 ))
                 .extracting(PlanException::getErrorCode)
                 .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD);
@@ -148,49 +166,35 @@ class DailyQuantityTest {
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
-                        LocalDate.of(2026, 7, 15),
-                        DailyQuantityAmount.of(10, 0, 10, null)
+                        VALID_WEEK_END_ON.plusDays(1),
+                        VALID_DAILY_QUANTITY_AMOUNT
                 ))
                 .extracting(PlanException::getErrorCode)
                 .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD);
     }
 
     @Test
-    void 하루_계획_완수량은_음수일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+    void 하루_계획량은_주간_계획량보다_클_수_없다() {
+        assertThatExceptionOfType(PlanException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
-                        LocalDate.of(2026, 7, 7),
-                        DailyQuantityAmount.of(10, -1, 0, null)
+                        VALID_WEEK_START_ON,
+                        DailyQuantityAmount.of(11, 0, 11, null)
                 ))
-                .extracting(DomainValidationException::getErrorCode)
-                .isEqualTo(VALUE_NEGATIVE);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
     }
 
     @Test
-    void 하루_계획_딜레이량은_음수일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> DailyQuantity.create(
-                        1L,
+    void 주간_계획량에_속한_하루_계획량은_주간_계획량보다_클_수_없다() {
+        assertThatExceptionOfType(PlanException.class)
+                .isThrownBy(() -> DailyQuantity.createForWeeklyQuantity(
                         VALID_WEEKLY_QUANTITY,
-                        LocalDate.of(2026, 7, 7),
-                        DailyQuantityAmount.of(10, 0, -1, null)
+                        VALID_WEEK_START_ON,
+                        DailyQuantityAmount.of(11, 0, 11, null)
                 ))
-                .extracting(DomainValidationException::getErrorCode)
-                .isEqualTo(VALUE_NEGATIVE);
-    }
-
-    @Test
-    void 하루_계획량의_메모는_25자를_초과할_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> DailyQuantity.create(
-                        1L,
-                        VALID_WEEKLY_QUANTITY,
-                        LocalDate.of(2026, 7, 7),
-                        DailyQuantityAmount.of(10, 0, 0, "가".repeat(26))
-                ))
-                .extracting(DomainValidationException::getErrorCode)
-                .isEqualTo(MAX_LENGTH_EXCEEDED);
+                .extracting(PlanException::getErrorCode)
+                .isEqualTo(DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
     }
 }

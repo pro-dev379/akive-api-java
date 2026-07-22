@@ -3,8 +3,6 @@ package net.akive.api.plan.domain;
 import lombok.*;
 import net.akive.api.plan.exception.PlanException;
 
-import java.util.List;
-
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
@@ -21,7 +19,29 @@ public class WeeklyQuantity {
     private TotalQuantity totalQuantity;
     private WeekPeriod weekPeriod;
     private WeeklyQuantityAmount weeklyQuantityAmount;
-    private List<DailyQuantity> dailyQuantities;
+
+    public static WeeklyQuantity createForTotalQuantity(
+            TotalQuantity totalQuantity,
+            SessionPeriod sessionPeriod,
+            WeekPeriod weekPeriod,
+            WeeklyQuantityAmount weeklyQuantityAmount
+    ) {
+        requireNonNull(totalQuantity);
+        requireNonNull(sessionPeriod);
+        requireNonNull(weekPeriod);
+        requireNonNull(weeklyQuantityAmount);
+        validateWeekPeriodInSessionPeriod(weekPeriod, sessionPeriod);
+        validateWeeklyQuantityAmountInTotalQuantityAmount(
+                weeklyQuantityAmount,
+                totalQuantity.getTotalQuantityAmount()
+        );
+
+        return WeeklyQuantity.builder()
+                .totalQuantity(totalQuantity)
+                .weekPeriod(weekPeriod)
+                .weeklyQuantityAmount(weeklyQuantityAmount)
+                .build();
+    }
 
     public static WeeklyQuantity create(
             Long weeklyQuantityId,
@@ -32,11 +52,6 @@ public class WeeklyQuantity {
         requireNonNull(totalQuantity);
         requireNonNull(weekPeriod);
         requireNonNull(weeklyQuantityAmount);
-
-        validateWeekPeriodInSessionPeriod(
-                weekPeriod,
-                totalQuantity.getSessionalPlan().getSessionPeriod()
-        );
 
         validateWeeklyQuantityAmountInTotalQuantityAmount(
                 weeklyQuantityAmount,

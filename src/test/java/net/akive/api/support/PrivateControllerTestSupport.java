@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.plan.application.port.in.*;
 import net.akive.api.plan.presentation.DailyTodoController;
 import net.akive.api.plan.presentation.SessionalPlanController;
+import net.akive.api.plan.presentation.TotalQuantityController;
 import net.akive.api.plan.presentation.WeeklyPlanController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -13,7 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers = {
         SessionalPlanController.class,
         DailyTodoController.class,
-        WeeklyPlanController.class
+        WeeklyPlanController.class,
+        TotalQuantityController.class
 })
 public abstract class PrivateControllerTestSupport {
 
@@ -43,4 +45,7 @@ public abstract class PrivateControllerTestSupport {
 
     @MockitoBean
     protected DeleteSessionalPlanUseCase deleteSessionalPlanUseCase;
+
+    @MockitoBean
+    protected CreateTotalQuantityUseCase createTotalQuantityUseCase;
 }

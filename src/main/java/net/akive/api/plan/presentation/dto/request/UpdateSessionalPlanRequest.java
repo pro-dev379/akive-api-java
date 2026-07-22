@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
+import net.akive.api.plan.presentation.dto.request.common.SessionPeriodRequest;
 
 public record UpdateSessionalPlanRequest(
         @NotBlank @Size(max = 100) String sessionName,

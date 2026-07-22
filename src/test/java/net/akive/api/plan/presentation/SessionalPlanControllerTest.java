@@ -8,7 +8,7 @@ import net.akive.api.plan.application.dto.result.common.*;
 import net.akive.api.plan.application.dto.result.sessionalplan.*;
 import net.akive.api.plan.exception.PlanException;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
-import net.akive.api.plan.presentation.dto.request.SessionPeriodRequest;
+import net.akive.api.plan.presentation.dto.request.common.SessionPeriodRequest;
 import net.akive.api.plan.presentation.dto.request.UpdateSessionalPlanRequest;
 import net.akive.api.support.PrivateControllerTestSupport;
 import org.junit.jupiter.api.Test;

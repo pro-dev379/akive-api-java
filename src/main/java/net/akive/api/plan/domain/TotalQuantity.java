@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
@@ -21,7 +19,18 @@ public class TotalQuantity {
     private SessionalPlan sessionalPlan;
     private Subject subject;
     private TotalQuantityAmount totalQuantityAmount;
-    private List<WeeklyQuantity> weeklyQuantities;
+
+    public static TotalQuantity createForUser(
+            SessionalPlan sessionalPlan,
+            Subject subject,
+            TotalQuantityAmount totalQuantityAmount
+    ) {
+        return TotalQuantity.builder()
+                .sessionalPlan(requireNonNull(sessionalPlan))
+                .subject(requireNonNull(subject))
+                .totalQuantityAmount(requireNonNull(totalQuantityAmount))
+                .build();
+    }
 
     public static TotalQuantity create(
             Long totalQuantityId,
@@ -30,7 +39,7 @@ public class TotalQuantity {
             TotalQuantityAmount totalQuantityAmount
     ) {
         return TotalQuantity.builder()
-                .totalQuantityId(totalQuantityId)
+                .totalQuantityId(requirePositive(totalQuantityId))
                 .sessionalPlan(requireNonNull(sessionalPlan))
                 .subject(requireNonNull(subject))
                 .totalQuantityAmount(requireNonNull(totalQuantityAmount))

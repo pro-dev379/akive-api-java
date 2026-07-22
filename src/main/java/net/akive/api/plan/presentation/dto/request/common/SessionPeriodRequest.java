@@ -1,4 +1,4 @@
-package net.akive.api.plan.presentation.dto.request;
+package net.akive.api.plan.presentation.dto.request.common;
 
 import jakarta.validation.constraints.NotNull;
 

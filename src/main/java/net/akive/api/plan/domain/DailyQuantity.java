@@ -25,6 +25,28 @@ public class DailyQuantity {
     private LocalDate date;
     private DailyQuantityAmount dailyQuantityAmount;
 
+    public static DailyQuantity createForWeeklyQuantity(
+            WeeklyQuantity weeklyQuantity,
+            LocalDate date,
+            DailyQuantityAmount dailyQuantityAmount
+    ) {
+        requireNonNull(weeklyQuantity);
+        requireNonNull(date);
+        validateDateInWeekPeriod(date, weeklyQuantity.getWeekPeriod());
+        requireNonNull(dailyQuantityAmount);
+
+        validateDailyQuantityAmountInWeeklyQuantityAmount(
+                dailyQuantityAmount,
+                weeklyQuantity.getWeeklyQuantityAmount()
+        );
+
+        return DailyQuantity.builder()
+                .weeklyQuantity(weeklyQuantity)
+                .date(date)
+                .dailyQuantityAmount(dailyQuantityAmount)
+                .build();
+    }
+
     public static DailyQuantity create(
             Long dailyQuantityId,
             WeeklyQuantity weeklyQuantity,
@@ -42,7 +64,7 @@ public class DailyQuantity {
         );
 
         return DailyQuantity.builder()
-                .dailyQuantityId(dailyQuantityId)
+                .dailyQuantityId(requirePositive(dailyQuantityId))
                 .weeklyQuantity(weeklyQuantity)
                 .date(date)
                 .dailyQuantityAmount(dailyQuantityAmount)

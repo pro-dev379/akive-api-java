@@ -4,7 +4,6 @@ import lombok.*;
 import net.akive.api.plan.exception.PlanException;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -21,7 +20,6 @@ public class SessionalPlan {
     private Long userId;
     private String sessionName;
     private SessionPeriod sessionPeriod;
-    private List<TotalQuantity> totalQuantities;
 
     public static SessionalPlan createForUser(
             Long userId,
