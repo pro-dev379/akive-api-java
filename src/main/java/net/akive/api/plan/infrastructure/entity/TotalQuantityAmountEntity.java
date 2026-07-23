@@ -22,7 +22,7 @@ public class TotalQuantityAmountEntity {
     @Column(length = 10, nullable = false)
     private String unit;
 
-    @Column(name = "total_quantity_memo", length = 25)
+    @Column(name = "total_quantity_memo")
     private String memo;
 
     public static TotalQuantityAmountEntity from(TotalQuantityAmount totalQuantityAmount) {

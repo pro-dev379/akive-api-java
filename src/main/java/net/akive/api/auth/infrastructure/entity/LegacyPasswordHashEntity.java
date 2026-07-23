@@ -15,10 +15,10 @@ import static lombok.AccessLevel.PROTECTED;
 @AllArgsConstructor(access = PRIVATE)
 public class LegacyPasswordHashEntity {
 
-    @Column(name = "password_hash", nullable = false, length = 500)
+    @Column(name = "password_hash", nullable = false)
     private String hash;
 
-    @Column(name = "password_salt", nullable = false, length = 500)
+    @Column(name = "password_salt", nullable = false)
     private String salt;
 
     public static LegacyPasswordHashEntity of(String hash, String salt) {

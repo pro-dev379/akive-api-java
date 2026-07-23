@@ -16,7 +16,8 @@ import static net.akive.api.user.domain.LoginType.EMAIL;
 @AllArgsConstructor(access = PRIVATE)
 public class User {
 
-    private static final int NICKNAME_MAX_LENGTH = 100;
+    private static final int NICKNAME_MAX_LENGTH = 20;
+    private static final int AIM_MAX_LENGTH = 100;
 
     private Long userId;
     private Email email;
@@ -49,7 +50,7 @@ public class User {
                 .nickname(validateNickname(nickname))
                 .password(validateEncodedPassword(password))
                 .imgUrl(imgUrl)
-                .aim(aim)
+                .aim(requireMaxLengthIfPresent(aim, AIM_MAX_LENGTH))
                 .leave(leave)
                 .leaveReason(leaveReason)
                 .build();

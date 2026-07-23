@@ -8,7 +8,7 @@ import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
 import net.akive.api.plan.presentation.dto.request.common.SessionPeriodRequest;
 
 public record UpdateSessionalPlanRequest(
-        @NotBlank @Size(max = 100) String sessionName,
+        @NotBlank @Size(max = 50) String sessionName,
         @NotNull @Valid SessionPeriodRequest sessionPeriod
 ) {
 

@@ -5,6 +5,6 @@ import static net.akive.api.common.domain.DomainValidator.requireMaxLengthIfPres
 public record QuantityMemo(String value) {
 
     public QuantityMemo {
-        requireMaxLengthIfPresent(value, 25);
+        requireMaxLengthIfPresent(value, 100);
     }
 }

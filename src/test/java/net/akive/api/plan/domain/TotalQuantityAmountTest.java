@@ -104,9 +104,9 @@ class TotalQuantityAmountTest {
     }
 
     @Test
-    void 메모는_25자를_초과할_수_없다() {
+    void 메모는_100자를_초과할_수_없다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> TotalQuantityAmount.of(100, "문제", "가".repeat(26)))
+                .isThrownBy(() -> TotalQuantityAmount.of(100, "문제", "가".repeat(101)))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }

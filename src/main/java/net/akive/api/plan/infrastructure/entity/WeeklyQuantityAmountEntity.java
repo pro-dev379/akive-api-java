@@ -19,7 +19,7 @@ public class WeeklyQuantityAmountEntity {
     @Column(name = "weekly_quantity_amount")
     private int quantityAmount;
 
-    @Column(name = "weekly_quantity_memo", length = 25)
+    @Column(name = "weekly_quantity_memo")
     private String quantityMemo;
 
     public static WeeklyQuantityAmountEntity from(WeeklyQuantityAmount weeklyQuantityAmount) {

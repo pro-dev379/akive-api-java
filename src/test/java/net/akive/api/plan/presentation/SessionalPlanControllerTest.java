@@ -248,11 +248,11 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
-    void 세셔널_플랜_생성_요청_시_세셔널_플랜명이_100자를_초과하면_400을_응답한다() throws Exception {
+    void 세셔널_플랜_생성_요청_시_세셔널_플랜명이_50자를_초과하면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
         CreateSessionalPlanRequest request = new CreateSessionalPlanRequest(
-                "a".repeat(101),
+                "a".repeat(51),
                 new SessionPeriodRequest(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)

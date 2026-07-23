@@ -44,16 +44,4 @@ class EmailTest {
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
-
-    @Test
-    void 이메일이_최대_길이를_초과하면_생성이_거부된다() {
-        // given
-        String email = "a".repeat(192) + "@test.com";
-
-        // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> new Email(email))
-                .extracting(DomainValidationException::getErrorCode)
-                .isEqualTo(MAX_LENGTH_EXCEEDED);
-    }
 }

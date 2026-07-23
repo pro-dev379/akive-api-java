@@ -17,6 +17,7 @@ class UserTest {
     private static final Email VALID_EMAIL = new Email("test@test.com");
     private static final String VALID_NICKNAME = "akive";
     private static final String VALID_ENCODED_PASSWORD = "encoded-password";
+    private static final String VALID_AIM = "목표";
 
     @Test
     void 회원을_생성한다() {
@@ -48,6 +49,157 @@ class UserTest {
         assertThat(user.getAim()).isEqualTo("목표");
         assertThat(user.isLeave()).isTrue();
         assertThat(user.getLeaveReason()).isEqualTo("탈퇴 사유");
+    }
+
+    @Test
+    void 회원_생성_시_닉네임의_앞뒤_공백을_제거한다() {
+        // when
+        User user = User.create(
+                1L,
+                VALID_EMAIL,
+                USER,
+                SNS,
+                "  akive  ",
+                VALID_ENCODED_PASSWORD,
+                null,
+                null,
+                false,
+                null
+        );
+
+        // then
+        assertThat(user.getNickname()).isEqualTo(VALID_NICKNAME);
+    }
+
+    @Test
+    void 회원_생성_시_닉네임이_공백이면_생성에_실패한다() {
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> User.create(
+                        1L,
+                        VALID_EMAIL,
+                        USER,
+                        SNS,
+                        "   ",
+                        VALID_ENCODED_PASSWORD,
+                        null,
+                        VALID_AIM,
+                        false,
+                        null
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(BLANK_VALUE);
+    }
+
+    @Test
+    void 회원_생성_시_닉네임은_20자일_수_있다() {
+        // given
+        String nickname = "a".repeat(20);
+
+        // when
+        User user = User.create(
+                1L,
+                VALID_EMAIL,
+                USER,
+                SNS,
+                nickname,
+                VALID_ENCODED_PASSWORD,
+                null,
+                null,
+                false,
+                null
+        );
+
+        // then
+        assertThat(user.getNickname()).isEqualTo(nickname);
+    }
+
+    @Test
+    void 회원_생성_시_닉네임이_20자를_초과하면_생성에_실패한다() {
+        // given
+        String nickname = "a".repeat(21);
+
+        // when & then
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> User.create(
+                        1L,
+                        VALID_EMAIL,
+                        USER,
+                        SNS,
+                        nickname,
+                        VALID_ENCODED_PASSWORD,
+                        null,
+                        null,
+                        false,
+                        null
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(MAX_LENGTH_EXCEEDED);
+    }
+
+    @Test
+    void 회원_생성_시_목표가_null이어도_생성한다() {
+        // when
+        User user = User.create(
+                1L,
+                VALID_EMAIL,
+                USER,
+                SNS,
+                VALID_NICKNAME,
+                VALID_ENCODED_PASSWORD,
+                null,
+                null,
+                false,
+                null
+        );
+
+        // then
+        assertThat(user.getAim()).isNull();
+    }
+
+    @Test
+    void 회원_생성_시_목표는_100자일_수_있다() {
+        // given
+        String aim = "a".repeat(100);
+
+        // when
+        User user = User.create(
+                1L,
+                VALID_EMAIL,
+                USER,
+                SNS,
+                VALID_NICKNAME,
+                VALID_ENCODED_PASSWORD,
+                null,
+                aim,
+                false,
+                null
+        );
+
+        // then
+        assertThat(user.getAim()).isEqualTo(aim);
+    }
+
+    @Test
+    void 회원_생성_시_목표가_100자를_초과하면_생성에_실패한다() {
+        // given
+        String aim = "a".repeat(101);
+
+        // when & then
+        assertThatExceptionOfType(DomainValidationException.class)
+                .isThrownBy(() -> User.create(
+                        1L,
+                        VALID_EMAIL,
+                        USER,
+                        SNS,
+                        VALID_NICKNAME,
+                        VALID_ENCODED_PASSWORD,
+                        null,
+                        aim,
+                        false,
+                        null
+                ))
+                .extracting(DomainValidationException::getErrorCode)
+                .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
     @Test
@@ -93,8 +245,8 @@ class UserTest {
     }
 
     @Test
-    void 이메일_회원가입_시_닉네임이_최대_길이를_초과하지_않으면_회원이_정상_생성된다() {
-        String nickname = "a".repeat(100);
+    void 이메일_회원가입_시_닉네임은_20자일_수_있다() {
+        String nickname = "a".repeat(20);
 
         User user = User.signUpByEmail(
                 VALID_EMAIL,
@@ -107,8 +259,8 @@ class UserTest {
     }
 
     @Test
-    void 이메일_회원가입_시_닉네임이_최대_길이를_초과하면_회원_생성에_실패한다() {
-        String nickname = "a".repeat(101);
+    void 이메일_회원가입_시_닉네임이_20자를_초과하면_회원_생성에_실패한다() {
+        String nickname = "a".repeat(21);
 
         assertThatExceptionOfType(DomainValidationException.class)
                 .isThrownBy(() -> User.signUpByEmail(

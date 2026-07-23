@@ -90,12 +90,12 @@ class TotalQuantityControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
-    void 세션_총량_생성_요청_시_과목명이_100자를_초과하면_400을_응답한다() throws Exception {
+    void 세션_총량_생성_요청_시_과목명이_50자를_초과하면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 2L;
         CreateTotalQuantityRequest request = new CreateTotalQuantityRequest(
-                new SubjectRequest("가".repeat(101), "수능"),
+                new SubjectRequest("가".repeat(51), "수능"),
                 new TotalQuantityAmountRequest(100, "문제", "총량 메모")
         );
 
@@ -153,12 +153,12 @@ class TotalQuantityControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
-    void 세션_총량_생성_요청_시_과목_카테고리가_10자를_초과하면_400을_응답한다() throws Exception {
+    void 세션_총량_생성_요청_시_과목_카테고리가_20자를_초과하면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 2L;
         CreateTotalQuantityRequest request = new CreateTotalQuantityRequest(
-                new SubjectRequest("수학", "가".repeat(11)),
+                new SubjectRequest("수학", "가".repeat(21)),
                 new TotalQuantityAmountRequest(100, "문제", "총량 메모")
         );
 
@@ -331,13 +331,13 @@ class TotalQuantityControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
-    void 세션_총량_생성_요청_시_메모가_25자를_초과하면_400을_응답한다() throws Exception {
+    void 세션_총량_생성_요청_시_메모가_100자를_초과하면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
         Long sessionalPlanId = 2L;
         CreateTotalQuantityRequest request = new CreateTotalQuantityRequest(
                 new SubjectRequest("수학", "수능"),
-                new TotalQuantityAmountRequest(100, "문제", "가".repeat(26))
+                new TotalQuantityAmountRequest(100, "문제", "가".repeat(101))
         );
 
         // when & then

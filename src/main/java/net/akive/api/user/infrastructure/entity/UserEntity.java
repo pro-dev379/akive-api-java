@@ -31,7 +31,7 @@ public class UserEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long userId;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false)
     private String email;
 
     @Enumerated(STRING)
@@ -42,22 +42,18 @@ public class UserEntity extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'EMAIL'")
     private LoginType loginType;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private String nickname;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(length = 200)
     private String imgUrl;
-
-    @Column(length = 200)
     private String aim;
 
     @Column(name="is_leave", columnDefinition = "TINYINT(1) UNSIGNED DEFAULT 0", nullable = false)
     private boolean leave;
 
-    @Column(length = 300)
     private String leaveReason;
 
     public static UserEntity reference(Long userId) {

@@ -16,6 +16,8 @@ import static net.akive.api.plan.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
 @AllArgsConstructor(access = PRIVATE)
 public class SessionalPlan {
 
+    private static final int SESSION_NAME_MAX_LENGTH = 50;
+
     private Long sessionalPlanId;
     private Long userId;
     private String sessionName;
@@ -31,7 +33,7 @@ public class SessionalPlan {
 
         return SessionalPlan.builder()
                 .userId(requirePositive(userId))
-                .sessionName(requireMaxLength(requireNotBlank(sessionName), 100))
+                .sessionName(requireMaxLength(requireNotBlank(sessionName), SESSION_NAME_MAX_LENGTH))
                 .sessionPeriod(sessionPeriod)
                 .build();
     }
@@ -45,7 +47,7 @@ public class SessionalPlan {
         return SessionalPlan.builder()
                 .sessionalPlanId(sessionalPlanId)
                 .userId(requirePositive(userId))
-                .sessionName(requireMaxLength(requireNotBlank(sessionName), 100))
+                .sessionName(requireMaxLength(requireNotBlank(sessionName), SESSION_NAME_MAX_LENGTH))
                 .sessionPeriod(requireNonNull(sessionPeriod))
                 .build();
     }
@@ -60,7 +62,7 @@ public class SessionalPlan {
         return SessionalPlan.builder()
                 .sessionalPlanId(this.sessionalPlanId)
                 .userId(this.userId)
-                .sessionName(requireMaxLength(requireNotBlank(sessionName), 100))
+                .sessionName(requireMaxLength(requireNotBlank(sessionName), SESSION_NAME_MAX_LENGTH))
                 .sessionPeriod(sessionPeriod)
                 .build();
     }

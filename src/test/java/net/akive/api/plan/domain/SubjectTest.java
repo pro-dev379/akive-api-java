@@ -56,9 +56,9 @@ class SubjectTest {
     }
 
     @Test
-    void 과목명은_100자일_수_있다() {
+    void 과목명은_50자일_수_있다() {
         // given
-        String name = "가".repeat(100);
+        String name = "가".repeat(50);
 
         // when
         Subject subject = new Subject(name, "과목");
@@ -68,9 +68,9 @@ class SubjectTest {
     }
 
     @Test
-    void 과목명은_100자를_초과할_수_없다() {
+    void 과목명은_50자를_초과할_수_없다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> new Subject("가".repeat(101), "과목"))
+                .isThrownBy(() -> new Subject("가".repeat(51), "과목"))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
@@ -92,9 +92,9 @@ class SubjectTest {
     }
 
     @Test
-    void 카테고리는_10자일_수_있다() {
+    void 카테고리는_20자일_수_있다() {
         // given
-        String category = "가".repeat(10);
+        String category = "가".repeat(20);
 
         // when
         Subject subject = new Subject("수학", category);
@@ -104,9 +104,9 @@ class SubjectTest {
     }
 
     @Test
-    void 카테고리는_10자를_초과할_수_없다() {
+    void 카테고리는_20자를_초과할_수_없다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> new Subject("수학", "가".repeat(11)))
+                .isThrownBy(() -> new Subject("수학", "가".repeat(21)))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }

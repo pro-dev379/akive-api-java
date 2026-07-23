@@ -28,9 +28,9 @@ class QuantityMemoTest {
     }
 
     @Test
-    void 메모는_25자일_수_있다() {
+    void 메모는_100자일_수_있다() {
         // given
-        String value = "가".repeat(25);
+        String value = "가".repeat(100);
 
         // when
         QuantityMemo quantityMemo = new QuantityMemo(value);
@@ -40,9 +40,9 @@ class QuantityMemoTest {
     }
 
     @Test
-    void 메모는_25자를_초과할_수_없다() {
+    void 메모는_100자를_초과할_수_없다() {
         assertThatExceptionOfType(DomainValidationException.class)
-                .isThrownBy(() -> new QuantityMemo("가".repeat(26)))
+                .isThrownBy(() -> new QuantityMemo("가".repeat(101)))
                 .extracting(DomainValidationException::getErrorCode)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }

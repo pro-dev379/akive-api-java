@@ -36,34 +36,18 @@ public class MentoringProfileEntity extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @Column(length = 140)
     private String goal;
-
-    @Column(length = 100)
     private String preference;
 
     @Column(name = "`constraint`", length = 100)
     private String constraint;
 
-    @Column(length = 140)
     private String weakness;
-
-    @Column(length = 80)
     private String strength;
-
-    @Column(length = 80)
     private String recurringPattern;
-
-    @Column(length = 120)
     private String decisionOrCommitment;
-
-    @Column(length = 220)
     private String studyPlan;
-
-    @Column(length = 80)
     private String behavioralPattern;
-
-    @Column(length = 140)
     private String effectiveAdvice;
 
     public static MentoringProfileEntity from(MentoringProfile mentoringProfile) {

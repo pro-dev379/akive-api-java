@@ -36,7 +36,7 @@ public class SessionalPlanEntity extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @Column(length = 100, nullable = false)
+    @Column(nullable = false)
     private String sessionName;
 
     @Embedded

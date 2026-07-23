@@ -22,7 +22,7 @@ public class DailyQuantityAmountEntity {
     private int completedQuantityAmount;
     private int delayedQuantityAmount;
 
-    @Column(name = "daily_quantity_memo", length = 25)
+    @Column(name = "daily_quantity_memo")
     private String quantityMemo;
 
     public static DailyQuantityAmountEntity from(DailyQuantityAmount dailyQuantityAmount) {
