@@ -10,9 +10,6 @@ public record WeeklyQuantityAmount(QuantityAmount quantityAmount, QuantityMemo q
     }
 
     public static WeeklyQuantityAmount of(int quantityAmount, String quantityMemo) {
-        return new WeeklyQuantityAmount(
-                new QuantityAmount(quantityAmount),
-                new QuantityMemo(quantityMemo)
-        );
+        return new WeeklyQuantityAmount(new QuantityAmount(quantityAmount), new QuantityMemo(quantityMemo));
     }
 }
