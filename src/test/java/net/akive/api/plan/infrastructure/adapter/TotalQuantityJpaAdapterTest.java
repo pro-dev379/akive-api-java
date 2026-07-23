@@ -59,12 +59,7 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
     void 세셔널_플랜에_세션_총량이_존재하는지_확인한다() {
         // given
         SessionalPlan savedSessionalPlan = saveSessionalPlan();
-        TotalQuantityPlan totalQuantityPlan = totalQuantityPlanFactory.create(
-                savedSessionalPlan,
-                new Subject("수학", "과목"),
-                TotalQuantityAmount.of(100, "문제", null)
-        );
-        saveTotalQuantityPort.save(totalQuantityPlan);
+        saveTotalQuantity(savedSessionalPlan, "수학");
 
         // when
         boolean exists = validateTotalQuantityPort.existsBySessionalPlanId(savedSessionalPlan.getSessionalPlanId());
@@ -82,10 +77,72 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         assertThat(exists).isFalse();
     }
 
+    @Test
+    void 세셔널_플랜에_과목명이_존재하는지_확인한다() {
+        // given
+        SessionalPlan savedSessionalPlan = saveSessionalPlan();
+        saveTotalQuantity(savedSessionalPlan, "수학");
+
+        // when
+        boolean exists = validateTotalQuantityPort.existsBySessionalPlanIdAndSubjectName(
+                savedSessionalPlan.getSessionalPlanId(),
+                "수학"
+        );
+
+        // then
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void 같은_과목명이어도_다른_세셔널_플랜이면_존재하지_않는_것으로_확인한다() {
+        // given
+        SessionalPlan savedSessionalPlan = saveSessionalPlan();
+        SessionalPlan anotherSessionalPlan = saveSessionalPlan("2회차", "2");
+        saveTotalQuantity(savedSessionalPlan, "수학");
+
+        // when
+        boolean exists = validateTotalQuantityPort.existsBySessionalPlanIdAndSubjectName(
+                anotherSessionalPlan.getSessionalPlanId(),
+                "수학"
+        );
+
+        // then
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    void 세셔널_플랜의_세션_총량_개수를_조회한다() {
+        // given
+        SessionalPlan savedSessionalPlan = saveSessionalPlan();
+        saveTotalQuantity(savedSessionalPlan, "수학");
+        saveTotalQuantity(savedSessionalPlan, "영어");
+
+        // when
+        int totalQuantityCount = validateTotalQuantityPort.countBySessionalPlanId(
+                savedSessionalPlan.getSessionalPlanId()
+        );
+
+        // then
+        assertThat(totalQuantityCount).isEqualTo(2);
+    }
+
+    @Test
+    void 존재하지_않는_세셔널_플랜_식별자로는_세션_총량_개수가_0이다() {
+        // when
+        int totalQuantityCount = validateTotalQuantityPort.countBySessionalPlanId(999L);
+
+        // then
+        assertThat(totalQuantityCount).isZero();
+    }
+
     private SessionalPlan saveSessionalPlan() {
+        return saveSessionalPlan("1회차", "1");
+    }
+
+    private SessionalPlan saveSessionalPlan(String sessionName, String suffix) {
         User savedUser = saveUserPort.save(User.signUpByEmail(
-                new Email("test@test.com"),
-                "USER@abcde",
+                new Email("test" + suffix + "@test.com"),
+                "USER@abcd" + suffix,
                 "password123!",
                 USER
         ));
@@ -93,12 +150,21 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         return saveSessionalPlanPort.save(SessionalPlan.create(
                 null,
                 savedUser.getUserId(),
-                "1회차",
+                sessionName,
                 new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 14)
                 )
         ));
+    }
+
+    private void saveTotalQuantity(SessionalPlan sessionalPlan, String subjectName) {
+        TotalQuantityPlan totalQuantityPlan = totalQuantityPlanFactory.create(
+                sessionalPlan,
+                new Subject(subjectName, "과목"),
+                TotalQuantityAmount.of(100, "문제", null)
+        );
+        saveTotalQuantityPort.save(totalQuantityPlan);
     }
 
     private Integer countTotalQuantities(Long totalQuantityId, Long sessionalPlanId) {

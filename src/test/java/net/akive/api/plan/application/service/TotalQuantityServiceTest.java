@@ -1,23 +1,16 @@
 package net.akive.api.plan.application.service;
 
 import net.akive.api.plan.application.dto.command.CreateTotalQuantityCommand;
-import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.SaveTotalQuantityPort;
-import net.akive.api.plan.domain.SessionPeriod;
-import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.Subject;
 import net.akive.api.plan.domain.TotalQuantityAmount;
 import net.akive.api.plan.domain.TotalQuantityPlan;
 import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,10 +24,13 @@ import static org.mockito.Mockito.never;
 class TotalQuantityServiceTest {
 
     @Mock
-    LoadSessionalPlanPort loadSessionalPlanPort;
+    TotalQuantityDomainService totalQuantityDomainService;
 
     @Mock
     SaveTotalQuantityPort saveTotalQuantityPort;
+
+    @Mock
+    TotalQuantityPlan totalQuantityPlan;
 
     @InjectMocks
     TotalQuantityService totalQuantityService;
@@ -52,19 +48,10 @@ class TotalQuantityServiceTest {
                 subject,
                 totalQuantityAmount
         );
-        SessionalPlan sessionalPlan = SessionalPlan.create(
-                sessionalPlanId,
-                userId,
-                "세션",
-                new SessionPeriod(
-                        LocalDate.of(2026, 7, 7),
-                        LocalDate.of(2026, 7, 14)
-                )
-        );
 
-        given(loadSessionalPlanPort.loadBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.of(sessionalPlan));
-        given(saveTotalQuantityPort.save(any(TotalQuantityPlan.class)))
+        given(totalQuantityDomainService.create(sessionalPlanId, userId, subject, totalQuantityAmount))
+                .willReturn(totalQuantityPlan);
+        given(saveTotalQuantityPort.save(totalQuantityPlan))
                 .willReturn(10L);
 
         // when
@@ -73,15 +60,8 @@ class TotalQuantityServiceTest {
         // then
         assertThat(result).isEqualTo(10L);
 
-        ArgumentCaptor<TotalQuantityPlan> totalQuantityPlanCaptor = ArgumentCaptor.forClass(TotalQuantityPlan.class);
-        then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(saveTotalQuantityPort).should().save(totalQuantityPlanCaptor.capture());
-
-        TotalQuantityPlan totalQuantityPlan = totalQuantityPlanCaptor.getValue();
-        assertThat(totalQuantityPlan.totalQuantity().getSessionalPlan()).isEqualTo(sessionalPlan);
-        assertThat(totalQuantityPlan.totalQuantity().getSubject()).isEqualTo(subject);
-        assertThat(totalQuantityPlan.totalQuantity().getTotalQuantityAmount()).isEqualTo(totalQuantityAmount);
-        assertThat(totalQuantityPlan.weeklyQuantities()).hasSize(2);
+        then(totalQuantityDomainService).should().create(sessionalPlanId, userId, subject, totalQuantityAmount);
+        then(saveTotalQuantityPort).should().save(totalQuantityPlan);
     }
 
     @Test
@@ -99,8 +79,12 @@ class TotalQuantityServiceTest {
                 null
         );
 
-        given(loadSessionalPlanPort.loadBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.empty());
+        given(totalQuantityDomainService.create(
+                command.sessionalPlanId(),
+                command.userId(),
+                command.subject(),
+                command.totalQuantityAmount()
+        )).willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND));
 
         // when & then
         assertThatExceptionOfType(PlanException.class)
@@ -108,7 +92,12 @@ class TotalQuantityServiceTest {
                 .extracting(PlanException::getErrorCode)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
-        then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(totalQuantityDomainService).should().create(
+                command.sessionalPlanId(),
+                command.userId(),
+                command.subject(),
+                command.totalQuantityAmount()
+        );
         then(saveTotalQuantityPort).should(never()).save(any(TotalQuantityPlan.class));
     }
 }

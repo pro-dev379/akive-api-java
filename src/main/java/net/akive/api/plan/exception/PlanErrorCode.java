@@ -16,7 +16,10 @@ public enum PlanErrorCode implements ErrorCode {
     SESSIONAL_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN_404_1", "Sessional plan not found."),
     SESSION_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "PLAN_409_1", "Session name already exists."),
 
-    DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD(HttpStatus.BAD_REQUEST, "PLAN_400_5", "Daily quantity date must be within week period."),
+    TOTAL_QUANTITY_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "PLAN_400_11", "Total quantity limit exceeded."),
+    SUBJECT_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "PLAN_409_2", "Subject name already exists."),
+
+    DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD(HttpStatus.BAD_REQUEST, "PLAN_400_6", "Daily quantity date must be within week period."),
     DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT(HttpStatus.BAD_REQUEST, "PLAN_400_6", "Daily quantity amount exceeds weekly quantity amount."),
     DAILY_QUANTITY_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "PLAN_400_7", "Daily quantity amount mismatch."),
 

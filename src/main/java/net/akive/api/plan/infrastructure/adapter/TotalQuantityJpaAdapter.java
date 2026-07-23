@@ -70,6 +70,16 @@ class TotalQuantityJpaAdapter implements SaveTotalQuantityPort, ValidateTotalQua
         return totalQuantityJpaRepository.existsBySessionalPlan_SessionalPlanId(sessionalPlanId);
     }
 
+    @Override
+    public boolean existsBySessionalPlanIdAndSubjectName(Long sessionalPlanId, String subjectName) {
+        return totalQuantityJpaRepository.existsBySessionalPlan_SessionalPlanIdAndSubject_Name(sessionalPlanId, subjectName);
+    }
+
+    @Override
+    public int countBySessionalPlanId(Long sessionalPlanId) {
+        return Math.toIntExact(totalQuantityJpaRepository.countBySessionalPlan_SessionalPlanId(sessionalPlanId));
+    }
+
     private Long saveTotalQuantity(TotalQuantity totalQuantity) {
         TotalQuantityEntity savedTotalQuantity = totalQuantityJpaRepository.saveAndFlush(TotalQuantityEntity.from(totalQuantity));
 

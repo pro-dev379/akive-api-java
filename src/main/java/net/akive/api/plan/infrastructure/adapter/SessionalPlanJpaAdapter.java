@@ -102,9 +102,7 @@ class SessionalPlanJpaAdapter implements
 
     @Override
     public int countInProgressByUserId(Long userId, LocalDate now) {
-        return Math.toIntExact(
-                sessionalPlanJpaRepository.countByUser_UserIdAndSessionPeriod_EndOnGreaterThanEqual(userId, now)
-        );
+        return Math.toIntExact(sessionalPlanJpaRepository.countByUser_UserIdAndSessionPeriod_EndOnGreaterThanEqual(userId, now));
     }
 
     private SessionalPlanTotalQuantityData toSessionalPlanTotalQuantityData(
