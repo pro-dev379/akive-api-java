@@ -43,13 +43,12 @@ public class SessionalPlanEntity extends BaseTimeEntity {
     private SessionPeriodEntity sessionPeriod;
 
     public static SessionalPlanEntity from(SessionalPlan sessionalPlan) {
-        SessionalPlanEntity sessionalPlanEntity = new SessionalPlanEntity();
-        sessionalPlanEntity.sessionalPlanId = sessionalPlan.getSessionalPlanId();
-        sessionalPlanEntity.user = UserEntity.reference(sessionalPlan.getUserId());
-        sessionalPlanEntity.sessionName = sessionalPlan.getSessionName();
-        sessionalPlanEntity.sessionPeriod = SessionPeriodEntity.from(sessionalPlan.getSessionPeriod());
-
-        return sessionalPlanEntity;
+        return new SessionalPlanEntity(
+                sessionalPlan.getSessionalPlanId(),
+                UserEntity.reference(sessionalPlan.getUserId()),
+                sessionalPlan.getSessionName(),
+                SessionPeriodEntity.from(sessionalPlan.getSessionPeriod())
+        );
     }
 
     public SessionalPlan to() {

@@ -67,21 +67,20 @@ public class MentoringProfileEntity extends BaseTimeEntity {
     private String effectiveAdvice;
 
     public static MentoringProfileEntity from(MentoringProfile mentoringProfile) {
-        MentoringProfileEntity mentoringProfileEntity = new MentoringProfileEntity();
-        mentoringProfileEntity.mentoringProfileId = mentoringProfile.getMentoringProfileId();
-        mentoringProfileEntity.user = UserEntity.reference(mentoringProfile.getUserId());
-        mentoringProfileEntity.goal = mentoringProfile.getGoal();
-        mentoringProfileEntity.preference = mentoringProfile.getPreference();
-        mentoringProfileEntity.constraint = mentoringProfile.getConstraint();
-        mentoringProfileEntity.weakness = mentoringProfile.getWeakness();
-        mentoringProfileEntity.strength = mentoringProfile.getStrength();
-        mentoringProfileEntity.recurringPattern = mentoringProfile.getRecurringPattern();
-        mentoringProfileEntity.decisionOrCommitment = mentoringProfile.getDecisionOrCommitment();
-        mentoringProfileEntity.studyPlan = mentoringProfile.getStudyPlan();
-        mentoringProfileEntity.behavioralPattern = mentoringProfile.getBehavioralPattern();
-        mentoringProfileEntity.effectiveAdvice = mentoringProfile.getEffectiveAdvice();
-
-        return mentoringProfileEntity;
+        return new MentoringProfileEntity(
+                mentoringProfile.getMentoringProfileId(),
+                UserEntity.reference(mentoringProfile.getUserId()),
+                mentoringProfile.getGoal(),
+                mentoringProfile.getPreference(),
+                mentoringProfile.getConstraint(),
+                mentoringProfile.getWeakness(),
+                mentoringProfile.getStrength(),
+                mentoringProfile.getRecurringPattern(),
+                mentoringProfile.getDecisionOrCommitment(),
+                mentoringProfile.getStudyPlan(),
+                mentoringProfile.getBehavioralPattern(),
+                mentoringProfile.getEffectiveAdvice()
+        );
     }
 
     public MentoringProfile to() {

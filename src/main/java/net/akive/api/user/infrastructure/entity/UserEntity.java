@@ -68,19 +68,18 @@ public class UserEntity extends BaseTimeEntity {
     }
 
     public static UserEntity from(User user) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.userId = user.getUserId();
-        userEntity.email = user.getEmail().value();
-        userEntity.roleType = user.getRoleType();
-        userEntity.loginType = user.getLoginType();
-        userEntity.nickname = user.getNickname();
-        userEntity.password = user.getPassword();
-        userEntity.imgUrl = user.getImgUrl();
-        userEntity.aim = user.getAim();
-        userEntity.leave = user.isLeave();
-        userEntity.leaveReason = user.getLeaveReason();
-
-        return userEntity;
+        return new UserEntity(
+                user.getUserId(),
+                user.getEmail().value(),
+                user.getRoleType(),
+                user.getLoginType(),
+                user.getNickname(),
+                user.getPassword(),
+                user.getImgUrl(),
+                user.getAim(),
+                user.isLeave(),
+                user.getLeaveReason()
+        );
     }
 
     public User to() {
