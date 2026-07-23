@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.persistence.BaseTimeEntity;
-import net.akive.api.plan.domain.TotalQuantity;
 import net.akive.api.plan.domain.WeeklyQuantity;
 import org.hibernate.annotations.OnDelete;
 
@@ -55,11 +54,9 @@ public class WeeklyQuantityEntity extends BaseTimeEntity {
     }
 
     public WeeklyQuantity to() {
-        TotalQuantity totalQuantity = this.totalQuantity.to();
-
         return WeeklyQuantity.create(
                 this.weeklyQuantityId,
-                totalQuantity,
+                this.totalQuantity.to(),
                 this.weekPeriod.to(),
                 this.weeklyQuantityAmount.to()
         );
