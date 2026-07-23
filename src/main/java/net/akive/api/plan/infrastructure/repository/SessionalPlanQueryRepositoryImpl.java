@@ -11,6 +11,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static net.akive.api.plan.infrastructure.entity.QDailyQuantityEntity.dailyQuantityEntity;
+import static net.akive.api.plan.infrastructure.entity.QTotalQuantityEntity.totalQuantityEntity;
+import static net.akive.api.plan.infrastructure.entity.QWeeklyQuantityEntity.weeklyQuantityEntity;
+
 @Repository
 @RequiredArgsConstructor
 class SessionalPlanQueryRepositoryImpl implements SessionalPlanQueryRepository {
@@ -19,9 +23,9 @@ class SessionalPlanQueryRepositoryImpl implements SessionalPlanQueryRepository {
 
     @Override
     public List<SessionalPlanTotalQuantityProjection> findSessionalPlanTotalQuantityDetailsBySessionalPlanId(Long sessionalPlanId) {
-        QDailyQuantityEntity dq = QDailyQuantityEntity.dailyQuantityEntity;
-        QWeeklyQuantityEntity wq = QWeeklyQuantityEntity.weeklyQuantityEntity;
-        QTotalQuantityEntity tq = QTotalQuantityEntity.totalQuantityEntity;
+        QDailyQuantityEntity dq = dailyQuantityEntity;
+        QWeeklyQuantityEntity wq = weeklyQuantityEntity;
+        QTotalQuantityEntity tq = totalQuantityEntity;
 
         return jpaQueryFactory
                 .select(

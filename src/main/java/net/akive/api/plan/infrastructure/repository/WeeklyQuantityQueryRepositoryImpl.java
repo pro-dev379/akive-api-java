@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static net.akive.api.plan.infrastructure.entity.QDailyQuantityEntity.dailyQuantityEntity;
+import static net.akive.api.plan.infrastructure.entity.QTotalQuantityEntity.totalQuantityEntity;
+import static net.akive.api.plan.infrastructure.entity.QWeeklyQuantityEntity.weeklyQuantityEntity;
+
 @Repository
 @RequiredArgsConstructor
 public class WeeklyQuantityQueryRepositoryImpl implements WeeklyQuantityQueryRepository{
@@ -20,9 +24,9 @@ public class WeeklyQuantityQueryRepositoryImpl implements WeeklyQuantityQueryRep
             Long sessionPlanId,
             WeekPeriodEntity weekPeriod
     ) {
-        QTotalQuantityEntity tq = QTotalQuantityEntity.totalQuantityEntity;
-        QWeeklyQuantityEntity wq = QWeeklyQuantityEntity.weeklyQuantityEntity;
-        QDailyQuantityEntity dq = QDailyQuantityEntity.dailyQuantityEntity;
+        QTotalQuantityEntity tq = totalQuantityEntity;
+        QWeeklyQuantityEntity wq = weeklyQuantityEntity;
+        QDailyQuantityEntity dq = dailyQuantityEntity;
 
         return jpaQueryFactory
                 .select(
