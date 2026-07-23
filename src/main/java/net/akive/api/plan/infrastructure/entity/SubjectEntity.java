@@ -16,10 +16,10 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 public class SubjectEntity {
 
-    @Column(name = "subject", length = 100, nullable = false)
+    @Column(name = "subject", nullable = false)
     private String name;
 
-    @Column(name = "subject_category", length = 10, nullable = false)
+    @Column(name = "subject_category", nullable = false)
     private String category;
 
     public static SubjectEntity from(Subject subject) {

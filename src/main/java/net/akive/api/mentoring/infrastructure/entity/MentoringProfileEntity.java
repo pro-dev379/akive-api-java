@@ -39,7 +39,7 @@ public class MentoringProfileEntity extends BaseTimeEntity {
     private String goal;
     private String preference;
 
-    @Column(name = "`constraint`", length = 100)
+    @Column(name = "`constraint`")
     private String constraint;
 
     private String weakness;
