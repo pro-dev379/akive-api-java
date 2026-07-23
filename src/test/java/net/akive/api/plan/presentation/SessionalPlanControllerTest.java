@@ -19,7 +19,6 @@ import java.util.List;
 import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.plan.exception.PlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
 import static net.akive.api.plan.exception.PlanErrorCode.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -303,10 +302,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // when & then
         mockMvc.perform(post("/sessional-plans")
                         .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(REQUIRED_VALUE_MISSING.getCode()));
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -326,10 +325,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // when & then
         mockMvc.perform(post("/sessional-plans")
                         .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(REQUIRED_VALUE_MISSING.getCode()));
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -490,10 +489,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // when & then
         mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
                         .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(REQUIRED_VALUE_MISSING.getCode()));
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
 
         then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
     }
@@ -514,10 +513,10 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         // when & then
         mockMvc.perform(put("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
                         .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(REQUIRED_VALUE_MISSING.getCode()));
+                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
 
         then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
     }
