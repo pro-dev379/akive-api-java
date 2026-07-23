@@ -8,6 +8,6 @@ import jakarta.validation.constraints.Size;
 public record TotalQuantityAmountRequest(
         @NotNull @Min(0) Integer quantityAmount,
         @NotBlank @Size(max = 10) String unit,
-        @NotBlank @Size(max = 25) String quantityMemo
+        @Size(max = 25) String quantityMemo
 ) {
 }

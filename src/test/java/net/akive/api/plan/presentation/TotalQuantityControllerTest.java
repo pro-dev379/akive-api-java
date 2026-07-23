@@ -277,6 +277,58 @@ class TotalQuantityControllerTest extends PrivateControllerTestSupport {
     }
 
     @Test
+    void 세션_총량_생성_요청_시_메모가_비어있어도_세션_총량은_생성된다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        Long totalQuantityId = 10L;
+        CreateTotalQuantityRequest request = new CreateTotalQuantityRequest(
+                new SubjectRequest("수학", "수능"),
+                new TotalQuantityAmountRequest(100, "문제", "")
+        );
+        CreateTotalQuantityCommand command = request.to(userId, sessionalPlanId);
+
+        given(createTotalQuantityUseCase.create(command))
+                .willReturn(totalQuantityId);
+
+        // when & then
+        mockMvc.perform(post("/sessional-plans/{sessionalPlanId}/total-quantities", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalQuantityId").value(totalQuantityId));
+
+        then(createTotalQuantityUseCase).should().create(command);
+    }
+
+    @Test
+    void 세션_총량_생성_요청_시_메모가_null이어도_세션_총량을_생성한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        Long totalQuantityId = 10L;
+        CreateTotalQuantityRequest request = new CreateTotalQuantityRequest(
+                new SubjectRequest("수학", "수능"),
+                new TotalQuantityAmountRequest(100, "문제", null)
+        );
+        CreateTotalQuantityCommand command = request.to(userId, sessionalPlanId);
+
+        given(createTotalQuantityUseCase.create(command))
+                .willReturn(totalQuantityId);
+
+        // when & then
+        mockMvc.perform(post("/sessional-plans/{sessionalPlanId}/total-quantities", sessionalPlanId)
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalQuantityId").value(totalQuantityId));
+
+        then(createTotalQuantityUseCase).should().create(command);
+    }
+
+    @Test
     void 세션_총량_생성_요청_시_메모가_25자를_초과하면_400을_응답한다() throws Exception {
         // given
         Long userId = 1L;
