@@ -122,8 +122,8 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED"))
-                .andExpect(jsonPath("$.message").value("Email verification request limit exceeded."));
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_EMAIL_VERIFICATION_RESEND_LIMIT_EXCEEDED"))
+                .andExpect(jsonPath("$.message").value("Email verification resend limit exceeded."));
     }
 
     @Test
@@ -140,8 +140,8 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT"))
-                .andExpect(jsonPath("$.message").value("Email verification request is too frequent."));
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_EMAIL_VERIFICATION_RESEND_TOO_FREQUENT"))
+                .andExpect(jsonPath("$.message").value("Email verification resend is too frequent."));
     }
 
     @Test
@@ -363,7 +363,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_401_EXPIRED_EMAIL_VERIFICATION_CODE"))
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_401_EMAIL_VERIFICATION_CODE_EXPIRED"))
                 .andExpect(jsonPath("$.message").value("Email verification code expired."));
     }
 
@@ -385,7 +385,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_409_EMAIL_VERIFICATION_ALREADY_VERIFIED"))
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_409_EMAIL_ALREADY_VERIFIED"))
                 .andExpect(jsonPath("$.message").value("Email is already verified."));
     }
 }
