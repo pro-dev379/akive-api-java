@@ -2,7 +2,10 @@ package net.akive.api.auth.domain.emailverification;
 
 import lombok.*;
 import net.akive.api.common.domain.Email;
-import net.akive.api.auth.exception.EmailVerificationException;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.TooManyRequestsException;
+import net.akive.api.common.exception.business.UnauthorizedException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -11,7 +14,10 @@ import java.util.Objects;
 import static lombok.AccessLevel.*;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.ConflictError.*;
+import static net.akive.api.common.exception.business.TooManyRequestsError.*;
+import static net.akive.api.common.exception.business.UnauthorizedError.*;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -64,15 +70,15 @@ public class EmailVerification {
         requireNonNull(requestedAt);
 
         if (this.verified) {
-            throw new EmailVerificationException(ALREADY_VERIFIED);
+            throw new ConflictException(EMAIL_VERIFICATION_ALREADY_VERIFIED);
         }
 
         if (this.expiresAt.isBefore(requestedAt)) {
-            throw new EmailVerificationException(EXPIRED);
+            throw new UnauthorizedException(EXPIRED_EMAIL_VERIFICATION_CODE);
         }
 
         if (!Objects.equals(this.verificationCode, validatedInputVerificationCode)) {
-            throw new EmailVerificationException(CODE_MISMATCH);
+            throw new BadRequestException(EMAIL_VERIFICATION_CODE_MISMATCH);
         }
 
         this.verified = true;
@@ -80,11 +86,11 @@ public class EmailVerification {
 
     private void validateResendAvailable(LocalDateTime requestedAt) {
         if (this.resendCount >= MAX_RESEND_COUNT) {
-            throw new EmailVerificationException(RESEND_LIMIT_EXCEEDED);
+            throw new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED);
         }
 
         if (Duration.between(this.lastSentAt, requestedAt).compareTo(RESEND_INTERVAL) < 0) {
-            throw new EmailVerificationException(RESEND_TOO_SOON);
+            throw new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT);
         }
     }
 }

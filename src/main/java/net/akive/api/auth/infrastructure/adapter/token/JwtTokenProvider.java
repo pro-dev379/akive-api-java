@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.port.out.token.CreateTokenPort;
 import net.akive.api.auth.domain.token.TokenPayload;
 import net.akive.api.auth.application.port.out.token.ValidateTokenPort;
-import net.akive.api.auth.exception.TokenException;
+import net.akive.api.common.exception.business.UnauthorizedException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
@@ -17,8 +17,8 @@ import java.time.Instant;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static net.akive.api.auth.domain.token.TokenType.*;
-import static net.akive.api.auth.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
-import static net.akive.api.auth.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
 import static org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256;
 
 @Component
@@ -81,18 +81,18 @@ class JwtTokenProvider implements CreateTokenPort, ValidateTokenPort {
             return refreshTokenJwtDecoder.decode(refreshToken);
         } catch (JwtValidationException e) {
             if (containsExpiredTokenError(e)) {
-                throw new TokenException(EXPIRED_REFRESH_TOKEN);
+                throw new UnauthorizedException(EXPIRED_REFRESH_TOKEN);
             }
 
-            throw new TokenException(INVALID_REFRESH_TOKEN);
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         } catch (JwtException e) {
-            throw new TokenException(INVALID_REFRESH_TOKEN);
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         }
     }
 
     private void validateRefreshTokenType(Jwt jwt) {
         if (!REFRESH.name().equals(jwt.getClaimAsString("type"))) {
-            throw new TokenException(INVALID_REFRESH_TOKEN);
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         }
     }
 
@@ -104,7 +104,7 @@ class JwtTokenProvider implements CreateTokenPort, ValidateTokenPort {
                     jwt.getExpiresAt()
             );
         } catch (RuntimeException e) {
-            throw new TokenException(INVALID_REFRESH_TOKEN);
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         }
     }
 

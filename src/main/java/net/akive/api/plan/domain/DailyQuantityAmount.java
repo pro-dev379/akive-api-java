@@ -1,9 +1,9 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
 
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_MISMATCH;
+import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_AMOUNT_MISMATCH;
 
 public record DailyQuantityAmount(
         QuantityAmount quantityAmount,
@@ -20,7 +20,7 @@ public record DailyQuantityAmount(
 
         int calculatedQuantityAmount = completedQuantityAmount.value() + delayedQuantityAmount.value();
         if (calculatedQuantityAmount != quantityAmount.value()) {
-            throw new PlanException(DAILY_QUANTITY_AMOUNT_MISMATCH);
+            throw new BadRequestException(DAILY_QUANTITY_AMOUNT_MISMATCH);
         }
     }
 

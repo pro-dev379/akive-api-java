@@ -1,14 +1,21 @@
 package net.akive.api.auth.domain.emailverification;
 
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.TooManyRequestsException;
+import net.akive.api.common.exception.business.UnauthorizedException;
+
 import net.akive.api.common.domain.Email;
-import net.akive.api.auth.exception.EmailVerificationException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.*;
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.ConflictError.*;
+import static net.akive.api.common.exception.business.TooManyRequestsError.*;
+import static net.akive.api.common.exception.business.UnauthorizedError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -61,13 +68,13 @@ class EmailVerificationTest {
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(TooManyRequestsException.class)
                 .isThrownBy(() -> emailVerification.renew(
                         new EmailVerificationCode("654321"),
                         REQUESTED_AT.plusSeconds(10)
                 ))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(RESEND_TOO_SOON);
+                .extracting(TooManyRequestsException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT);
     }
 
     @Test
@@ -80,10 +87,10 @@ class EmailVerificationTest {
         emailVerification.renew(new EmailVerificationCode("333333"), REQUESTED_AT.plusMinutes(3));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(TooManyRequestsException.class)
                 .isThrownBy(() -> emailVerification.renew(new EmailVerificationCode("444444"), REQUESTED_AT.plusMinutes(4)))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(RESEND_LIMIT_EXCEEDED);
+                .extracting(TooManyRequestsException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED);
     }
 
     @Test
@@ -118,13 +125,13 @@ class EmailVerificationTest {
         emailVerification.verify(new EmailVerificationCode(VERIFICATION_CODE), REQUESTED_AT.plusMinutes(1));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> emailVerification.verify(
                         new EmailVerificationCode(VERIFICATION_CODE),
                         REQUESTED_AT.plusMinutes(2)
                 ))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(ALREADY_VERIFIED);
+                .extracting(ConflictException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_ALREADY_VERIFIED);
     }
 
     @Test
@@ -133,13 +140,13 @@ class EmailVerificationTest {
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> emailVerification.verify(
                         new EmailVerificationCode("000000"),
                         REQUESTED_AT.plusMinutes(1)
                 ))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(CODE_MISMATCH);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_CODE_MISMATCH);
     }
 
     @Test
@@ -148,15 +155,15 @@ class EmailVerificationTest {
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() ->
                         emailVerification.verify(
                                 new EmailVerificationCode(VERIFICATION_CODE),
                                 REQUESTED_AT.plus(EXPIRE_DURATION).plusSeconds(1)
                         )
                 )
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(EXPIRED);
+                .extracting(UnauthorizedException::getError)
+                .isEqualTo(EXPIRED_EMAIL_VERIFICATION_CODE);
     }
 
     private EmailVerification emailVerification(EmailVerificationPurpose verificationPurpose) {

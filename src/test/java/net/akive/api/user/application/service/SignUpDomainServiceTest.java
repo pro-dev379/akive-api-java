@@ -1,10 +1,11 @@
 package net.akive.api.user.application.service;
 
 import net.akive.api.common.domain.Email;
-import net.akive.api.auth.exception.EmailVerificationException;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.ConflictError;
 import net.akive.api.user.application.port.out.GenerateNicknamePort;
 import net.akive.api.user.domain.User;
-import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,10 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_VERIFIED;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
-import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -64,15 +64,15 @@ class SignUpDomainServiceTest {
     @Test
     void 이미_가입된_이메일이면_회원_생성에_실패한다() {
         // given
-        willThrow(new UserException(EMAIL_ALREADY_EXISTS))
+        willThrow(new ConflictException(ConflictError.EMAIL_ALREADY_EXISTS))
                 .given(signUpValidator)
                 .validateEmailSignUpAvailable(VALID_EMAIL);
 
         // when & then
-        assertThatExceptionOfType(UserException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> signUpDomainService.signUpByEmail(VALID_EMAIL, VALID_PASSWORD, USER))
-                .extracting(UserException::getErrorCode)
-                .isEqualTo(EMAIL_ALREADY_EXISTS);
+                .extracting(ConflictException::getError)
+                .isEqualTo(ConflictError.EMAIL_ALREADY_EXISTS);
 
         then(signUpValidator).should().validateEmailSignUpAvailable(VALID_EMAIL);
         then(generateNicknamePort).shouldHaveNoInteractions();
@@ -82,15 +82,15 @@ class SignUpDomainServiceTest {
     @Test
     void 이메일_인증이_완료되지_않으면_회원_생성에_실패한다() {
         // given
-        willThrow(new EmailVerificationException(NOT_VERIFIED))
+        willThrow(new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED))
                 .given(signUpValidator)
                 .validateEmailSignUpAvailable(VALID_EMAIL);
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> signUpDomainService.signUpByEmail(VALID_EMAIL, VALID_PASSWORD, USER))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(NOT_VERIFIED);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_NOT_VERIFIED);
 
         then(signUpValidator).should().validateEmailSignUpAvailable(VALID_EMAIL);
         then(generateNicknamePort).shouldHaveNoInteractions();

@@ -1,5 +1,7 @@
 package net.akive.api.plan.application.service;
 
+import net.akive.api.common.exception.business.NotFoundException;
+
 import net.akive.api.plan.application.dto.query.GetWeeklyPlanQuery;
 import net.akive.api.plan.application.dto.result.common.DailyQuantityAmountResult;
 import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
@@ -16,7 +18,6 @@ import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.Subject;
 import net.akive.api.plan.domain.WeekPeriod;
 import net.akive.api.plan.domain.WeeklyQuantityAmount;
-import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,8 +28,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.exception.PlanErrorCode.WEEKLY_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
@@ -221,11 +222,11 @@ class QueryWeeklyPlanServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> queryWeeklyPlanService.getByWeekNum(
                         new GetWeeklyPlanQuery(sessionalPlanId, userId, 1)
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(NotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(loadSessionalPlanPort).should()
@@ -248,11 +249,11 @@ class QueryWeeklyPlanServiceTest {
                 .willReturn(Optional.of(sessionPeriod));
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> queryWeeklyPlanService.getByWeekNum(
                         new GetWeeklyPlanQuery(sessionalPlanId, userId, 99)
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(NotFoundException::getError)
                 .isEqualTo(WEEKLY_PLAN_NOT_FOUND);
 
         then(loadSessionalPlanPort).should()

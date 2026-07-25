@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.exception.TokenErrorCode;
+import net.akive.api.common.exception.business.UnauthorizedError;
 import net.akive.api.common.response.ApiErrorResponse;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import static net.akive.api.auth.exception.TokenErrorCode.EXPIRED_ACCESS_TOKEN;
-import static net.akive.api.auth.exception.TokenErrorCode.INVALID_ACCESS_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_ACCESS_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_ACCESS_TOKEN;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
-        TokenErrorCode errorCode = resolveTokenErrorCode(authException);
+        UnauthorizedError errorCode = resolveUnauthorizedErrorCode(authException);
 
         response.setStatus(errorCode.getStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -39,7 +39,7 @@ public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
         objectMapper.writeValue(response.getWriter(), ApiErrorResponse.of(errorCode));
     }
 
-    private TokenErrorCode resolveTokenErrorCode(AuthenticationException authException) {
+    private UnauthorizedError resolveUnauthorizedErrorCode(AuthenticationException authException) {
         if (containsExpiredMessage(authException)) {
             return EXPIRED_ACCESS_TOKEN;
         }

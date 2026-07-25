@@ -1,10 +1,10 @@
 package net.akive.api.user.application.service;
 
 import net.akive.api.common.domain.Email;
+import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.user.application.port.out.LoadUserPort;
 import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.domain.User;
-import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,9 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
-import static net.akive.api.user.exception.UserErrorCode.NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -73,10 +73,10 @@ class AccountServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatExceptionOfType(UserException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> accountService.updatePassword(userId, "encoded-password"))
-                .extracting(UserException::getErrorCode)
-                .isEqualTo(NOT_FOUND);
+                .extracting(NotFoundException::getError)
+                .isEqualTo(USER_NOT_FOUND);
 
         then(saveUserPort).shouldHaveNoInteractions();
     }

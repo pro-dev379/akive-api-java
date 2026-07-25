@@ -5,14 +5,17 @@ import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
 import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
 import static net.akive.api.common.domain.DomainValidator.requireMaxLength;
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
-import static net.akive.api.plan.exception.PlanErrorCode.*;
+import static net.akive.api.common.exception.business.BadRequestError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
 
 @Component
 @RequiredArgsConstructor
@@ -26,12 +29,12 @@ class SessionalPlanValidator {
     void validateCreatable(Long userId, String requestedSessionName, LocalDate now) {
         String normalizedSessionName = validateSessionName(requestedSessionName);
         if (validateSessionalPlanPort.existsByUserIdAndSessionName(userId, normalizedSessionName)) {
-            throw new PlanException(SESSION_NAME_ALREADY_EXISTS);
+            throw new ConflictException(SESSION_NAME_ALREADY_EXISTS);
         }
 
         int inProgressSessionalPlanCount = validateSessionalPlanPort.countInProgressByUserId(userId, now);
         if (inProgressSessionalPlanCount >= MAX_IN_PROGRESS_SESSIONAL_PLAN_COUNT) {
-            throw new PlanException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
+            throw new BadRequestException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
         }
     }
 
@@ -61,7 +64,7 @@ class SessionalPlanValidator {
                 requestedSessionName,
                 currentSessionalPlanId
         )) {
-            throw new PlanException(SESSION_NAME_ALREADY_EXISTS);
+            throw new ConflictException(SESSION_NAME_ALREADY_EXISTS);
         }
     }
 
@@ -71,7 +74,7 @@ class SessionalPlanValidator {
     ) {
         if (!currentSessionalPlan.getSessionPeriod().equals(requestedSessionPeriod) &&
                 validateTotalQuantityPort.existsBySessionalPlanId(currentSessionalPlan.getSessionalPlanId())) {
-            throw new PlanException(SESSION_PERIOD_CHANGE_NOT_ALLOWED);
+            throw new BadRequestException(SESSION_PERIOD_CHANGE_NOT_ALLOWED);
         }
     }
 

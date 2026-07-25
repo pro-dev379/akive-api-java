@@ -86,7 +86,7 @@ class DailyTodoControllerTest extends PrivateControllerTestSupport {
         mockMvc.perform(get("/sessional-plans/todos/{date}", "2026-13-07")
                         .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(getDailyTodosUseCase).should(never()).getByDate(any(GetDailyTodosCommand.class));
     }

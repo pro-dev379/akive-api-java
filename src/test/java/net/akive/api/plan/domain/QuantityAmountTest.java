@@ -1,9 +1,10 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
+import static net.akive.api.common.exception.business.BadRequestError.VALUE_NEGATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -29,9 +30,9 @@ class QuantityAmountTest {
 
     @Test
     void 수량은_음수일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new QuantityAmount(-1))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(VALUE_NEGATIVE);
     }
 }

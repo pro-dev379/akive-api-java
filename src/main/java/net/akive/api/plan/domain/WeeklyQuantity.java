@@ -1,13 +1,13 @@
 package net.akive.api.plan.domain;
 
 import lombok.*;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.plan.exception.PlanErrorCode.WEEKLY_QUANTITY_AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT;
-import static net.akive.api.plan.exception.PlanErrorCode.WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION_PERIOD;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_EXCEEDS_TOTAL_QUANTITY;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -72,7 +72,7 @@ public class WeeklyQuantity {
     ) {
         if (weekPeriod.startOn().isBefore(sessionPeriod.startOn()) ||
                 weekPeriod.endOn().isAfter(sessionPeriod.endOn())) {
-            throw new PlanException(WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION_PERIOD);
+            throw new BadRequestException(WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION);
         }
     }
 
@@ -81,7 +81,7 @@ public class WeeklyQuantity {
             TotalQuantityAmount totalQuantityAmount
     ) {
         if (totalQuantityAmount.quantityAmount().value() < weeklyQuantityAmount.quantityAmount().value()) {
-            throw new PlanException(WEEKLY_QUANTITY_AMOUNT_EXCEEDS_TOTAL_QUANTITY_AMOUNT);
+            throw new BadRequestException(WEEKLY_QUANTITY_EXCEEDS_TOTAL_QUANTITY);
         }
     }
 }

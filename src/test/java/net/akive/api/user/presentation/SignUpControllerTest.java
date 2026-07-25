@@ -1,16 +1,16 @@
 package net.akive.api.user.presentation;
 
-import net.akive.api.auth.exception.EmailVerificationException;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.support.PublicControllerTestSupport;
 import net.akive.api.user.application.dto.SignUpByEmailCommand;
 import net.akive.api.user.application.dto.SignUpResult;
-import net.akive.api.user.exception.UserException;
 import net.akive.api.user.presentation.dto.request.SignUpByEmailRequest;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_VERIFIED;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
 import static net.akive.api.user.domain.RoleType.USER;
-import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -120,7 +120,7 @@ class SignUpControllerTest extends PublicControllerTestSupport {
                 "password123!"
         );
 
-        willThrow(new EmailVerificationException(NOT_VERIFIED))
+        willThrow(new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED))
                 .given(signUpByEmailUseCase)
                 .signUp(request.to());
 
@@ -140,7 +140,7 @@ class SignUpControllerTest extends PublicControllerTestSupport {
                 "password123!"
         );
 
-        willThrow(new UserException(EMAIL_ALREADY_EXISTS))
+        willThrow(new ConflictException(EMAIL_ALREADY_EXISTS))
                 .given(signUpByEmailUseCase)
                 .signUp(request.to());
 

@@ -3,10 +3,10 @@ package net.akive.api.plan.application.service;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.domain.*;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.NotFoundException;
 import org.springframework.stereotype.Component;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 
 @Component
 @RequiredArgsConstructor
@@ -36,6 +36,6 @@ class TotalQuantityDomainService {
     private SessionalPlan loadSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {
         return loadSessionalPlanPort
                 .loadBySessionalPlanIdAndUserId(sessionalPlanId, userId)
-                .orElseThrow(() -> new PlanException(SESSIONAL_PLAN_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
     }
 }

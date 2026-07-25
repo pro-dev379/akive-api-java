@@ -1,13 +1,13 @@
 package net.akive.api.auth.presentation;
 
 import net.akive.api.auth.application.dto.result.token.ReissueTokenResult;
-import net.akive.api.auth.exception.TokenException;
+import net.akive.api.common.exception.business.UnauthorizedException;
 import net.akive.api.support.PublicControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.auth.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
-import static net.akive.api.auth.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
-import static net.akive.api.common.exception.CommonErrorCode.INVALID_INPUT_VALUE;
+import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_INPUT_VALUE;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
@@ -106,7 +106,7 @@ class TokenControllerTest extends PublicControllerTestSupport {
         // given
         String refreshToken = "invalid-refresh-token";
 
-        willThrow(new TokenException(INVALID_REFRESH_TOKEN))
+        willThrow(new UnauthorizedException(INVALID_REFRESH_TOKEN))
                 .given(issueTokenUseCase)
                 .reissue(refreshToken);
 
@@ -123,7 +123,7 @@ class TokenControllerTest extends PublicControllerTestSupport {
         // given
         String refreshToken = "expired-refresh-token";
 
-        willThrow(new TokenException(EXPIRED_REFRESH_TOKEN))
+        willThrow(new UnauthorizedException(EXPIRED_REFRESH_TOKEN))
                 .given(issueTokenUseCase)
                 .reissue(refreshToken);
 

@@ -1,5 +1,7 @@
 package net.akive.api.auth.application.service.login;
 
+import net.akive.api.common.exception.business.UnauthorizedException;
+
 import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.dto.command.login.LoginByEmailCommand;
 import net.akive.api.auth.application.dto.result.login.LoginResult;
@@ -8,7 +10,6 @@ import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
 import net.akive.api.auth.application.port.out.login.DeleteLegacyUserPasswordPort;
 import net.akive.api.auth.application.port.out.login.LoadEmailLoginUserPort;
 import net.akive.api.auth.domain.login.LoginUser;
-import net.akive.api.auth.exception.LoginException;
 import net.akive.api.user.application.port.in.UpdatePasswordUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static net.akive.api.auth.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_EMAIL_OR_PASSWORD;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -112,12 +113,12 @@ class LoginServiceTest {
         LoginByEmailCommand command = new LoginByEmailCommand(new Email("not-found@test.com"), "password123!");
 
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
-                .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
+                .willThrow(new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
 
         // when & then
-        assertThatExceptionOfType(LoginException.class)
+        assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> loginService.login(command))
-                .extracting(LoginException::getErrorCode)
+                .extracting(UnauthorizedException::getError)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(loginDomainService).shouldHaveNoInteractions();
@@ -135,12 +136,12 @@ class LoginServiceTest {
         given(loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email()))
                 .willReturn(user);
         given(loginDomainService.authenticate(user, command.password()))
-                .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
+                .willThrow(new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
 
         // when & then
-        assertThatExceptionOfType(LoginException.class)
+        assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> loginService.login(command))
-                .extracting(LoginException::getErrorCode)
+                .extracting(UnauthorizedException::getError)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(updatePasswordUseCase).should(never()).updatePassword(any(), any());

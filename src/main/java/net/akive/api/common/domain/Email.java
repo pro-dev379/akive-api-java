@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.regex.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonCreator.Mode.DELEGATING;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.INVALID_EMAIL_FORMAT;
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_EMAIL_FORMAT;
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.common.exception.business.BadRequestException;
 
 public record Email(String value) {
 
@@ -18,7 +18,7 @@ public record Email(String value) {
     public Email {
         requireNotBlank(value);
         if (!EMAIL_PATTERN.matcher(value).matches()) {
-            throw new DomainValidationException(INVALID_EMAIL_FORMAT);
+            throw new BadRequestException(INVALID_EMAIL_FORMAT);
         }
     }
 

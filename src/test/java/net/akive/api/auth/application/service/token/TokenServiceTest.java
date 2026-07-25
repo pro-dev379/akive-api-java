@@ -1,5 +1,7 @@
 package net.akive.api.auth.application.service.token;
 
+import net.akive.api.common.exception.business.UnauthorizedException;
+
 import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
 import net.akive.api.auth.application.dto.result.token.ReissueTokenResult;
 import net.akive.api.auth.application.port.out.token.CreateTokenPort;
@@ -8,7 +10,6 @@ import net.akive.api.auth.application.port.out.token.RotateTokenPort;
 import net.akive.api.auth.application.port.out.token.SaveTokenPort;
 import net.akive.api.auth.application.port.out.token.ValidateTokenPort;
 import net.akive.api.auth.domain.token.TokenPayload;
-import net.akive.api.auth.exception.TokenException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
@@ -22,8 +23,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-import static net.akive.api.auth.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
-import static net.akive.api.auth.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
 import static net.akive.api.user.domain.RoleType.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -160,8 +161,8 @@ class TokenServiceTest {
 
         // when & then
         assertThatThrownBy(() -> tokenService.reissue(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(INVALID_REFRESH_TOKEN);
     }
 
@@ -248,8 +249,8 @@ class TokenServiceTest {
 
         // when & then
         assertThatThrownBy(() -> tokenService.reissue(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(INVALID_REFRESH_TOKEN);
 
         then(createTokenPort).should(never()).createAccessToken(userId, roleType);
@@ -272,8 +273,8 @@ class TokenServiceTest {
 
         // when & then
         assertThatThrownBy(() -> tokenService.reissue(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(INVALID_REFRESH_TOKEN);
 
         then(createTokenPort).should(never()).createAccessToken(userId, roleType);
@@ -286,12 +287,12 @@ class TokenServiceTest {
         String refreshToken = "invalid-refresh-token";
 
         given(validateTokenPort.validateRefreshToken(refreshToken))
-                .willThrow(new TokenException(INVALID_REFRESH_TOKEN));
+                .willThrow(new UnauthorizedException(INVALID_REFRESH_TOKEN));
 
         // when & then
         assertThatThrownBy(() -> tokenService.reissue(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(INVALID_REFRESH_TOKEN);
 
         verifyNoInteractions(loadTokenPort);
@@ -305,12 +306,12 @@ class TokenServiceTest {
         String refreshToken = "expired-refresh-token";
 
         given(validateTokenPort.validateRefreshToken(refreshToken))
-                .willThrow(new TokenException(EXPIRED_REFRESH_TOKEN));
+                .willThrow(new UnauthorizedException(EXPIRED_REFRESH_TOKEN));
 
         // when & then
         assertThatThrownBy(() -> tokenService.reissue(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(EXPIRED_REFRESH_TOKEN);
 
         verifyNoInteractions(loadTokenPort);

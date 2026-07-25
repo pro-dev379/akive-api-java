@@ -1,16 +1,18 @@
 package net.akive.api.user.application.service;
 
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
+
 import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.port.out.ValidateUserPort;
-import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
-import static net.akive.api.user.exception.UserErrorCode.NOT_FOUND;
+import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -44,10 +46,10 @@ class ValidateUserServiceTest {
         given(validateUserPort.existsByEmailAndLeaveFalse(email)).willReturn(false);
 
         // when & then
-        assertThatExceptionOfType(UserException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> validateUserService.validateUserExistsByEmail(email))
-                .extracting(UserException::getErrorCode)
-                .isEqualTo(NOT_FOUND);
+                .extracting(NotFoundException::getError)
+                .isEqualTo(USER_NOT_FOUND);
     }
 
     @Test
@@ -70,10 +72,10 @@ class ValidateUserServiceTest {
         given(validateUserPort.existsByUserIdAndLeaveFalse(userId)).willReturn(false);
 
         // when & then
-        assertThatExceptionOfType(UserException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> validateUserService.validateUserExistsById(userId))
-                .extracting(UserException::getErrorCode)
-                .isEqualTo(NOT_FOUND);
+                .extracting(NotFoundException::getError)
+                .isEqualTo(USER_NOT_FOUND);
     }
 
     @Test
@@ -96,9 +98,9 @@ class ValidateUserServiceTest {
         given(validateUserPort.existsByEmail(email)).willReturn(true);
 
         // when & then
-        assertThatExceptionOfType(UserException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> validateUserService.validateEmailNotDuplicate(email))
-                .extracting(UserException::getErrorCode)
+                .extracting(ConflictException::getError)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
     }
 }

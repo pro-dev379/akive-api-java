@@ -11,14 +11,14 @@ import net.akive.api.plan.application.port.out.dto.WeeklyPlanWeeklyQuantityData;
 import net.akive.api.plan.domain.PlanDate;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionWeek;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.exception.PlanErrorCode.WEEKLY_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_NOT_FOUND;
 
 @Service
 @Transactional(readOnly = true)
@@ -51,15 +51,15 @@ class QueryWeeklyPlanService implements GetWeeklyPlanUseCase {
 
     private SessionPeriod loadSessionPeriodOrThrow(Long sessionalPlanId, Long userId) {
         return loadSessionalPlanPort.loadSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId)
-                .orElseThrow(() -> new PlanException(SESSIONAL_PLAN_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
     }
 
     private SessionWeek getSessionWeekOrThrow(SessionPeriod sessionPeriod, Integer weekNum) {
         if (weekNum == null) {
-            throw new PlanException(WEEKLY_PLAN_NOT_FOUND);
+            throw new NotFoundException(WEEKLY_PLAN_NOT_FOUND);
         }
 
         return sessionPeriod.findSessionWeek(weekNum)
-                .orElseThrow(() -> new PlanException(WEEKLY_PLAN_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(WEEKLY_PLAN_NOT_FOUND));
     }
 }

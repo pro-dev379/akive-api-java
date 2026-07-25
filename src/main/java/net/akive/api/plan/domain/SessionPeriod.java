@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
-import static net.akive.api.plan.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
-import static net.akive.api.plan.exception.PlanErrorCode.SESSION_PERIOD_TOO_LONG;
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
+import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_TOO_LONG;
 
 public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
 
@@ -22,11 +22,11 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
         requireNonNull(endOn);
 
         if (!startOn.isBefore(endOn)) {
-            throw new PlanException(INVALID_SESSION_PERIOD);
+            throw new BadRequestException(INVALID_SESSION_PERIOD);
         }
 
         if (endOn.isAfter(startOn.plusMonths(MAX_DURATION_MONTHS))) {
-            throw new PlanException(SESSION_PERIOD_TOO_LONG);
+            throw new BadRequestException(SESSION_PERIOD_TOO_LONG);
         }
     }
 

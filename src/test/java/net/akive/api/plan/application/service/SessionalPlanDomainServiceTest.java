@@ -1,10 +1,11 @@
 package net.akive.api.plan.application.service;
 
+import net.akive.api.common.exception.business.ConflictException;
+
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.common.time.FixedCurrentTimeProvider;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.then;
@@ -79,18 +80,18 @@ class SessionalPlanDomainServiceTest {
                 LocalDate.of(2026, 7, 7),
                 LocalDate.of(2026, 7, 14)
         );
-        willThrow(new PlanException(SESSION_NAME_ALREADY_EXISTS))
+        willThrow(new ConflictException(SESSION_NAME_ALREADY_EXISTS))
                 .given(sessionalPlanValidator)
                 .validateCreatable(USER_ID, REQUESTED_SESSION_NAME, REQUESTED_ON);
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> sessionalPlanDomainService.createForUser(
                         USER_ID,
                         REQUESTED_SESSION_NAME,
                         requestedSessionPeriod
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(ConflictException::getError)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(sessionalPlanValidator).should().validateCreatable(
@@ -137,7 +138,7 @@ class SessionalPlanDomainServiceTest {
                 LocalDate.of(2026, 7, 8),
                 LocalDate.of(2026, 7, 15)
         );
-        willThrow(new PlanException(SESSION_NAME_ALREADY_EXISTS))
+        willThrow(new ConflictException(SESSION_NAME_ALREADY_EXISTS))
                 .given(sessionalPlanValidator)
                 .validateUpdatable(
                         currentSessionalPlan,
@@ -146,13 +147,13 @@ class SessionalPlanDomainServiceTest {
                 );
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> sessionalPlanDomainService.update(
                         currentSessionalPlan,
                         REQUESTED_UPDATE_SESSION_NAME,
                         requestedSessionPeriod
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(ConflictException::getError)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(sessionalPlanValidator).should().validateUpdatable(

@@ -1,13 +1,14 @@
 package net.akive.api.auth.infrastructure.adapter.login;
 
+import net.akive.api.common.exception.business.UnauthorizedException;
+
 import net.akive.api.common.domain.Email;
 import net.akive.api.auth.domain.login.LoginUser;
-import net.akive.api.auth.exception.LoginException;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.auth.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_EMAIL_OR_PASSWORD;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -42,9 +43,9 @@ class LoginUserJpaAdapterTest extends RepositoryTestSupport {
         Email email = new Email("none@test.com");
 
         // when & then
-        assertThatExceptionOfType(LoginException.class)
+        assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> loadEmailLoginUserPort.loadByEmailAndLeaveFalse(email))
-                .extracting(LoginException::getErrorCode)
+                .extracting(UnauthorizedException::getError)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
     }
 }

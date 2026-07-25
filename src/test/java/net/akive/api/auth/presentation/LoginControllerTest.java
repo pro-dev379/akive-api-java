@@ -1,12 +1,12 @@
 package net.akive.api.auth.presentation;
 
 import net.akive.api.auth.application.dto.result.login.LoginResult;
-import net.akive.api.auth.exception.LoginException;
+import net.akive.api.common.exception.business.UnauthorizedException;
 import net.akive.api.auth.presentation.dto.request.login.LoginByEmailRequest;
 import net.akive.api.support.PublicControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.auth.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_EMAIL_OR_PASSWORD;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -67,7 +67,7 @@ class LoginControllerTest extends PublicControllerTestSupport {
         // given
         LoginByEmailRequest request = new LoginByEmailRequest("none@test.com", "password123!");
         given(loginByEmailUseCase.login(request.to()))
-                .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
+                .willThrow(new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
 
         // when
         mockMvc.perform(post("/login/email")
@@ -83,7 +83,7 @@ class LoginControllerTest extends PublicControllerTestSupport {
         // given
         LoginByEmailRequest request = new LoginByEmailRequest("test@test.com", "wrong-password");
         given(loginByEmailUseCase.login(request.to()))
-                .willThrow(new LoginException(INVALID_EMAIL_OR_PASSWORD));
+                .willThrow(new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
 
         // when
         mockMvc.perform(post("/login/email")

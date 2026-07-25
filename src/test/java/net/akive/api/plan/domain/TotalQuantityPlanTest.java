@@ -1,13 +1,14 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -60,23 +61,23 @@ class TotalQuantityPlanTest {
 
     @Test
     void 세션_총량_계획의_세션_총량은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new TotalQuantityPlan(
                         null,
                         List.of(VALID_WEEKLY_QUANTITY_PLAN)
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 세션_총량_계획의_주간_계획_목록은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new TotalQuantityPlan(
                         VALID_TOTAL_QUANTITY,
                         null
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 

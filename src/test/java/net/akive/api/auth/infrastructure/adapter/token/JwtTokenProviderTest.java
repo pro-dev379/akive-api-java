@@ -1,6 +1,7 @@
 package net.akive.api.auth.infrastructure.adapter.token;
 
-import net.akive.api.auth.exception.TokenException;
+import net.akive.api.common.exception.business.UnauthorizedException;
+
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.common.time.FixedCurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
@@ -17,8 +18,8 @@ import org.springframework.security.oauth2.jwt.*;
 import java.util.List;
 import java.time.Instant;
 
-import static net.akive.api.auth.exception.TokenErrorCode.EXPIRED_REFRESH_TOKEN;
-import static net.akive.api.auth.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
 import static net.akive.api.auth.domain.token.TokenType.*;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -148,8 +149,8 @@ class JwtTokenProviderTest {
 
         // when & then
         assertThatThrownBy(() -> jwtTokenProvider.validateRefreshToken(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(INVALID_REFRESH_TOKEN);
     }
 
@@ -164,8 +165,8 @@ class JwtTokenProviderTest {
 
         // when & then
         assertThatThrownBy(() -> jwtTokenProvider.validateRefreshToken(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(EXPIRED_REFRESH_TOKEN);
     }
 
@@ -214,8 +215,8 @@ class JwtTokenProviderTest {
 
         // when & then
         assertThatThrownBy(() -> jwtTokenProvider.validateRefreshToken(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(INVALID_REFRESH_TOKEN);
     }
 
@@ -236,8 +237,8 @@ class JwtTokenProviderTest {
 
         // when & then
         assertThatThrownBy(() -> jwtTokenProvider.validateRefreshToken(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(INVALID_REFRESH_TOKEN);
     }
 
@@ -259,8 +260,8 @@ class JwtTokenProviderTest {
 
         // when & then
         assertThatThrownBy(() -> jwtTokenProvider.validateRefreshToken(refreshToken))
-                .isInstanceOf(TokenException.class)
-                .extracting("errorCode")
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("error")
                 .isEqualTo(INVALID_REFRESH_TOKEN);
     }
 }

@@ -1,10 +1,10 @@
 package net.akive.api.common.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.common.exception.business.BadRequestException;
 
 import java.time.LocalDate;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.*;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 
 public final class DomainValidator {
 
@@ -13,7 +13,7 @@ public final class DomainValidator {
 
     public static <T> T requireNonNull(T value) {
         if (value == null) {
-            throw new DomainValidationException(REQUIRED_VALUE_MISSING);
+            throw new BadRequestException(REQUIRED_VALUE_MISSING);
         }
 
         return value;
@@ -24,7 +24,7 @@ public final class DomainValidator {
 
         String trimmedValue = value.trim();
         if (trimmedValue.isEmpty()) {
-            throw new DomainValidationException(BLANK_VALUE);
+            throw new BadRequestException(BLANK_VALUE);
         }
 
         return trimmedValue;
@@ -34,7 +34,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value.length() > maxLength) {
-            throw new DomainValidationException(MAX_LENGTH_EXCEEDED);
+            throw new BadRequestException(MAX_LENGTH_EXCEEDED);
         }
 
         return value;
@@ -46,7 +46,7 @@ public final class DomainValidator {
         }
 
         if (value.length() > maxLength) {
-            throw new DomainValidationException(MAX_LENGTH_EXCEEDED);
+            throw new BadRequestException(MAX_LENGTH_EXCEEDED);
         }
 
         return value;
@@ -56,7 +56,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value <= 0) {
-            throw new DomainValidationException(VALUE_NOT_POSITIVE);
+            throw new BadRequestException(VALUE_NOT_POSITIVE);
         }
 
         return value;
@@ -66,7 +66,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value <= 0) {
-            throw new DomainValidationException(VALUE_NOT_POSITIVE);
+            throw new BadRequestException(VALUE_NOT_POSITIVE);
         }
 
         return value;
@@ -76,7 +76,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value < 0) {
-            throw new DomainValidationException(VALUE_NEGATIVE);
+            throw new BadRequestException(VALUE_NEGATIVE);
         }
 
         return value;
@@ -86,7 +86,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value < 0) {
-            throw new DomainValidationException(VALUE_NEGATIVE);
+            throw new BadRequestException(VALUE_NEGATIVE);
         }
 
         return value;
@@ -97,7 +97,7 @@ public final class DomainValidator {
         requireNonNull(endOn);
 
         if (startOn.isAfter(endOn)) {
-            throw new DomainValidationException(INVALID_DATE_RANGE);
+            throw new BadRequestException(INVALID_DATE_RANGE);
         }
     }
 }

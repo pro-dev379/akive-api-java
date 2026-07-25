@@ -10,7 +10,7 @@ import net.akive.api.auth.application.port.out.token.SaveTokenPort;
 import net.akive.api.auth.application.port.out.token.CreateTokenPort;
 import net.akive.api.auth.application.port.out.token.ValidateTokenPort;
 import net.akive.api.auth.domain.token.TokenPayload;
-import net.akive.api.auth.exception.TokenException;
+import net.akive.api.common.exception.business.UnauthorizedException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 
-import static net.akive.api.auth.exception.TokenErrorCode.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
 
 @Service
 @Transactional
@@ -69,10 +69,10 @@ class TokenService implements IssueTokenUseCase {
     private void validateSavedRefreshToken(Long userId, String refreshToken) {
         String savedRefreshToken = loadTokenPort
                 .loadByUserId(userId)
-                .orElseThrow(() -> new TokenException(INVALID_REFRESH_TOKEN));
+                .orElseThrow(() -> new UnauthorizedException(INVALID_REFRESH_TOKEN));
 
         if (!savedRefreshToken.equals(refreshToken)) {
-            throw new TokenException(INVALID_REFRESH_TOKEN);
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         }
     }
 
@@ -95,7 +95,7 @@ class TokenService implements IssueTokenUseCase {
         );
 
         if (!rotated) {
-            throw new TokenException(INVALID_REFRESH_TOKEN);
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         }
 
         return newRefreshToken;

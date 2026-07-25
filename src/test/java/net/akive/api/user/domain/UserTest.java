@@ -1,11 +1,12 @@
 package net.akive.api.user.domain;
 
+import net.akive.api.common.exception.business.BadRequestException;
+
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.BLANK_VALUE;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
+import static net.akive.api.common.exception.business.BadRequestError.BLANK_VALUE;
+import static net.akive.api.common.exception.business.BadRequestError.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.LoginType.SNS;
 import static net.akive.api.user.domain.RoleType.USER;
@@ -73,7 +74,7 @@ class UserTest {
 
     @Test
     void 회원_생성_시_닉네임이_공백이면_생성에_실패한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> User.create(
                         1L,
                         VALID_EMAIL,
@@ -86,7 +87,7 @@ class UserTest {
                         false,
                         null
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 
@@ -119,7 +120,7 @@ class UserTest {
         String nickname = "a".repeat(21);
 
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> User.create(
                         1L,
                         VALID_EMAIL,
@@ -132,7 +133,7 @@ class UserTest {
                         false,
                         null
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
@@ -185,7 +186,7 @@ class UserTest {
         String aim = "a".repeat(101);
 
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> User.create(
                         1L,
                         VALID_EMAIL,
@@ -198,7 +199,7 @@ class UserTest {
                         false,
                         null
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
@@ -233,14 +234,14 @@ class UserTest {
 
     @Test
     void 이메일_회원가입_시_닉네임이_공백이면_회원_생성에_실패한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> User.signUpByEmail(
                         VALID_EMAIL,
                         "   ",
                         VALID_ENCODED_PASSWORD,
                         USER
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 
@@ -262,14 +263,14 @@ class UserTest {
     void 이메일_회원가입_시_닉네임이_20자를_초과하면_회원_생성에_실패한다() {
         String nickname = "a".repeat(21);
 
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> User.signUpByEmail(
                         VALID_EMAIL,
                         nickname,
                         VALID_ENCODED_PASSWORD,
                         USER
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
@@ -287,14 +288,14 @@ class UserTest {
 
     @Test
     void 이메일_회원가입_시_인코딩된_패스워드가_공백이면_회원_생성에_실패한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> User.signUpByEmail(
                         VALID_EMAIL,
                         VALID_NICKNAME,
                         "   ",
                         USER
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 
@@ -328,9 +329,9 @@ class UserTest {
         User user = createEmailUser();
 
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> user.updatePassword("   "))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 

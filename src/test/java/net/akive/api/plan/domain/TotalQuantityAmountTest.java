@@ -1,12 +1,13 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.BLANK_VALUE;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
+import static net.akive.api.common.exception.business.BadRequestError.BLANK_VALUE;
+import static net.akive.api.common.exception.business.BadRequestError.MAX_LENGTH_EXCEEDED;
+import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.exception.business.BadRequestError.VALUE_NEGATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -34,33 +35,33 @@ class TotalQuantityAmountTest {
 
     @Test
     void 전체_계획량은_음수일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantityAmount.of(-1, "문제", null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(VALUE_NEGATIVE);
     }
 
     @Test
     void 전체_계획량의_수량은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new TotalQuantityAmount(null, "문제", null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 단위는_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantityAmount.of(100, null, null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 단위는_공백일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantityAmount.of(100, " ", null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 
@@ -87,9 +88,9 @@ class TotalQuantityAmountTest {
 
     @Test
     void 단위는_10자를_초과할_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantityAmount.of(100, "가".repeat(11), null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
@@ -105,9 +106,9 @@ class TotalQuantityAmountTest {
 
     @Test
     void 메모는_100자를_초과할_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantityAmount.of(100, "문제", "가".repeat(101)))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 }

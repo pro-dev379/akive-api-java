@@ -1,12 +1,13 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
 import static java.time.DayOfWeek.TUESDAY;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -36,17 +37,17 @@ class PlanDateTest {
 
     @Test
     void 날짜가_null이면_계획_날짜_생성에_실패한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new PlanDate(null, TUESDAY))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 요일이_null이면_계획_날짜_생성에_실패한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new PlanDate(LocalDate.of(2026, 7, 7), null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 }

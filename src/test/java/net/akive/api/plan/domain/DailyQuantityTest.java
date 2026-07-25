@@ -1,15 +1,12 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NOT_POSITIVE;
-import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
-import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -76,53 +73,53 @@ class DailyQuantityTest {
 
     @Test
     void 하루_계획량의_주간_계획량은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         null,
                         VALID_WEEK_START_ON,
                         VALID_DAILY_QUANTITY_AMOUNT
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 하루_계획량의_날짜는_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         null,
                         VALID_DAILY_QUANTITY_AMOUNT
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 하루_계획량의_수량은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         VALID_WEEK_START_ON,
                         null
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 하루_계획량의_식별자는_양수여야_한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         0L,
                         VALID_WEEKLY_QUANTITY,
                         VALID_WEEK_START_ON,
                         VALID_DAILY_QUANTITY_AMOUNT
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(VALUE_NOT_POSITIVE);
     }
 
@@ -149,52 +146,52 @@ class DailyQuantityTest {
 
     @Test
     void 하루_계획량의_날짜는_주간_계획량의_시작일보다_빠를_수_없다() {
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         VALID_WEEK_START_ON.minusDays(1),
                         VALID_DAILY_QUANTITY_AMOUNT
                 ))
-                .extracting(PlanException::getErrorCode)
-                .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
     }
 
     @Test
     void 하루_계획량의_날짜는_주간_계획량의_종료일보다_늦을_수_없다() {
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         VALID_WEEK_END_ON.plusDays(1),
                         VALID_DAILY_QUANTITY_AMOUNT
                 ))
-                .extracting(PlanException::getErrorCode)
-                .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
     }
 
     @Test
     void 하루_계획량은_주간_계획량보다_클_수_없다() {
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> DailyQuantity.create(
                         1L,
                         VALID_WEEKLY_QUANTITY,
                         VALID_WEEK_START_ON,
                         DailyQuantityAmount.of(11, 0, 11, null)
                 ))
-                .extracting(PlanException::getErrorCode)
-                .isEqualTo(DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY);
     }
 
     @Test
     void 주간_계획량에_속한_하루_계획량은_주간_계획량보다_클_수_없다() {
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> DailyQuantity.createForWeeklyQuantity(
                         VALID_WEEKLY_QUANTITY,
                         VALID_WEEK_START_ON,
                         DailyQuantityAmount.of(11, 0, 11, null)
                 ))
-                .extracting(PlanException::getErrorCode)
-                .isEqualTo(DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY);
     }
 }

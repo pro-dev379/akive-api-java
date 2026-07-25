@@ -6,7 +6,9 @@ import net.akive.api.plan.application.dto.query.GetSessionalPlanQuery;
 import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
 import net.akive.api.plan.application.dto.result.common.*;
 import net.akive.api.plan.application.dto.result.sessionalplan.*;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.presentation.dto.request.CreateSessionalPlanRequest;
 import net.akive.api.plan.presentation.dto.request.common.SessionPeriodRequest;
 import net.akive.api.plan.presentation.dto.request.UpdateSessionalPlanRequest;
@@ -16,9 +18,9 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.exception.PlanErrorCode.SESSION_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.exception.PlanErrorCode.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -186,7 +188,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         GetSessionalPlanQuery command = new GetSessionalPlanQuery(userId, sessionalPlanId);
 
         given(getSessionalPlanUseCase.get(command))
-                .willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND));
+                .willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
         // when & then
         mockMvc.perform(get("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
@@ -242,7 +244,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -265,7 +267,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -282,7 +284,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -305,7 +307,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -328,7 +330,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -353,7 +355,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -370,7 +372,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 )
         );
 
-        willThrow(new PlanException(SESSION_NAME_ALREADY_EXISTS))
+        willThrow(new ConflictException(SESSION_NAME_ALREADY_EXISTS))
                 .given(createSessionalPlanUseCase)
                 .create(request.to(userId));
 
@@ -380,7 +382,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("PLAN_409_1"));
+                .andExpect(jsonPath("$.code").value("PLAN_409_SESSION_NAME_ALREADY_EXISTS"));
     }
 
     @Test
@@ -426,7 +428,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
     }
@@ -450,7 +452,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
     }
@@ -468,7 +470,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
     }
@@ -492,7 +494,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
     }
@@ -516,7 +518,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(updateSessionalPlanUseCase).should(never()).update(any(UpdateSessionalPlanCommand.class));
     }
@@ -542,7 +544,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("COMMON_400_1"));
+                .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
         then(createSessionalPlanUseCase).should(never()).create(any(CreateSessionalPlanCommand.class));
     }
@@ -560,7 +562,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 )
         );
 
-        willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND))
+        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(updateSessionalPlanUseCase)
                 .update(request.to(sessionalPlanId, userId));
 
@@ -570,7 +572,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("PLAN_404_1"));
+                .andExpect(jsonPath("$.code").value("PLAN_404_SESSIONAL_PLAN_NOT_FOUND"));
 
         then(updateSessionalPlanUseCase).should().update(request.to(sessionalPlanId, userId));
     }
@@ -588,7 +590,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 )
         );
 
-        willThrow(new PlanException(SESSION_NAME_ALREADY_EXISTS))
+        willThrow(new ConflictException(SESSION_NAME_ALREADY_EXISTS))
                 .given(updateSessionalPlanUseCase)
                 .update(request.to(sessionalPlanId, userId));
 
@@ -598,7 +600,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("PLAN_409_1"));
+                .andExpect(jsonPath("$.code").value("PLAN_409_SESSION_NAME_ALREADY_EXISTS"));
 
         then(updateSessionalPlanUseCase).should().update(request.to(sessionalPlanId, userId));
     }
@@ -616,7 +618,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                 )
         );
 
-        willThrow(new PlanException(SESSION_PERIOD_CHANGE_NOT_ALLOWED))
+        willThrow(new BadRequestException(SESSION_PERIOD_CHANGE_NOT_ALLOWED))
                 .given(updateSessionalPlanUseCase)
                 .update(request.to(sessionalPlanId, userId));
 
@@ -626,7 +628,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("PLAN_400_2"));
+                .andExpect(jsonPath("$.code").value("PLAN_400_SESSION_PERIOD_CHANGE_NOT_ALLOWED"));
 
         then(updateSessionalPlanUseCase).should().update(request.to(sessionalPlanId, userId));
     }
@@ -677,7 +679,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long sessionalPlanId = 10L;
         DeleteSessionalPlanCommand command = new DeleteSessionalPlanCommand(userId, sessionalPlanId);
 
-        willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND))
+        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(deleteSessionalPlanUseCase)
                 .delete(command);
 
@@ -685,7 +687,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         mockMvc.perform(delete("/sessional-plans/{sessionalPlanId}", sessionalPlanId)
                         .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("PLAN_404_1"));
+                .andExpect(jsonPath("$.code").value("PLAN_404_SESSIONAL_PLAN_NOT_FOUND"));
 
         then(deleteSessionalPlanUseCase).should().delete(command);
     }

@@ -1,15 +1,15 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.plan.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
-import static net.akive.api.plan.exception.PlanErrorCode.SESSION_PERIOD_TOO_LONG;
+import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
+import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_TOO_LONG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -32,18 +32,18 @@ class SessionPeriodTest {
     @Test
     void 시작일이_null이면_세션_기간_생성에_실패한다() {
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new SessionPeriod(null, LocalDate.of(2026, 7, 14)))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 종료일이_null이면_세션_기간_생성에_실패한다() {
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new SessionPeriod(LocalDate.of(2026, 7, 7), null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
@@ -53,21 +53,21 @@ class SessionPeriodTest {
         LocalDate sessionOn = LocalDate.of(2026, 7, 7);
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new SessionPeriod(sessionOn, sessionOn))
-                .extracting(PlanException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 
     @Test
     void 시작일이_종료일보다_이후이면_세션_기간_생성에_실패한다() {
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new SessionPeriod(
                         LocalDate.of(2026, 7, 14),
                         LocalDate.of(2026, 7, 7)
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 
@@ -84,12 +84,12 @@ class SessionPeriodTest {
 
     @Test
     void 세션_기간이_12개월을_초과하면_세션_기간_생성에_실패한다() {
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new SessionPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2027, 7, 8)
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(SESSION_PERIOD_TOO_LONG);
     }
 

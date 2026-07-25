@@ -4,15 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
 
 import java.time.LocalDate;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT;
-import static net.akive.api.plan.exception.PlanErrorCode.DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD;
+import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
+import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -73,7 +73,7 @@ public class DailyQuantity {
 
     private static void validateDateInWeekPeriod(LocalDate date, WeekPeriod weekPeriod) {
         if (date.isBefore(weekPeriod.startOn()) || date.isAfter(weekPeriod.endOn())) {
-            throw new PlanException(DAILY_QUANTITY_DATE_OUT_OF_WEEK_PERIOD);
+            throw new BadRequestException(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
         }
     }
 
@@ -82,7 +82,7 @@ public class DailyQuantity {
             WeeklyQuantityAmount weeklyQuantityAmount
     ) {
         if (weeklyQuantityAmount.quantityAmount().value() < dailyQuantityAmount.quantityAmount().value()) {
-            throw new PlanException(DAILY_QUANTITY_AMOUNT_EXCEEDS_WEEKLY_QUANTITY_AMOUNT);
+            throw new BadRequestException(DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY);
         }
     }
 }

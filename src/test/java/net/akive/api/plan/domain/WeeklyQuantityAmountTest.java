@@ -1,11 +1,12 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.MAX_LENGTH_EXCEEDED;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NEGATIVE;
+import static net.akive.api.common.exception.business.BadRequestError.MAX_LENGTH_EXCEEDED;
+import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.exception.business.BadRequestError.VALUE_NEGATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -32,17 +33,17 @@ class WeeklyQuantityAmountTest {
 
     @Test
     void 주간_계획량은_음수일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> WeeklyQuantityAmount.of(-1, null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(VALUE_NEGATIVE);
     }
 
     @Test
     void 주간_계획량의_수량은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new WeeklyQuantityAmount(null, null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
@@ -58,9 +59,9 @@ class WeeklyQuantityAmountTest {
 
     @Test
     void 메모는_100자를_초과할_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> WeeklyQuantityAmount.of(10, "가".repeat(101)))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 }

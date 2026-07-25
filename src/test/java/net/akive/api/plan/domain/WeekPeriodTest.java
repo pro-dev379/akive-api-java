@@ -1,16 +1,14 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static java.time.DayOfWeek.*;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.INVALID_DATE_RANGE;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.plan.exception.PlanErrorCode.INVALID_WEEK_PERIOD;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -32,28 +30,28 @@ class WeekPeriodTest {
 
     @Test
     void 시작일이_null이면_주간_기간_생성에_실패한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new WeekPeriod(null, LocalDate.of(2026, 7, 14)))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 종료일이_null이면_주간_기간_생성에_실패한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new WeekPeriod(LocalDate.of(2026, 7, 7), null))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 주간_기간은_7일을_초과할_수_없다() {
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new WeekPeriod(
                         LocalDate.of(2026, 7, 7),
                         LocalDate.of(2026, 7, 15)
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(INVALID_WEEK_PERIOD);
     }
 
@@ -90,12 +88,12 @@ class WeekPeriodTest {
 
     @Test
     void 시작일이_종료일보다_이후이면_주간_기간_생성에_실패한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new WeekPeriod(
                         LocalDate.of(2026, 7, 13),
                         LocalDate.of(2026, 7, 12)
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(INVALID_DATE_RANGE);
     }
 

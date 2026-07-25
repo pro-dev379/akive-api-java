@@ -1,6 +1,6 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static net.akive.api.common.domain.DomainValidator.requireStartNotAfterEnd;
-import static net.akive.api.plan.exception.PlanErrorCode.INVALID_WEEK_PERIOD;
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_WEEK_PERIOD;
 
 public record WeekPeriod(LocalDate startOn, LocalDate endOn) {
 
@@ -19,7 +19,7 @@ public record WeekPeriod(LocalDate startOn, LocalDate endOn) {
 
         long periodDays = ChronoUnit.DAYS.between(startOn, endOn);
         if (periodDays < 0 || WEEK_DAYS < periodDays) {
-            throw new PlanException(INVALID_WEEK_PERIOD);
+            throw new BadRequestException(INVALID_WEEK_PERIOD);
         }
     }
 

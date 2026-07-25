@@ -3,7 +3,7 @@ package net.akive.api.user.application.service;
 import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
 import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
-import net.akive.api.auth.exception.EmailVerificationException;
+import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.mentoring.application.port.in.CreateDefaultMentoringProfileUseCase;
 import net.akive.api.user.application.dto.SignUpByEmailCommand;
 import net.akive.api.user.application.dto.SignUpResult;
@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_VERIFIED;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -120,12 +120,12 @@ class SignUpServiceTest {
                 "password123!"
         );
 
-        doThrow(new EmailVerificationException(NOT_VERIFIED))
+        doThrow(new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED))
                 .when(signUpDomainService)
                 .signUpByEmail(command.email(), command.password(), command.roleType());
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> signUpService.signUp(command));
 
         then(saveUserPort).should(never()).save(any(User.class));

@@ -1,14 +1,14 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.*;
-import static net.akive.api.plan.exception.PlanErrorCode.INVALID_SESSION_PERIOD;
+import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -70,14 +70,14 @@ class SessionalPlanTest {
         LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
 
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> SessionalPlan.createForUser(
                         1L,
                         "   ",
                         sessionPeriod,
                         requestedAt
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
     
@@ -91,14 +91,14 @@ class SessionalPlanTest {
         LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
 
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> SessionalPlan.createForUser(
                         1L,
                         "가".repeat(51),
                         sessionPeriod,
                         requestedAt
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
@@ -134,14 +134,14 @@ class SessionalPlanTest {
         LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> SessionalPlan.createForUser(
                         1L,
                         "1회차",
                         sessionPeriod,
                         requestedAt
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 
@@ -155,14 +155,14 @@ class SessionalPlanTest {
         LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> SessionalPlan.createForUser(
                         1L,
                         "1회차",
                         sessionPeriod,
                         requestedAt
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 
@@ -220,14 +220,14 @@ class SessionalPlanTest {
         );
 
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> SessionalPlan.create(
                         1L,
                         1L,
                         "   ",
                         sessionPeriod
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 
@@ -240,14 +240,14 @@ class SessionalPlanTest {
         );
 
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> SessionalPlan.create(
                         1L,
                         1L,
                         "가".repeat(51),
                         sessionPeriod
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
@@ -335,13 +335,13 @@ class SessionalPlanTest {
         LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
 
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> sessionalPlan.update(
                         "가".repeat(51),
                         sessionalPlan.getSessionPeriod(),
                         requestedAt
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
@@ -352,13 +352,13 @@ class SessionalPlanTest {
         LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
 
         // when & then
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> sessionalPlan.update(
                         "   ",
                         sessionalPlan.getSessionPeriod(),
                         requestedAt
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 
@@ -373,13 +373,13 @@ class SessionalPlanTest {
         LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> sessionalPlan.update(
                         "수정된 1회차",
                         requestedSessionPeriod,
                         requestedAt
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 
@@ -394,13 +394,13 @@ class SessionalPlanTest {
         LocalDateTime requestedAt = LocalDateTime.of(2026, 7, 6, 12, 0);
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> sessionalPlan.update(
                         "수정된 1회차",
                         requestedSessionPeriod,
                         requestedAt
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 

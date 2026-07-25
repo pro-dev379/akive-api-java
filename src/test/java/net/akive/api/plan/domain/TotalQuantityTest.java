@@ -1,12 +1,13 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.VALUE_NOT_POSITIVE;
+import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.exception.business.BadRequestError.VALUE_NOT_POSITIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -60,89 +61,89 @@ class TotalQuantityTest {
 
     @Test
     void 사용자_세션_총량의_세셔널_플랜은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantity.createForUser(
                         null,
                         VALID_SUBJECT,
                         VALID_TOTAL_QUANTITY_AMOUNT
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 사용자_세션_총량의_과목은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantity.createForUser(
                         VALID_SESSIONAL_PLAN,
                         null,
                         VALID_TOTAL_QUANTITY_AMOUNT
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 사용자_세션_총량의_계획량은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantity.createForUser(
                         VALID_SESSIONAL_PLAN,
                         VALID_SUBJECT,
                         null
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 영속회된_세션_총량의_식별자는_양수여야_한다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantity.create(
                         0L,
                         VALID_SESSIONAL_PLAN,
                         VALID_SUBJECT,
                         VALID_TOTAL_QUANTITY_AMOUNT
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(VALUE_NOT_POSITIVE);
     }
 
     @Test
     void 영속화된_세션_총량의_세셔널_플랜은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         null,
                         VALID_SUBJECT,
                         VALID_TOTAL_QUANTITY_AMOUNT
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 영속화된_세션_총량의_과목은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
                         null,
                         VALID_TOTAL_QUANTITY_AMOUNT
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 영속화된_세션_총량의_계획량은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> TotalQuantity.create(
                         1L,
                         VALID_SESSIONAL_PLAN,
                         VALID_SUBJECT,
                         null
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 }

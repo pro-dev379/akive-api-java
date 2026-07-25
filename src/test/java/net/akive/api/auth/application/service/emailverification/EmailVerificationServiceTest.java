@@ -1,5 +1,9 @@
 package net.akive.api.auth.application.service.emailverification;
 
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.TooManyRequestsException;
+
 import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
 import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCommand;
@@ -10,7 +14,6 @@ import net.akive.api.auth.application.port.out.emailverification.SendEmailVerifi
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import net.akive.api.auth.exception.EmailVerificationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,9 +26,9 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPolic
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.RESEND_INTERVAL;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFIED_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_FOUND;
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_VERIFIED;
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.RESEND_TOO_SOON;
+import static net.akive.api.common.exception.business.NotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.TooManyRequestsError.EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,13 +81,13 @@ class EmailVerificationServiceTest {
     void 인증번호_발급에_실패하면_전송하지_않고_저장하지_않는다() {
         // given
         given(emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP))
-                .willThrow(new EmailVerificationException(RESEND_TOO_SOON));
+                .willThrow(new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(TooManyRequestsException.class)
                 .isThrownBy(() -> emailVerificationService.send(sendCommand(SIGN_UP)))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(RESEND_TOO_SOON);
+                .extracting(TooManyRequestsException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT);
 
         then(sendEmailVerificationMailPort).should(never()).send(any(), any());
         then(saveEmailVerificationPort).should(never()).save(any(), any());
@@ -109,13 +112,13 @@ class EmailVerificationServiceTest {
     void 인증번호_검증에_실패하면_인증정보를_저장하지_않는다() {
         // given
         given(emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
-                .willThrow(new EmailVerificationException(NOT_FOUND));
+                .willThrow(new NotFoundException(EMAIL_VERIFICATION_NOT_FOUND));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> emailVerificationService.verify(verifyCommand(SIGN_UP, VERIFICATION_CODE.value())))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(NOT_FOUND);
+                .extracting(NotFoundException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_NOT_FOUND);
 
         then(saveEmailVerificationPort).should(never()).save(any(), any());
     }
@@ -132,15 +135,15 @@ class EmailVerificationServiceTest {
     @Test
     void 인증_완료_확인에_실패하면_예외를_던진다() {
         // given
-        willThrow(new EmailVerificationException(NOT_VERIFIED))
+        willThrow(new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED))
                 .given(emailVerificationDomainService)
                 .ensureVerified(new Email(EMAIL), SIGN_UP);
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> emailVerificationService.ensureVerified(ensureVerifiedCommand(SIGN_UP)))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(NOT_VERIFIED);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_NOT_VERIFIED);
 
         then(emailVerificationDomainService).should().ensureVerified(new Email(EMAIL), SIGN_UP);
     }

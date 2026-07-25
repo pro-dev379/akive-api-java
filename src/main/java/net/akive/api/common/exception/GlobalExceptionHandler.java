@@ -2,6 +2,7 @@ package net.akive.api.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import net.akive.api.common.exception.business.BusinessException;
 import net.akive.api.common.response.ApiErrorResponse;
 import net.akive.api.common.response.FieldErrorDetail;
 import org.springframework.http.ResponseEntity;
@@ -15,24 +16,29 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_INPUT_VALUE;
+import static net.akive.api.common.exception.internal.InternalServerError.INTERNAL_SERVER_ERROR;
+import static net.akive.api.common.exception.business.NotFoundError.REQUESTED_RESOURCE_NOT_FOUND;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     ResponseEntity<ApiErrorResponse> handleBusinessException(HttpServletRequest request, BusinessException e) {
-        ErrorCode errorCode = e.getErrorCode();
+        Error error = e.getError();
 
         log.warn(
-                "[BusinessException] uri={}, method={}, code={}, message={}",
+                "[BusinessException] uri={}, method={}, code={}, message={}, detail={}",
                 request.getRequestURI(),
                 request.getMethod(),
-                errorCode.getCode(),
+                error.getCode(),
                 e.getMessage(),
+                e.getDetail(),
                 e
         );
 
-        return createErrorResponse(errorCode);
+        return createErrorResponse(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -54,7 +60,7 @@ public class GlobalExceptionHandler {
                 e
         );
 
-        return createErrorResponse(CommonErrorCode.INVALID_INPUT_VALUE, fieldErrors);
+        return createErrorResponse(INVALID_INPUT_VALUE, fieldErrors);
     }
 
     @ExceptionHandler({
@@ -75,32 +81,32 @@ public class GlobalExceptionHandler {
                 e
         );
 
-        return createErrorResponse(CommonErrorCode.INVALID_INPUT_VALUE);
+        return createErrorResponse(INVALID_INPUT_VALUE);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     ResponseEntity<ApiErrorResponse> handleNoResourceFoundException(HttpServletRequest request) {
         log.warn("[NoResourceFoundException] uri={}, method={}", request.getRequestURI(), request.getMethod());
 
-        return createErrorResponse(CommonErrorCode.NOT_FOUND);
+        return createErrorResponse(REQUESTED_RESOURCE_NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorResponse> handleException(HttpServletRequest request, Exception e) {
         log.error("[UnexpectedException] uri={}, method={}", request.getRequestURI(), request.getMethod(), e);
 
-        return createErrorResponse(CommonErrorCode.INTERNAL_SERVER_ERROR);
+        return createErrorResponse(INTERNAL_SERVER_ERROR);
     }
 
-    private ResponseEntity<ApiErrorResponse> createErrorResponse(ErrorCode errorCode) {
+    private ResponseEntity<ApiErrorResponse> createErrorResponse(Error error) {
         return ResponseEntity
-                .status(errorCode.getStatus())
-                .body(ApiErrorResponse.of(errorCode));
+                .status(error.getStatus())
+                .body(ApiErrorResponse.of(error));
     }
 
-    private ResponseEntity<ApiErrorResponse> createErrorResponse(ErrorCode errorCode, List<FieldErrorDetail> fieldErrorDetails) {
+    private ResponseEntity<ApiErrorResponse> createErrorResponse(Error error, List<FieldErrorDetail> fieldErrorDetails) {
         return ResponseEntity
-                .status(errorCode.getStatus())
-                .body(ApiErrorResponse.of(errorCode, fieldErrorDetails));
+                .status(error.getStatus())
+                .body(ApiErrorResponse.of(error, fieldErrorDetails));
     }
 }

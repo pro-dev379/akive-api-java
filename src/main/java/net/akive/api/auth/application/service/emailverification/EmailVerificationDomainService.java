@@ -6,15 +6,16 @@ import net.akive.api.auth.application.port.out.emailverification.LoadEmailVerifi
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import net.akive.api.auth.exception.EmailVerificationException;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.common.domain.Email;
 import net.akive.api.common.time.CurrentTimeProvider;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_FOUND;
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.NOT_VERIFIED;
+import static net.akive.api.common.exception.business.NotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
 
 @Component
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ class EmailVerificationDomainService {
     ) {
         EmailVerification emailVerification = loadEmailVerificationPort
                 .loadByEmailAndVerificationPurpose(email, verificationPurpose)
-                .orElseThrow(() -> new EmailVerificationException(NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(EMAIL_VERIFICATION_NOT_FOUND));
 
         emailVerification.verify(verificationCode, currentTimeProvider.now());
 
@@ -57,10 +58,10 @@ class EmailVerificationDomainService {
     void ensureVerified(Email email, EmailVerificationPurpose verificationPurpose) {
         EmailVerification emailVerification = loadEmailVerificationPort
                 .loadByEmailAndVerificationPurpose(email, verificationPurpose)
-                .orElseThrow(() -> new EmailVerificationException(NOT_VERIFIED));
+                .orElseThrow(() -> new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED));
 
         if (!emailVerification.isVerified()) {
-            throw new EmailVerificationException(NOT_VERIFIED);
+            throw new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED);
         }
     }
 }

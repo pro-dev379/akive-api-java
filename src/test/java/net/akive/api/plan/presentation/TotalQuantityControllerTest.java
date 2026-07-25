@@ -1,17 +1,19 @@
 package net.akive.api.plan.presentation;
 
 import net.akive.api.plan.application.dto.command.CreateTotalQuantityCommand;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.presentation.dto.request.CreateTotalQuantityRequest;
 import net.akive.api.plan.presentation.dto.request.common.SubjectRequest;
 import net.akive.api.plan.presentation.dto.request.common.TotalQuantityAmountRequest;
 import net.akive.api.support.PrivateControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.CommonErrorCode.INVALID_INPUT_VALUE;
-import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.exception.PlanErrorCode.SUBJECT_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.exception.PlanErrorCode.TOTAL_QUANTITY_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_INPUT_VALUE;
+import static net.akive.api.common.exception.business.BadRequestError.TOTAL_QUANTITY_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -359,7 +361,7 @@ class TotalQuantityControllerTest extends PrivateControllerTestSupport {
         CreateTotalQuantityRequest request = createRequest();
         CreateTotalQuantityCommand command = request.to(userId, sessionalPlanId);
 
-        willThrow(new PlanException(TOTAL_QUANTITY_LIMIT_EXCEEDED))
+        willThrow(new BadRequestException(TOTAL_QUANTITY_LIMIT_EXCEEDED))
                 .given(createTotalQuantityUseCase).create(command);
 
         // when & then
@@ -414,7 +416,7 @@ class TotalQuantityControllerTest extends PrivateControllerTestSupport {
         );
         CreateTotalQuantityCommand command = request.to(userId, sessionalPlanId);
 
-        willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND))
+        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(createTotalQuantityUseCase).create(command);
 
         // when & then
@@ -436,7 +438,7 @@ class TotalQuantityControllerTest extends PrivateControllerTestSupport {
         CreateTotalQuantityRequest request = createRequest();
         CreateTotalQuantityCommand command = request.to(userId, sessionalPlanId);
 
-        willThrow(new PlanException(SUBJECT_NAME_ALREADY_EXISTS))
+        willThrow(new ConflictException(SUBJECT_NAME_ALREADY_EXISTS))
                 .given(createTotalQuantityUseCase).create(command);
 
         // when & then

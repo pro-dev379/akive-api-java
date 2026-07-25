@@ -3,18 +3,24 @@ package net.akive.api.auth.presentation;
 import net.akive.api.auth.application.dto.command.emailverification.SendEmailVerificationCommand;
 import net.akive.api.auth.application.dto.result.emailverification.SendEmailVerificationResult;
 import net.akive.api.auth.application.dto.command.emailverification.VerifyEmailVerificationCodeCommand;
-import net.akive.api.auth.exception.EmailVerificationException;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.TooManyRequestsException;
+import net.akive.api.common.exception.business.UnauthorizedException;
 import net.akive.api.auth.presentation.dto.request.emailverification.SendEmailVerificationCodeRequest;
 import net.akive.api.auth.presentation.dto.request.emailverification.VerifyEmailVerificationCodeRequest;
 import net.akive.api.support.PublicControllerTestSupport;
-import net.akive.api.user.exception.UserErrorCode;
-import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.*;
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.ConflictError.*;
+import static net.akive.api.common.exception.business.NotFoundError.*;
+import static net.akive.api.common.exception.business.TooManyRequestsError.*;
+import static net.akive.api.common.exception.business.UnauthorizedError.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -107,7 +113,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
         // given
         SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
 
-        willThrow(new EmailVerificationException(RESEND_LIMIT_EXCEEDED))
+        willThrow(new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(request.to());
 
@@ -116,8 +122,8 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_1"))
-                .andExpect(jsonPath("$.message").value("Resend limit exceeded."));
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED"))
+                .andExpect(jsonPath("$.message").value("Email verification request limit exceeded."));
     }
 
     @Test
@@ -125,7 +131,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
         // given
         SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
 
-        willThrow(new EmailVerificationException(RESEND_TOO_SOON))
+        willThrow(new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(request.to());
 
@@ -134,8 +140,8 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_2"))
-                .andExpect(jsonPath("$.message").value("Resend request too soon."));
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_429_EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT"))
+                .andExpect(jsonPath("$.message").value("Email verification request is too frequent."));
     }
 
     @Test
@@ -143,7 +149,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
         // given
         SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", FIND_PASSWORD);
 
-        willThrow(new UserException(UserErrorCode.NOT_FOUND))
+        willThrow(new NotFoundException(USER_NOT_FOUND))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(any(SendEmailVerificationCommand.class));
 
@@ -159,7 +165,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
         // given
         SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
 
-        willThrow(new UserException(UserErrorCode.EMAIL_ALREADY_EXISTS))
+        willThrow(new ConflictException(EMAIL_ALREADY_EXISTS))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(any(SendEmailVerificationCommand.class));
 
@@ -304,7 +310,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                 "000000"
         );
 
-        willThrow(new EmailVerificationException(CODE_MISMATCH))
+        willThrow(new BadRequestException(EMAIL_VERIFICATION_CODE_MISMATCH))
                 .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.to());
 
@@ -313,8 +319,8 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_400_1"))
-                .andExpect(jsonPath("$.message").value("Verification code does not match."));
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_400_EMAIL_VERIFICATION_CODE_MISMATCH"))
+                .andExpect(jsonPath("$.message").value("Email verification code mismatch."));
     }
 
     @Test
@@ -326,7 +332,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                 "123456"
         );
 
-        willThrow(new EmailVerificationException(NOT_FOUND))
+        willThrow(new NotFoundException(EMAIL_VERIFICATION_NOT_FOUND))
                 .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.to());
 
@@ -335,8 +341,8 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_404_1"))
-                .andExpect(jsonPath("$.message").value("Verification code not found."));
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_404_EMAIL_VERIFICATION_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Email verification not found."));
     }
 
     @Test
@@ -348,7 +354,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                 "123456"
         );
 
-        willThrow(new EmailVerificationException(EXPIRED))
+        willThrow(new UnauthorizedException(EXPIRED_EMAIL_VERIFICATION_CODE))
                 .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.to());
 
@@ -357,8 +363,8 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_401_1"))
-                .andExpect(jsonPath("$.message").value("Verification code expired."));
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_401_EXPIRED_EMAIL_VERIFICATION_CODE"))
+                .andExpect(jsonPath("$.message").value("Email verification code expired."));
     }
 
     @Test
@@ -370,7 +376,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                 "123456"
         );
 
-        willThrow(new EmailVerificationException(ALREADY_VERIFIED))
+        willThrow(new ConflictException(EMAIL_VERIFICATION_ALREADY_VERIFIED))
                 .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.to());
 
@@ -379,7 +385,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_409_1"))
-                .andExpect(jsonPath("$.message").value("Verification code already verified."));
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_409_EMAIL_VERIFICATION_ALREADY_VERIFIED"))
+                .andExpect(jsonPath("$.message").value("Email is already verified."));
     }
 }

@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.port.in.ValidateUserUseCase;
 import net.akive.api.user.application.port.out.ValidateUserPort;
-import net.akive.api.user.exception.UserException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.user.exception.UserErrorCode.*;
+import static net.akive.api.common.exception.business.ConflictError.*;
+import static net.akive.api.common.exception.business.NotFoundError.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,21 +22,21 @@ class ValidateUserService implements ValidateUserUseCase {
     @Override
     public void validateUserExistsByEmail(Email email) {
         if (!validateUserPort.existsByEmailAndLeaveFalse(email)) {
-            throw new UserException(NOT_FOUND);
+            throw new NotFoundException(USER_NOT_FOUND);
         }
     }
 
     @Override
     public void validateUserExistsById(Long userId) {
         if (!validateUserPort.existsByUserIdAndLeaveFalse(userId)) {
-            throw new UserException(NOT_FOUND);
+            throw new NotFoundException(USER_NOT_FOUND);
         }
     }
 
     @Override
     public void validateEmailNotDuplicate(Email email) {
         if (validateUserPort.existsByEmail(email)) {
-            throw new UserException(EMAIL_ALREADY_EXISTS);
+            throw new ConflictException(EMAIL_ALREADY_EXISTS);
         }
     }
 }

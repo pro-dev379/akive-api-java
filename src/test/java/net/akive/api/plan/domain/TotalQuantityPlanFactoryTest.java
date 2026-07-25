@@ -1,12 +1,13 @@
 package net.akive.api.plan.domain;
 
-import net.akive.api.common.domain.exception.DomainValidationException;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.common.domain.exception.DomainValidationErrorCode.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
@@ -182,37 +183,37 @@ class TotalQuantityPlanFactoryTest {
 
     @Test
     void 세셔널_플랜은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityPlanFactory.create(
                         null,
                         new Subject("수학", "과목"),
                         TotalQuantityAmount.of(100, "문제", null)
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 과목은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityPlanFactory.create(
                         createSessionalPlan(LocalDate.of(2026, 7, 7), LocalDate.of(2026, 7, 14)),
                         null,
                         TotalQuantityAmount.of(100, "문제", null)
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
     @Test
     void 세션_총량은_null일_수_없다() {
-        assertThatExceptionOfType(DomainValidationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityPlanFactory.create(
                         createSessionalPlan(LocalDate.of(2026, 7, 7), LocalDate.of(2026, 7, 14)),
                         new Subject("수학", "과목"),
                         null
                 ))
-                .extracting(DomainValidationException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 

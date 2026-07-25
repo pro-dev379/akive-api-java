@@ -1,8 +1,10 @@
 package net.akive.api.auth.application.service.emailverification;
 
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
+
 import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.port.in.ValidateUserUseCase;
-import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,8 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.FIND_PASSWORD;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
-import static net.akive.api.user.exception.UserErrorCode.NOT_FOUND;
+import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -43,19 +45,19 @@ class EmailVerificationRequestValidatorTest {
     @Test
     void 회원가입_인증_요청_시_이미_가입된_이메일이면_요청할_수_없다() {
         // given
-        willThrow(new UserException(EMAIL_ALREADY_EXISTS))
+        willThrow(new ConflictException(EMAIL_ALREADY_EXISTS))
                 .given(validateUserUseCase)
                 .validateEmailNotDuplicate(new Email("test@test.com"));
 
         // when & then
-        assertThatExceptionOfType(UserException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() ->
                         emailVerificationRequestValidator.validateRequestAvailable(
                                 new Email("test@test.com"),
                                 SIGN_UP
                         )
                 )
-                .extracting(UserException::getErrorCode)
+                .extracting(ConflictException::getError)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
 
         then(validateUserUseCase).should().validateEmailNotDuplicate(new Email("test@test.com"));
@@ -77,20 +79,20 @@ class EmailVerificationRequestValidatorTest {
     @Test
     void 패스워드_찾기_인증_요청_시_회원이_없으면_요청할_수_없다() {
         // given
-        willThrow(new UserException(NOT_FOUND))
+        willThrow(new NotFoundException(USER_NOT_FOUND))
                 .given(validateUserUseCase)
                 .validateUserExistsByEmail(new Email("test@test.com"));
 
         // when & then
-        assertThatExceptionOfType(UserException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() ->
                         emailVerificationRequestValidator.validateRequestAvailable(
                                 new Email("test@test.com"),
                                 FIND_PASSWORD
                         )
                 )
-                .extracting(UserException::getErrorCode)
-                .isEqualTo(NOT_FOUND);
+                .extracting(NotFoundException::getError)
+                .isEqualTo(USER_NOT_FOUND);
 
         then(validateUserUseCase).should().validateUserExistsByEmail(new Email("test@test.com"));
         then(validateUserUseCase).should(never()).validateEmailNotDuplicate(any());

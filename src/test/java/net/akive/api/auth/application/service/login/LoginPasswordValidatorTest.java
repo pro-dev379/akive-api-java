@@ -1,10 +1,11 @@
 package net.akive.api.auth.application.service.login;
 
+import net.akive.api.common.exception.business.UnauthorizedException;
+
 import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.port.out.login.LoadLegacyUserPasswordPort;
 import net.akive.api.auth.domain.login.LegacyUserPassword;
 import net.akive.api.auth.domain.login.LoginUser;
-import net.akive.api.auth.exception.LoginException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static net.akive.api.auth.exception.LoginErrorCode.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_EMAIL_OR_PASSWORD;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -63,9 +64,9 @@ class LoginPasswordValidatorTest {
                 .willReturn(false);
 
         // when & then
-        assertThatExceptionOfType(LoginException.class)
+        assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD))
-                .extracting(LoginException::getErrorCode)
+                .extracting(UnauthorizedException::getError)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(loadLegacyUserPasswordPort).shouldHaveNoInteractions();
@@ -99,9 +100,9 @@ class LoginPasswordValidatorTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatExceptionOfType(LoginException.class)
+        assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, RAW_PASSWORD))
-                .extracting(LoginException::getErrorCode)
+                .extracting(UnauthorizedException::getError)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(legacyPasswordVerifier).shouldHaveNoInteractions();
@@ -120,9 +121,9 @@ class LoginPasswordValidatorTest {
                 .willReturn(false);
 
         // when & then
-        assertThatExceptionOfType(LoginException.class)
+        assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> loginPasswordValidator.validateAndCheckLegacyPasswordUsed(user, WRONG_PASSWORD))
-                .extracting(LoginException::getErrorCode)
+                .extracting(UnauthorizedException::getError)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(passwordEncoder).shouldHaveNoInteractions();

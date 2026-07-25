@@ -1,18 +1,19 @@
 package net.akive.api.plan.application.service;
 
+import net.akive.api.common.exception.business.NotFoundException;
+
 import net.akive.api.plan.application.dto.command.CreateTotalQuantityCommand;
 import net.akive.api.plan.application.port.out.SaveTotalQuantityPort;
 import net.akive.api.plan.domain.Subject;
 import net.akive.api.plan.domain.TotalQuantityAmount;
 import net.akive.api.plan.domain.TotalQuantityPlan;
-import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -84,12 +85,12 @@ class TotalQuantityServiceTest {
                 command.userId(),
                 command.subject(),
                 command.totalQuantityAmount()
-        )).willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND));
+        )).willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityService.create(command))
-                .extracting(PlanException::getErrorCode)
+                .extracting(NotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(totalQuantityDomainService).should().create(

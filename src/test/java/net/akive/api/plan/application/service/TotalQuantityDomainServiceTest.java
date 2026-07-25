@@ -1,12 +1,14 @@
 package net.akive.api.plan.application.service;
 
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
+
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.Subject;
 import net.akive.api.plan.domain.TotalQuantityAmount;
 import net.akive.api.plan.domain.TotalQuantityPlan;
-import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,8 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.exception.PlanErrorCode.SUBJECT_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -77,14 +79,14 @@ class TotalQuantityDomainServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityDomainService.create(
                         SESSIONAL_PLAN_ID,
                         USER_ID,
                         SUBJECT,
                         TOTAL_QUANTITY_AMOUNT
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(NotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID);
@@ -96,19 +98,19 @@ class TotalQuantityDomainServiceTest {
         // given
         given(loadSessionalPlanPort.loadBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID))
                 .willReturn(Optional.of(sessionalPlan()));
-        willThrow(new PlanException(SUBJECT_NAME_ALREADY_EXISTS))
+        willThrow(new ConflictException(SUBJECT_NAME_ALREADY_EXISTS))
                 .given(totalQuantityValidator)
                 .validateCreatable(SESSIONAL_PLAN_ID, SUBJECT.name());
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> totalQuantityDomainService.create(
                         SESSIONAL_PLAN_ID,
                         USER_ID,
                         SUBJECT,
                         TOTAL_QUANTITY_AMOUNT
                 ))
-                .extracting(PlanException::getErrorCode)
+                .extracting(ConflictException::getError)
                 .isEqualTo(SUBJECT_NAME_ALREADY_EXISTS);
 
         then(loadSessionalPlanPort).should().loadBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID);

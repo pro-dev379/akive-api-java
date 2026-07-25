@@ -1,12 +1,17 @@
 package net.akive.api.auth.application.service.emailverification;
 
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.TooManyRequestsException;
+import net.akive.api.common.exception.business.UnauthorizedException;
+
 import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.port.out.emailverification.GenerateEmailVerificationCodePort;
 import net.akive.api.auth.application.port.out.emailverification.LoadEmailVerificationPort;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
-import net.akive.api.auth.exception.EmailVerificationException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.common.time.FixedCurrentTimeProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +26,11 @@ import java.util.Optional;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EXPIRE_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.auth.exception.EmailVerificationErrorCode.*;
+import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.ConflictError.*;
+import static net.akive.api.common.exception.business.NotFoundError.*;
+import static net.akive.api.common.exception.business.TooManyRequestsError.*;
+import static net.akive.api.common.exception.business.UnauthorizedError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -107,10 +116,10 @@ class EmailVerificationDomainServiceTest {
                 .willReturn(Optional.of(emailVerification(SIGN_UP, currentTimeProvider.now())));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(TooManyRequestsException.class)
                 .isThrownBy(() -> emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(RESEND_TOO_SOON);
+                .extracting(TooManyRequestsException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT);
     }
 
     @Test
@@ -127,10 +136,10 @@ class EmailVerificationDomainServiceTest {
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(TooManyRequestsException.class)
                 .isThrownBy(() -> emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(RESEND_LIMIT_EXCEEDED);
+                .extracting(TooManyRequestsException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED);
     }
 
     @Test
@@ -155,10 +164,10 @@ class EmailVerificationDomainServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(NOT_FOUND);
+                .extracting(NotFoundException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_NOT_FOUND);
     }
 
     @Test
@@ -170,14 +179,14 @@ class EmailVerificationDomainServiceTest {
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> emailVerificationDomainService.verify(
                         new Email(EMAIL),
                         SIGN_UP,
                         new EmailVerificationCode("000000")
                 ))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(CODE_MISMATCH);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_CODE_MISMATCH);
     }
 
     @Test
@@ -192,10 +201,10 @@ class EmailVerificationDomainServiceTest {
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(EXPIRED);
+                .extracting(UnauthorizedException::getError)
+                .isEqualTo(EXPIRED_EMAIL_VERIFICATION_CODE);
     }
 
     @Test
@@ -208,10 +217,10 @@ class EmailVerificationDomainServiceTest {
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(ALREADY_VERIFIED);
+                .extracting(ConflictException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_ALREADY_VERIFIED);
     }
 
     @Test
@@ -237,10 +246,10 @@ class EmailVerificationDomainServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> emailVerificationDomainService.ensureVerified(new Email(EMAIL), SIGN_UP))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(NOT_VERIFIED);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_NOT_VERIFIED);
     }
 
     @Test
@@ -252,10 +261,10 @@ class EmailVerificationDomainServiceTest {
                 .willReturn(Optional.of(emailVerification));
 
         // when & then
-        assertThatExceptionOfType(EmailVerificationException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> emailVerificationDomainService.ensureVerified(new Email(EMAIL), SIGN_UP))
-                .extracting(EmailVerificationException::getErrorCode)
-                .isEqualTo(NOT_VERIFIED);
+                .extracting(BadRequestException::getError)
+                .isEqualTo(EMAIL_VERIFICATION_NOT_VERIFIED);
     }
 
     private EmailVerification emailVerification(

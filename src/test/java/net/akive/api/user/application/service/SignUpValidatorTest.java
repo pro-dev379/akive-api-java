@@ -1,10 +1,11 @@
 package net.akive.api.user.application.service;
 
+import net.akive.api.common.exception.business.ConflictException;
+
 import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
 import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerifiedUseCase;
 import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.port.out.ValidateUserPort;
-import net.akive.api.user.exception.UserException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.user.exception.UserErrorCode.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -38,9 +39,9 @@ class SignUpValidatorTest {
         given(validateUserPort.existsByEmail(email)).willReturn(true);
 
         // when & then
-        assertThatExceptionOfType(UserException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> signUpValidator.validateEmailSignUpAvailable(email))
-                .extracting(UserException::getErrorCode)
+                .extracting(ConflictException::getError)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
 
         then(ensureEmailVerifiedUseCase).should(never()).ensureVerified(any());

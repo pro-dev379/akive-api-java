@@ -5,11 +5,11 @@ import net.akive.api.user.application.port.in.UpdatePasswordUseCase;
 import net.akive.api.user.application.port.out.LoadUserPort;
 import net.akive.api.user.application.port.out.SaveUserPort;
 import net.akive.api.user.domain.User;
-import net.akive.api.user.exception.UserException;
+import net.akive.api.common.exception.business.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.user.exception.UserErrorCode.NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class AccountService implements UpdatePasswordUseCase {
     @Transactional
     public void updatePassword(Long userId, String encodedPassword) {
         User user = loadUserPort.loadByUserIdAndLeaveFalse(userId)
-                .orElseThrow(() -> new UserException(NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
         user.updatePassword(encodedPassword);
 

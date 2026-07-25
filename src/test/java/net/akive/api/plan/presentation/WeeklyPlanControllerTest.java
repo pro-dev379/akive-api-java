@@ -6,7 +6,7 @@ import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
 import net.akive.api.plan.application.dto.result.common.SubjectResult;
 import net.akive.api.plan.application.dto.result.common.WeekPeriodResult;
 import net.akive.api.plan.application.dto.result.weeklyplan.GetWeeklyPlanResult;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.support.PrivateControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -14,8 +14,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.exception.PlanErrorCode.WEEKLY_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_NOT_FOUND;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -109,7 +109,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
         GetWeeklyPlanQuery command = new GetWeeklyPlanQuery(sessionalPlanId, userId, weekNum);
 
         given(getWeeklyPlanUseCase.getByWeekNum(command))
-                .willThrow(new PlanException(SESSIONAL_PLAN_NOT_FOUND));
+                .willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
         // when & then
         mockMvc.perform(get(
@@ -132,7 +132,7 @@ class WeeklyPlanControllerTest extends PrivateControllerTestSupport {
         GetWeeklyPlanQuery command = new GetWeeklyPlanQuery(sessionalPlanId, userId, weekNum);
 
         given(getWeeklyPlanUseCase.getByWeekNum(command))
-                .willThrow(new PlanException(WEEKLY_PLAN_NOT_FOUND));
+                .willThrow(new NotFoundException(WEEKLY_PLAN_NOT_FOUND));
 
         // when & then
         mockMvc.perform(get(

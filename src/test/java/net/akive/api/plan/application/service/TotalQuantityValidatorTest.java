@@ -1,15 +1,16 @@
 package net.akive.api.plan.application.service;
 
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.ConflictError;
 import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
-import net.akive.api.plan.exception.PlanException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SUBJECT_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.exception.PlanErrorCode.TOTAL_QUANTITY_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.BadRequestError.TOTAL_QUANTITY_LIMIT_EXCEEDED;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -52,10 +53,10 @@ class TotalQuantityValidatorTest {
                 .willReturn(true);
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> totalQuantityValidator.validateCreatable(SESSIONAL_PLAN_ID, SUBJECT_NAME))
-                .extracting(PlanException::getErrorCode)
-                .isEqualTo(SUBJECT_NAME_ALREADY_EXISTS);
+                .extracting(ConflictException::getError)
+                .isEqualTo(ConflictError.SUBJECT_NAME_ALREADY_EXISTS);
 
         then(validateTotalQuantityPort).should()
                 .existsBySessionalPlanIdAndSubjectName(SESSIONAL_PLAN_ID, SUBJECT_NAME);
@@ -71,9 +72,9 @@ class TotalQuantityValidatorTest {
                 .willReturn(50);
 
         // when & then
-        assertThatExceptionOfType(PlanException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityValidator.validateCreatable(SESSIONAL_PLAN_ID, SUBJECT_NAME))
-                .extracting(PlanException::getErrorCode)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(TOTAL_QUANTITY_LIMIT_EXCEEDED);
 
         then(validateTotalQuantityPort).should()

@@ -2,11 +2,12 @@ package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
-import net.akive.api.plan.exception.PlanException;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
 import org.springframework.stereotype.Component;
 
-import static net.akive.api.plan.exception.PlanErrorCode.SUBJECT_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.exception.PlanErrorCode.TOTAL_QUANTITY_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.BadRequestError.TOTAL_QUANTITY_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
 
 @Component
 @RequiredArgsConstructor
@@ -18,12 +19,12 @@ class TotalQuantityValidator {
 
     public void validateCreatable(Long sessionalPlanId, String subjectName) {
         if (validateTotalQuantityPort.existsBySessionalPlanIdAndSubjectName(sessionalPlanId, subjectName)) {
-            throw new PlanException(SUBJECT_NAME_ALREADY_EXISTS);
+            throw new ConflictException(SUBJECT_NAME_ALREADY_EXISTS);
         }
 
         int totalQuantityCount = validateTotalQuantityPort.countBySessionalPlanId(sessionalPlanId);
         if (totalQuantityCount >= MAX_TOTAL_QUANTITY_COUNT_PER_SESSIONAL_PLAN) {
-            throw new PlanException(TOTAL_QUANTITY_LIMIT_EXCEEDED);
+            throw new BadRequestException(TOTAL_QUANTITY_LIMIT_EXCEEDED);
         }
     }
 }
