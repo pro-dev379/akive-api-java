@@ -16,12 +16,11 @@ import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
 import static net.akive.api.common.exception.business.BadRequestError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.plan.domain.PlanPolicy.*;
 
 @Component
 @RequiredArgsConstructor
 class SessionalPlanValidator {
-
-    private static final int MAX_IN_PROGRESS_SESSIONAL_PLAN_COUNT = 5;
 
     private final ValidateSessionalPlanPort validateSessionalPlanPort;
     private final ValidateTotalQuantityPort validateTotalQuantityPort;
@@ -33,7 +32,7 @@ class SessionalPlanValidator {
         }
 
         int inProgressSessionalPlanCount = validateSessionalPlanPort.countInProgressByUserId(userId, now);
-        if (inProgressSessionalPlanCount >= MAX_IN_PROGRESS_SESSIONAL_PLAN_COUNT) {
+        if (inProgressSessionalPlanCount >= IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT) {
             throw new BadRequestException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
         }
     }
@@ -79,6 +78,6 @@ class SessionalPlanValidator {
     }
 
     private static String validateSessionName(String requestedSessionName) {
-        return requireMaxLength(requireNotBlank(requestedSessionName), 100);
+        return requireMaxLength(requireNotBlank(requestedSessionName), SESSION_NAME_MAX_LENGTH);
     }
 }

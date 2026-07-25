@@ -16,8 +16,6 @@ class CreateDefaultMentoringProfileService implements CreateDefaultMentoringProf
 
     @Override
     public void create(Long userId) {
-        saveMentoringProfilePort.save(
-                MentoringProfile.createDefault(userId)
-        );
+        saveMentoringProfilePort.save(MentoringProfile.createDefault(userId));
     }
 }

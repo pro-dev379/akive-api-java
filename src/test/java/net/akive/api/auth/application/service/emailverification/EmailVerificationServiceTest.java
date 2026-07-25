@@ -22,9 +22,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
-import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EXPIRE_DURATION;
-import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.RESEND_INTERVAL;
-import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFIED_EXPIRATION_DURATION;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRE_DURATION;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EMAIL_VERIFICATION_RESEND_MIN_INTERVAL;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFIED_EMAIL_VERIFICATION_EXPIRE_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.common.exception.business.NotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
 import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
@@ -68,13 +68,13 @@ class EmailVerificationServiceTest {
 
         // then
         assertThat(result.email()).isEqualTo(new Email(EMAIL));
-        assertThat(result.expiresAt()).isEqualTo(REQUESTED_AT.plus(EXPIRE_DURATION));
-        assertThat(result.expireSeconds()).isEqualTo(EXPIRE_DURATION.toSeconds());
-        assertThat(result.resendIntervalSeconds()).isEqualTo(RESEND_INTERVAL.toSeconds());
+        assertThat(result.expiresAt()).isEqualTo(REQUESTED_AT.plus(VERIFICATION_CODE_EXPIRE_DURATION));
+        assertThat(result.expireSeconds()).isEqualTo(VERIFICATION_CODE_EXPIRE_DURATION.toSeconds());
+        assertThat(result.resendIntervalSeconds()).isEqualTo(EMAIL_VERIFICATION_RESEND_MIN_INTERVAL.toSeconds());
 
         then(emailVerificationDomainService).should().issue(new Email(EMAIL), SIGN_UP);
-        then(sendEmailVerificationMailPort).should().send(emailVerification, EXPIRE_DURATION);
-        then(saveEmailVerificationPort).should().save(emailVerification, EXPIRE_DURATION);
+        then(sendEmailVerificationMailPort).should().send(emailVerification, VERIFICATION_CODE_EXPIRE_DURATION);
+        then(saveEmailVerificationPort).should().save(emailVerification, VERIFICATION_CODE_EXPIRE_DURATION);
     }
 
     @Test
@@ -105,7 +105,7 @@ class EmailVerificationServiceTest {
 
         // then
         then(emailVerificationDomainService).should().verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE);
-        then(saveEmailVerificationPort).should().save(emailVerification, VERIFIED_EXPIRATION_DURATION);
+        then(saveEmailVerificationPort).should().save(emailVerification, VERIFIED_EMAIL_VERIFICATION_EXPIRE_DURATION);
     }
 
     @Test

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.mentoring.domain.MentoringPolicy.*;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -44,16 +45,16 @@ public class MentoringProfile {
         return MentoringProfile.builder()
                 .mentoringProfileId(mentoringProfileId)
                 .userId(requirePositive(userId))
-                .goal(requireMaxLengthIfPresent(goal, 140))
-                .preference(requireMaxLengthIfPresent(preference, 100))
-                .constraint(requireMaxLengthIfPresent(constraint, 100))
-                .weakness(requireMaxLengthIfPresent(weakness, 140))
-                .strength(requireMaxLengthIfPresent(strength, 80))
-                .recurringPattern(requireMaxLengthIfPresent(recurringPattern, 80))
-                .decisionOrCommitment(requireMaxLengthIfPresent(decisionOrCommitment, 120))
-                .studyPlan(requireMaxLengthIfPresent(studyPlan, 220))
-                .behavioralPattern(requireMaxLengthIfPresent(behavioralPattern, 80))
-                .effectiveAdvice(requireMaxLengthIfPresent(effectiveAdvice, 140))
+                .goal(requireMaxLengthIfPresent(goal, GOAL_MAX_LENGTH))
+                .preference(requireMaxLengthIfPresent(preference, PREFERENCE_MAX_LENGTH))
+                .constraint(requireMaxLengthIfPresent(constraint, CONSTRAINT_MAX_LENGTH))
+                .weakness(requireMaxLengthIfPresent(weakness, WEAKNESS_MAX_LENGTH))
+                .strength(requireMaxLengthIfPresent(strength, STRENGTH_MAX_LENGTH))
+                .recurringPattern(requireMaxLengthIfPresent(recurringPattern, RECURRING_PATTERN_MAX_LENGTH))
+                .decisionOrCommitment(requireMaxLengthIfPresent(decisionOrCommitment, DECISION_OR_COMMITMENT_MAX_LENGTH))
+                .studyPlan(requireMaxLengthIfPresent(studyPlan, STUDY_PLAN_MAX_LENGTH))
+                .behavioralPattern(requireMaxLengthIfPresent(behavioralPattern, BEHAVIORAL_PATTERN_MAX_LENGTH))
+                .effectiveAdvice(requireMaxLengthIfPresent(effectiveAdvice, EFFECTIVE_ADVICE_MAX_LENGTH))
                 .build();
     }
 

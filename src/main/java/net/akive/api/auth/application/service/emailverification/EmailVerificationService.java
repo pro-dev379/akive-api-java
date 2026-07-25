@@ -31,14 +31,14 @@ class EmailVerificationService implements
     public SendEmailVerificationResult send(SendEmailVerificationCommand command) {
         EmailVerification emailVerification = emailVerificationDomainService.issue(command.email(), command.verificationPurpose());
 
-        sendEmailVerificationMailPort.send(emailVerification, EXPIRE_DURATION);
-        saveEmailVerificationPort.save(emailVerification, EXPIRE_DURATION);
+        sendEmailVerificationMailPort.send(emailVerification, VERIFICATION_CODE_EXPIRE_DURATION);
+        saveEmailVerificationPort.save(emailVerification, VERIFICATION_CODE_EXPIRE_DURATION);
 
         return new SendEmailVerificationResult(
                 command.email(),
                 emailVerification.getExpiresAt(),
-                EXPIRE_DURATION.toSeconds(),
-                RESEND_INTERVAL.toSeconds()
+                VERIFICATION_CODE_EXPIRE_DURATION.toSeconds(),
+                EMAIL_VERIFICATION_RESEND_MIN_INTERVAL.toSeconds()
         );
     }
 
@@ -50,7 +50,7 @@ class EmailVerificationService implements
                 command.verificationCode()
         );
 
-        saveEmailVerificationPort.save(emailVerification, VERIFIED_EXPIRATION_DURATION);
+        saveEmailVerificationPort.save(emailVerification, VERIFIED_EMAIL_VERIFICATION_EXPIRE_DURATION);
     }
 
     @Override

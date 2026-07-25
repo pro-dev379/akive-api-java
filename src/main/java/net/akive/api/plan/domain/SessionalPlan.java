@@ -9,14 +9,13 @@ import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
+import static net.akive.api.plan.domain.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 
 @Getter
 @Builder(access = PRIVATE)
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 public class SessionalPlan {
-
-    private static final int SESSION_NAME_MAX_LENGTH = 50;
 
     private Long sessionalPlanId;
     private Long userId;

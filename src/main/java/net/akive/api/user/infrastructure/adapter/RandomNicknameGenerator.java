@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+import static net.akive.api.user.domain.UserPolicy.RANDOM_NICKNAME_SUFFIX_LENGTH;
+
 @Component
 class RandomNicknameGenerator implements GenerateNicknamePort {
 
@@ -16,6 +18,6 @@ class RandomNicknameGenerator implements GenerateNicknamePort {
                 + UUID.randomUUID()
                     .toString()
                     .replace("-", "")
-                    .substring(0, 8);
+                    .substring(0, RANDOM_NICKNAME_SUFFIX_LENGTH);
     }
 }

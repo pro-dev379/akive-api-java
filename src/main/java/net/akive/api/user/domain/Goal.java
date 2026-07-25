@@ -9,6 +9,7 @@ import java.time.LocalTime;
 
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.user.domain.UserPolicy.*;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -44,10 +45,10 @@ public class Goal {
     public static Goal createDefault(Long userId) {
         return Goal.builder()
                 .userId(requirePositive(userId))
-                .attendOn(LocalTime.of(20, 0))
-                .rest10MinSec(120L)
-                .mealNum(3)
-                .meal1TimeSec(3_600L)
+                .attendOn(DEFAULT_GOAL_ATTEND_ON)
+                .rest10MinSec(DEFAULT_GOAL_REST_10_MIN_SEC)
+                .mealNum(DEFAULT_GOAL_MEAL_NUM)
+                .meal1TimeSec(DEFAULT_GOAL_MEAL_1_TIME_SEC)
                 .build();
     }
 }

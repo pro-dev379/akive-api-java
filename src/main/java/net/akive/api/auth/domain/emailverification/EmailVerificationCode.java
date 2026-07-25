@@ -4,15 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import net.akive.api.common.exception.business.BadRequestException;
 
-import java.util.regex.Pattern;
-
 import static com.fasterxml.jackson.annotation.JsonCreator.Mode.DELEGATING;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_PATTERN;
 import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_INVALID_CODE_FORMAT;
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
 
 public record EmailVerificationCode(String value) {
-
-    private static final Pattern VERIFICATION_CODE_PATTERN = Pattern.compile("\\d{6}");
 
     @JsonCreator(mode = DELEGATING)
     public EmailVerificationCode {

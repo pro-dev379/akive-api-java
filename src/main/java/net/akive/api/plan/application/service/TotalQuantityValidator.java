@@ -8,12 +8,11 @@ import org.springframework.stereotype.Component;
 
 import static net.akive.api.common.exception.business.BadRequestError.TOTAL_QUANTITY_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
+import static net.akive.api.plan.domain.PlanPolicy.TOTAL_QUANTITY_MAX_COUNT;
 
 @Component
 @RequiredArgsConstructor
 class TotalQuantityValidator {
-
-    private static final int MAX_TOTAL_QUANTITY_COUNT_PER_SESSIONAL_PLAN = 50;
 
     private final ValidateTotalQuantityPort validateTotalQuantityPort;
 
@@ -23,7 +22,7 @@ class TotalQuantityValidator {
         }
 
         int totalQuantityCount = validateTotalQuantityPort.countBySessionalPlanId(sessionalPlanId);
-        if (totalQuantityCount >= MAX_TOTAL_QUANTITY_COUNT_PER_SESSIONAL_PLAN) {
+        if (totalQuantityCount >= TOTAL_QUANTITY_MAX_COUNT) {
             throw new BadRequestException(TOTAL_QUANTITY_LIMIT_EXCEEDED);
         }
     }

@@ -4,6 +4,9 @@ import jakarta.validation.constraints.*;
 import net.akive.api.user.application.dto.SignUpByEmailCommand;
 import net.akive.api.user.domain.RoleType;
 
+import static net.akive.api.user.domain.UserPolicy.PASSWORD_MIN_LENGTH;
+import static net.akive.api.user.domain.UserPolicy.PASSWORD_PATTERN_REGEX;
+
 public record SignUpByEmailRequest(
         @Email
         @NotBlank
@@ -13,8 +16,8 @@ public record SignUpByEmailRequest(
         RoleType roleType,
 
         @NotBlank
-        @Size(min = 8)
-        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d]).*$")
+        @Size(min = PASSWORD_MIN_LENGTH)
+        @Pattern(regexp = PASSWORD_PATTERN_REGEX)
         String password
 ) {
         public SignUpByEmailCommand to() {

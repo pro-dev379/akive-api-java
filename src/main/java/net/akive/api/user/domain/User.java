@@ -9,15 +9,14 @@ import net.akive.api.common.domain.Email;
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.user.domain.LoginType.EMAIL;
+import static net.akive.api.user.domain.UserPolicy.AIM_MAX_LENGTH;
+import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 
 @Getter
 @Builder(access = PRIVATE)
 @NoArgsConstructor(access = PRIVATE)
 @AllArgsConstructor(access = PRIVATE)
 public class User {
-
-    private static final int NICKNAME_MAX_LENGTH = 20;
-    private static final int AIM_MAX_LENGTH = 100;
 
     private Long userId;
     private Email email;

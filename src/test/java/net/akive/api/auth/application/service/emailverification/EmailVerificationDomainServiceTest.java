@@ -24,7 +24,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EXPIRE_DURATION;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRE_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.common.exception.business.BadRequestError.*;
 import static net.akive.api.common.exception.business.ConflictError.*;
@@ -83,7 +83,7 @@ class EmailVerificationDomainServiceTest {
         assertThat(emailVerification.isVerified()).isFalse();
         assertThat(emailVerification.getResendCount()).isZero();
         assertThat(emailVerification.getLastSentAt()).isEqualTo(currentTimeProvider.now());
-        assertThat(emailVerification.getExpiresAt()).isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
+        assertThat(emailVerification.getExpiresAt()).isEqualTo(currentTimeProvider.now().plus(VERIFICATION_CODE_EXPIRE_DURATION));
 
         then(emailVerificationRequestValidator).should().validateRequestAvailable(new Email(EMAIL), SIGN_UP);
     }
@@ -105,7 +105,7 @@ class EmailVerificationDomainServiceTest {
         assertThat(emailVerification.getResendCount()).isEqualTo(1);
         assertThat(emailVerification.isVerified()).isFalse();
         assertThat(emailVerification.getLastSentAt()).isEqualTo(currentTimeProvider.now());
-        assertThat(emailVerification.getExpiresAt()).isEqualTo(currentTimeProvider.now().plus(EXPIRE_DURATION));
+        assertThat(emailVerification.getExpiresAt()).isEqualTo(currentTimeProvider.now().plus(VERIFICATION_CODE_EXPIRE_DURATION));
     }
 
     @Test
@@ -194,7 +194,7 @@ class EmailVerificationDomainServiceTest {
         // given
         EmailVerification emailVerification = emailVerification(
                 SIGN_UP,
-                currentTimeProvider.now().minus(EXPIRE_DURATION).minusSeconds(1)
+                currentTimeProvider.now().minus(VERIFICATION_CODE_EXPIRE_DURATION).minusSeconds(1)
         );
 
         given(loadEmailVerificationPort.loadByEmailAndVerificationPurpose(new Email(EMAIL), SIGN_UP))

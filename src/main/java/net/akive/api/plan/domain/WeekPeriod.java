@@ -9,16 +9,15 @@ import java.util.stream.Stream;
 
 import static net.akive.api.common.domain.DomainValidator.requireStartNotAfterEnd;
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_WEEK_PERIOD;
+import static net.akive.api.plan.domain.PlanPolicy.DAYS_PER_WEEK;
 
 public record WeekPeriod(LocalDate startOn, LocalDate endOn) {
-
-    private static final long WEEK_DAYS = 7L;
 
     public WeekPeriod {
         requireStartNotAfterEnd(startOn, endOn);
 
         long periodDays = ChronoUnit.DAYS.between(startOn, endOn);
-        if (periodDays < 0 || WEEK_DAYS < periodDays) {
+        if (periodDays < 0 || DAYS_PER_WEEK < periodDays) {
             throw new BadRequestException(INVALID_WEEK_PERIOD);
         }
     }

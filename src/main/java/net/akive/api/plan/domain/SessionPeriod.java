@@ -12,10 +12,10 @@ import net.akive.api.common.exception.business.BadRequestException;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
 import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_TOO_LONG;
+import static net.akive.api.plan.domain.PlanPolicy.DAYS_PER_WEEK;
+import static net.akive.api.plan.domain.PlanPolicy.SESSION_PERIOD_MAX_MONTHS;
 
 public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
-
-    private static final int MAX_DURATION_MONTHS = 12;
 
     public SessionPeriod {
         requireNonNull(startOn);
@@ -25,7 +25,7 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
             throw new BadRequestException(INVALID_SESSION_PERIOD);
         }
 
-        if (endOn.isAfter(startOn.plusMonths(MAX_DURATION_MONTHS))) {
+        if (endOn.isAfter(startOn.plusMonths(SESSION_PERIOD_MAX_MONTHS))) {
             throw new BadRequestException(SESSION_PERIOD_TOO_LONG);
         }
     }
@@ -64,7 +64,7 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
             return Optional.empty();
         }
 
-        return Optional.of(SessionWeek.of(weekNum, weekStartOn, min(weekStartOn.plusDays(6), endOn)));
+        return Optional.of(SessionWeek.of(weekNum, weekStartOn, min(weekStartOn.plusDays(DAYS_PER_WEEK - 1), endOn)));
     }
 
     private static LocalDate min(LocalDate first, LocalDate second) {

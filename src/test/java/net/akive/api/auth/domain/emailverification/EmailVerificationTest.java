@@ -39,7 +39,7 @@ class EmailVerificationTest {
         assertThat(emailVerification.getVerificationCode()).isEqualTo(new EmailVerificationCode(VERIFICATION_CODE));
         assertThat(emailVerification.getResendCount()).isZero();
         assertThat(emailVerification.isVerified()).isFalse();
-        assertThat(emailVerification.getExpiresAt()).isEqualTo(REQUESTED_AT.plus(EXPIRE_DURATION));
+        assertThat(emailVerification.getExpiresAt()).isEqualTo(REQUESTED_AT.plus(VERIFICATION_CODE_EXPIRE_DURATION));
         assertThat(emailVerification.getLastSentAt()).isEqualTo(REQUESTED_AT);
         assertThat(emailVerification.getCreatedAt()).isEqualTo(REQUESTED_AT);
     }
@@ -47,7 +47,7 @@ class EmailVerificationTest {
     @Test
     void 재전송_가능시간_이후에_갱신하면_새_인증정보로_갱신된다() {
         // given
-        LocalDateTime secondRequestedAt = REQUESTED_AT.plus(RESEND_INTERVAL);
+        LocalDateTime secondRequestedAt = REQUESTED_AT.plus(EMAIL_VERIFICATION_RESEND_MIN_INTERVAL);
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
         // when
@@ -57,7 +57,7 @@ class EmailVerificationTest {
         assertThat(emailVerification.getVerificationCode()).isEqualTo(new EmailVerificationCode("654321"));
         assertThat(emailVerification.getResendCount()).isEqualTo(1);
         assertThat(emailVerification.isVerified()).isFalse();
-        assertThat(emailVerification.getExpiresAt()).isEqualTo(secondRequestedAt.plus(EXPIRE_DURATION));
+        assertThat(emailVerification.getExpiresAt()).isEqualTo(secondRequestedAt.plus(VERIFICATION_CODE_EXPIRE_DURATION));
         assertThat(emailVerification.getLastSentAt()).isEqualTo(secondRequestedAt);
         assertThat(emailVerification.getCreatedAt()).isEqualTo(REQUESTED_AT);
     }
@@ -111,7 +111,7 @@ class EmailVerificationTest {
         EmailVerification emailVerification = emailVerification(SIGN_UP);
 
         // when
-        emailVerification.verify(new EmailVerificationCode(VERIFICATION_CODE), REQUESTED_AT.plus(EXPIRE_DURATION));
+        emailVerification.verify(new EmailVerificationCode(VERIFICATION_CODE), REQUESTED_AT.plus(VERIFICATION_CODE_EXPIRE_DURATION));
 
         // then
         assertThat(emailVerification.isVerified()).isTrue();
@@ -159,7 +159,7 @@ class EmailVerificationTest {
                 .isThrownBy(() ->
                         emailVerification.verify(
                                 new EmailVerificationCode(VERIFICATION_CODE),
-                                REQUESTED_AT.plus(EXPIRE_DURATION).plusSeconds(1)
+                                REQUESTED_AT.plus(VERIFICATION_CODE_EXPIRE_DURATION).plusSeconds(1)
                         )
                 )
                 .extracting(UnauthorizedException::getError)

@@ -48,7 +48,7 @@ public class EmailVerification {
                 .verificationCode(requireNonNull(verificationCode))
                 .resendCount(0)
                 .verified(false)
-                .expiresAt(validatedRequestedAt.plus(EXPIRE_DURATION))
+                .expiresAt(validatedRequestedAt.plus(VERIFICATION_CODE_EXPIRE_DURATION))
                 .lastSentAt(validatedRequestedAt)
                 .createdAt(validatedRequestedAt)
                 .build();
@@ -61,7 +61,7 @@ public class EmailVerification {
         this.verificationCode = requireNonNull(verificationCode);
         this.resendCount++;
         this.verified = false;
-        this.expiresAt = requestedAt.plus(EXPIRE_DURATION);
+        this.expiresAt = requestedAt.plus(VERIFICATION_CODE_EXPIRE_DURATION);
         this.lastSentAt = requestedAt;
     }
 
@@ -85,11 +85,11 @@ public class EmailVerification {
     }
 
     private void validateResendAvailable(LocalDateTime requestedAt) {
-        if (this.resendCount >= MAX_RESEND_COUNT) {
+        if (this.resendCount >= EMAIL_VERIFICATION_RESEND_MAX_COUNT) {
             throw new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED);
         }
 
-        if (Duration.between(this.lastSentAt, requestedAt).compareTo(RESEND_INTERVAL) < 0) {
+        if (Duration.between(this.lastSentAt, requestedAt).compareTo(EMAIL_VERIFICATION_RESEND_MIN_INTERVAL) < 0) {
             throw new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT);
         }
     }
