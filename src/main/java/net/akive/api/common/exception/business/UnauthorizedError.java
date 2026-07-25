@@ -15,9 +15,9 @@ public enum UnauthorizedError implements Error {
     INVALID_EMAIL_OR_PASSWORD(LOGIN, "Invalid email or password."),
     INVALID_ACCESS_TOKEN(TOKEN, "Invalid access token."),
     INVALID_REFRESH_TOKEN(TOKEN, "Invalid refresh token."),
-    EXPIRED_ACCESS_TOKEN(TOKEN, "Access token expired."),
-    EXPIRED_REFRESH_TOKEN(TOKEN, "Refresh token expired."),
-    EXPIRED_EMAIL_VERIFICATION_CODE(EMAIL_VERIFICATION, "Email verification code expired."),
+    ACCESS_TOKEN_EXPIRED(TOKEN, "Access token expired."),
+    REFRESH_TOKEN_EXPIRED(TOKEN, "Refresh token expired."),
+    EMAIL_VERIFICATION_CODE_EXPIRED(EMAIL_VERIFICATION, "Email verification code expired."),
     ;
 
     private final ErrorDomain domain;

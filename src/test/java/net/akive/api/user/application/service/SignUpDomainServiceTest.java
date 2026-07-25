@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,7 +82,7 @@ class SignUpDomainServiceTest {
     @Test
     void 이메일_인증이_완료되지_않으면_회원_생성에_실패한다() {
         // given
-        willThrow(new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED))
+        willThrow(new BadRequestException(EMAIL_NOT_VERIFIED))
                 .given(signUpValidator)
                 .validateEmailSignUpAvailable(VALID_EMAIL);
 
@@ -90,7 +90,7 @@ class SignUpDomainServiceTest {
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> signUpDomainService.signUpByEmail(VALID_EMAIL, VALID_PASSWORD, USER))
                 .extracting(BadRequestException::getError)
-                .isEqualTo(EMAIL_VERIFICATION_NOT_VERIFIED);
+                .isEqualTo(EMAIL_NOT_VERIFIED);
 
         then(signUpValidator).should().validateEmailSignUpAvailable(VALID_EMAIL);
         then(generateNicknamePort).shouldHaveNoInteractions();

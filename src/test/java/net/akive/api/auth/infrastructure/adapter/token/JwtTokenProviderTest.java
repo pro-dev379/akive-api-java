@@ -18,7 +18,7 @@ import org.springframework.security.oauth2.jwt.*;
 import java.util.List;
 import java.time.Instant;
 
-import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.REFRESH_TOKEN_EXPIRED;
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
 import static net.akive.api.auth.domain.token.TokenType.*;
 import static net.akive.api.user.domain.RoleType.USER;
@@ -167,7 +167,7 @@ class JwtTokenProviderTest {
         assertThatThrownBy(() -> jwtTokenProvider.validateRefreshToken(refreshToken))
                 .isInstanceOf(UnauthorizedException.class)
                 .extracting("error")
-                .isEqualTo(EXPIRED_REFRESH_TOKEN);
+                .isEqualTo(REFRESH_TOKEN_EXPIRED);
     }
 
     @Test

@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_ACCESS_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.ACCESS_TOKEN_EXPIRED;
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_ACCESS_TOKEN;
 
 @Component
@@ -41,7 +41,7 @@ public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private UnauthorizedError resolveUnauthorizedErrorCode(AuthenticationException authException) {
         if (containsExpiredMessage(authException)) {
-            return EXPIRED_ACCESS_TOKEN;
+            return ACCESS_TOKEN_EXPIRED;
         }
 
         return INVALID_ACCESS_TOKEN;

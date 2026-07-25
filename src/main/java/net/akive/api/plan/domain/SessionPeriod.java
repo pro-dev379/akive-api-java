@@ -11,7 +11,7 @@ import net.akive.api.common.exception.business.BadRequestException;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
-import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_TOO_LONG;
+import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_MAX_MONTHS_EXCEEDED;
 import static net.akive.api.plan.domain.PlanPolicy.DAYS_PER_WEEK;
 import static net.akive.api.plan.domain.PlanPolicy.SESSION_PERIOD_MAX_MONTHS;
 
@@ -26,7 +26,7 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
         }
 
         if (endOn.isAfter(startOn.plusMonths(SESSION_PERIOD_MAX_MONTHS))) {
-            throw new BadRequestException(SESSION_PERIOD_TOO_LONG);
+            throw new BadRequestException(SESSION_PERIOD_MAX_MONTHS_EXCEEDED);
         }
     }
 

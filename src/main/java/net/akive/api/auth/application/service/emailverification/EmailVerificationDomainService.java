@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 import static net.akive.api.common.exception.business.NotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
 
 @Component
 @RequiredArgsConstructor
@@ -58,10 +58,10 @@ class EmailVerificationDomainService {
     void ensureVerified(Email email, EmailVerificationPurpose verificationPurpose) {
         EmailVerification emailVerification = loadEmailVerificationPort
                 .loadByEmailAndVerificationPurpose(email, verificationPurpose)
-                .orElseThrow(() -> new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED));
+                .orElseThrow(() -> new BadRequestException(EMAIL_NOT_VERIFIED));
 
         if (!emailVerification.isVerified()) {
-            throw new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED);
+            throw new BadRequestException(EMAIL_NOT_VERIFIED);
         }
     }
 }

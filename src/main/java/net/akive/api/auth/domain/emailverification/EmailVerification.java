@@ -70,11 +70,11 @@ public class EmailVerification {
         requireNonNull(requestedAt);
 
         if (this.verified) {
-            throw new ConflictException(EMAIL_VERIFICATION_ALREADY_VERIFIED);
+            throw new ConflictException(EMAIL_ALREADY_VERIFIED);
         }
 
         if (this.expiresAt.isBefore(requestedAt)) {
-            throw new UnauthorizedException(EXPIRED_EMAIL_VERIFICATION_CODE);
+            throw new UnauthorizedException(EMAIL_VERIFICATION_CODE_EXPIRED);
         }
 
         if (!Objects.equals(this.verificationCode, validatedInputVerificationCode)) {
@@ -86,11 +86,11 @@ public class EmailVerification {
 
     private void validateResendAvailable(LocalDateTime requestedAt) {
         if (this.resendCount >= EMAIL_VERIFICATION_RESEND_MAX_COUNT) {
-            throw new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED);
+            throw new TooManyRequestsException(EMAIL_VERIFICATION_RESEND_LIMIT_EXCEEDED);
         }
 
         if (Duration.between(this.lastSentAt, requestedAt).compareTo(EMAIL_VERIFICATION_RESEND_MIN_INTERVAL) < 0) {
-            throw new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT);
+            throw new TooManyRequestsException(EMAIL_VERIFICATION_RESEND_TOO_FREQUENT);
         }
     }
 }

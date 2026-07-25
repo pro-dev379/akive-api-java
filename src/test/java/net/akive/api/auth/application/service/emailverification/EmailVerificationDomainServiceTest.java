@@ -119,7 +119,7 @@ class EmailVerificationDomainServiceTest {
         assertThatExceptionOfType(TooManyRequestsException.class)
                 .isThrownBy(() -> emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP))
                 .extracting(TooManyRequestsException::getError)
-                .isEqualTo(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT);
+                .isEqualTo(EMAIL_VERIFICATION_RESEND_TOO_FREQUENT);
     }
 
     @Test
@@ -139,7 +139,7 @@ class EmailVerificationDomainServiceTest {
         assertThatExceptionOfType(TooManyRequestsException.class)
                 .isThrownBy(() -> emailVerificationDomainService.issue(new Email(EMAIL), SIGN_UP))
                 .extracting(TooManyRequestsException::getError)
-                .isEqualTo(EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED);
+                .isEqualTo(EMAIL_VERIFICATION_RESEND_LIMIT_EXCEEDED);
     }
 
     @Test
@@ -204,7 +204,7 @@ class EmailVerificationDomainServiceTest {
         assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
                 .extracting(UnauthorizedException::getError)
-                .isEqualTo(EXPIRED_EMAIL_VERIFICATION_CODE);
+                .isEqualTo(EMAIL_VERIFICATION_CODE_EXPIRED);
     }
 
     @Test
@@ -220,7 +220,7 @@ class EmailVerificationDomainServiceTest {
         assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> emailVerificationDomainService.verify(new Email(EMAIL), SIGN_UP, VERIFICATION_CODE))
                 .extracting(ConflictException::getError)
-                .isEqualTo(EMAIL_VERIFICATION_ALREADY_VERIFIED);
+                .isEqualTo(EMAIL_ALREADY_VERIFIED);
     }
 
     @Test
@@ -249,7 +249,7 @@ class EmailVerificationDomainServiceTest {
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> emailVerificationDomainService.ensureVerified(new Email(EMAIL), SIGN_UP))
                 .extracting(BadRequestException::getError)
-                .isEqualTo(EMAIL_VERIFICATION_NOT_VERIFIED);
+                .isEqualTo(EMAIL_NOT_VERIFIED);
     }
 
     @Test
@@ -264,7 +264,7 @@ class EmailVerificationDomainServiceTest {
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> emailVerificationDomainService.ensureVerified(new Email(EMAIL), SIGN_UP))
                 .extracting(BadRequestException::getError)
-                .isEqualTo(EMAIL_VERIFICATION_NOT_VERIFIED);
+                .isEqualTo(EMAIL_NOT_VERIFIED);
     }
 
     private EmailVerification emailVerification(

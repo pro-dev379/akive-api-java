@@ -12,8 +12,8 @@ import static net.akive.api.common.exception.ErrorDomain.EMAIL_VERIFICATION;
 @RequiredArgsConstructor
 public enum TooManyRequestsError implements Error {
 
-    EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT(EMAIL_VERIFICATION, "Email verification request is too frequent."),
-    EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED(EMAIL_VERIFICATION, "Email verification request limit exceeded."),
+    EMAIL_VERIFICATION_RESEND_TOO_FREQUENT(EMAIL_VERIFICATION, "Email verification resend is too frequent."),
+    EMAIL_VERIFICATION_RESEND_LIMIT_EXCEEDED(EMAIL_VERIFICATION, "Email verification resend limit exceeded."),
     ;
 
     private final ErrorDomain domain;

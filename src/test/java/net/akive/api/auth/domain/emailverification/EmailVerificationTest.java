@@ -74,7 +74,7 @@ class EmailVerificationTest {
                         REQUESTED_AT.plusSeconds(10)
                 ))
                 .extracting(TooManyRequestsException::getError)
-                .isEqualTo(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT);
+                .isEqualTo(EMAIL_VERIFICATION_RESEND_TOO_FREQUENT);
     }
 
     @Test
@@ -90,7 +90,7 @@ class EmailVerificationTest {
         assertThatExceptionOfType(TooManyRequestsException.class)
                 .isThrownBy(() -> emailVerification.renew(new EmailVerificationCode("444444"), REQUESTED_AT.plusMinutes(4)))
                 .extracting(TooManyRequestsException::getError)
-                .isEqualTo(EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED);
+                .isEqualTo(EMAIL_VERIFICATION_RESEND_LIMIT_EXCEEDED);
     }
 
     @Test
@@ -131,7 +131,7 @@ class EmailVerificationTest {
                         REQUESTED_AT.plusMinutes(2)
                 ))
                 .extracting(ConflictException::getError)
-                .isEqualTo(EMAIL_VERIFICATION_ALREADY_VERIFIED);
+                .isEqualTo(EMAIL_ALREADY_VERIFIED);
     }
 
     @Test
@@ -163,7 +163,7 @@ class EmailVerificationTest {
                         )
                 )
                 .extracting(UnauthorizedException::getError)
-                .isEqualTo(EXPIRED_EMAIL_VERIFICATION_CODE);
+                .isEqualTo(EMAIL_VERIFICATION_CODE_EXPIRED);
     }
 
     private EmailVerification emailVerification(EmailVerificationPurpose verificationPurpose) {

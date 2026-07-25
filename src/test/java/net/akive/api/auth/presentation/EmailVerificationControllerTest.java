@@ -113,7 +113,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
         // given
         SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
 
-        willThrow(new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_LIMIT_EXCEEDED))
+        willThrow(new TooManyRequestsException(EMAIL_VERIFICATION_RESEND_LIMIT_EXCEEDED))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(request.to());
 
@@ -131,7 +131,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
         // given
         SendEmailVerificationCodeRequest request = new SendEmailVerificationCodeRequest("test@test.com", SIGN_UP);
 
-        willThrow(new TooManyRequestsException(EMAIL_VERIFICATION_REQUEST_TOO_FREQUENT))
+        willThrow(new TooManyRequestsException(EMAIL_VERIFICATION_RESEND_TOO_FREQUENT))
                 .given(sendEmailVerificationCodeUseCase)
                 .send(request.to());
 
@@ -354,7 +354,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                 "123456"
         );
 
-        willThrow(new UnauthorizedException(EXPIRED_EMAIL_VERIFICATION_CODE))
+        willThrow(new UnauthorizedException(EMAIL_VERIFICATION_CODE_EXPIRED))
                 .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.to());
 
@@ -376,7 +376,7 @@ class EmailVerificationControllerTest extends PublicControllerTestSupport {
                 "123456"
         );
 
-        willThrow(new ConflictException(EMAIL_VERIFICATION_ALREADY_VERIFIED))
+        willThrow(new ConflictException(EMAIL_ALREADY_VERIFIED))
                 .given(verifyEmailVerificationCodeUseCase)
                 .verify(request.to());
 

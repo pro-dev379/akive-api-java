@@ -9,7 +9,7 @@ import java.util.List;
 
 import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
-import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_TOO_LONG;
+import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_MAX_MONTHS_EXCEEDED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -90,7 +90,7 @@ class SessionPeriodTest {
                         LocalDate.of(2027, 7, 8)
                 ))
                 .extracting(BadRequestException::getError)
-                .isEqualTo(SESSION_PERIOD_TOO_LONG);
+                .isEqualTo(SESSION_PERIOD_MAX_MONTHS_EXCEEDED);
     }
 
     @Test

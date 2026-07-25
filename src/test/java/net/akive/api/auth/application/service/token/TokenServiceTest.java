@@ -23,7 +23,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.REFRESH_TOKEN_EXPIRED;
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
 import static net.akive.api.user.domain.RoleType.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -306,13 +306,13 @@ class TokenServiceTest {
         String refreshToken = "expired-refresh-token";
 
         given(validateTokenPort.validateRefreshToken(refreshToken))
-                .willThrow(new UnauthorizedException(EXPIRED_REFRESH_TOKEN));
+                .willThrow(new UnauthorizedException(REFRESH_TOKEN_EXPIRED));
 
         // when & then
         assertThatThrownBy(() -> tokenService.reissue(refreshToken))
                 .isInstanceOf(UnauthorizedException.class)
                 .extracting("error")
-                .isEqualTo(EXPIRED_REFRESH_TOKEN);
+                .isEqualTo(REFRESH_TOKEN_EXPIRED);
 
         verifyNoInteractions(loadTokenPort);
         verifyNoInteractions(createTokenPort);

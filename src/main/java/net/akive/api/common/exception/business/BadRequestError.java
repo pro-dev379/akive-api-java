@@ -24,12 +24,12 @@ public enum BadRequestError implements Error {
     INVALID_EMAIL_FORMAT(COMMON_DOMAIN, "Invalid email format."),
 
     EMAIL_VERIFICATION_CODE_MISMATCH(EMAIL_VERIFICATION, "Email verification code mismatch."),
-    EMAIL_VERIFICATION_NOT_VERIFIED(EMAIL_VERIFICATION, "Email is not verified."),
+    EMAIL_NOT_VERIFIED(EMAIL_VERIFICATION, "Email is not verified."),
     EMAIL_VERIFICATION_INVALID_CODE_FORMAT(EMAIL_VERIFICATION, "Invalid email verification code format."),
 
     INVALID_SESSION_PERIOD(PLAN, "Invalid session period."),
     SESSION_PERIOD_CHANGE_NOT_ALLOWED(PLAN, "Session period cannot be changed."),
-    SESSION_PERIOD_TOO_LONG(PLAN, "Session period is too long."),
+    SESSION_PERIOD_MAX_MONTHS_EXCEEDED(PLAN, "Session period is too long."),
     IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED(PLAN, "Too many in-progress sessional plans."),
     TOTAL_QUANTITY_LIMIT_EXCEEDED(PLAN, "Total quantity limit exceeded."),
     WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION(PLAN, "Weekly quantity period is outside session period."),

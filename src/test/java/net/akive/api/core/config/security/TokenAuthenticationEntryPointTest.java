@@ -7,7 +7,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
 
-import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_ACCESS_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.ACCESS_TOKEN_EXPIRED;
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_ACCESS_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,10 +28,10 @@ class TokenAuthenticationEntryPointTest {
 
         ApiErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ApiErrorResponse.class);
 
-        assertThat(response.getStatus()).isEqualTo(EXPIRED_ACCESS_TOKEN.getStatus().value());
+        assertThat(response.getStatus()).isEqualTo(ACCESS_TOKEN_EXPIRED.getStatus().value());
         assertThat(response.getContentType()).startsWith("application/json");
-        assertThat(errorResponse.code()).isEqualTo(EXPIRED_ACCESS_TOKEN.getCode());
-        assertThat(errorResponse.message()).isEqualTo(EXPIRED_ACCESS_TOKEN.getMessage());
+        assertThat(errorResponse.code()).isEqualTo(ACCESS_TOKEN_EXPIRED.getCode());
+        assertThat(errorResponse.message()).isEqualTo(ACCESS_TOKEN_EXPIRED.getMessage());
     }
 
     @Test

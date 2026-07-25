@@ -8,7 +8,7 @@ import net.akive.api.user.application.dto.SignUpResult;
 import net.akive.api.user.presentation.dto.request.SignUpByEmailRequest;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.user.domain.RoleType.USER;
 import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
 import static org.mockito.ArgumentMatchers.any;
@@ -120,7 +120,7 @@ class SignUpControllerTest extends PublicControllerTestSupport {
                 "password123!"
         );
 
-        willThrow(new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED))
+        willThrow(new BadRequestException(EMAIL_NOT_VERIFIED))
                 .given(signUpByEmailUseCase)
                 .signUp(request.to());
 

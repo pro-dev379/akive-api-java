@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -120,7 +120,7 @@ class SignUpServiceTest {
                 "password123!"
         );
 
-        doThrow(new BadRequestException(EMAIL_VERIFICATION_NOT_VERIFIED))
+        doThrow(new BadRequestException(EMAIL_NOT_VERIFIED))
                 .when(signUpDomainService)
                 .signUpByEmail(command.email(), command.password(), command.roleType());
 

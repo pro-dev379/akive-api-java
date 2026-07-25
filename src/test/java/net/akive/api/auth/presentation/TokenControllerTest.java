@@ -5,7 +5,7 @@ import net.akive.api.common.exception.business.UnauthorizedException;
 import net.akive.api.support.PublicControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.REFRESH_TOKEN_EXPIRED;
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_INPUT_VALUE;
 import static org.mockito.BDDMockito.given;
@@ -123,7 +123,7 @@ class TokenControllerTest extends PublicControllerTestSupport {
         // given
         String refreshToken = "expired-refresh-token";
 
-        willThrow(new UnauthorizedException(EXPIRED_REFRESH_TOKEN))
+        willThrow(new UnauthorizedException(REFRESH_TOKEN_EXPIRED))
                 .given(issueTokenUseCase)
                 .reissue(refreshToken);
 
@@ -131,7 +131,7 @@ class TokenControllerTest extends PublicControllerTestSupport {
         mockMvc.perform(post("/tokens")
                         .header("Authorization", "Bearer " + refreshToken))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(EXPIRED_REFRESH_TOKEN.getCode()))
-                .andExpect(jsonPath("$.message").value(EXPIRED_REFRESH_TOKEN.getMessage()));
+                .andExpect(jsonPath("$.code").value(REFRESH_TOKEN_EXPIRED.getCode()))
+                .andExpect(jsonPath("$.message").value(REFRESH_TOKEN_EXPIRED.getMessage()));
     }
 }

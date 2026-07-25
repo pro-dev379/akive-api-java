@@ -17,7 +17,7 @@ import java.time.Instant;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static net.akive.api.auth.domain.token.TokenType.*;
-import static net.akive.api.common.exception.business.UnauthorizedError.EXPIRED_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.UnauthorizedError.REFRESH_TOKEN_EXPIRED;
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
 import static org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256;
 
@@ -81,7 +81,7 @@ class JwtTokenProvider implements CreateTokenPort, ValidateTokenPort {
             return refreshTokenJwtDecoder.decode(refreshToken);
         } catch (JwtValidationException e) {
             if (containsExpiredTokenError(e)) {
-                throw new UnauthorizedException(EXPIRED_REFRESH_TOKEN);
+                throw new UnauthorizedException(REFRESH_TOKEN_EXPIRED);
             }
 
             throw new UnauthorizedException(INVALID_REFRESH_TOKEN);

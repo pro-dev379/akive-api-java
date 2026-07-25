@@ -12,7 +12,7 @@ import static net.akive.api.common.exception.ErrorDomain.*;
 @RequiredArgsConstructor
 public enum NotFoundError implements Error {
 
-    REQUESTED_RESOURCE_NOT_FOUND(COMMON, "Requested resource not found."),
+    RESOURCE_NOT_FOUND(COMMON, "Resource not found."),
     USER_NOT_FOUND(USER, "User not found."),
     SESSIONAL_PLAN_NOT_FOUND(PLAN, "Sessional plan not found."),
     WEEKLY_PLAN_NOT_FOUND(PLAN, "Weekly plan not found."),

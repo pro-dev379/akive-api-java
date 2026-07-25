@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_INPUT_VALUE;
 import static net.akive.api.common.exception.web.HttpRequestError.METHOD_NOT_ALLOWED;
 import static net.akive.api.common.exception.internal.InternalServerError.INTERNAL_SERVER_ERROR;
-import static net.akive.api.common.exception.business.NotFoundError.REQUESTED_RESOURCE_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.RESOURCE_NOT_FOUND;
 
 @Slf4j
 @RestControllerAdvice
@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiErrorResponse> handleNoResourceFoundException(HttpServletRequest request) {
         logWarn(request, "[NoResourceFoundException]", null, null);
 
-        return createErrorResponse(REQUESTED_RESOURCE_NOT_FOUND);
+        return createErrorResponse(RESOURCE_NOT_FOUND);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
