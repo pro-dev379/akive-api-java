@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.dto.query.GetSessionalPlanQuery;
 import net.akive.api.plan.application.dto.result.common.SessionPeriodResult;
 import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
-import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
+import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
 import net.akive.api.plan.application.port.in.GetSessionalPlanUseCase;
 import net.akive.api.plan.application.port.in.GetSessionalPlansUseCase;
@@ -36,11 +36,11 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
     }
 
     @Override
-    public GetSessionalPlanDetailResult get(GetSessionalPlanQuery command) {
+    public GetSessionalPlanResult get(GetSessionalPlanQuery command) {
         SessionalPlan sessionalPlan = loadSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
         List<SessionWeek> weeks = sessionalPlan.getSessionPeriod().splitIntoWeeks();
 
-        return new GetSessionalPlanDetailResult(
+        return new GetSessionalPlanResult(
                 sessionalPlan.getSessionalPlanId(),
                 sessionalPlan.getSessionName(),
                 SessionPeriodResult.from(sessionalPlan.getSessionPeriod()),
@@ -49,7 +49,7 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
                         sessionalPlan.getSessionalPlanId(),
                         weeks
                 ).stream()
-                        .map(GetSessionalPlanDetailResult.TotalQuantityResult::from)
+                        .map(GetSessionalPlanResult.TotalQuantityResult::from)
                         .toList()
         );
     }

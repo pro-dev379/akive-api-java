@@ -4,7 +4,7 @@ import net.akive.api.common.exception.business.NotFoundException;
 
 import net.akive.api.plan.application.dto.query.GetSessionalPlanQuery;
 import net.akive.api.plan.application.dto.result.common.*;
-import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanDetailResult;
+import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanResult;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlansResult;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.LoadTotalQuantityPort;
@@ -175,7 +175,7 @@ class QuerySessionalPlanServiceTest {
         )).willReturn(totalQuantities);
 
         // when
-        GetSessionalPlanDetailResult result = querySessionalPlanService.get(
+        GetSessionalPlanResult result = querySessionalPlanService.get(
                 new GetSessionalPlanQuery(userId, sessionalPlanId)
         );
 
@@ -197,9 +197,9 @@ class QuerySessionalPlanServiceTest {
                 );
         assertThat(result.totalQuantities())
                 .extracting(
-                        GetSessionalPlanDetailResult.TotalQuantityResult::totalQuantityId,
-                        GetSessionalPlanDetailResult.TotalQuantityResult::subject,
-                        GetSessionalPlanDetailResult.TotalQuantityResult::totalQuantityAmount
+                        GetSessionalPlanResult.TotalQuantityResult::totalQuantityId,
+                        GetSessionalPlanResult.TotalQuantityResult::subject,
+                        GetSessionalPlanResult.TotalQuantityResult::totalQuantityAmount
                 )
                 .containsExactly(tuple(
                         10L,
@@ -208,9 +208,9 @@ class QuerySessionalPlanServiceTest {
                 ));
         assertThat(result.totalQuantities().getFirst().weeklyQuantities())
                 .extracting(
-                        GetSessionalPlanDetailResult.WeeklyQuantityResult::weeklyQuantityId,
-                        GetSessionalPlanDetailResult.WeeklyQuantityResult::sessionWeek,
-                        GetSessionalPlanDetailResult.WeeklyQuantityResult::weeklyQuantityAmount
+                        GetSessionalPlanResult.WeeklyQuantityResult::weeklyQuantityId,
+                        GetSessionalPlanResult.WeeklyQuantityResult::sessionWeek,
+                        GetSessionalPlanResult.WeeklyQuantityResult::weeklyQuantityAmount
                 )
                 .containsExactly(
                         tuple(
@@ -219,7 +219,7 @@ class QuerySessionalPlanServiceTest {
                                         1,
                                         new WeekPeriodResult(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 12))
                                 ),
-                                new GetSessionalPlanDetailResult.WeeklyQuantityAmountResult(70, 30, 40, "1주차 메모")
+                                new GetSessionalPlanResult.WeeklyQuantityAmountResult(70, 30, 40, "1주차 메모")
                         ),
                         tuple(
                                 101L,
@@ -227,7 +227,7 @@ class QuerySessionalPlanServiceTest {
                                         2,
                                         new WeekPeriodResult(LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 14))
                                 ),
-                                new GetSessionalPlanDetailResult.WeeklyQuantityAmountResult(30, 10, 20, "2주차 메모")
+                                new GetSessionalPlanResult.WeeklyQuantityAmountResult(30, 10, 20, "2주차 메모")
                         )
                 );
 

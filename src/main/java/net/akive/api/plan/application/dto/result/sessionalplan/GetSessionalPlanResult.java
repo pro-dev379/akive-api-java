@@ -7,7 +7,7 @@ import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityDa
 
 import java.util.List;
 
-public record GetSessionalPlanDetailResult(
+public record GetSessionalPlanResult(
         Long sessionalPlanId,
         String sessionName,
         SessionPeriodResult sessionPeriod,

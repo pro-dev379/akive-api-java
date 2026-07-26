@@ -103,7 +103,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         Long sessionalPlanId = 2L;
         GetSessionalPlanQuery command = new GetSessionalPlanQuery(userId, sessionalPlanId);
-        GetSessionalPlanDetailResult result = new GetSessionalPlanDetailResult(
+        GetSessionalPlanResult result = new GetSessionalPlanResult(
                 sessionalPlanId,
                 "1회차",
                 new SessionPeriodResult(
@@ -121,12 +121,12 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                         )
                 ),
                 List.of(
-                        new GetSessionalPlanDetailResult.TotalQuantityResult(
+                        new GetSessionalPlanResult.TotalQuantityResult(
                                 10L,
                                 new SubjectResult("수학", "학습"),
                                 new TotalQuantityAmountResult(100, "문제", "총량 메모"),
                                 List.of(
-                                        new GetSessionalPlanDetailResult.WeeklyQuantityResult(
+                                        new GetSessionalPlanResult.WeeklyQuantityResult(
                                                 100L,
                                                 new SessionWeekResult(
                                                         1,
@@ -135,7 +135,7 @@ class SessionalPlanControllerTest extends PrivateControllerTestSupport {
                                                                 LocalDate.of(2026, 7, 12)
                                                         )
                                                 ),
-                                                new GetSessionalPlanDetailResult.WeeklyQuantityAmountResult(
+                                                new GetSessionalPlanResult.WeeklyQuantityAmountResult(
                                                         70,
                                                         30,
                                                         40,
