@@ -59,7 +59,7 @@ class SessionalPlanJpaAdapter implements
             List<SessionWeek> sessionWeeks
     ) {
         List<SessionalPlanTotalQuantityProjection> projections = sessionalPlanJpaRepository
-                .findSessionalPlanTotalQuantityDetailsBySessionalPlanId(sessionalPlanId);
+                .findSessionalPlanTotalQuantitiesBySessionalPlanId(sessionalPlanId);
 
         Map<WeekPeriod, SessionWeek> sessionWeekByPeriod = sessionWeeks.stream()
                 .collect(Collectors.toMap(
