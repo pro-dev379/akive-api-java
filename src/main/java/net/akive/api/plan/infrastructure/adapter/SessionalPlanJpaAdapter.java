@@ -80,6 +80,31 @@ class SessionalPlanJpaAdapter implements
     }
 
     @Override
+    public Optional<SessionalPlanTotalQuantityData> loadSessionalPlanTotalQuantityBySessionalPlanIdAndTotalQuantityId(
+            Long sessionalPlanId,
+            Long totalQuantityId,
+            List<SessionWeek> sessionWeeks
+    ) {
+        List<SessionalPlanTotalQuantityProjection> projections =
+                sessionalPlanJpaRepository.findSessionalPlanTotalQuantitiesBySessionalPlanIdAndTotalQuantityId(
+                        sessionalPlanId,
+                        totalQuantityId
+                );
+
+        if (projections.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Map<WeekPeriod, SessionWeek> sessionWeekByPeriod = sessionWeeks.stream()
+                .collect(Collectors.toMap(
+                        SessionWeek::weekPeriod,
+                        Function.identity()
+                ));
+
+        return Optional.of(toSessionalPlanTotalQuantityData(projections, sessionWeekByPeriod));
+    }
+
+    @Override
     public SessionalPlan save(SessionalPlan sessionalPlan) {
         return sessionalPlanJpaRepository.save(SessionalPlanEntity.from(sessionalPlan)).to();
     }

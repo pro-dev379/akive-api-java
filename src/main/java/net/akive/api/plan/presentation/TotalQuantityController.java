@@ -2,7 +2,10 @@ package net.akive.api.plan.presentation;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.plan.application.dto.query.GetSessionalPlanTotalQuantityQuery;
+import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanResult;
 import net.akive.api.plan.application.port.in.CreateTotalQuantityUseCase;
+import net.akive.api.plan.application.port.in.GetSessionalPlanTotalQuantityUseCase;
 import net.akive.api.plan.presentation.dto.request.CreateTotalQuantityRequest;
 import net.akive.api.plan.presentation.dto.response.CreateTotalQuantityResponse;
 import org.springframework.validation.annotation.Validated;
@@ -15,7 +18,19 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequiredArgsConstructor
 public class TotalQuantityController {
 
+    private final GetSessionalPlanTotalQuantityUseCase getSessionalPlanTotalQuantityUseCase;
     private final CreateTotalQuantityUseCase createTotalQuantityUseCase;
+
+    @GetMapping("/{totalQuantityId}")
+    public GetSessionalPlanResult.TotalQuantityResult get(
+            @AuthenticatedUserId Long userId,
+            @PathVariable Long sessionalPlanId,
+            @PathVariable Long totalQuantityId
+    ) {
+        return getSessionalPlanTotalQuantityUseCase.get(
+                new GetSessionalPlanTotalQuantityQuery(sessionalPlanId, userId, totalQuantityId)
+        );
+    }
 
     @PostMapping
     @ResponseStatus(CREATED)

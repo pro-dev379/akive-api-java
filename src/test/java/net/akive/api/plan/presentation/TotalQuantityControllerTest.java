@@ -4,16 +4,26 @@ import net.akive.api.plan.application.dto.command.CreateTotalQuantityCommand;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.plan.application.dto.query.GetSessionalPlanTotalQuantityQuery;
+import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
+import net.akive.api.plan.application.dto.result.common.SubjectResult;
+import net.akive.api.plan.application.dto.result.common.TotalQuantityAmountResult;
+import net.akive.api.plan.application.dto.result.common.WeekPeriodResult;
+import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanResult;
 import net.akive.api.plan.presentation.dto.request.CreateTotalQuantityRequest;
 import net.akive.api.plan.presentation.dto.request.common.SubjectRequest;
 import net.akive.api.plan.presentation.dto.request.common.TotalQuantityAmountRequest;
 import net.akive.api.support.PrivateControllerTestSupport;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_INPUT_VALUE;
 import static net.akive.api.common.exception.business.BadRequestError.TOTAL_QUANTITY_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_TOTAL_QUANTITY_NOT_FOUND;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -21,11 +31,167 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class TotalQuantityControllerTest extends PrivateControllerTestSupport {
+
+    @Test
+    void 세션_총량을_조회한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        Long totalQuantityId = 10L;
+        GetSessionalPlanTotalQuantityQuery query = new GetSessionalPlanTotalQuantityQuery(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        );
+        GetSessionalPlanResult.TotalQuantityResult result = new GetSessionalPlanResult.TotalQuantityResult(
+                totalQuantityId,
+                new SubjectResult("수학", "학습"),
+                new TotalQuantityAmountResult(100, "문제", "총량 메모"),
+                List.of(
+                        new GetSessionalPlanResult.WeeklyQuantityResult(
+                                100L,
+                                new SessionWeekResult(
+                                        1,
+                                        new WeekPeriodResult(
+                                                LocalDate.of(2026, 7, 6),
+                                                LocalDate.of(2026, 7, 12)
+                                        )
+                                ),
+                                new GetSessionalPlanResult.WeeklyQuantityAmountResult(
+                                        70,
+                                        30,
+                                        40,
+                                        "1주차 메모"
+                                )
+                        )
+                )
+        );
+
+        given(getSessionalPlanTotalQuantityUseCase.get(query))
+                .willReturn(result);
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/{sessionalPlanId}/total-quantities/{totalQuantityId}",
+                        sessionalPlanId,
+                        totalQuantityId
+                )
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalQuantityId").value(totalQuantityId))
+                .andExpect(jsonPath("$.subject.name").value("수학"))
+                .andExpect(jsonPath("$.subject.category").value("학습"))
+                .andExpect(jsonPath("$.totalQuantityAmount.quantityAmount").value(100))
+                .andExpect(jsonPath("$.totalQuantityAmount.unit").value("문제"))
+                .andExpect(jsonPath("$.totalQuantityAmount.quantityMemo").value("총량 메모"))
+                .andExpect(jsonPath("$.weeklyQuantities[0].weeklyQuantityId").value(100L))
+                .andExpect(jsonPath("$.weeklyQuantities[0].sessionWeek.weekNum").value(1))
+                .andExpect(jsonPath("$.weeklyQuantities[0].sessionWeek.weekPeriod.startOn").value("2026-07-06"))
+                .andExpect(jsonPath("$.weeklyQuantities[0].sessionWeek.weekPeriod.endOn").value("2026-07-12"))
+                .andExpect(jsonPath("$.weeklyQuantities[0].weeklyQuantityAmount.quantityAmount").value(70))
+                .andExpect(jsonPath("$.weeklyQuantities[0].weeklyQuantityAmount.completedQuantityAmount").value(30))
+                .andExpect(jsonPath("$.weeklyQuantities[0].weeklyQuantityAmount.delayedQuantityAmount").value(40))
+                .andExpect(jsonPath("$.weeklyQuantities[0].weeklyQuantityAmount.quantityMemo").value("1주차 메모"));
+
+        then(getSessionalPlanTotalQuantityUseCase).should().get(query);
+    }
+
+    @Test
+    void 세션_총량_조회_요청_시_세셔널_플랜_식별자_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long totalQuantityId = 10L;
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/{sessionalPlanId}/total-quantities/{totalQuantityId}",
+                        "invalid",
+                        totalQuantityId
+                )
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(INVALID_INPUT_VALUE.getCode()));
+
+        then(getSessionalPlanTotalQuantityUseCase).should(never())
+                .get(any(GetSessionalPlanTotalQuantityQuery.class));
+    }
+
+    @Test
+    void 세션_총량_조회_요청_시_세션_총량_식별자_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/{sessionalPlanId}/total-quantities/{totalQuantityId}",
+                        sessionalPlanId,
+                        "invalid"
+                )
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(INVALID_INPUT_VALUE.getCode()));
+
+        then(getSessionalPlanTotalQuantityUseCase).should(never())
+                .get(any(GetSessionalPlanTotalQuantityQuery.class));
+    }
+
+    @Test
+    void 세션_총량_조회_요청_시_세셔널_플랜이_없으면_404를_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        Long totalQuantityId = 10L;
+        GetSessionalPlanTotalQuantityQuery query = new GetSessionalPlanTotalQuantityQuery(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        );
+
+        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+                .given(getSessionalPlanTotalQuantityUseCase).get(query);
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/{sessionalPlanId}/total-quantities/{totalQuantityId}",
+                        sessionalPlanId,
+                        totalQuantityId
+                )
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(SESSIONAL_PLAN_NOT_FOUND.getCode()));
+
+        then(getSessionalPlanTotalQuantityUseCase).should().get(query);
+    }
+
+    @Test
+    void 세션_총량_조회_요청_시_세션_총량이_없으면_404를_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        Long totalQuantityId = 10L;
+        GetSessionalPlanTotalQuantityQuery query = new GetSessionalPlanTotalQuantityQuery(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        );
+
+        willThrow(new NotFoundException(SESSIONAL_PLAN_TOTAL_QUANTITY_NOT_FOUND))
+                .given(getSessionalPlanTotalQuantityUseCase).get(query);
+
+        // when & then
+        mockMvc.perform(get("/sessional-plans/{sessionalPlanId}/total-quantities/{totalQuantityId}",
+                        sessionalPlanId,
+                        totalQuantityId
+                )
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(SESSIONAL_PLAN_TOTAL_QUANTITY_NOT_FOUND.getCode()));
+
+        then(getSessionalPlanTotalQuantityUseCase).should().get(query);
+    }
 
     @Test
     void 세션_총량을_생성한다() throws Exception {

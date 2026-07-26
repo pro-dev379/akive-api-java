@@ -47,5 +47,8 @@ public abstract class PrivateControllerTestSupport {
     protected DeleteSessionalPlanUseCase deleteSessionalPlanUseCase;
 
     @MockitoBean
+    protected GetSessionalPlanTotalQuantityUseCase getSessionalPlanTotalQuantityUseCase;
+
+    @MockitoBean
     protected CreateTotalQuantityUseCase createTotalQuantityUseCase;
 }

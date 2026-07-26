@@ -6,5 +6,9 @@ import java.util.List;
 
 public interface SessionalPlanQueryRepository {
 
-    List<SessionalPlanTotalQuantityProjection> findSessionalPlanTotalQuantityDetailsBySessionalPlanId(Long sessionalPlanId);
+    List<SessionalPlanTotalQuantityProjection> findSessionalPlanTotalQuantitiesBySessionalPlanId(Long sessionalPlanId);
+    List<SessionalPlanTotalQuantityProjection> findSessionalPlanTotalQuantitiesBySessionalPlanIdAndTotalQuantityId(
+            Long sessionalPlanId,
+            Long totalQuantityId
+    );
 }

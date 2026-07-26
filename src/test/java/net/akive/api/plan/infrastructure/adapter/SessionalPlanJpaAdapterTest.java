@@ -1,8 +1,14 @@
 package net.akive.api.plan.infrastructure.adapter;
 
 import net.akive.api.common.domain.Email;
+import net.akive.api.plan.application.port.out.dto.SessionalPlanTotalQuantityData;
+import net.akive.api.plan.application.port.out.dto.SessionalPlanWeeklyQuantityData;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
+import net.akive.api.plan.domain.Subject;
+import net.akive.api.plan.domain.TotalQuantityAmount;
+import net.akive.api.plan.domain.TotalQuantityPlan;
+import net.akive.api.plan.domain.TotalQuantityPlanFactory;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
@@ -12,8 +18,11 @@ import java.util.List;
 
 import static net.akive.api.user.domain.RoleType.USER;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
+
+    private final TotalQuantityPlanFactory totalQuantityPlanFactory = new TotalQuantityPlanFactory();
 
     @Test
     void 세셔널_플랜을_저장한다() {
@@ -168,6 +177,83 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
 
         // then
         assertThat(loadedSessionPeriod).isEqualTo(sessionPeriod);
+    }
+
+    @Test
+    void 세셔널_플랜의_세션_총량을_조회한다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                new Email("test@test.com"),
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "1회차",
+                new SessionPeriod(
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2026, 7, 14)
+                )
+        ));
+        saveTotalQuantity(savedSessionalPlan, "수학", 100);
+        Long savedEnglishTotalQuantityId = saveTotalQuantity(savedSessionalPlan, "영어", 200);
+
+        // when
+        SessionalPlanTotalQuantityData data = loadTotalQuantityPort
+                .loadSessionalPlanTotalQuantityBySessionalPlanIdAndTotalQuantityId(
+                        savedSessionalPlan.getSessionalPlanId(),
+                        savedEnglishTotalQuantityId,
+                        savedSessionalPlan.getSessionPeriod().splitIntoWeeks()
+                )
+                .orElseThrow();
+
+        // then
+        assertThat(data.totalQuantityId()).isEqualTo(savedEnglishTotalQuantityId);
+        assertThat(data.sessionalPlanId()).isEqualTo(savedSessionalPlan.getSessionalPlanId());
+        assertThat(data.subject()).isEqualTo(new Subject("영어", "과목"));
+        assertThat(data.totalQuantityAmount()).isEqualTo(TotalQuantityAmount.of(200, "문제", null));
+        assertThat(data.weeklyQuantities())
+                .hasSize(2)
+                .extracting(
+                        SessionalPlanWeeklyQuantityData::totalQuantityId,
+                        weeklyQuantity -> weeklyQuantity.sessionWeek().weekNum(),
+                        weeklyQuantity -> weeklyQuantity.weeklyQuantityAmount().quantityAmount(),
+                        weeklyQuantity -> weeklyQuantity.weeklyQuantityAmount().completedQuantityAmount(),
+                        weeklyQuantity -> weeklyQuantity.weeklyQuantityAmount().delayedQuantityAmount()
+                )
+                .containsExactly(
+                        tuple(savedEnglishTotalQuantityId, 1, 200, 0, 200),
+                        tuple(savedEnglishTotalQuantityId, 2, 0, 0, 0)
+                );
+    }
+
+    @Test
+    void 세셔널_플랜에_존재하지_않는_세션_총량은_조회되지_않는다() {
+        // given
+        User savedUser = saveUserPort.save(User.signUpByEmail(
+                new Email("test@test.com"),
+                "USER@abcde",
+                "password123!",
+                USER
+        ));
+        SessionalPlan savedSessionalPlan = saveSessionalPlanPort.save(SessionalPlan.create(
+                null,
+                savedUser.getUserId(),
+                "1회차",
+                new SessionPeriod(
+                        LocalDate.of(2026, 7, 7),
+                        LocalDate.of(2026, 7, 14)
+                )
+        ));
+
+        // when & then
+        assertThat(loadTotalQuantityPort.loadSessionalPlanTotalQuantityBySessionalPlanIdAndTotalQuantityId(
+                savedSessionalPlan.getSessionalPlanId(),
+                999L,
+                savedSessionalPlan.getSessionPeriod().splitIntoWeeks()
+        )).isEmpty();
     }
 
     @Test
@@ -468,5 +554,19 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         assertThat(loadSessionalPlanPort.loadAllByUserIdOrderBySessionalPlanIdDesc(savedUser.getUserId()))
                 .extracting(SessionalPlan::getSessionalPlanId)
                 .containsExactly(savedSessionalPlan.getSessionalPlanId());
+    }
+
+    private Long saveTotalQuantity(
+            SessionalPlan sessionalPlan,
+            String subjectName,
+            int quantityAmount
+    ) {
+        TotalQuantityPlan totalQuantityPlan = totalQuantityPlanFactory.create(
+                sessionalPlan,
+                new Subject(subjectName, "과목"),
+                TotalQuantityAmount.of(quantityAmount, "문제", null)
+        );
+
+        return saveTotalQuantityPort.save(totalQuantityPlan);
     }
 }
