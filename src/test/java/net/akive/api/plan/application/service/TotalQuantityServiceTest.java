@@ -2,8 +2,10 @@ package net.akive.api.plan.application.service;
 
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.dto.command.CreateTotalQuantityCommand;
+import net.akive.api.plan.application.dto.command.DeleteTotalQuantityCommand;
 import net.akive.api.plan.application.dto.query.GetSessionalPlanTotalQuantityQuery;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanResult;
+import net.akive.api.plan.application.port.out.DeleteTotalQuantityPort;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.LoadTotalQuantityPort;
 import net.akive.api.plan.application.port.out.SaveTotalQuantityPort;
@@ -49,6 +51,9 @@ class TotalQuantityServiceTest {
 
     @Mock
     SaveTotalQuantityPort saveTotalQuantityPort;
+
+    @Mock
+    DeleteTotalQuantityPort deleteTotalQuantityPort;
 
     @Mock
     TotalQuantityPlan totalQuantityPlan;
@@ -258,5 +263,65 @@ class TotalQuantityServiceTest {
                 command.totalQuantityAmount()
         );
         then(saveTotalQuantityPort).should(never()).save(any(TotalQuantityPlan.class));
+    }
+
+    @Test
+    void 세션_총량을_삭제한다() {
+        // given
+        Long sessionalPlanId = 1L;
+        Long userId = 2L;
+        Long totalQuantityId = 10L;
+        DeleteTotalQuantityCommand command = new DeleteTotalQuantityCommand(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        );
+
+        given(deleteTotalQuantityPort.deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(
+                totalQuantityId,
+                sessionalPlanId,
+                userId
+        )).willReturn(1L);
+
+        // when
+        totalQuantityService.delete(command);
+
+        // then
+        then(deleteTotalQuantityPort).should().deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(
+                totalQuantityId,
+                sessionalPlanId,
+                userId
+        );
+    }
+
+    @Test
+    void 삭제할_세션_총량이_없으면_세션_총량_삭제에_실패한다() {
+        // given
+        Long sessionalPlanId = 1L;
+        Long userId = 2L;
+        Long totalQuantityId = 10L;
+        DeleteTotalQuantityCommand command = new DeleteTotalQuantityCommand(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        );
+
+        given(deleteTotalQuantityPort.deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(
+                totalQuantityId,
+                sessionalPlanId,
+                userId
+        )).willReturn(0L);
+
+        // when & then
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantityService.delete(command))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(SESSIONAL_PLAN_TOTAL_QUANTITY_NOT_FOUND);
+
+        then(deleteTotalQuantityPort).should().deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(
+                totalQuantityId,
+                sessionalPlanId,
+                userId
+        );
     }
 }

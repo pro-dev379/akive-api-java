@@ -58,6 +58,9 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
     protected LoadTotalQuantityPort loadTotalQuantityPort;
 
     @Autowired
+    protected DeleteTotalQuantityPort deleteTotalQuantityPort;
+
+    @Autowired
     protected ValidateTotalQuantityPort validateTotalQuantityPort;
 
 }

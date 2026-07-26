@@ -1,6 +1,7 @@
 package net.akive.api.plan.infrastructure.adapter;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.plan.application.port.out.DeleteTotalQuantityPort;
 import net.akive.api.plan.application.port.out.SaveTotalQuantityPort;
 import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
 import net.akive.api.plan.domain.DailyQuantity;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
-class TotalQuantityJpaAdapter implements SaveTotalQuantityPort, ValidateTotalQuantityPort {
+class TotalQuantityJpaAdapter implements SaveTotalQuantityPort, DeleteTotalQuantityPort, ValidateTotalQuantityPort {
 
     private static final int WEEKLY_QUANTITY_INSERT_CHUNK_SIZE = 100;
     private static final int DAILY_QUANTITY_INSERT_CHUNK_SIZE = 500;
@@ -63,6 +64,11 @@ class TotalQuantityJpaAdapter implements SaveTotalQuantityPort, ValidateTotalQua
         insertDailyQuantities(totalQuantityPlan.weeklyQuantities(), weeklyQuantityIdByPeriod);
 
         return totalQuantityId;
+    }
+
+    @Override
+    public long deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(Long totalQuantityId, Long sessionalPlanId, Long userId) {
+        return totalQuantityJpaRepository.deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(totalQuantityId, sessionalPlanId, userId);
     }
 
     @Override

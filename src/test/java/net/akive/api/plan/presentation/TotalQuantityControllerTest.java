@@ -4,6 +4,7 @@ import net.akive.api.plan.application.dto.command.CreateTotalQuantityCommand;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.plan.application.dto.command.DeleteTotalQuantityCommand;
 import net.akive.api.plan.application.dto.query.GetSessionalPlanTotalQuantityQuery;
 import net.akive.api.plan.application.dto.result.common.SessionWeekResult;
 import net.akive.api.plan.application.dto.result.common.SubjectResult;
@@ -31,6 +32,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -616,6 +618,92 @@ class TotalQuantityControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.code").value(SUBJECT_NAME_ALREADY_EXISTS.getCode()));
 
         then(createTotalQuantityUseCase).should().create(command);
+    }
+
+    @Test
+    void 세션_총량을_삭제한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        Long totalQuantityId = 10L;
+        DeleteTotalQuantityCommand command = new DeleteTotalQuantityCommand(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        );
+
+        // when & then
+        mockMvc.perform(delete("/sessional-plans/{sessionalPlanId}/total-quantities/{totalQuantityId}",
+                        sessionalPlanId,
+                        totalQuantityId
+                )
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isNoContent());
+
+        then(deleteTotalQuantityUseCase).should().delete(command);
+    }
+
+    @Test
+    void 세션_총량_삭제_요청_시_세셔널_플랜_식별자_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long totalQuantityId = 10L;
+
+        // when & then
+        mockMvc.perform(delete("/sessional-plans/{sessionalPlanId}/total-quantities/{totalQuantityId}",
+                        "invalid",
+                        totalQuantityId
+                )
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(INVALID_INPUT_VALUE.getCode()));
+
+        then(deleteTotalQuantityUseCase).should(never()).delete(any(DeleteTotalQuantityCommand.class));
+    }
+
+    @Test
+    void 세션_총량_삭제_요청_시_세션_총량_식별자_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+
+        // when & then
+        mockMvc.perform(delete("/sessional-plans/{sessionalPlanId}/total-quantities/{totalQuantityId}",
+                        sessionalPlanId,
+                        "invalid"
+                )
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(INVALID_INPUT_VALUE.getCode()));
+
+        then(deleteTotalQuantityUseCase).should(never()).delete(any(DeleteTotalQuantityCommand.class));
+    }
+
+    @Test
+    void 세션_총량_삭제_요청_시_세션_총량이_없으면_404를_응답한다() throws Exception {
+        // given
+        Long userId = 1L;
+        Long sessionalPlanId = 2L;
+        Long totalQuantityId = 10L;
+        DeleteTotalQuantityCommand command = new DeleteTotalQuantityCommand(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        );
+
+        willThrow(new NotFoundException(SESSIONAL_PLAN_TOTAL_QUANTITY_NOT_FOUND))
+                .given(deleteTotalQuantityUseCase).delete(command);
+
+        // when & then
+        mockMvc.perform(delete("/sessional-plans/{sessionalPlanId}/total-quantities/{totalQuantityId}",
+                        sessionalPlanId,
+                        totalQuantityId
+                )
+                        .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId)))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(SESSIONAL_PLAN_TOTAL_QUANTITY_NOT_FOUND.getCode()));
+
+        then(deleteTotalQuantityUseCase).should().delete(command);
     }
 
     private CreateTotalQuantityRequest createRequest() {

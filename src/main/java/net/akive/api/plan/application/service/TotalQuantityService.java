@@ -3,10 +3,13 @@ package net.akive.api.plan.application.service;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.dto.command.CreateTotalQuantityCommand;
+import net.akive.api.plan.application.dto.command.DeleteTotalQuantityCommand;
 import net.akive.api.plan.application.dto.query.GetSessionalPlanTotalQuantityQuery;
 import net.akive.api.plan.application.dto.result.sessionalplan.GetSessionalPlanResult;
 import net.akive.api.plan.application.port.in.CreateTotalQuantityUseCase;
+import net.akive.api.plan.application.port.in.DeleteTotalQuantityUseCase;
 import net.akive.api.plan.application.port.in.GetSessionalPlanTotalQuantityUseCase;
+import net.akive.api.plan.application.port.out.DeleteTotalQuantityPort;
 import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
 import net.akive.api.plan.application.port.out.LoadTotalQuantityPort;
 import net.akive.api.plan.application.port.out.SaveTotalQuantityPort;
@@ -25,11 +28,15 @@ import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PL
 @Service
 @Transactional
 @RequiredArgsConstructor
-class TotalQuantityService implements GetSessionalPlanTotalQuantityUseCase, CreateTotalQuantityUseCase {
+class TotalQuantityService implements
+        GetSessionalPlanTotalQuantityUseCase,
+        CreateTotalQuantityUseCase,
+        DeleteTotalQuantityUseCase {
 
     private final LoadSessionalPlanPort loadSessionalPlanPort;
     private final LoadTotalQuantityPort loadTotalQuantityPort;
     private final SaveTotalQuantityPort saveTotalQuantityPort;
+    private final DeleteTotalQuantityPort deleteTotalQuantityPort;
 
     private final TotalQuantityDomainService totalQuantityDomainService;
 
@@ -53,6 +60,19 @@ class TotalQuantityService implements GetSessionalPlanTotalQuantityUseCase, Crea
         );
 
         return saveTotalQuantityPort.save(totalQuantityPlan);
+    }
+
+    @Override
+    public void delete(DeleteTotalQuantityCommand command) {
+        long deletedCount = deleteTotalQuantityPort.deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(
+                command.totalQuantityId(),
+                command.sessionalPlanId(),
+                command.userId()
+        );
+
+        if (deletedCount == 0) {
+            throw new NotFoundException(SESSIONAL_PLAN_TOTAL_QUANTITY_NOT_FOUND);
+        }
     }
 
     private SessionalPlan loadSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {

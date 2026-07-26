@@ -135,6 +135,43 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         assertThat(totalQuantityCount).isZero();
     }
 
+    @Test
+    void 세션_총량을_삭제한다() {
+        // given
+        SessionalPlan savedSessionalPlan = saveSessionalPlan();
+        Long totalQuantityId = saveTotalQuantity(savedSessionalPlan, "수학");
+
+        // when
+        long deletedCount = deleteTotalQuantityPort.deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(
+                totalQuantityId,
+                savedSessionalPlan.getSessionalPlanId(),
+                savedSessionalPlan.getUserId()
+        );
+
+        // then
+        assertThat(deletedCount).isEqualTo(1);
+        assertThat(countTotalQuantities(totalQuantityId, savedSessionalPlan.getSessionalPlanId())).isZero();
+        assertThat(countWeeklyQuantities(totalQuantityId)).isZero();
+        assertThat(countDailyQuantitiesByTotalQuantityId(totalQuantityId)).isZero();
+    }
+
+    @Test
+    void 삭제할_세션_총량이_없으면_0을_반환한다() {
+        // given
+        SessionalPlan savedSessionalPlan = saveSessionalPlan();
+        Long notExistingTotalQuantityId = 999L;
+
+        // when
+        long deletedCount = deleteTotalQuantityPort.deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(
+                notExistingTotalQuantityId,
+                savedSessionalPlan.getSessionalPlanId(),
+                savedSessionalPlan.getUserId()
+        );
+
+        // then
+        assertThat(deletedCount).isZero();
+    }
+
     private SessionalPlan saveSessionalPlan() {
         return saveSessionalPlan("1회차", "1");
     }
@@ -158,13 +195,13 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         ));
     }
 
-    private void saveTotalQuantity(SessionalPlan sessionalPlan, String subjectName) {
+    private Long saveTotalQuantity(SessionalPlan sessionalPlan, String subjectName) {
         TotalQuantityPlan totalQuantityPlan = totalQuantityPlanFactory.create(
                 sessionalPlan,
                 new Subject(subjectName, "과목"),
                 TotalQuantityAmount.of(100, "문제", null)
         );
-        saveTotalQuantityPort.save(totalQuantityPlan);
+        return saveTotalQuantityPort.save(totalQuantityPlan);
     }
 
     private Integer countTotalQuantities(Long totalQuantityId, Long sessionalPlanId) {
@@ -215,6 +252,18 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
                 from daily_quantity dq
                 join weekly_quantity wq on wq.weekly_quantity_id = dq.weekly_quantity_id
                 where wq.total_quantity_id = ?
+                """, Integer.class, totalQuantityId);
+    }
+
+    private Integer countDailyQuantitiesByTotalQuantityId(Long totalQuantityId) {
+        return jdbcTemplate.queryForObject("""
+                select count(*)
+                from daily_quantity
+                where weekly_quantity_id in (
+                    select weekly_quantity_id
+                    from weekly_quantity
+                    where total_quantity_id = ?
+                )
                 """, Integer.class, totalQuantityId);
     }
 

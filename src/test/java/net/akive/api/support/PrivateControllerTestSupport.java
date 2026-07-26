@@ -51,4 +51,7 @@ public abstract class PrivateControllerTestSupport {
 
     @MockitoBean
     protected CreateTotalQuantityUseCase createTotalQuantityUseCase;
+
+    @MockitoBean
+    protected DeleteTotalQuantityUseCase deleteTotalQuantityUseCase;
 }
