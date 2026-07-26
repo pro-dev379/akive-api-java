@@ -1,6 +1,6 @@
 package net.akive.api.plan.presentation;
 
-import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
+import net.akive.api.plan.application.dto.query.GetDailyTodosQuery;
 import net.akive.api.plan.application.dto.result.common.SubjectResult;
 import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 import net.akive.api.support.PrivateControllerTestSupport;
@@ -36,7 +36,7 @@ class DailyTodoControllerTest extends PrivateControllerTestSupport {
                 )
         ));
 
-        given(getDailyTodosUseCase.getByDate(new GetDailyTodosCommand(userId, date)))
+        given(getDailyTodosUseCase.getByDate(new GetDailyTodosQuery(userId, date)))
                 .willReturn(result);
 
         // when & then
@@ -55,7 +55,7 @@ class DailyTodoControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.unit").value("분"))
                 .andExpect(jsonPath("$.todos[0].dailyTodoQuantityAmount.quantityMemo").value("메모"));
 
-        then(getDailyTodosUseCase).should().getByDate(new GetDailyTodosCommand(userId, date));
+        then(getDailyTodosUseCase).should().getByDate(new GetDailyTodosQuery(userId, date));
     }
 
     @Test
@@ -64,7 +64,7 @@ class DailyTodoControllerTest extends PrivateControllerTestSupport {
         Long userId = 1L;
         LocalDate date = LocalDate.of(2026, 7, 7);
 
-        given(getDailyTodosUseCase.getByDate(new GetDailyTodosCommand(userId, date)))
+        given(getDailyTodosUseCase.getByDate(new GetDailyTodosQuery(userId, date)))
                 .willReturn(new GetDailyTodosResult(List.of()));
 
         // when & then
@@ -74,7 +74,7 @@ class DailyTodoControllerTest extends PrivateControllerTestSupport {
                 .andExpect(jsonPath("$.todos").isArray())
                 .andExpect(jsonPath("$.todos").isEmpty());
 
-        then(getDailyTodosUseCase).should().getByDate(new GetDailyTodosCommand(userId, date));
+        then(getDailyTodosUseCase).should().getByDate(new GetDailyTodosQuery(userId, date));
     }
 
     @Test
@@ -88,6 +88,6 @@ class DailyTodoControllerTest extends PrivateControllerTestSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("COMMON_400_INVALID_INPUT_VALUE"));
 
-        then(getDailyTodosUseCase).should(never()).getByDate(any(GetDailyTodosCommand.class));
+        then(getDailyTodosUseCase).should(never()).getByDate(any(GetDailyTodosQuery.class));
     }
 }

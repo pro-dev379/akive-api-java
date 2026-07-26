@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.service;
 
-import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
+import net.akive.api.plan.application.dto.query.GetDailyTodosQuery;
 import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
 import net.akive.api.plan.application.port.out.dto.DailyTodoData;
@@ -45,7 +45,7 @@ class QueryDailyTodoServiceTest {
                         date
                 )
         );
-        GetDailyTodosCommand command = new GetDailyTodosCommand(userId, date);
+        GetDailyTodosQuery command = new GetDailyTodosQuery(userId, date);
 
         given(loadDailyTodosPort.loadDailyTodosByUserIdAndDate(userId, date))
                 .willReturn(dailyTodos);
@@ -64,7 +64,7 @@ class QueryDailyTodoServiceTest {
         // given
         Long userId = 1L;
         LocalDate date = LocalDate.of(2026, 7, 7);
-        GetDailyTodosCommand command = new GetDailyTodosCommand(userId, date);
+        GetDailyTodosQuery command = new GetDailyTodosQuery(userId, date);
 
         given(loadDailyTodosPort.loadDailyTodosByUserIdAndDate(userId, date))
                 .willReturn(List.of());

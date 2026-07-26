@@ -5,5 +5,5 @@ import net.akive.api.plan.application.dto.result.weeklyplan.GetWeeklyPlanResult;
 
 public interface GetWeeklyPlanUseCase {
 
-    GetWeeklyPlanResult getByWeekNum(GetWeeklyPlanQuery command);
+    GetWeeklyPlanResult getByWeekNum(GetWeeklyPlanQuery query);
 }

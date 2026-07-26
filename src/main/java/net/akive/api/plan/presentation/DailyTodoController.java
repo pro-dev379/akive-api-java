@@ -2,7 +2,7 @@ package net.akive.api.plan.presentation;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
-import net.akive.api.plan.application.dto.command.GetDailyTodosCommand;
+import net.akive.api.plan.application.dto.query.GetDailyTodosQuery;
 import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
 import net.akive.api.plan.application.port.in.GetDailyTodosUseCase;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +21,6 @@ public class DailyTodoController {
 
     @GetMapping("/{date}")
     public GetDailyTodosResult getByDate(@AuthenticatedUserId Long userId, @PathVariable LocalDate date) {
-        return getDailyTodosUseCase.getByDate(new GetDailyTodosCommand(userId, date));
+        return getDailyTodosUseCase.getByDate(new GetDailyTodosQuery(userId, date));
     }
 }
