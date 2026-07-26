@@ -34,14 +34,14 @@ public record GetWeeklyPlanResult(
             List<DailyQuantityResult> dailyQuantities
     ) {
 
-        public static WeeklyQuantityResult from(WeeklyPlanWeeklyQuantityData weeklyPlanWeeklyQuantityData) {
+        public static WeeklyQuantityResult from(WeeklyPlanWeeklyQuantityData data) {
             return new WeeklyQuantityResult(
-                    weeklyPlanWeeklyQuantityData.sessionalPlanId(),
-                    weeklyPlanWeeklyQuantityData.totalQuantityId(),
-                    weeklyPlanWeeklyQuantityData.weeklyQuantityId(),
-                    SubjectResult.from(weeklyPlanWeeklyQuantityData.subject()),
-                    WeeklyQuantityAmountResult.of(weeklyPlanWeeklyQuantityData.weeklyQuantityAmount(), weeklyPlanWeeklyQuantityData.unit()),
-                    weeklyPlanWeeklyQuantityData.dailyQuantities().stream().map(DailyQuantityResult::from).toList()
+                    data.sessionalPlanId(),
+                    data.totalQuantityId(),
+                    data.weeklyQuantityId(),
+                    SubjectResult.from(data.subject()),
+                    WeeklyQuantityAmountResult.of(data.weeklyQuantityAmount(), data.unit()),
+                    data.dailyQuantities().stream().map(DailyQuantityResult::from).toList()
             );
         }
 
@@ -65,11 +65,11 @@ public record GetWeeklyPlanResult(
                 DailyQuantityAmountResult dailyQuantityAmount
         ) {
 
-            public static DailyQuantityResult from(WeeklyPlanDailyQuantityData weeklyPlanDailyQuantityData) {
+            public static DailyQuantityResult from(WeeklyPlanDailyQuantityData data) {
                 return new DailyQuantityResult(
-                        weeklyPlanDailyQuantityData.dailyQuantityId(),
-                        PlanDateResult.from(weeklyPlanDailyQuantityData.planDate()),
-                        DailyQuantityAmountResult.from(weeklyPlanDailyQuantityData.dailyQuantityAmount())
+                        data.dailyQuantityId(),
+                        PlanDateResult.from(data.planDate()),
+                        DailyQuantityAmountResult.from(data.dailyQuantityAmount())
                 );
             }
         }
