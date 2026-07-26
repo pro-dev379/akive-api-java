@@ -186,7 +186,7 @@ class QuerySessionalPlanServiceTest {
                 LocalDate.of(2026, 7, 6),
                 LocalDate.of(2026, 7, 14)
         ));
-        assertThat(result.weeks())
+        assertThat(result.sessionWeeks())
                 .extracting(
                         SessionWeekResult::weekNum,
                         SessionWeekResult::weekPeriod

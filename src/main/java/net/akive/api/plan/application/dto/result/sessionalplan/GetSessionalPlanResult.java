@@ -11,7 +11,7 @@ public record GetSessionalPlanResult(
         Long sessionalPlanId,
         String sessionName,
         SessionPeriodResult sessionPeriod,
-        List<SessionWeekResult> weeks,
+        List<SessionWeekResult> sessionWeeks,
         List<TotalQuantityResult> totalQuantities
 ) {
 
