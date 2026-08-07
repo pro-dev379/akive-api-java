@@ -1,12 +1,12 @@
 package net.akive.api.plan.application.service;
 
 import net.akive.api.common.exception.business.NotFoundException;
-import net.akive.api.plan.application.dto.command.CreateSessionalPlanCommand;
-import net.akive.api.plan.application.dto.command.DeleteSessionalPlanCommand;
-import net.akive.api.plan.application.dto.command.UpdateSessionalPlanCommand;
-import net.akive.api.plan.application.port.out.DeleteSessionalPlanPort;
-import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
-import net.akive.api.plan.application.port.out.SaveSessionalPlanPort;
+import net.akive.api.plan.application.provided.dto.command.CreateSessionalPlanCommand;
+import net.akive.api.plan.application.provided.dto.command.DeleteSessionalPlanCommand;
+import net.akive.api.plan.application.provided.dto.command.UpdateSessionalPlanCommand;
+import net.akive.api.plan.application.required.DeleteSessionalPlanPort;
+import net.akive.api.plan.application.required.LoadSessionalPlanPort;
+import net.akive.api.plan.application.required.SaveSessionalPlanPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.common.exception.business.ConflictException;

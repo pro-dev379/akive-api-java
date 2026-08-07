@@ -3,7 +3,7 @@ package net.akive.api.plan.application.service;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 
-import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
+import net.akive.api.plan.application.required.LoadSessionalPlanPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
 import net.akive.api.plan.domain.Subject;

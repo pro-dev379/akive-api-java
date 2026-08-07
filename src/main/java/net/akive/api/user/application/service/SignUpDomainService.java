@@ -2,7 +2,7 @@ package net.akive.api.user.application.service;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.domain.Email;
-import net.akive.api.user.application.port.out.GenerateNicknamePort;
+import net.akive.api.user.application.required.GenerateNicknamePort;
 import net.akive.api.user.domain.User;
 import net.akive.api.user.domain.RoleType;
 import org.springframework.security.crypto.password.PasswordEncoder;

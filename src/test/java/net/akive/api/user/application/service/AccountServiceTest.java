@@ -2,8 +2,8 @@ package net.akive.api.user.application.service;
 
 import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.NotFoundException;
-import net.akive.api.user.application.port.out.LoadUserPort;
-import net.akive.api.user.application.port.out.SaveUserPort;
+import net.akive.api.user.application.required.LoadUserPort;
+import net.akive.api.user.application.required.SaveUserPort;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

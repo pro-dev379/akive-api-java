@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
+import net.akive.api.plan.application.required.ValidateTotalQuantityPort;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import org.springframework.stereotype.Component;

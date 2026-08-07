@@ -4,7 +4,7 @@ import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 
 import net.akive.api.common.domain.Email;
-import net.akive.api.user.application.port.out.ValidateUserPort;
+import net.akive.api.user.application.required.ValidateUserPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

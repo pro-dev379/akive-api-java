@@ -1,10 +1,10 @@
 package net.akive.api.core.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.akive.api.auth.application.dto.result.login.LoginResult;
-import net.akive.api.auth.application.port.in.login.LoginByEmailUseCase;
-import net.akive.api.auth.presentation.LoginController;
-import net.akive.api.auth.presentation.dto.request.login.LoginByEmailRequest;
+import net.akive.api.auth.application.login.provided.dto.LoginResult;
+import net.akive.api.auth.application.login.provided.LoginByEmailUseCase;
+import net.akive.api.auth.adapter.login.webapi.LoginController;
+import net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

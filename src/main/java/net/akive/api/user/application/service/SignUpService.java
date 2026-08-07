@@ -1,14 +1,14 @@
 package net.akive.api.user.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.dto.result.token.IssueTokenResult;
-import net.akive.api.auth.application.port.in.token.IssueTokenUseCase;
-import net.akive.api.mentoring.application.port.in.CreateDefaultMentoringProfileUseCase;
-import net.akive.api.user.application.dto.SignUpResult;
-import net.akive.api.user.application.dto.SignUpByEmailCommand;
-import net.akive.api.user.application.port.in.SignUpByEmailUseCase;
-import net.akive.api.user.application.port.out.SaveGoalPort;
-import net.akive.api.user.application.port.out.SaveUserPort;
+import net.akive.api.auth.application.token.provided.dto.IssueTokenResult;
+import net.akive.api.auth.application.token.provided.IssueTokenUseCase;
+import net.akive.api.mentoring.application.provided.CreateDefaultMentoringProfileUseCase;
+import net.akive.api.user.application.provided.dto.SignUpResult;
+import net.akive.api.user.application.provided.dto.SignUpByEmailCommand;
+import net.akive.api.user.application.provided.SignUpByEmailUseCase;
+import net.akive.api.user.application.required.SaveGoalPort;
+import net.akive.api.user.application.required.SaveUserPort;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Service;

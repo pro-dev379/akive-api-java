@@ -1,6 +1,6 @@
 package net.akive.api.mentoring.application.service;
 
-import net.akive.api.mentoring.application.port.out.SaveMentoringProfilePort;
+import net.akive.api.mentoring.application.required.SaveMentoringProfilePort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

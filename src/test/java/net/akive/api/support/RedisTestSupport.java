@@ -1,12 +1,12 @@
 package net.akive.api.support;
 
-import net.akive.api.auth.application.port.out.emailverification.DeleteEmailVerificationPort;
-import net.akive.api.auth.application.port.out.emailverification.LoadEmailVerificationPort;
-import net.akive.api.auth.application.port.out.emailverification.SaveEmailVerificationPort;
-import net.akive.api.auth.application.port.out.token.DeleteTokenPort;
-import net.akive.api.auth.application.port.out.token.LoadTokenPort;
-import net.akive.api.auth.application.port.out.token.RotateTokenPort;
-import net.akive.api.auth.application.port.out.token.SaveTokenPort;
+import net.akive.api.auth.application.emailverification.required.DeleteEmailVerificationPort;
+import net.akive.api.auth.application.emailverification.required.LoadEmailVerificationPort;
+import net.akive.api.auth.application.emailverification.required.SaveEmailVerificationPort;
+import net.akive.api.auth.application.token.required.DeleteTokenPort;
+import net.akive.api.auth.application.token.required.LoadTokenPort;
+import net.akive.api.auth.application.token.required.RotateTokenPort;
+import net.akive.api.auth.application.token.required.SaveTokenPort;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

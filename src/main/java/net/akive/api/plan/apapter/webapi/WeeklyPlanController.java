@@ -1,0 +1,25 @@
+package net.akive.api.plan.apapter.webapi;
+
+import lombok.RequiredArgsConstructor;
+import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.plan.application.provided.dto.query.GetWeeklyPlanQuery;
+import net.akive.api.plan.application.provided.dto.result.weeklyplan.GetWeeklyPlanResult;
+import net.akive.api.plan.application.provided.GetWeeklyPlanUseCase;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/sessional-plans/{sessionalPlanId}/weekly-plans")
+@RequiredArgsConstructor
+public class WeeklyPlanController {
+
+    private final GetWeeklyPlanUseCase getWeeklyPlanUseCase;
+
+    @GetMapping("/{weekNum}")
+    public GetWeeklyPlanResult getByWeekNum(
+            @AuthenticatedUserId Long userId,
+            @PathVariable Long sessionalPlanId,
+            @PathVariable Integer weekNum
+    ) {
+        return getWeeklyPlanUseCase.getByWeekNum(new GetWeeklyPlanQuery(sessionalPlanId, userId, weekNum));
+    }
+}

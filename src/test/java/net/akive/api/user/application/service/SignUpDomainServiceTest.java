@@ -4,7 +4,7 @@ import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.ConflictError;
-import net.akive.api.user.application.port.out.GenerateNicknamePort;
+import net.akive.api.user.application.required.GenerateNicknamePort;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

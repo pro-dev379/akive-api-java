@@ -2,10 +2,10 @@ package net.akive.api.user.application.service;
 
 import net.akive.api.common.exception.business.ConflictException;
 
-import net.akive.api.auth.application.dto.command.emailverification.EnsureEmailVerifiedCommand;
-import net.akive.api.auth.application.port.in.emailverification.EnsureEmailVerifiedUseCase;
+import net.akive.api.auth.application.emailverification.provided.dto.EnsureEmailVerifiedCommand;
+import net.akive.api.auth.application.emailverification.provided.EnsureEmailVerifiedUseCase;
 import net.akive.api.common.domain.Email;
-import net.akive.api.user.application.port.out.ValidateUserPort;
+import net.akive.api.user.application.required.ValidateUserPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

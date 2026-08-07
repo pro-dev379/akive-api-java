@@ -1,14 +1,14 @@
 package net.akive.api.support;
 
-import net.akive.api.auth.application.port.out.login.DeleteLegacyUserPasswordPort;
-import net.akive.api.auth.application.port.out.login.LoadEmailLoginUserPort;
-import net.akive.api.auth.application.port.out.login.LoadLegacyUserPasswordPort;
-import net.akive.api.auth.infrastructure.repository.LegacyUserPasswordJpaRepository;
-import net.akive.api.mentoring.application.port.out.SaveMentoringProfilePort;
-import net.akive.api.plan.application.port.out.*;
-import net.akive.api.user.application.port.out.SaveGoalPort;
-import net.akive.api.user.application.port.out.SaveUserPort;
-import net.akive.api.user.application.port.out.ValidateUserPort;
+import net.akive.api.auth.application.login.required.DeleteLegacyUserPasswordPort;
+import net.akive.api.auth.application.login.required.LoadEmailLoginUserPort;
+import net.akive.api.auth.application.login.required.LoadLegacyUserPasswordPort;
+import net.akive.api.auth.adapter.login.persistence.LegacyUserPasswordJpaRepository;
+import net.akive.api.mentoring.application.required.SaveMentoringProfilePort;
+import net.akive.api.plan.application.required.*;
+import net.akive.api.user.application.required.SaveGoalPort;
+import net.akive.api.user.application.required.SaveUserPort;
+import net.akive.api.user.application.required.ValidateUserPort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 

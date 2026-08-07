@@ -3,8 +3,8 @@ package net.akive.api.plan.application.service;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 
-import net.akive.api.plan.application.port.out.ValidateSessionalPlanPort;
-import net.akive.api.plan.application.port.out.ValidateTotalQuantityPort;
+import net.akive.api.plan.application.required.ValidateSessionalPlanPort;
+import net.akive.api.plan.application.required.ValidateTotalQuantityPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
 import org.junit.jupiter.api.Test;

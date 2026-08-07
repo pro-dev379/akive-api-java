@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.plan.application.port.out.LoadSessionalPlanPort;
+import net.akive.api.plan.application.required.LoadSessionalPlanPort;
 import net.akive.api.plan.domain.*;
 import net.akive.api.common.exception.business.NotFoundException;
 import org.springframework.stereotype.Component;

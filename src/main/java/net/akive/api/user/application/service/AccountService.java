@@ -1,9 +1,9 @@
 package net.akive.api.user.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.user.application.port.in.UpdatePasswordUseCase;
-import net.akive.api.user.application.port.out.LoadUserPort;
-import net.akive.api.user.application.port.out.SaveUserPort;
+import net.akive.api.user.application.provided.UpdatePasswordUseCase;
+import net.akive.api.user.application.required.LoadUserPort;
+import net.akive.api.user.application.required.SaveUserPort;
 import net.akive.api.user.domain.User;
 import net.akive.api.common.exception.business.NotFoundException;
 import org.springframework.stereotype.Service;

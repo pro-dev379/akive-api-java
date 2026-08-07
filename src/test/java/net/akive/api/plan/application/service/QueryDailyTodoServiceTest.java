@@ -1,9 +1,9 @@
 package net.akive.api.plan.application.service;
 
-import net.akive.api.plan.application.dto.query.GetDailyTodosQuery;
-import net.akive.api.plan.application.dto.result.dailytodo.GetDailyTodosResult;
-import net.akive.api.plan.application.port.out.LoadDailyTodosPort;
-import net.akive.api.plan.application.port.out.dto.DailyTodoData;
+import net.akive.api.plan.application.provided.dto.query.GetDailyTodosQuery;
+import net.akive.api.plan.application.provided.dto.result.dailytodo.GetDailyTodosResult;
+import net.akive.api.plan.application.required.LoadDailyTodosPort;
+import net.akive.api.plan.application.required.dto.DailyTodoData;
 import net.akive.api.plan.domain.DailyQuantityAmount;
 import net.akive.api.plan.domain.Subject;
 import org.junit.jupiter.api.Test;
