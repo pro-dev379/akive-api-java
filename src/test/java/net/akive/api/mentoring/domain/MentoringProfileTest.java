@@ -1,11 +1,12 @@
 package net.akive.api.mentoring.domain;
 
 import net.akive.api.common.exception.business.BadRequestException;
-
 import org.junit.jupiter.api.Test;
 
 import static net.akive.api.common.exception.business.BadRequestError.MAX_LENGTH_EXCEEDED;
-import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
+import static net.akive.api.mentoring.domain.MentoringFixture.createMentoringProfile;
+import static net.akive.api.mentoring.domain.MentoringFixture.createMentoringProfileWithDetail;
+import static net.akive.api.mentoring.domain.MentoringPolicy.GOAL_MAX_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -13,15 +14,47 @@ class MentoringProfileTest {
 
     @Test
     void 멘토링_프로필을_생성한다() {
-        // given
-        Long mentoringProfileId = 1L;
-        Long userId = 2L;
+        MentoringProfile defaultMentoringProfile = createMentoringProfile();
 
-        // when
-        MentoringProfile mentoringProfile = MentoringProfile.create(
-                mentoringProfileId,
-                userId,
-                "목표",
+        assertThat(defaultMentoringProfile.getUser()).isNotNull();
+        assertThat(defaultMentoringProfile.getDetail()).isNull();
+    }
+
+    @Test
+    void 멘토링_프로필을_업데이트_한다() {
+        MentoringProfile mentoringProfile = createMentoringProfileWithDetail();
+        MentoringProfileUpdateInfo updateInfo = new MentoringProfileUpdateInfo(
+                "업데이트된 목표",
+                "업데이트된 선호",
+                "업데이트된 제약",
+                "업데이트된 약점",
+                "업데이트된 강점",
+                "업데이트된 반복 패턴",
+                "업데이트된 결정과 약속",
+                "업데이트된 학습 계획",
+                "업데이트된 행동 패턴",
+                "업데이트된 효과적인 조언"
+        );
+
+        mentoringProfile.update(updateInfo);
+
+        assertThat(mentoringProfile.getDetail().goal()).isEqualTo(updateInfo.goal());
+        assertThat(mentoringProfile.getDetail().preference()).isEqualTo(updateInfo.preference());
+        assertThat(mentoringProfile.getDetail().constraint()).isEqualTo(updateInfo.constraint());
+        assertThat(mentoringProfile.getDetail().weakness()).isEqualTo(updateInfo.weakness());
+        assertThat(mentoringProfile.getDetail().strength()).isEqualTo(updateInfo.strength());
+        assertThat(mentoringProfile.getDetail().recurringPattern()).isEqualTo(updateInfo.recurringPattern());
+        assertThat(mentoringProfile.getDetail().decisionOrCommitment()).isEqualTo(updateInfo.decisionOrCommitment());
+        assertThat(mentoringProfile.getDetail().studyPlan()).isEqualTo(updateInfo.studyPlan());
+        assertThat(mentoringProfile.getDetail().behavioralPattern()).isEqualTo(updateInfo.behavioralPattern());
+        assertThat(mentoringProfile.getDetail().effectiveAdvice()).isEqualTo(updateInfo.effectiveAdvice());
+    }
+
+    @Test
+    void 업데이트_시_글자_길이를_초과하는_값이_있으면_업데이트_실패한다() {
+        MentoringProfile mentoringProfile = createMentoringProfileWithDetail();
+        MentoringProfileUpdateInfo updateInfo = new MentoringProfileUpdateInfo(
+                "a".repeat(GOAL_MAX_LENGTH + 1),
                 "선호",
                 "제약",
                 "약점",
@@ -33,69 +66,8 @@ class MentoringProfileTest {
                 "효과적인 조언"
         );
 
-        // then
-        assertThat(mentoringProfile.getMentoringProfileId()).isEqualTo(mentoringProfileId);
-        assertThat(mentoringProfile.getUserId()).isEqualTo(userId);
-        assertThat(mentoringProfile.getGoal()).isEqualTo("목표");
-        assertThat(mentoringProfile.getPreference()).isEqualTo("선호");
-        assertThat(mentoringProfile.getConstraint()).isEqualTo("제약");
-        assertThat(mentoringProfile.getWeakness()).isEqualTo("약점");
-        assertThat(mentoringProfile.getStrength()).isEqualTo("강점");
-        assertThat(mentoringProfile.getRecurringPattern()).isEqualTo("반복 패턴");
-        assertThat(mentoringProfile.getDecisionOrCommitment()).isEqualTo("결정과 약속");
-        assertThat(mentoringProfile.getStudyPlan()).isEqualTo("학습 계획");
-        assertThat(mentoringProfile.getBehavioralPattern()).isEqualTo("행동 패턴");
-        assertThat(mentoringProfile.getEffectiveAdvice()).isEqualTo("효과적인 조언");
-    }
-
-    @Test
-    void 기본_멘토링_프로필을_생성한다() {
-        // given
-        Long userId = 1L;
-
-        // when
-        MentoringProfile defaultMentoringProfile = MentoringProfile.createDefault(userId);
-
-        // then
-        assertThat(defaultMentoringProfile.getMentoringProfileId()).isNull();
-        assertThat(defaultMentoringProfile.getUserId()).isEqualTo(userId);
-        assertThat(defaultMentoringProfile.getGoal()).isNull();
-        assertThat(defaultMentoringProfile.getPreference()).isNull();
-        assertThat(defaultMentoringProfile.getConstraint()).isNull();
-        assertThat(defaultMentoringProfile.getWeakness()).isNull();
-        assertThat(defaultMentoringProfile.getStrength()).isNull();
-        assertThat(defaultMentoringProfile.getRecurringPattern()).isNull();
-        assertThat(defaultMentoringProfile.getDecisionOrCommitment()).isNull();
-        assertThat(defaultMentoringProfile.getStudyPlan()).isNull();
-        assertThat(defaultMentoringProfile.getBehavioralPattern()).isNull();
-        assertThat(defaultMentoringProfile.getEffectiveAdvice()).isNull();
-    }
-
-    @Test
-    void 기본_멘토링_프로필은_회원_식별자가_없으면_생성에_실패한다() {
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> MentoringProfile.createDefault(null))
-                .extracting(BadRequestException::getError)
-                .isEqualTo(REQUIRED_VALUE_MISSING);
-    }
-
-    @Test
-    void 멘토링_프로필_필드가_허용_길이를_넘으면_생성에_실패한다() {
-        assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> MentoringProfile.create(
-                        1L,
-                        2L,
-                        "a".repeat(141),
-                        "선호",
-                        "제약",
-                        "약점",
-                        "강점",
-                        "반복 패턴",
-                        "결정과 약속",
-                        "학습 계획",
-                        "행동 패턴",
-                        "효과적인 조언"
-                ))
+                .isThrownBy(() -> mentoringProfile.update(updateInfo))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }

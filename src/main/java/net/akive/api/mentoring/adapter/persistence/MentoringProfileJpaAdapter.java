@@ -1,21 +1,19 @@
 package net.akive.api.mentoring.adapter.persistence;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.mentoring.application.required.SaveMentoringProfilePort;
+import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.mentoring.domain.MentoringProfile;
 import net.akive.api.mentoring.adapter.persistence.entity.MentoringProfileEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-class MentoringProfileJpaAdapter implements SaveMentoringProfilePort {
+class MentoringProfileJpaAdapter implements MentoringProfileRepository {
 
     private final MentoringProfileJpaRepository mentoringProfileJpaRepository;
 
     @Override
     public MentoringProfile save(MentoringProfile mentoringProfile) {
-        return mentoringProfileJpaRepository
-                .save(MentoringProfileEntity.from(mentoringProfile))
-                .to();
+        return mentoringProfileJpaRepository.save(MentoringProfileEntity.from(mentoringProfile)).to();
     }
 }

@@ -79,7 +79,7 @@ public class UserEntity extends BaseTimeEntity {
     }
 
     public User to() {
-        return User.create(
+        return User.reconstruct(
                 this.userId,
                 new Email(this.email),
                 this.roleType,

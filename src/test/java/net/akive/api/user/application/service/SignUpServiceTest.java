@@ -4,7 +4,7 @@ import net.akive.api.common.domain.Email;
 import net.akive.api.auth.application.token.provided.dto.IssueTokenResult;
 import net.akive.api.auth.application.token.provided.IssueTokenUseCase;
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.mentoring.application.provided.CreateDefaultMentoringProfileUseCase;
+import net.akive.api.mentoring.application.provided.MentoringProfileCreator;
 import net.akive.api.user.application.provided.dto.SignUpByEmailCommand;
 import net.akive.api.user.application.provided.dto.SignUpResult;
 import net.akive.api.user.application.required.SaveGoalPort;
@@ -40,7 +40,7 @@ class SignUpServiceTest {
     SignUpDomainService signUpDomainService;
 
     @Mock
-    CreateDefaultMentoringProfileUseCase createDefaultMentoringProfileUseCase;
+    MentoringProfileCreator mentoringProfileCreator;
 
     @Mock
     IssueTokenUseCase issueTokenUseCase;
@@ -66,7 +66,7 @@ class SignUpServiceTest {
                 encodedPassword,
                 USER
         );
-        User savedUser = User.create(
+        User savedUser = User.reconstruct(
                 1L,
                 user.getEmail(),
                 user.getRoleType(),
@@ -108,7 +108,7 @@ class SignUpServiceTest {
                         goal.getUserId().equals(savedUser.getUserId())
                 ));
 
-        then(createDefaultMentoringProfileUseCase).should().create(savedUser.getUserId());
+        then(mentoringProfileCreator).should().create(savedUser.getUserId());
     }
 
     @Test
@@ -131,6 +131,6 @@ class SignUpServiceTest {
         then(saveUserPort).should(never()).save(any(User.class));
         then(issueTokenUseCase).should(never()).issue(any(), any());
         then(saveGoalPort).should(never()).save(any(Goal.class));
-        then(createDefaultMentoringProfileUseCase).should(never()).create(any());
+        then(mentoringProfileCreator).should(never()).create(any());
     }
 }

@@ -3,7 +3,7 @@ package net.akive.api.user.application.service;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.token.provided.dto.IssueTokenResult;
 import net.akive.api.auth.application.token.provided.IssueTokenUseCase;
-import net.akive.api.mentoring.application.provided.CreateDefaultMentoringProfileUseCase;
+import net.akive.api.mentoring.application.provided.MentoringProfileCreator;
 import net.akive.api.user.application.provided.dto.SignUpResult;
 import net.akive.api.user.application.provided.dto.SignUpByEmailCommand;
 import net.akive.api.user.application.provided.SignUpByEmailUseCase;
@@ -23,7 +23,7 @@ class SignUpService implements SignUpByEmailUseCase {
     private final SaveGoalPort saveGoalPort;
 
     private final SignUpDomainService signUpDomainService;
-    private final CreateDefaultMentoringProfileUseCase createDefaultMentoringProfileUseCase;
+    private final MentoringProfileCreator mentoringProfileCreator;
     private final IssueTokenUseCase issueTokenUseCase;
 
     @Override
@@ -39,7 +39,7 @@ class SignUpService implements SignUpByEmailUseCase {
         IssueTokenResult issuedToken = issueTokenUseCase.issue(userId, savedUser.getRoleType());
 
         saveGoalPort.save(Goal.createDefault(userId));
-        createDefaultMentoringProfileUseCase.create(userId);
+        mentoringProfileCreator.create(userId);
 
         return new SignUpResult(savedUser.getNickname(), issuedToken.accessToken(), issuedToken.refreshToken());
     }

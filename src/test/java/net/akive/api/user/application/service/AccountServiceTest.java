@@ -39,7 +39,7 @@ class AccountServiceTest {
         Long userId = 1L;
         String encodedPassword = "encoded-password";
 
-        User user = User.create(
+        User user = User.reconstruct(
                 userId,
                 new Email("test@test.com"),
                 USER,

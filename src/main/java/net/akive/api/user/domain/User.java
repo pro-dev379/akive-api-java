@@ -29,7 +29,7 @@ public class User {
     private boolean leave;
     private String leaveReason;
 
-    public static User create(
+    public static User reconstruct(
             Long userId,
             Email email,
             RoleType roleType,

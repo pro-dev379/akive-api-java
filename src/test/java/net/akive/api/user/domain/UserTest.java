@@ -26,7 +26,7 @@ class UserTest {
         Long userId = 1L;
 
         // when
-        User user = User.create(
+        User user = User.reconstruct(
                 userId,
                 VALID_EMAIL,
                 USER,
@@ -55,7 +55,7 @@ class UserTest {
     @Test
     void 회원_생성_시_닉네임의_앞뒤_공백을_제거한다() {
         // when
-        User user = User.create(
+        User user = User.reconstruct(
                 1L,
                 VALID_EMAIL,
                 USER,
@@ -75,7 +75,7 @@ class UserTest {
     @Test
     void 회원_생성_시_닉네임이_공백이면_생성에_실패한다() {
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> User.create(
+                .isThrownBy(() -> User.reconstruct(
                         1L,
                         VALID_EMAIL,
                         USER,
@@ -97,7 +97,7 @@ class UserTest {
         String nickname = "a".repeat(20);
 
         // when
-        User user = User.create(
+        User user = User.reconstruct(
                 1L,
                 VALID_EMAIL,
                 USER,
@@ -121,7 +121,7 @@ class UserTest {
 
         // when & then
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> User.create(
+                .isThrownBy(() -> User.reconstruct(
                         1L,
                         VALID_EMAIL,
                         USER,
@@ -140,7 +140,7 @@ class UserTest {
     @Test
     void 회원_생성_시_목표가_null이어도_생성한다() {
         // when
-        User user = User.create(
+        User user = User.reconstruct(
                 1L,
                 VALID_EMAIL,
                 USER,
@@ -163,7 +163,7 @@ class UserTest {
         String aim = "a".repeat(100);
 
         // when
-        User user = User.create(
+        User user = User.reconstruct(
                 1L,
                 VALID_EMAIL,
                 USER,
@@ -187,7 +187,7 @@ class UserTest {
 
         // when & then
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> User.create(
+                .isThrownBy(() -> User.reconstruct(
                         1L,
                         VALID_EMAIL,
                         USER,
