@@ -3,6 +3,7 @@ package net.akive.api.common.domain;
 import net.akive.api.common.exception.business.BadRequestException;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
 import static net.akive.api.common.exception.business.BadRequestError.*;
 
@@ -28,6 +29,16 @@ public final class DomainValidator {
         }
 
         return trimmedValue;
+    }
+
+    public static <T extends Collection<?>> T requireNotEmpty(T value) {
+        requireNonNull(value);
+
+        if (value.isEmpty()) {
+            throw new BadRequestException(EMPTY_COLLECTION);
+        }
+
+        return value;
     }
 
     public static String requireMaxLength(String value, int maxLength) {

@@ -1,6 +1,9 @@
 package net.akive.api.auth.domain.emailverification;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
@@ -11,13 +14,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import static lombok.AccessLevel.*;
-import static net.akive.api.common.domain.DomainValidator.*;
+import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
-import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.ConflictError.*;
-import static net.akive.api.common.exception.business.TooManyRequestsError.*;
-import static net.akive.api.common.exception.business.UnauthorizedError.*;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
+import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_CODE_MISMATCH;
+import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_VERIFIED;
+import static net.akive.api.common.exception.business.TooManyRequestsError.EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.TooManyRequestsError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
+import static net.akive.api.common.exception.business.UnauthorizedError.EMAIL_VERIFICATION_CODE_EXPIRED;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -26,12 +30,19 @@ import static net.akive.api.common.exception.business.UnauthorizedError.*;
 public class EmailVerification {
 
     private Email email;
+
     private EmailVerificationPurpose verificationPurpose;
+
     private EmailVerificationCode verificationCode;
-    private int resendCount;
+
+    private int renewalCount;
+
     private boolean verified;
+
     private LocalDateTime expiresAt;
+
     private LocalDateTime lastSentAt;
+
     private LocalDateTime createdAt;
 
     public static EmailVerification create(
@@ -46,9 +57,9 @@ public class EmailVerification {
                 .email(requireNonNull(email))
                 .verificationPurpose(requireNonNull(verificationPurpose))
                 .verificationCode(requireNonNull(verificationCode))
-                .resendCount(0)
+                .renewalCount(0)
                 .verified(false)
-                .expiresAt(validatedRequestedAt.plus(VERIFICATION_CODE_EXPIRE_DURATION))
+                .expiresAt(validatedRequestedAt.plus(VERIFICATION_CODE_EXPIRATION_DURATION))
                 .lastSentAt(validatedRequestedAt)
                 .createdAt(validatedRequestedAt)
                 .build();
@@ -56,12 +67,12 @@ public class EmailVerification {
 
     public void renew(EmailVerificationCode verificationCode, LocalDateTime requestedAt) {
         requireNonNull(requestedAt);
-        validateResendAvailable(requestedAt);
+        validateRenewable(requestedAt);
 
         this.verificationCode = requireNonNull(verificationCode);
-        this.resendCount++;
+        this.renewalCount++;
         this.verified = false;
-        this.expiresAt = requestedAt.plus(VERIFICATION_CODE_EXPIRE_DURATION);
+        this.expiresAt = requestedAt.plus(VERIFICATION_CODE_EXPIRATION_DURATION);
         this.lastSentAt = requestedAt;
     }
 
@@ -84,13 +95,13 @@ public class EmailVerification {
         this.verified = true;
     }
 
-    private void validateResendAvailable(LocalDateTime requestedAt) {
-        if (this.resendCount >= EMAIL_VERIFICATION_RESEND_MAX_COUNT) {
-            throw new TooManyRequestsException(EMAIL_VERIFICATION_RESEND_LIMIT_EXCEEDED);
+    private void validateRenewable(LocalDateTime requestedAt) {
+        if (this.renewalCount >= EMAIL_VERIFICATION_RENEWAL_MAX_COUNT) {
+            throw new TooManyRequestsException(EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED);
         }
 
-        if (Duration.between(this.lastSentAt, requestedAt).compareTo(EMAIL_VERIFICATION_RESEND_MIN_INTERVAL) < 0) {
-            throw new TooManyRequestsException(EMAIL_VERIFICATION_RESEND_TOO_FREQUENT);
+        if (Duration.between(this.lastSentAt, requestedAt).compareTo(EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL) < 0) {
+            throw new TooManyRequestsException(EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT);
         }
     }
 }

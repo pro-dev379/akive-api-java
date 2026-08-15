@@ -1,62 +1,61 @@
 package net.akive.api.auth.application.emailverification.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.emailverification.provided.dto.SendEmailVerificationResult;
-import net.akive.api.auth.application.emailverification.provided.dto.SendEmailVerificationCommand;
-import net.akive.api.auth.application.emailverification.provided.dto.VerifyEmailVerificationCodeCommand;
-import net.akive.api.auth.application.emailverification.provided.dto.EnsureEmailVerifiedCommand;
-import net.akive.api.auth.application.emailverification.provided.SendEmailVerificationCodeUseCase;
-import net.akive.api.auth.application.emailverification.provided.EnsureEmailVerifiedUseCase;
-import net.akive.api.auth.application.emailverification.provided.VerifyEmailVerificationCodeUseCase;
-import net.akive.api.auth.application.emailverification.required.SaveEmailVerificationPort;
-import net.akive.api.auth.application.emailverification.required.SendEmailVerificationMailPort;
+import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeIssuer;
+import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeVerifier;
+import net.akive.api.auth.application.emailverification.provided.EmailVerifiedChecker;
+import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationCodeVerifyCommand;
+import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationIssueCommand;
+import net.akive.api.auth.application.emailverification.provided.dto.EmailVerifiedCheckCommand;
+import net.akive.api.auth.application.emailverification.required.EmailVerificationStore;
+import net.akive.api.auth.application.emailverification.required.EmailVerificationSender;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFIED_EMAIL_VERIFICATION_EXPIRATION_DURATION;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 class EmailVerificationService implements
-        SendEmailVerificationCodeUseCase,
-        VerifyEmailVerificationCodeUseCase,
-        EnsureEmailVerifiedUseCase {
+        EmailVerificationCodeIssuer,
+        EmailVerificationCodeVerifier,
+        EmailVerifiedChecker {
 
-    private final SendEmailVerificationMailPort sendEmailVerificationMailPort;
-    private final SaveEmailVerificationPort saveEmailVerificationPort;
+    private final EmailVerificationStore emailVerificationStore;
+    private final EmailVerificationSender emailVerificationSender;
+
     private final EmailVerificationDomainService emailVerificationDomainService;
 
     @Override
-    public SendEmailVerificationResult send(SendEmailVerificationCommand command) {
-        EmailVerification emailVerification = emailVerificationDomainService.issue(command.email(), command.verificationPurpose());
-
-        sendEmailVerificationMailPort.send(emailVerification, VERIFICATION_CODE_EXPIRE_DURATION);
-        saveEmailVerificationPort.save(emailVerification, VERIFICATION_CODE_EXPIRE_DURATION);
-
-        return new SendEmailVerificationResult(
+    public EmailVerification issue(EmailVerificationIssueCommand command) {
+        EmailVerification emailVerification = emailVerificationDomainService.issue(
                 command.email(),
-                emailVerification.getExpiresAt(),
-                VERIFICATION_CODE_EXPIRE_DURATION.toSeconds(),
-                EMAIL_VERIFICATION_RESEND_MIN_INTERVAL.toSeconds()
+                command.verificationPurpose()
         );
+
+        emailVerificationSender.send(emailVerification, VERIFICATION_CODE_EXPIRATION_DURATION);
+        emailVerificationStore.save(emailVerification, VERIFICATION_CODE_EXPIRATION_DURATION);
+
+        return emailVerification;
     }
 
     @Override
-    public void verify(VerifyEmailVerificationCodeCommand command) {
+    public void verify(EmailVerificationCodeVerifyCommand command) {
         EmailVerification emailVerification = emailVerificationDomainService.verify(
                 command.email(),
                 command.verificationPurpose(),
                 command.verificationCode()
         );
 
-        saveEmailVerificationPort.save(emailVerification, VERIFIED_EMAIL_VERIFICATION_EXPIRE_DURATION);
+        emailVerificationStore.save(emailVerification, VERIFIED_EMAIL_VERIFICATION_EXPIRATION_DURATION);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public void ensureVerified(EnsureEmailVerifiedCommand command) {
-        emailVerificationDomainService.ensureVerified(command.email(), command.verificationPurpose());
+    public void checkVerified(EmailVerifiedCheckCommand command) {
+        emailVerificationDomainService.checkVerified(command.email(), command.verificationPurpose());
     }
 }

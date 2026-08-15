@@ -1,20 +1,16 @@
 package net.akive.api.common.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import net.akive.api.common.exception.business.BadRequestException;
+
 import java.util.regex.Pattern;
 
-import static com.fasterxml.jackson.annotation.JsonCreator.Mode.DELEGATING;
-import static net.akive.api.common.exception.business.BadRequestError.INVALID_EMAIL_FORMAT;
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
-
-import net.akive.api.common.exception.business.BadRequestException;
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_EMAIL_FORMAT;
 
 public record Email(String value) {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
-    @JsonCreator(mode = DELEGATING)
     public Email {
         requireNotBlank(value);
         if (!EMAIL_PATTERN.matcher(value).matches()) {
@@ -22,8 +18,6 @@ public record Email(String value) {
         }
     }
 
-    @JsonValue
-    @Override
     public String value() {
         return value;
     }

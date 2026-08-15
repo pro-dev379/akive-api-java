@@ -17,6 +17,7 @@ public enum BadRequestError implements Error {
 
     REQUIRED_VALUE_MISSING(COMMON_DOMAIN, "Required value is missing."),
     BLANK_VALUE(COMMON_DOMAIN, "Value must not be blank."),
+    EMPTY_COLLECTION(COMMON_DOMAIN, "Collection must not be empty."),
     MAX_LENGTH_EXCEEDED(COMMON_DOMAIN, "Value is too long."),
     VALUE_NOT_POSITIVE(COMMON_DOMAIN, "Value must be positive."),
     VALUE_NEGATIVE(COMMON_DOMAIN, "Value must not be negative."),

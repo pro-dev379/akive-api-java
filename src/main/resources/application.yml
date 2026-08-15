@@ -27,3 +27,7 @@ jwt:
     expiration-minutes: 30
   refresh-token:
     expiration-days: 14
+
+email:
+  from:
+    verification: akive@akive.net

@@ -12,16 +12,13 @@ class EmailVerificationCodeTest {
 
     @Test
     void 인증번호_값_객체를_생성한다() {
-        // when
-        EmailVerificationCode verificationCode = new EmailVerificationCode("123456");
+        String verificationCode = new EmailVerificationCode("123456").value();
 
-        // then
-        assertThat(verificationCode.value()).isEqualTo("123456");
+        assertThat(verificationCode).isEqualTo("123456");
     }
 
     @Test
     void 인증번호가_6자리_숫자가_아니면_생성이_거부된다() {
-        // when & then
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> new EmailVerificationCode("12345a"))
                 .extracting(BadRequestException::getError)

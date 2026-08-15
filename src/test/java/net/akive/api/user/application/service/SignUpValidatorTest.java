@@ -2,8 +2,8 @@ package net.akive.api.user.application.service;
 
 import net.akive.api.common.exception.business.ConflictException;
 
-import net.akive.api.auth.application.emailverification.provided.dto.EnsureEmailVerifiedCommand;
-import net.akive.api.auth.application.emailverification.provided.EnsureEmailVerifiedUseCase;
+import net.akive.api.auth.application.emailverification.provided.dto.EmailVerifiedCheckCommand;
+import net.akive.api.auth.application.emailverification.provided.EmailVerifiedChecker;
 import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.required.ValidateUserPort;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class SignUpValidatorTest {
     ValidateUserPort validateUserPort;
 
     @Mock
-    EnsureEmailVerifiedUseCase ensureEmailVerifiedUseCase;
+    EmailVerifiedChecker emailVerifiedChecker;
 
     @InjectMocks
     SignUpValidator signUpValidator;
@@ -44,7 +44,7 @@ class SignUpValidatorTest {
                 .extracting(ConflictException::getError)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
 
-        then(ensureEmailVerifiedUseCase).should(never()).ensureVerified(any());
+        then(emailVerifiedChecker).should(never()).checkVerified(any());
     }
 
     @Test
@@ -57,8 +57,8 @@ class SignUpValidatorTest {
         signUpValidator.validateEmailSignUpAvailable(email);
 
         // then
-        then(ensureEmailVerifiedUseCase)
+        then(emailVerifiedChecker)
                 .should()
-                .ensureVerified(new EnsureEmailVerifiedCommand(email, SIGN_UP));
+                .checkVerified(new EmailVerifiedCheckCommand(email, SIGN_UP));
     }
 }

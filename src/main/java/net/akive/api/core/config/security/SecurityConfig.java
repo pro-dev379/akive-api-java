@@ -28,8 +28,7 @@ public class SecurityConfig {
                         "/tokens",
                         "/login/**",
                         "/users/email",
-                        "/emails/verification-codes",
-                        "/emails/verification-codes/**"
+                        "/verifications/**"
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

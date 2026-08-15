@@ -20,21 +20,21 @@ class ValidateUserService implements ValidateUserUseCase {
     private final ValidateUserPort validateUserPort;
 
     @Override
-    public void validateUserExistsByEmail(Email email) {
+    public void validateUserExistsByEmail(Email email) throws NotFoundException {
         if (!validateUserPort.existsByEmailAndLeaveFalse(email)) {
             throw new NotFoundException(USER_NOT_FOUND);
         }
     }
 
     @Override
-    public void validateUserExistsById(Long userId) {
+    public void validateUserExistsById(Long userId) throws NotFoundException {
         if (!validateUserPort.existsByUserIdAndLeaveFalse(userId)) {
             throw new NotFoundException(USER_NOT_FOUND);
         }
     }
 
     @Override
-    public void validateEmailNotDuplicate(Email email) {
+    public void validateEmailNotDuplicate(Email email) throws ConflictException {
         if (validateUserPort.existsByEmail(email)) {
             throw new ConflictException(EMAIL_ALREADY_EXISTS);
         }
