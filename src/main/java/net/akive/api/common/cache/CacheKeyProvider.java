@@ -2,6 +2,7 @@ package net.akive.api.common.cache;
 
 import lombok.NoArgsConstructor;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+import net.akive.api.common.domain.ClientInstanceId;
 
 import static lombok.AccessLevel.*;
 
@@ -12,7 +13,7 @@ public class CacheKeyProvider {
         return "email-auth:%s:%s".formatted(email, verificationPurpose.getCode());
     }
 
-    public static String refreshToken(Long userId) {
-        return "refresh-token:%s".formatted(userId);
+    public static String refreshToken(Long userId, ClientInstanceId clientInstanceId) {
+        return "refresh-token:%s:%s".formatted(userId, clientInstanceId);
     }
 }

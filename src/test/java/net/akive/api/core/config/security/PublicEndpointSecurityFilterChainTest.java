@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_ACCESS_TOKEN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -53,6 +55,7 @@ class PublicEndpointSecurityFilterChainTest {
 
         mockMvc.perform(post("/login/email")
                         .header(AUTHORIZATION, "Bearer invalid-access-token")
+                        .header("X-Client-Instance-Id", UUID.randomUUID())
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new LoginByEmailRequest("test@test.com", "password")

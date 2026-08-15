@@ -23,6 +23,7 @@ spring:
       connect-timeout: 3s
 
 jwt:
+  issuer: akive
   access-token:
     expiration-minutes: 30
   refresh-token:

@@ -1,10 +1,12 @@
 package net.akive.api.auth.adapter.token.webapi;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.token.provided.dto.ReissueTokenResult;
-import net.akive.api.auth.application.token.provided.IssueTokenUseCase;
+import net.akive.api.auth.adapter.token.webapi.dto.response.TokenReissueResponse;
+import net.akive.api.auth.application.token.provided.TokenIssuer;
+import net.akive.api.auth.application.token.provided.dto.TokenReissueCommand;
+import net.akive.api.auth.domain.token.RefreshToken;
+import net.akive.api.auth.domain.token.ReissuedToken;
 import net.akive.api.common.exception.business.UnauthorizedException;
-import net.akive.api.auth.adapter.token.webapi.dto.response.ReissueTokenResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +21,10 @@ public class TokenApi {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
-    private final IssueTokenUseCase issueTokenUseCase;
+    private final TokenIssuer tokenIssuer;
 
     @PostMapping
-    public ReissueTokenResponse reissue(@RequestHeader("Authorization") String authorizationHeader) {
+    public TokenReissueResponse reissue(@RequestHeader("Authorization") String authorizationHeader) {
         if (!authorizationHeader.startsWith(BEARER_PREFIX)) {
             throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         }
@@ -32,8 +34,10 @@ public class TokenApi {
             throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         }
 
-        ReissueTokenResult result = issueTokenUseCase.reissue(refreshToken);
+        TokenReissueCommand command = new TokenReissueCommand(new RefreshToken(refreshToken));
 
-        return ReissueTokenResponse.from(result);
+        ReissuedToken token = tokenIssuer.reissue(command);
+
+        return TokenReissueResponse.from(token);
     }
 }

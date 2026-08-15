@@ -1,12 +1,13 @@
 package net.akive.api.user.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.token.provided.dto.IssueTokenResult;
-import net.akive.api.auth.application.token.provided.IssueTokenUseCase;
+import net.akive.api.auth.application.token.provided.TokenIssuer;
+import net.akive.api.auth.application.token.provided.dto.TokenIssueCommand;
+import net.akive.api.auth.domain.token.IssuedToken;
 import net.akive.api.mentoring.application.provided.MentoringProfileCreator;
-import net.akive.api.user.application.provided.dto.SignUpResult;
-import net.akive.api.user.application.provided.dto.SignUpByEmailCommand;
 import net.akive.api.user.application.provided.SignUpByEmailUseCase;
+import net.akive.api.user.application.provided.dto.SignUpByEmailCommand;
+import net.akive.api.user.application.provided.dto.SignUpResult;
 import net.akive.api.user.application.required.SaveGoalPort;
 import net.akive.api.user.application.required.SaveUserPort;
 import net.akive.api.user.domain.Goal;
@@ -24,23 +25,36 @@ class SignUpService implements SignUpByEmailUseCase {
 
     private final SignUpDomainService signUpDomainService;
     private final MentoringProfileCreator mentoringProfileCreator;
-    private final IssueTokenUseCase issueTokenUseCase;
+    private final TokenIssuer tokenIssuer;
 
     @Override
     public SignUpResult signUp(SignUpByEmailCommand command) {
-        User savedUser = saveUserPort.save(
-                signUpDomainService.signUpByEmail(
-                        command.email(),
-                        command.password(),
-                        command.roleType()
-                )
+        User user = signUpDomainService.signUpByEmail(
+                command.email(),
+                command.password(),
+                command.roleType()
         );
+
+        User savedUser = saveUserPort.save(user);
+
         Long userId = savedUser.getUserId();
-        IssueTokenResult issuedToken = issueTokenUseCase.issue(userId, savedUser.getRoleType());
+        TokenIssueCommand tokenIssueCommand = new TokenIssueCommand(
+                userId,
+                command.clientInstanceId(),
+                command.roleType()
+        );
+
+
+        IssuedToken token = tokenIssuer.issue(tokenIssueCommand);
 
         saveGoalPort.save(Goal.createDefault(userId));
+
         mentoringProfileCreator.create(userId);
 
-        return new SignUpResult(savedUser.getNickname(), issuedToken.accessToken(), issuedToken.refreshToken());
+        return new SignUpResult(
+                savedUser.getNickname(),
+                token.accessToken().value(),
+                token.refreshToken().value()
+        );
     }
 }

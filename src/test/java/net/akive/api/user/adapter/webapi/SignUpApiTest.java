@@ -8,6 +8,8 @@ import net.akive.api.user.application.provided.dto.SignUpResult;
 import net.akive.api.user.adapter.webapi.dto.request.SignUpByEmailRequest;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.user.domain.RoleType.USER;
 import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
@@ -24,6 +26,7 @@ class SignUpApiTest extends PublicApiTestSupport {
     @Test
     void 이메일로_회원가입하면_토큰과_닉네임이_응답된다() throws Exception {
         // given
+        UUID clientInstanceId = UUID.randomUUID();
         SignUpByEmailRequest request = new SignUpByEmailRequest(
                 "test@test.com",
                 USER,
@@ -31,6 +34,7 @@ class SignUpApiTest extends PublicApiTestSupport {
         );
 
         SignUpByEmailCommand command = SignUpByEmailCommand.of(
+                clientInstanceId,
                 "test@test.com",
                 USER,
                 "password123!"
@@ -47,6 +51,7 @@ class SignUpApiTest extends PublicApiTestSupport {
 
         // when & then
         mockMvc.perform(post("/users/email")
+                        .header("X-Client-Instance-Id", clientInstanceId)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -68,6 +73,7 @@ class SignUpApiTest extends PublicApiTestSupport {
 
         // when & then
         mockMvc.perform(post("/users/email")
+                        .header("X-Client-Instance-Id", UUID.randomUUID())
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -86,6 +92,7 @@ class SignUpApiTest extends PublicApiTestSupport {
 
         // when & then
         mockMvc.perform(post("/users/email")
+                        .header("X-Client-Instance-Id", UUID.randomUUID())
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -104,6 +111,7 @@ class SignUpApiTest extends PublicApiTestSupport {
 
         // when & then
         mockMvc.perform(post("/users/email")
+                        .header("X-Client-Instance-Id", UUID.randomUUID())
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -114,18 +122,26 @@ class SignUpApiTest extends PublicApiTestSupport {
     @Test
     void 이메일로_회원가입_요청_시_이메일_인증이_완료되지_않으면_400을_응답한다() throws Exception {
         // given
+        UUID clientInstanceId = UUID.randomUUID();
         SignUpByEmailRequest request = new SignUpByEmailRequest(
                 "test@test.com",
                 USER,
                 "password123!"
         );
+        SignUpByEmailCommand command = SignUpByEmailCommand.of(
+                clientInstanceId,
+                request.email(),
+                request.roleType(),
+                request.password()
+        );
 
         willThrow(new BadRequestException(EMAIL_NOT_VERIFIED))
                 .given(signUpByEmailUseCase)
-                .signUp(request.to());
+                .signUp(command);
 
         // when & then
         mockMvc.perform(post("/users/email")
+                        .header("X-Client-Instance-Id", clientInstanceId)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -134,18 +150,26 @@ class SignUpApiTest extends PublicApiTestSupport {
     @Test
     void 이메일로_회원가입_요청_시_이미_가입된_이메일이면_409를_응답한다() throws Exception {
         // given
+        UUID clientInstanceId = UUID.randomUUID();
         SignUpByEmailRequest request = new SignUpByEmailRequest(
                 "test@test.com",
                 USER,
                 "password123!"
         );
+        SignUpByEmailCommand command = SignUpByEmailCommand.of(
+                clientInstanceId,
+                request.email(),
+                request.roleType(),
+                request.password()
+        );
 
         willThrow(new ConflictException(EMAIL_ALREADY_EXISTS))
                 .given(signUpByEmailUseCase)
-                .signUp(request.to());
+                .signUp(command);
 
         // when & then
         mockMvc.perform(post("/users/email")
+                        .header("X-Client-Instance-Id", clientInstanceId)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());

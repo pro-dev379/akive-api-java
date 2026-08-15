@@ -1,8 +1,10 @@
 package net.akive.api.user.application.service;
 
+import net.akive.api.auth.application.token.provided.TokenIssuer;
+import net.akive.api.auth.application.token.provided.dto.TokenIssueCommand;
+import net.akive.api.auth.domain.token.IssuedToken;
+import net.akive.api.common.domain.ClientInstanceId;
 import net.akive.api.common.domain.Email;
-import net.akive.api.auth.application.token.provided.dto.IssueTokenResult;
-import net.akive.api.auth.application.token.provided.IssueTokenUseCase;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.mentoring.application.provided.MentoringProfileCreator;
 import net.akive.api.user.application.provided.dto.SignUpByEmailCommand;
@@ -17,6 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static net.akive.api.auth.application.token.provided.dto.TokenIssueCommandFixture.createTokenIssueCommand;
+import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
+import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
 import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.user.domain.LoginType.EMAIL;
 import static net.akive.api.user.domain.RoleType.USER;
@@ -43,7 +48,7 @@ class SignUpServiceTest {
     MentoringProfileCreator mentoringProfileCreator;
 
     @Mock
-    IssueTokenUseCase issueTokenUseCase;
+    TokenIssuer tokenIssuer;
 
     @InjectMocks
     SignUpService signUpService;
@@ -51,7 +56,9 @@ class SignUpServiceTest {
     @Test
     void 이메일로_회원가입하면_회원_정보와_기본_데이터를_생성하고_토큰을_발급한다() {
         // given
+        ClientInstanceId clientInstanceId = createClientInstanceId();
         SignUpByEmailCommand command = new SignUpByEmailCommand(
+                clientInstanceId,
                 new Email("test@test.com"),
                 USER,
                 "password123!"
@@ -81,12 +88,13 @@ class SignUpServiceTest {
 
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
-        IssueTokenResult issuedToken = new IssueTokenResult(accessToken, refreshToken);
+        IssuedToken issuedToken = createIssuedToken(accessToken, refreshToken);
 
         when(signUpDomainService.signUpByEmail(command.email(), command.password(), command.roleType()))
                 .thenReturn(user);
         when(saveUserPort.save(any(User.class))).thenReturn(savedUser);
-        when(issueTokenUseCase.issue(savedUser.getUserId(), USER)).thenReturn(issuedToken);
+        when(tokenIssuer.issue(createTokenIssueCommand(savedUser.getUserId(), clientInstanceId, USER)))
+                .thenReturn(issuedToken);
 
         // when
         SignUpResult result = signUpService.signUp(command);
@@ -101,7 +109,7 @@ class SignUpServiceTest {
                 .signUpByEmail(command.email(), command.password(), command.roleType());
         then(saveUserPort).should().save(user);
 
-        then(issueTokenUseCase).should().issue(savedUser.getUserId(), USER);
+        then(tokenIssuer).should().issue(createTokenIssueCommand(savedUser.getUserId(), clientInstanceId, USER));
 
         then(saveGoalPort).should()
                 .save(argThat(goal ->
@@ -115,6 +123,7 @@ class SignUpServiceTest {
     void 회원가입할_수_없으면_회원_정보와_기본_데이터를_생성하지_않고_토큰을_발급하지_않는다() {
         // given
         SignUpByEmailCommand command = new SignUpByEmailCommand(
+                createClientInstanceId(),
                 new Email("test@test.com"),
                 USER,
                 "password123!"
@@ -129,7 +138,7 @@ class SignUpServiceTest {
                 .isThrownBy(() -> signUpService.signUp(command));
 
         then(saveUserPort).should(never()).save(any(User.class));
-        then(issueTokenUseCase).should(never()).issue(any(), any());
+        then(tokenIssuer).should(never()).issue(any(TokenIssueCommand.class));
         then(saveGoalPort).should(never()).save(any(Goal.class));
         then(mentoringProfileCreator).should(never()).create(any());
     }

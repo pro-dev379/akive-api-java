@@ -16,10 +16,12 @@ public class RedisTemplateClient {
     private static final DefaultRedisScript<Long> COMPARE_AND_SET_SCRIPT = new DefaultRedisScript<>(
             """
             local ttl = tonumber(cjson.decode(ARGV[3]))
+            
             if redis.call('GET', KEYS[1]) == ARGV[1] then
                 redis.call('SET', KEYS[1], ARGV[2], 'PX', ttl)
                 return 1
             end
+            
             return 0
             """,
             Long.class
@@ -29,7 +31,9 @@ public class RedisTemplateClient {
 
     public <T> Optional<T> get(String key, Class<T> type) {
         Object value = customRedisTemplate.opsForValue().get(key);
+
         if (value == null) return Optional.empty();
+
         return Optional.of(type.cast(value));
     }
 

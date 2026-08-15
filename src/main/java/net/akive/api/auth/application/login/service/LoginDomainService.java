@@ -16,9 +16,6 @@ class LoginDomainService {
         return new LoginAuthentication(user, legacyPasswordUsed);
     }
 
-    record LoginAuthentication(
-            LoginUser user,
-            boolean legacyPasswordUsed
-    ) {
+    record LoginAuthentication(LoginUser user, boolean legacyPasswordUsed) {
     }
 }

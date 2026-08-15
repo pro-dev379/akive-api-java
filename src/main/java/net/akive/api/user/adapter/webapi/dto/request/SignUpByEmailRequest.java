@@ -1,7 +1,6 @@
 package net.akive.api.user.adapter.webapi.dto.request;
 
 import jakarta.validation.constraints.*;
-import net.akive.api.user.application.provided.dto.SignUpByEmailCommand;
 import net.akive.api.user.domain.RoleType;
 
 import static net.akive.api.user.domain.UserPolicy.PASSWORD_MIN_LENGTH;
@@ -20,7 +19,4 @@ public record SignUpByEmailRequest(
         @Pattern(regexp = PASSWORD_PATTERN_REGEX)
         String password
 ) {
-        public SignUpByEmailCommand to() {
-                return SignUpByEmailCommand.of(email, roleType, password);
-        }
 }

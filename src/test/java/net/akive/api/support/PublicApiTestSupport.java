@@ -7,7 +7,7 @@ import net.akive.api.auth.adapter.token.webapi.TokenApi;
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeIssuer;
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeVerifier;
 import net.akive.api.auth.application.login.provided.LoginByEmailUseCase;
-import net.akive.api.auth.application.token.provided.IssueTokenUseCase;
+import net.akive.api.auth.application.token.provided.TokenIssuer;
 import net.akive.api.user.adapter.webapi.SignUpController;
 import net.akive.api.user.application.provided.SignUpByEmailUseCase;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public abstract class PublicApiTestSupport {
     protected LoginByEmailUseCase loginByEmailUseCase;
 
     @MockitoBean
-    protected IssueTokenUseCase issueTokenUseCase;
+    protected TokenIssuer tokenIssuer;
 
     protected MvcTestResultAssert postJson(String url, Object body) throws Exception {
         return postJson(url, objectMapper.writeValueAsString(body));

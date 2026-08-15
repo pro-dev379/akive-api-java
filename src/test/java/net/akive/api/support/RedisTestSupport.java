@@ -1,7 +1,7 @@
 package net.akive.api.support;
 
 import net.akive.api.auth.application.emailverification.required.EmailVerificationStore;
-import net.akive.api.auth.application.token.required.*;
+import net.akive.api.auth.application.token.required.RefreshTokenStore;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -32,16 +32,7 @@ public class RedisTestSupport extends IntegrationTestSupport{
     protected EmailVerificationStore emailVerificationStore;
 
     @Autowired
-    protected LoadTokenPort loadTokenPort;
-
-    @Autowired
-    protected SaveTokenPort saveTokenPort;
-
-    @Autowired
-    protected RotateTokenPort rotateTokenPort;
-
-    @Autowired
-    protected DeleteTokenPort deleteTokenPort;
+    protected RefreshTokenStore refreshTokenStore;
 
     @Autowired
     protected RedisTemplate<String, Object> redisTemplate;
