@@ -1,6 +1,6 @@
 package net.akive.api.email.application.service;
 
-import net.akive.api.email.application.dto.EmailSendCommand;
+import net.akive.api.email.application.provided.dto.EmailSendCommand;
 import net.akive.api.email.application.required.EmailDispatcher;
 import net.akive.api.email.application.required.EmailTemplateRenderer;
 import org.junit.jupiter.api.Test;

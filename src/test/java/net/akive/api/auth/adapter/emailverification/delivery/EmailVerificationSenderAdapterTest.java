@@ -1,7 +1,7 @@
 package net.akive.api.auth.adapter.emailverification.delivery;
 
 import net.akive.api.auth.domain.emailverification.EmailVerification;
-import net.akive.api.email.application.dto.EmailSendCommand;
+import net.akive.api.email.application.provided.dto.EmailSendCommand;
 import net.akive.api.email.application.provided.EmailSender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

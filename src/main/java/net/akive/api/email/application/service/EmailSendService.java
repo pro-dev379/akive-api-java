@@ -1,7 +1,7 @@
 package net.akive.api.email.application.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.email.application.dto.EmailSendCommand;
+import net.akive.api.email.application.provided.dto.EmailSendCommand;
 import net.akive.api.email.application.provided.EmailSender;
 import net.akive.api.email.application.required.EmailDispatcher;
 import net.akive.api.email.application.required.EmailTemplateRenderer;

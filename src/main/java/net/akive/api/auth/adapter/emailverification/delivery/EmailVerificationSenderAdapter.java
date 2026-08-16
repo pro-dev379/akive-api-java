@@ -3,7 +3,7 @@ package net.akive.api.auth.adapter.emailverification.delivery;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.emailverification.required.EmailVerificationSender;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
-import net.akive.api.email.application.dto.EmailSendCommand;
+import net.akive.api.email.application.provided.dto.EmailSendCommand;
 import net.akive.api.email.application.provided.EmailSender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

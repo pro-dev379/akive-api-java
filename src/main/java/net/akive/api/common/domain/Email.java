@@ -12,7 +12,8 @@ public record Email(String value) {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     public Email {
-        requireNotBlank(value);
+        value = requireNotBlank(value);
+
         if (!EMAIL_PATTERN.matcher(value).matches()) {
             throw new BadRequestException(INVALID_EMAIL_FORMAT);
         }
