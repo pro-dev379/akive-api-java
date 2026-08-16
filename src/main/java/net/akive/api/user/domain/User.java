@@ -23,7 +23,7 @@ public class User {
     private RoleType roleType;
     private LoginType loginType;
     private String nickname;
-    private String password;
+    private String passwordHash;
     private String imgUrl;
     private String aim;
     private boolean leave;
@@ -35,7 +35,7 @@ public class User {
             RoleType roleType,
             LoginType loginType,
             String nickname,
-            String password,
+            String passwordHash,
             String imgUrl,
             String aim,
             boolean leave,
@@ -47,7 +47,7 @@ public class User {
                 .roleType(requireNonNull(roleType))
                 .loginType(requireNonNull(loginType))
                 .nickname(validateNickname(nickname))
-                .password(validateEncodedPassword(password))
+                .passwordHash(validatePasswordHash(passwordHash))
                 .imgUrl(imgUrl)
                 .aim(requireMaxLengthIfPresent(aim, AIM_MAX_LENGTH))
                 .leave(leave)
@@ -66,20 +66,28 @@ public class User {
                 .roleType(requireNonNull(roleType))
                 .loginType(requireNonNull(EMAIL))
                 .nickname(validateNickname(nickname))
-                .password(validateEncodedPassword(encodedPassword))
+                .passwordHash(validateRequiredPasswordHash(encodedPassword))
                 .leave(false)
                 .build();
     }
 
+    public boolean hasPassword() {
+        return this.passwordHash != null;
+    }
+
     public void updatePassword(String encodedPassword) {
-        this.password = validateEncodedPassword(encodedPassword);
+        this.passwordHash = validateRequiredPasswordHash(encodedPassword);
     }
 
     private static String validateNickname(String nickname) {
         return requireMaxLength(requireNotBlank(nickname), NICKNAME_MAX_LENGTH);
     }
 
-    private static String validateEncodedPassword(String encodedPassword) {
-        return requireNotBlank(encodedPassword);
+    private static String validatePasswordHash(String passwordHash) {
+        return passwordHash != null ? requireNotBlank(passwordHash) : null;
+    }
+
+    private static String validateRequiredPasswordHash(String passwordHash) {
+        return requireNotBlank(passwordHash);
     }
 }

@@ -59,7 +59,7 @@ class AccountServiceTest {
         accountService.updatePassword(userId, encodedPassword);
 
         // then
-        assertThat(user.getPassword()).isEqualTo(encodedPassword);
+        assertThat(user.getPasswordHash()).isEqualTo(encodedPassword);
 
         then(saveUserPort).should().save(user);
     }

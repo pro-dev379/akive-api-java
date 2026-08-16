@@ -53,7 +53,7 @@ class SignUpDomainServiceTest {
         assertThat(user.getEmail()).isEqualTo(VALID_EMAIL);
         assertThat(user.getLoginType()).isEqualTo(EMAIL);
         assertThat(user.getNickname()).isEqualTo("USER@abcde");
-        assertThat(user.getPassword()).isEqualTo("encoded-password");
+        assertThat(user.getPasswordHash()).isEqualTo("encoded-password");
         assertThat(user.getRoleType()).isEqualTo(USER);
 
         then(signUpValidator).should().validateEmailSignUpAvailable(VALID_EMAIL);

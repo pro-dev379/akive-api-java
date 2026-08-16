@@ -14,7 +14,12 @@ import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
-@Table(name = "legacy_user_password")
+@Table(
+        name = "legacy_user_password",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "ux-legacy_user_password-user_id", columnNames = "user_id")
+        }
+)
 @Getter
 @AllArgsConstructor(access = PRIVATE)
 @NoArgsConstructor(access = PROTECTED)
@@ -29,21 +34,19 @@ public class LegacyUserPasswordEntity extends BaseTimeEntity {
     private UserEntity user;
 
     @Embedded
-    private LegacyPasswordHashEntity legacyPasswordHashEntity;
+    private LegacyPasswordHashEntity passwordHash;
 
     public static LegacyUserPasswordEntity from(LegacyUserPassword legacyUserPassword) {
         LegacyUserPasswordEntity legacyUserPasswordEntity = new LegacyUserPasswordEntity();
+
         legacyUserPasswordEntity.user = UserEntity.reference(legacyUserPassword.userId());
-        legacyUserPasswordEntity.legacyPasswordHashEntity = LegacyPasswordHashEntity.of(legacyUserPassword.hash(), legacyUserPassword.salt());
+        legacyUserPasswordEntity.passwordHash =
+                LegacyPasswordHashEntity.from(legacyUserPassword.passwordHash());
 
         return legacyUserPasswordEntity;
     }
 
     public LegacyUserPassword to() {
-        return new LegacyUserPassword(
-                user.getUserId(),
-                legacyPasswordHashEntity.getHash(),
-                legacyPasswordHashEntity.getSalt()
-        );
+        return new LegacyUserPassword(user.getUserId(), passwordHash.to());
     }
 }

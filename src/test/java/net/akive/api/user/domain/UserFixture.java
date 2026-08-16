@@ -14,13 +14,17 @@ public class UserFixture {
     }
 
     public static User createUser(Long userId) {
+        return createUser(userId, "password123!");
+    }
+
+    public static User createUser(Long userId, String passwordHash) {
         return User.reconstruct(
                 userId,
                 createEmail(),
                 RoleType.USER,
                 LoginType.EMAIL,
                 "USER@abcde",
-                "password123!",
+                passwordHash,
                 null,
                 null,
                 false,

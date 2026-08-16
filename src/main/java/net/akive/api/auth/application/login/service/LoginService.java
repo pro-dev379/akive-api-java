@@ -1,62 +1,85 @@
 package net.akive.api.auth.application.login.service;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.auth.application.login.provided.LoginByEmailUseCase;
+import net.akive.api.auth.application.login.provided.LoginProcessor;
 import net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand;
-import net.akive.api.auth.application.login.provided.dto.LoginResult;
-import net.akive.api.auth.application.login.required.DeleteLegacyUserPasswordPort;
-import net.akive.api.auth.application.login.required.LoadEmailLoginUserPort;
+import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
+import net.akive.api.auth.domain.login.LegacyUserPassword;
 import net.akive.api.auth.application.token.provided.TokenIssuer;
 import net.akive.api.auth.application.token.provided.dto.TokenIssueCommand;
-import net.akive.api.auth.domain.login.LoginUser;
 import net.akive.api.auth.domain.token.IssuedToken;
-import net.akive.api.common.domain.ClientInstanceId;
+import net.akive.api.common.exception.business.UnauthorizedException;
 import net.akive.api.user.application.provided.UpdatePasswordUseCase;
+import net.akive.api.user.application.provided.UserFinder;
+import net.akive.api.user.domain.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_EMAIL_OR_PASSWORD;
+
 @Service
 @RequiredArgsConstructor
-class LoginService implements LoginByEmailUseCase {
+class LoginService implements LoginProcessor {
 
-    private final TokenIssuer tokenIssuer;
+    private final UserFinder userFinder;
     private final UpdatePasswordUseCase updatePasswordUseCase;
+    private final TokenIssuer tokenIssuer;
+    private final LegacyUserPasswordRepository legacyUserPasswordRepository;
 
-    private final LoadEmailLoginUserPort loadEmailLoginUserPort;
-    private final DeleteLegacyUserPasswordPort deleteLegacyUserPasswordPort;
-
-    private final LoginDomainService loginDomainService;
     private final PasswordEncoder passwordEncoder;
+    private final LegacyPasswordVerifier legacyPasswordVerifier;
 
     @Override
     @Transactional
-    public LoginResult login(LoginByEmailCommand command) {
-        LoginUser user = loadEmailLoginUserPort.loadByEmailAndLeaveFalse(command.email());
-        LoginDomainService.LoginAuthentication loginAuthentication =
-                loginDomainService.authenticate(user, command.password());
+    public IssuedToken loginByEmail(LoginByEmailCommand command) {
+        User user = userFinder.findByEmailAndLeaveFalse(command.email())
+                .orElseThrow(() -> new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
 
-        if (loginAuthentication.legacyPasswordUsed()) {
+        if (authenticateAndCheckLegacyPasswordUsed(user, command.password())) {
             migratePassword(user, command.password());
         }
 
-        return issueToken(loginAuthentication.user(), command.clientInstanceId());
+        return tokenIssuer.issue(new TokenIssueCommand(
+                user.getUserId(),
+                command.clientInstanceId(),
+                user.getRoleType()
+        ));
     }
 
-    private void migratePassword(LoginUser user, String rawPassword) {
+    private boolean authenticateAndCheckLegacyPasswordUsed(User user, String rawPassword) {
+        if (user.hasPassword()) {
+            validatePassword(rawPassword, user.getPasswordHash());
+
+            return false;
+        }
+
+        validateLegacyPassword(rawPassword, user);
+
+        return true;
+    }
+
+    private void validatePassword(String rawPassword, String passwordHash) {
+        if (!passwordEncoder.matches(rawPassword, passwordHash)) {
+            throw new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD);
+        }
+    }
+
+    private void validateLegacyPassword(String rawPassword, User user) {
+        LegacyUserPassword legacyUserPassword = legacyUserPasswordRepository
+                .findByUserId(user.getUserId())
+                .orElseThrow(() -> new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
+
+        if (!legacyPasswordVerifier.matches(rawPassword, legacyUserPassword.passwordHash())) {
+            throw new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD);
+        }
+    }
+
+    private void migratePassword(User user, String rawPassword) {
         String encodedPassword = passwordEncoder.encode(rawPassword);
-        updatePasswordUseCase.updatePassword(user.userId(), encodedPassword);
-        deleteLegacyUserPasswordPort.deleteByUserId(user.userId());
-    }
 
-    private LoginResult issueToken(LoginUser user, ClientInstanceId clientInstanceId) {
-        TokenIssueCommand command = new TokenIssueCommand(user.userId(), clientInstanceId, user.roleType());
+        updatePasswordUseCase.updatePassword(user.getUserId(), encodedPassword);
 
-        IssuedToken token = tokenIssuer.issue(command);
-
-        return new LoginResult(
-                token.accessToken().value(),
-                token.refreshToken().value()
-        );
+        legacyUserPasswordRepository.deleteByUserId(user.getUserId());
     }
 }

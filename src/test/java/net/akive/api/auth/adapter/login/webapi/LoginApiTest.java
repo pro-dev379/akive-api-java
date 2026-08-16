@@ -1,122 +1,128 @@
 package net.akive.api.auth.adapter.login.webapi;
 
 import net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequest;
-import net.akive.api.auth.application.login.provided.dto.LoginResult;
+import net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand;
+import net.akive.api.auth.domain.token.IssuedToken;
 import net.akive.api.common.exception.business.UnauthorizedException;
 import net.akive.api.support.PublicApiTestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import static net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequestFixture.createLoginByEmailRequest;
+import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_EMAIL_OR_PASSWORD;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.never;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 class LoginApiTest extends PublicApiTestSupport {
 
+    private static final String LOGIN_BY_EMAIL_URL = "/login/email";
+
     @Test
-    void 이메일_로그인_요청_시_올바른_이메일과_패스워드를_전달하면_토큰을_발급한다() throws Exception {
-        // given
+    void 이메일과_패스워드로_로그인하면_토큰을_응답한다() {
         UUID clientInstanceId = UUID.randomUUID();
-        LoginByEmailRequest request = new LoginByEmailRequest("test@test.com", "password123!");
-        var command = net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand.of(
+        LoginByEmailRequest request = createLoginByEmailRequest();
+        LoginByEmailCommand command = LoginByEmailCommand.of(
                 clientInstanceId,
                 request.email(),
                 request.password()
         );
-        LoginResult result = new LoginResult("access-token", "refresh-token");
+        IssuedToken issuedToken = createIssuedToken("access-token", "refresh-token");
 
-        given(loginByEmailUseCase.login(command)).willReturn(result);
+        given(loginProcessor.loginByEmail(command)).willReturn(issuedToken);
 
-        // when
-        mockMvc.perform(post("/login/email")
-                        .header("X-Client-Instance-Id", clientInstanceId)
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("access-token"))
-                .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
+        MvcTestResultAssert result = postLoginByEmail(clientInstanceId.toString(), request).hasStatus(OK);
 
-        then(loginByEmailUseCase).should().login(command);
+        result.bodyJson().extractingPath("$.accessToken").isEqualTo("access-token");
+        result.bodyJson().extractingPath("$.refreshToken").isEqualTo("refresh-token");
+
+        then(loginProcessor).should().loginByEmail(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidRequests")
+    void 이메일_로그인_요청값이_올바르지_않으면_400을_응답한다(LoginByEmailRequest request) {
+        postLoginByEmail(UUID.randomUUID().toString(), request).hasStatus(BAD_REQUEST);
+
+        then(loginProcessor).should(never()).loginByEmail(any(LoginByEmailCommand.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidClientInstanceIdHeaders")
+    void 이메일_로그인_요청_시_클라이언트_식별자가_올바르지_않으면_400을_응답한다(String clientInstanceIdHeader) {
+        postLoginByEmail(clientInstanceIdHeader, createLoginByEmailRequest()).hasStatus(BAD_REQUEST);
+
+        then(loginProcessor).should(never()).loginByEmail(any(LoginByEmailCommand.class));
     }
 
     @Test
-    void 이메일_로그인_요청_시_이메일이_비어있으면_400을_응답한다() throws Exception {
-        // given
-        LoginByEmailRequest request = new LoginByEmailRequest("", "password123!");
-
-        // when
-        mockMvc.perform(post("/login/email")
-                        .header("X-Client-Instance-Id", UUID.randomUUID())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-
-        then(loginByEmailUseCase).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void 이메일_로그인_요청_시_패스워드가_비어있으면_400을_응답한다() throws Exception {
-        // given
-        LoginByEmailRequest request = new LoginByEmailRequest("test@test.com", "");
-
-        // when
-        mockMvc.perform(post("/login/email")
-                        .header("X-Client-Instance-Id", UUID.randomUUID())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-
-        then(loginByEmailUseCase).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void 이메일_로그인_요청_시_존재하지_않는_이메일이면_401을_응답한다() throws Exception {
-        // given
+    void 이메일_로그인_요청_시_인증에_실패하면_401을_응답한다() {
         UUID clientInstanceId = UUID.randomUUID();
-        LoginByEmailRequest request = new LoginByEmailRequest("none@test.com", "password123!");
-        var command = net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand.of(
+        LoginByEmailRequest request = createLoginByEmailRequest();
+        LoginByEmailCommand command = LoginByEmailCommand.of(
                 clientInstanceId,
                 request.email(),
                 request.password()
         );
-        given(loginByEmailUseCase.login(command))
-                .willThrow(new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
 
-        // when
-        mockMvc.perform(post("/login/email")
-                        .header("X-Client-Instance-Id", clientInstanceId)
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
+        willThrow(new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD))
+                .given(loginProcessor)
+                .loginByEmail(command);
 
-        then(loginByEmailUseCase).should().login(command);
+        postLoginByEmail(clientInstanceId.toString(), request).hasStatus(UNAUTHORIZED);
+
+        then(loginProcessor).should().loginByEmail(command);
     }
 
-    @Test
-    void 이메일_로그인_요청_시_패스워드가_일치하지_않으면_401을_응답한다() throws Exception {
-        // given
-        UUID clientInstanceId = UUID.randomUUID();
-        LoginByEmailRequest request = new LoginByEmailRequest("test@test.com", "wrong-password");
-        var command = net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand.of(
-                clientInstanceId,
-                request.email(),
-                request.password()
+    private MvcTestResultAssert postLoginByEmail(String clientInstanceIdHeader, LoginByEmailRequest request) {
+        var requestBuilder = mvcTester.post()
+                .uri(LOGIN_BY_EMAIL_URL)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(toJson(request));
+
+        if (clientInstanceIdHeader != null) {
+            requestBuilder.header("X-Client-Instance-Id", clientInstanceIdHeader);
+        }
+
+        return requestBuilder.assertThat();
+    }
+
+    private String toJson(Object body) {
+        try {
+            return objectMapper.writeValueAsString(body);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to serialize request body.", e);
+        }
+    }
+
+    private static Stream<LoginByEmailRequest> invalidRequests() {
+        return Stream.of(
+                createLoginByEmailRequest(null, "password123!"),
+                createLoginByEmailRequest("", "password123!"),
+                createLoginByEmailRequest(" ", "password123!"),
+                createLoginByEmailRequest("invalid-email", "password123!"),
+                createLoginByEmailRequest("test@", "password123!"),
+                createLoginByEmailRequest("@test.com", "password123!"),
+                createLoginByEmailRequest("test@test.com", null),
+                createLoginByEmailRequest("test@test.com", ""),
+                createLoginByEmailRequest("test@test.com", " ")
         );
-        given(loginByEmailUseCase.login(command))
-                .willThrow(new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
+    }
 
-        // when
-        mockMvc.perform(post("/login/email")
-                        .header("X-Client-Instance-Id", clientInstanceId)
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
-
-        then(loginByEmailUseCase).should().login(command);
+    private static Stream<String> invalidClientInstanceIdHeaders() {
+        return Stream.of(
+                null,
+                "",
+                "invalid-uuid"
+        );
     }
 }

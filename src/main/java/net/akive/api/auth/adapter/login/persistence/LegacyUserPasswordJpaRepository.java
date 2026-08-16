@@ -8,5 +8,6 @@ import java.util.Optional;
 public interface LegacyUserPasswordJpaRepository extends JpaRepository<LegacyUserPasswordEntity, Long> {
 
     Optional<LegacyUserPasswordEntity> findByUser_UserId(Long userId);
+
     void deleteByUser_UserId(Long userId);
 }

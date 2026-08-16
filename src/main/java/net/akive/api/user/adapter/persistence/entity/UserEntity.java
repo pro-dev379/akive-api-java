@@ -45,8 +45,7 @@ public class UserEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private String nickname;
 
-    @Column(nullable = false)
-    private String password;
+    private String passwordHash;
 
     private String imgUrl;
     private String aim;
@@ -70,7 +69,7 @@ public class UserEntity extends BaseTimeEntity {
                 user.getRoleType(),
                 user.getLoginType(),
                 user.getNickname(),
-                user.getPassword(),
+                user.getPasswordHash(),
                 user.getImgUrl(),
                 user.getAim(),
                 user.isLeave(),
@@ -85,7 +84,7 @@ public class UserEntity extends BaseTimeEntity {
                 this.roleType,
                 this.loginType,
                 this.nickname,
-                this.password,
+                this.passwordHash,
                 this.imgUrl,
                 this.aim,
                 this.leave,

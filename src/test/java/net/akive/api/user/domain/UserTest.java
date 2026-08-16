@@ -45,7 +45,7 @@ class UserTest {
         assertThat(user.getRoleType()).isEqualTo(USER);
         assertThat(user.getLoginType()).isEqualTo(SNS);
         assertThat(user.getNickname()).isEqualTo(VALID_NICKNAME);
-        assertThat(user.getPassword()).isEqualTo(VALID_ENCODED_PASSWORD);
+        assertThat(user.getPasswordHash()).isEqualTo(VALID_ENCODED_PASSWORD);
         assertThat(user.getImgUrl()).isEqualTo("https://example.com/image.png");
         assertThat(user.getAim()).isEqualTo("목표");
         assertThat(user.isLeave()).isTrue();
@@ -214,7 +214,7 @@ class UserTest {
 
         assertThat(user.getEmail()).isEqualTo(VALID_EMAIL);
         assertThat(user.getNickname()).isEqualTo(VALID_NICKNAME);
-        assertThat(user.getPassword()).isEqualTo(VALID_ENCODED_PASSWORD);
+        assertThat(user.getPasswordHash()).isEqualTo(VALID_ENCODED_PASSWORD);
         assertThat(user.getRoleType()).isEqualTo(USER);
         assertThat(user.getLoginType()).isEqualTo(EMAIL);
         assertThat(user.isLeave()).isFalse();
@@ -283,7 +283,7 @@ class UserTest {
                 USER
         );
 
-        assertThat(user.getPassword()).isEqualTo(VALID_ENCODED_PASSWORD);
+        assertThat(user.getPasswordHash()).isEqualTo(VALID_ENCODED_PASSWORD);
     }
 
     @Test
@@ -308,7 +308,7 @@ class UserTest {
         user.updatePassword("new-encoded");
 
         // then
-        assertThat(user.getPassword()).isEqualTo("new-encoded");
+        assertThat(user.getPasswordHash()).isEqualTo("new-encoded");
     }
 
     @Test
@@ -320,7 +320,7 @@ class UserTest {
         user.updatePassword("  new-encoded  ");
 
         // then
-        assertThat(user.getPassword()).isEqualTo("new-encoded");
+        assertThat(user.getPasswordHash()).isEqualTo("new-encoded");
     }
 
     @Test

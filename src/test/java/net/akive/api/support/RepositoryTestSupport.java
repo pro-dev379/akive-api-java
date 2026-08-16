@@ -1,9 +1,7 @@
 package net.akive.api.support;
 
-import net.akive.api.auth.application.login.required.DeleteLegacyUserPasswordPort;
-import net.akive.api.auth.application.login.required.LoadEmailLoginUserPort;
-import net.akive.api.auth.application.login.required.LoadLegacyUserPasswordPort;
 import net.akive.api.auth.adapter.login.persistence.LegacyUserPasswordJpaRepository;
+import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.plan.application.required.*;
 import net.akive.api.user.application.required.SaveGoalPort;
@@ -25,13 +23,7 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
     protected SaveGoalPort saveGoalPort;
 
     @Autowired
-    protected LoadEmailLoginUserPort loadEmailLoginUserPort;
-
-    @Autowired
-    protected LoadLegacyUserPasswordPort loadLegacyUserPasswordPort;
-
-    @Autowired
-    protected DeleteLegacyUserPasswordPort deleteLegacyUserPasswordPort;
+    protected LegacyUserPasswordRepository legacyUserPasswordRepository;
 
     @Autowired
     protected LegacyUserPasswordJpaRepository legacyUserPasswordJpaRepository;

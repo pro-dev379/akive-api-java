@@ -1,6 +1,6 @@
 package net.akive.api.auth.application.login.service;
 
-import net.akive.api.auth.domain.login.LegacyUserPassword;
+import net.akive.api.auth.domain.login.LegacyPasswordHash;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKeyFactory;
@@ -19,13 +19,10 @@ class LegacyPasswordVerifier {
     private static final int ITERATIONS = 104_906;
     private static final int KEY_LENGTH_BITS = 64 * 8;
 
-    boolean matches(String rawPassword, LegacyUserPassword legacyUserPassword) {
-        String hashedPassword = hash(rawPassword, legacyUserPassword.salt());
+    boolean matches(String rawPassword, LegacyPasswordHash passwordHash) {
+        String hashedPassword = hash(rawPassword, passwordHash.salt());
 
-        return MessageDigest.isEqual(
-                hashedPassword.getBytes(UTF_8),
-                legacyUserPassword.hash().getBytes(UTF_8)
-        );
+        return MessageDigest.isEqual(hashedPassword.getBytes(UTF_8), passwordHash.hash().getBytes(UTF_8));
     }
 
     private String hash(String rawPassword, String salt) {
@@ -43,7 +40,7 @@ class LegacyPasswordVerifier {
 
             return Base64.getEncoder().encodeToString(secretKey);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new IllegalStateException("Failed to generate legacy password hash.", e);
+            throw new IllegalStateException("Failed to generate legacy password hash", e);
         }
     }
 }

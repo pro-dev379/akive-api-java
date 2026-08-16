@@ -5,6 +5,7 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.auth.domain.login.LegacyPasswordHash;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -21,7 +22,11 @@ public class LegacyPasswordHashEntity {
     @Column(name = "password_salt", nullable = false)
     private String salt;
 
-    public static LegacyPasswordHashEntity of(String hash, String salt) {
-        return new LegacyPasswordHashEntity(hash, salt);
+    public static LegacyPasswordHashEntity from(LegacyPasswordHash passwordHash) {
+        return new LegacyPasswordHashEntity(passwordHash.hash(), passwordHash.salt());
+    }
+
+    public LegacyPasswordHash to() {
+        return new LegacyPasswordHash(this.hash, this.salt);
     }
 }

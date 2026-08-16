@@ -4,7 +4,9 @@ import net.akive.api.auth.domain.login.LegacyUserPassword;
 
 import java.util.Optional;
 
-public interface LoadLegacyUserPasswordPort {
+public interface LegacyUserPasswordRepository {
 
-    Optional<LegacyUserPassword> loadByUserId(Long userId);
+    Optional<LegacyUserPassword> findByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
 }

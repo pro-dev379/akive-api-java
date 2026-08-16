@@ -79,7 +79,7 @@ class SignUpServiceTest {
                 user.getRoleType(),
                 EMAIL,
                 user.getNickname(),
-                user.getPassword(),
+                user.getPasswordHash(),
                 null,
                 null,
                 false,

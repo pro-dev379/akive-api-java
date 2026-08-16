@@ -2,11 +2,11 @@ package net.akive.api.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.auth.adapter.emailverification.webapi.EmailVerificationApi;
-import net.akive.api.auth.adapter.login.webapi.LoginController;
+import net.akive.api.auth.adapter.login.webapi.LoginApi;
 import net.akive.api.auth.adapter.token.webapi.TokenApi;
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeIssuer;
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeVerifier;
-import net.akive.api.auth.application.login.provided.LoginByEmailUseCase;
+import net.akive.api.auth.application.login.provided.LoginProcessor;
 import net.akive.api.auth.application.token.provided.TokenIssuer;
 import net.akive.api.user.adapter.webapi.SignUpController;
 import net.akive.api.user.application.provided.SignUpByEmailUseCase;
@@ -23,7 +23,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @WebMvcTest(controllers = {
         EmailVerificationApi.class,
         SignUpController.class,
-        LoginController.class,
+        LoginApi.class,
         TokenApi.class,
 })
 @AutoConfigureMockMvc(addFilters = false)
@@ -49,7 +49,7 @@ public abstract class PublicApiTestSupport {
     protected SignUpByEmailUseCase signUpByEmailUseCase;
 
     @MockitoBean
-    protected LoginByEmailUseCase loginByEmailUseCase;
+    protected LoginProcessor loginProcessor;
 
     @MockitoBean
     protected TokenIssuer tokenIssuer;

@@ -14,7 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TokenAuthenticationEntryPointTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint = new TokenAuthenticationEntryPoint(objectMapper);
+    private final TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint =
+            new TokenAuthenticationEntryPoint(objectMapper);
 
     @Test
     void 액세스_토큰이_만료되면_만료된_액세스_토큰_예외를_던진다() throws Exception {
@@ -44,7 +45,10 @@ class TokenAuthenticationEntryPointTest {
                 new BadCredentialsException("Invalid bearer token")
         );
 
-        ApiErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ApiErrorResponse.class);
+        ApiErrorResponse errorResponse = objectMapper.readValue(
+                response.getContentAsString(),
+                ApiErrorResponse.class
+        );
 
         assertThat(response.getStatus()).isEqualTo(INVALID_ACCESS_TOKEN.getStatus().value());
         assertThat(response.getContentType()).startsWith("application/json");
