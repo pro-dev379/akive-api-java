@@ -10,14 +10,14 @@ import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.NotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
 
-@Service
+@Component
 @RequiredArgsConstructor
 class EmailVerificationDomainService {
 
