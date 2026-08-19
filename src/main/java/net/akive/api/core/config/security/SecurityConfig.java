@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .securityMatcher(
                         "/tokens",
                         "/login/**",
-                        "/users/email",
+                        "/members/email",
                         "/verifications/**"
                 )
                 .csrf(AbstractHttpConfigurer::disable)
