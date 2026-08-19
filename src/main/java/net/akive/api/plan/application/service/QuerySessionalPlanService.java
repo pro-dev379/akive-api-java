@@ -36,7 +36,7 @@ class QuerySessionalPlanService implements GetSessionalPlansUseCase, GetSessiona
     }
 
     @Override
-    public GetSessionalPlanResult get(GetSessionalPlanQuery query) {
+    public GetSessionalPlanResult get(GetSessionalPlanQuery query) throws NotFoundException {
         SessionalPlan sessionalPlan = loadSessionalPlanOrThrow(query.sessionalPlanId(), query.userId());
         List<SessionWeek> weeks = sessionalPlan.getSessionPeriod().splitIntoWeeks();
 

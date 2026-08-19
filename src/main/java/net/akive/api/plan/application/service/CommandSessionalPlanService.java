@@ -1,6 +1,8 @@
 package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.CreateSessionalPlanUseCase;
 import net.akive.api.plan.application.provided.DeleteSessionalPlanUseCase;
@@ -31,7 +33,7 @@ class CommandSessionalPlanService implements
     private final SessionalPlanDomainService sessionalPlanDomainService;
 
     @Override
-    public Long create(CreateSessionalPlanCommand command) {
+    public Long create(CreateSessionalPlanCommand command) throws BadRequestException, ConflictException {
         SessionalPlan sessionalPlan = sessionalPlanDomainService.createForUser(
                 command.userId(),
                 command.sessionName(),
@@ -44,7 +46,7 @@ class CommandSessionalPlanService implements
     }
 
     @Override
-    public void delete(DeleteSessionalPlanCommand command) {
+    public void delete(DeleteSessionalPlanCommand command) throws NotFoundException {
         long deletedCount = deleteSessionalPlanPort.deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
         if (deletedCount == 0) {
             throw new NotFoundException(SESSIONAL_PLAN_NOT_FOUND);
@@ -52,7 +54,8 @@ class CommandSessionalPlanService implements
     }
 
     @Override
-    public void update(UpdateSessionalPlanCommand command) {
+    public void update(UpdateSessionalPlanCommand command)
+            throws BadRequestException, ConflictException, NotFoundException {
         SessionalPlan sessionalPlan = loadSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
 
         SessionalPlan updatedSessionalPlan = sessionalPlanDomainService.update(

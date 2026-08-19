@@ -8,6 +8,7 @@ import net.akive.api.auth.application.token.provided.dto.TokenReissueCommand;
 import net.akive.api.auth.application.token.required.AccessTokenCreator;
 import net.akive.api.auth.application.token.required.RefreshTokenParser;
 import net.akive.api.auth.domain.token.*;
+import net.akive.api.common.exception.business.UnauthorizedException;
 import net.akive.api.user.domain.RoleType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +36,7 @@ class TokenIssueService implements TokenIssuer {
     }
 
     @Override
-    public ReissuedToken reissue(TokenReissueCommand command) {
+    public ReissuedToken reissue(TokenReissueCommand command) throws UnauthorizedException {
         RefreshTokenPayload refreshTokenPayload = refreshTokenParser.parse(command.refreshToken());
 
         Long userId = refreshTokenPayload.userId();

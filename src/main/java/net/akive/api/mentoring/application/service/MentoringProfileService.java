@@ -21,7 +21,7 @@ class MentoringProfileService implements MentoringProfileCreator {
     private final MentoringProfileRepository mentoringProfileRepository;
 
     @Override
-    public MentoringProfile create(Long userId) {
+    public MentoringProfile create(Long userId) throws NotFoundException {
         User user = userFinder.findByUserIdAndLeaveFalse(userId)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 

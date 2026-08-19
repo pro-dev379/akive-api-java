@@ -10,6 +10,11 @@ import net.akive.api.auth.application.emailverification.provided.dto.EmailVerifi
 import net.akive.api.auth.application.emailverification.required.EmailVerificationSender;
 import net.akive.api.auth.application.emailverification.required.EmailVerificationStore;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.TooManyRequestsException;
+import net.akive.api.common.exception.business.UnauthorizedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +35,8 @@ class EmailVerificationService implements
     private final EmailVerificationDomainService emailVerificationDomainService;
 
     @Override
-    public EmailVerification issue(EmailVerificationIssueCommand command) {
+    public EmailVerification issue(EmailVerificationIssueCommand command)
+            throws ConflictException, NotFoundException, TooManyRequestsException {
         EmailVerification emailVerification = emailVerificationDomainService.issue(
                 command.email(),
                 command.verificationPurpose()
@@ -43,7 +49,8 @@ class EmailVerificationService implements
     }
 
     @Override
-    public void verify(EmailVerificationCodeVerifyCommand command) {
+    public void verify(EmailVerificationCodeVerifyCommand command)
+            throws BadRequestException, NotFoundException, UnauthorizedException, ConflictException {
         EmailVerification emailVerification = emailVerificationDomainService.verify(
                 command.email(),
                 command.verificationPurpose(),
@@ -55,7 +62,7 @@ class EmailVerificationService implements
 
     @Override
     @Transactional(readOnly = true)
-    public void ensureEmailVerified(EmailVerificationEnsureCommand command) {
+    public void ensureEmailVerified(EmailVerificationEnsureCommand command) throws BadRequestException {
         emailVerificationDomainService.checkVerified(command.email(), command.verificationPurpose());
     }
 }

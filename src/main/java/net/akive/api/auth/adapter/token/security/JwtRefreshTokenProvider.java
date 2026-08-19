@@ -48,7 +48,7 @@ class JwtRefreshTokenProvider implements RefreshTokenCreator, RefreshTokenParser
     }
 
     @Override
-    public RefreshTokenPayload parse(RefreshToken refreshToken) {
+    public RefreshTokenPayload parse(RefreshToken refreshToken) throws UnauthorizedException {
         Jwt jwt = decode(refreshToken);
 
         return createPayload(jwt);

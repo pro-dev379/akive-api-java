@@ -32,7 +32,7 @@ class LoginService implements LoginProcessor {
 
     @Override
     @Transactional
-    public IssuedToken loginByEmail(LoginByEmailCommand command) {
+    public IssuedToken loginByEmail(LoginByEmailCommand command) throws UnauthorizedException {
         User user = userFinder.findByEmailAndLeaveFalse(command.email())
                 .orElseThrow(() -> new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
 

@@ -1,6 +1,8 @@
 package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.CreateTotalQuantityUseCase;
 import net.akive.api.plan.application.provided.DeleteTotalQuantityUseCase;
@@ -42,7 +44,8 @@ class TotalQuantityService implements
 
     @Override
     @Transactional(readOnly = true)
-    public GetSessionalPlanResult.TotalQuantityResult get(GetSessionalPlanTotalQuantityQuery query) {
+    public GetSessionalPlanResult.TotalQuantityResult get(GetSessionalPlanTotalQuantityQuery query)
+            throws NotFoundException {
         SessionalPlan sessionalPlan = loadSessionalPlanOrThrow(query.sessionalPlanId(), query.userId());
         List<SessionWeek> sessionWeeks = sessionalPlan.getSessionPeriod().splitIntoWeeks();
         SessionalPlanTotalQuantityData data = loadSessionalPlanTotalQuantityOrThrow(query.sessionalPlanId(), query.totalQuantityId(), sessionWeeks);
@@ -51,7 +54,8 @@ class TotalQuantityService implements
     }
 
     @Override
-    public Long create(CreateTotalQuantityCommand command) {
+    public Long create(CreateTotalQuantityCommand command)
+            throws BadRequestException, ConflictException, NotFoundException {
         TotalQuantityPlan totalQuantityPlan = totalQuantityDomainService.create(
                 command.sessionalPlanId(),
                 command.userId(),
@@ -63,7 +67,7 @@ class TotalQuantityService implements
     }
 
     @Override
-    public void delete(DeleteTotalQuantityCommand command) {
+    public void delete(DeleteTotalQuantityCommand command) throws NotFoundException {
         long deletedCount = deleteTotalQuantityPort.deleteByTotalQuantityIdAndSessionalPlanIdAndUserId(
                 command.totalQuantityId(),
                 command.sessionalPlanId(),

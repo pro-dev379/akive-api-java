@@ -42,7 +42,10 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
         return refreshToken;
     }
 
-    public Optional<RefreshToken> rotateIfRequired(RefreshTokenPayload payload, RefreshToken currentRefreshToken) {
+    public Optional<RefreshToken> rotateIfRequired(
+            RefreshTokenPayload payload,
+            RefreshToken currentRefreshToken
+    ) throws UnauthorizedException {
         validateCurrent(payload.userId(), payload.clientInstanceId(), currentRefreshToken);
 
         if (!refreshTokenRotationPolicy.requiresRotation(payload.expiresAt())) {

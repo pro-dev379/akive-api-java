@@ -1,6 +1,8 @@
 package net.akive.api.user.application.service;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.mentoring.application.provided.MentoringProfileCreator;
 import net.akive.api.user.application.event.UserSignedUpEvent;
@@ -30,7 +32,7 @@ public class UserAccountService implements UserAccountManager {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
-    public User signUpMemberByEmail(UserSignUpByEmailCommand command) {
+    public User signUpMemberByEmail(UserSignUpByEmailCommand command) throws BadRequestException, ConflictException {
         User user = userSignUpDomainService.signUpMemberByEmail(
                 command.email(),
                 command.password(),
@@ -53,7 +55,7 @@ public class UserAccountService implements UserAccountManager {
 
     @Override
     @Transactional
-    public void updatePassword(Long userId, String passwordHash) {
+    public void updatePassword(Long userId, String passwordHash) throws BadRequestException, NotFoundException {
         User user = userRepository.findByUserIdAndLeaveFalse(userId)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
