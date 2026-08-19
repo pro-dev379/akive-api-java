@@ -1,15 +1,11 @@
 package net.akive.api.plan.apapter.persistence;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.plan.apapter.persistence.entity.TotalQuantityEntity;
 import net.akive.api.plan.application.required.DeleteTotalQuantityPort;
 import net.akive.api.plan.application.required.SaveTotalQuantityPort;
 import net.akive.api.plan.application.required.ValidateTotalQuantityPort;
-import net.akive.api.plan.domain.DailyQuantity;
-import net.akive.api.plan.domain.TotalQuantityPlan;
-import net.akive.api.plan.domain.WeeklyQuantityPlan;
-import net.akive.api.plan.domain.TotalQuantity;
-import net.akive.api.plan.domain.WeekPeriod;
-import net.akive.api.plan.apapter.persistence.entity.TotalQuantityEntity;
+import net.akive.api.plan.domain.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 

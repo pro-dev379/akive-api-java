@@ -1,13 +1,13 @@
 package net.akive.api.plan.domain;
 
+import net.akive.api.common.exception.business.BadRequestException;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import net.akive.api.common.exception.business.BadRequestException;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;

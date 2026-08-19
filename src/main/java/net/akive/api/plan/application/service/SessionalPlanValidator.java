@@ -1,12 +1,12 @@
 package net.akive.api.plan.application.service;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.plan.application.required.ValidateSessionalPlanPort;
 import net.akive.api.plan.application.required.ValidateTotalQuantityPort;
 import net.akive.api.plan.domain.SessionPeriod;
 import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -16,7 +16,8 @@ import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
 import static net.akive.api.common.exception.business.BadRequestError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.domain.PlanPolicy.*;
+import static net.akive.api.plan.domain.PlanPolicy.IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT;
+import static net.akive.api.plan.domain.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 
 @Component
 @RequiredArgsConstructor

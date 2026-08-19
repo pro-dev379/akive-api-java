@@ -2,7 +2,7 @@ package net.akive.api.plan.domain;
 
 import net.akive.api.common.exception.business.BadRequestException;
 
-import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_AMOUNT_MISMATCH;
 
 public record DailyQuantityAmount(

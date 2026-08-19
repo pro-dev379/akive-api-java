@@ -2,7 +2,6 @@ package net.akive.api.mentoring.domain;
 
 import static net.akive.api.common.domain.DomainValidator.requireMaxLengthIfPresent;
 import static net.akive.api.mentoring.domain.MentoringPolicy.*;
-import static net.akive.api.mentoring.domain.MentoringPolicy.EFFECTIVE_ADVICE_MAX_LENGTH;
 
 public record MentoringProfileDetail(
         String goal,

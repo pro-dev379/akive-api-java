@@ -1,9 +1,9 @@
 package net.akive.api.plan.apapter.persistence;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.plan.apapter.persistence.projection.DailyTodoProjection;
 import net.akive.api.plan.application.required.LoadDailyTodosPort;
 import net.akive.api.plan.application.required.dto.DailyTodoData;
-import net.akive.api.plan.apapter.persistence.projection.DailyTodoProjection;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;

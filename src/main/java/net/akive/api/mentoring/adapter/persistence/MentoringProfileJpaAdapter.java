@@ -1,9 +1,9 @@
 package net.akive.api.mentoring.adapter.persistence;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.mentoring.adapter.persistence.entity.MentoringProfileEntity;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.mentoring.domain.MentoringProfile;
-import net.akive.api.mentoring.adapter.persistence.entity.MentoringProfileEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository

@@ -1,15 +1,12 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.exception.business.BadRequestException;
-
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
-import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
-import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_MAX_MONTHS_EXCEEDED;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

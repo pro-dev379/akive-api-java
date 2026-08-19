@@ -10,15 +10,10 @@ import net.akive.api.common.response.FieldErrorDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.bind.MissingPathVariableException;
-import org.springframework.web.bind.MissingRequestCookieException;
-import org.springframework.web.bind.MissingRequestHeaderException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.MissingRequestValueException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.*;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDate;
@@ -27,9 +22,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.akive.api.common.exception.business.BadRequestError.INVALID_INPUT_VALUE;
-import static net.akive.api.common.exception.web.HttpRequestError.METHOD_NOT_ALLOWED;
-import static net.akive.api.common.exception.internal.InternalServerError.INTERNAL_SERVER_ERROR;
 import static net.akive.api.common.exception.business.NotFoundError.RESOURCE_NOT_FOUND;
+import static net.akive.api.common.exception.internal.InternalServerError.INTERNAL_SERVER_ERROR;
+import static net.akive.api.common.exception.web.HttpRequestError.METHOD_NOT_ALLOWED;
 
 @Slf4j
 @RestControllerAdvice

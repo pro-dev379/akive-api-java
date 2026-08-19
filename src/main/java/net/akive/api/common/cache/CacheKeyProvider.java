@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.common.domain.ClientInstanceId;
 
-import static lombok.AccessLevel.*;
+import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
 public class CacheKeyProvider {

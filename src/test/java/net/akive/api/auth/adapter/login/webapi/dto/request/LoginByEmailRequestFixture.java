@@ -1,7 +1,7 @@
 package net.akive.api.auth.adapter.login.webapi.dto.request;
 
-import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 import static net.akive.api.auth.domain.login.LegacyUserPasswordFixture.RAW_PASSWORD;
+import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 
 public class LoginByEmailRequestFixture {
 

@@ -2,7 +2,8 @@ package net.akive.api.plan.domain;
 
 import java.time.LocalDate;
 
-import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
+import static net.akive.api.common.domain.DomainValidator.requirePositive;
 
 public record SessionWeek(
         int weekNum,

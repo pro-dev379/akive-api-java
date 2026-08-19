@@ -1,6 +1,9 @@
 package net.akive.api.plan.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BadRequestException;
 
 import java.time.LocalDateTime;

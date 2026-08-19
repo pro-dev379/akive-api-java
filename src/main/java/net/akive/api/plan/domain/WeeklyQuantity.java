@@ -1,11 +1,15 @@
 package net.akive.api.plan.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BadRequestException;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
-import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
+import static net.akive.api.common.domain.DomainValidator.requirePositive;
 import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_EXCEEDS_TOTAL_QUANTITY;
 import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION;
 

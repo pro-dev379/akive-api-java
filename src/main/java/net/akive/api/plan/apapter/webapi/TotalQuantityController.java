@@ -2,14 +2,14 @@ package net.akive.api.plan.apapter.webapi;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
-import net.akive.api.plan.application.provided.dto.command.DeleteTotalQuantityCommand;
-import net.akive.api.plan.application.provided.dto.query.GetSessionalPlanTotalQuantityQuery;
-import net.akive.api.plan.application.provided.dto.result.sessionalplan.GetSessionalPlanResult;
+import net.akive.api.plan.apapter.webapi.dto.request.CreateTotalQuantityRequest;
+import net.akive.api.plan.apapter.webapi.dto.response.CreateTotalQuantityResponse;
 import net.akive.api.plan.application.provided.CreateTotalQuantityUseCase;
 import net.akive.api.plan.application.provided.DeleteTotalQuantityUseCase;
 import net.akive.api.plan.application.provided.GetSessionalPlanTotalQuantityUseCase;
-import net.akive.api.plan.apapter.webapi.dto.request.CreateTotalQuantityRequest;
-import net.akive.api.plan.apapter.webapi.dto.response.CreateTotalQuantityResponse;
+import net.akive.api.plan.application.provided.dto.command.DeleteTotalQuantityCommand;
+import net.akive.api.plan.application.provided.dto.query.GetSessionalPlanTotalQuantityQuery;
+import net.akive.api.plan.application.provided.dto.result.sessionalplan.GetSessionalPlanResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

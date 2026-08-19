@@ -1,16 +1,13 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.exception.business.BadRequestException;
-
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
 
 class TotalQuantityPlanFactoryTest {
 

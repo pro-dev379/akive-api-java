@@ -1,7 +1,6 @@
 package net.akive.api.plan.domain;
 
 import net.akive.api.common.exception.business.BadRequestException;
-
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

@@ -1,7 +1,6 @@
 package net.akive.api.plan.application.service;
 
 import net.akive.api.common.exception.business.NotFoundException;
-
 import net.akive.api.plan.application.provided.dto.query.GetSessionalPlanQuery;
 import net.akive.api.plan.application.provided.dto.result.common.*;
 import net.akive.api.plan.application.provided.dto.result.sessionalplan.GetSessionalPlanResult;
@@ -11,11 +10,7 @@ import net.akive.api.plan.application.required.LoadTotalQuantityPort;
 import net.akive.api.plan.application.required.dto.SessionalPlanTotalQuantityData;
 import net.akive.api.plan.application.required.dto.SessionalPlanWeeklyQuantityAmountData;
 import net.akive.api.plan.application.required.dto.SessionalPlanWeeklyQuantityData;
-import net.akive.api.plan.domain.SessionPeriod;
-import net.akive.api.plan.domain.SessionWeek;
-import net.akive.api.plan.domain.SessionalPlan;
-import net.akive.api.plan.domain.Subject;
-import net.akive.api.plan.domain.TotalQuantityAmount;
+import net.akive.api.plan.domain.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,10 +21,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.tuple;
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;

@@ -1,6 +1,6 @@
 package net.akive.api.plan.domain;
 
-import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 
 public record WeeklyQuantityAmount(QuantityAmount quantityAmount, QuantityMemo quantityMemo) {
 

@@ -10,7 +10,8 @@ import java.time.LocalDate;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
-import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
+import static net.akive.api.common.domain.DomainValidator.requirePositive;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY;
 
