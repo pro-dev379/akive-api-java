@@ -1,34 +1,49 @@
 package net.akive.api.auth.adapter.emailverification.delivery;
 
 import net.akive.api.auth.domain.emailverification.EmailVerification;
-import net.akive.api.email.application.provided.dto.EmailSendCommand;
+import net.akive.api.core.config.email.EmailProperties;
 import net.akive.api.email.application.provided.EmailSender;
+import net.akive.api.email.application.provided.dto.EmailSendCommand;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 class EmailVerificationSenderAdapterTest {
 
+    private static final String FROM = "from@test.com";
+
     @Mock
     EmailSender emailSender;
+
+    @Mock
+    EmailProperties emailProperties;
+
+    @Mock
+    EmailProperties.FromProperties fromProperties;
 
     @InjectMocks
     EmailVerificationSenderAdapter emailVerificationSenderAdapter;
 
+    @BeforeEach
+    void setUp() {
+        given(emailProperties.from()).willReturn(fromProperties);
+        given(fromProperties.verification()).willReturn(FROM);
+    }
+
     @Test
     void 이메일_인증번호를_전송한다() {
         EmailVerification emailVerification = createEmailVerification();
-        ReflectionTestUtils.setField(emailVerificationSenderAdapter, "from", "from@test.com");
 
         emailVerificationSenderAdapter.send(emailVerification, VERIFICATION_CODE_EXPIRATION_DURATION);
 
@@ -38,7 +53,7 @@ class EmailVerificationSenderAdapterTest {
 
         EmailSendCommand command = captor.getValue();
 
-        assertThat(command.from()).isEqualTo("from@test.com");
+        assertThat(command.from()).isEqualTo(FROM);
         assertThat(command.to()).containsExactly(emailVerification.getEmail().value());
         assertThat(command.subject()).isEqualTo("[AKIVE] 인증 코드가 도착했어요.");
         assertThat(command.templatePath()).isEqualTo("email/verification-code");

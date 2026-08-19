@@ -7,12 +7,15 @@ import lombok.NoArgsConstructor;
 import net.akive.api.common.domain.Email;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.user.domain.LoginType;
-import net.akive.api.user.domain.User;
 import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.User;
 
 import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.GenerationType.*;
-import static lombok.AccessLevel.*;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PRIVATE;
+import static lombok.AccessLevel.PROTECTED;
+import static net.akive.api.user.domain.LoginType.EMAIL;
+import static net.akive.api.user.domain.RoleType.MEMBER;
 
 @Entity
 @Table(
@@ -35,26 +38,22 @@ public class UserEntity extends BaseTimeEntity {
     private String email;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'USER'")
-    private RoleType roleType;
+    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'MEMBER'")
+    private RoleType roleType = MEMBER;
 
     @Enumerated(STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'EMAIL'")
-    private LoginType loginType;
-
-    @Column(nullable = false)
-    private String nickname;
+    private LoginType loginType = EMAIL;
 
     private String passwordHash;
 
-    private String imgUrl;
-    private String aim;
+    @Embedded
+    private UserDetailEntity userDetail;
 
-    @Column(name="is_leave", columnDefinition = "TINYINT(1) UNSIGNED DEFAULT 0", nullable = false)
-    private boolean leave;
+    @Embedded
+    private LeaveEntity leave;
 
-    private String leaveReason;
-
+    @Deprecated
     public static UserEntity reference(Long userId) {
         UserEntity userEntity = new UserEntity();
         userEntity.userId = userId;
@@ -68,12 +67,9 @@ public class UserEntity extends BaseTimeEntity {
                 user.getEmail().value(),
                 user.getRoleType(),
                 user.getLoginType(),
-                user.getNickname(),
                 user.getPasswordHash(),
-                user.getImgUrl(),
-                user.getAim(),
-                user.isLeave(),
-                user.getLeaveReason()
+                UserDetailEntity.from(user.getUserDetail()),
+                LeaveEntity.from(user.getLeave())
         );
     }
 
@@ -83,12 +79,9 @@ public class UserEntity extends BaseTimeEntity {
                 new Email(this.email),
                 this.roleType,
                 this.loginType,
-                this.nickname,
                 this.passwordHash,
-                this.imgUrl,
-                this.aim,
-                this.leave,
-                this.leaveReason
+                this.userDetail.to(),
+                this.leave.to()
         );
     }
 }

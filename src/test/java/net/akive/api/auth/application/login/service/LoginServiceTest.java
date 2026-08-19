@@ -9,7 +9,7 @@ import net.akive.api.auth.domain.token.IssuedToken;
 import net.akive.api.common.domain.ClientInstanceId;
 import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.UnauthorizedException;
-import net.akive.api.user.application.provided.UpdatePasswordUseCase;
+import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class LoginServiceTest {
     UserFinder userFinder;
 
     @Mock
-    UpdatePasswordUseCase updatePasswordUseCase;
+    UserAccountManager userAccountManager;
 
     @Mock
     TokenIssuer tokenIssuer;
@@ -82,14 +82,14 @@ class LoginServiceTest {
         then(passwordEncoder).should().matches(command.password(), user.getPasswordHash());
         then(tokenIssuer).should().issue(tokenIssueCommand);
         then(legacyUserPasswordRepository).shouldHaveNoInteractions();
-        then(updatePasswordUseCase).shouldHaveNoInteractions();
+        then(userAccountManager).shouldHaveNoInteractions();
     }
 
     @Test
     void 레거시_패스워드로_이메일_로그인_하면_패스워드를_마이그레이션_하고_토큰을_발급한다() {
         LoginByEmailCommand command = createLoginByEmailCommand();
         User user = createUserWithoutPasswordHash(USER_ID);
-        LegacyUserPassword legacyUserPassword = createLegacyUserPassword(USER_ID);
+        LegacyUserPassword legacyUserPassword = createLegacyUserPassword(user);
         IssuedToken issuedToken = createIssuedToken();
         TokenIssueCommand tokenIssueCommand = createTokenIssueCommand(command, user);
 
@@ -108,7 +108,7 @@ class LoginServiceTest {
         then(legacyUserPasswordRepository).should().findByUserId(user.getUserId());
         then(legacyPasswordVerifier).should().matches(command.password(), legacyUserPassword.passwordHash());
         then(passwordEncoder).should().encode(command.password());
-        then(updatePasswordUseCase).should().updatePassword(user.getUserId(), MIGRATED_PASSWORD_HASH);
+        then(userAccountManager).should().updatePassword(user.getUserId(), MIGRATED_PASSWORD_HASH);
         then(legacyUserPasswordRepository).should().deleteByUserId(user.getUserId());
         then(tokenIssuer).should().issue(tokenIssueCommand);
     }
@@ -127,7 +127,7 @@ class LoginServiceTest {
         then(tokenIssuer).shouldHaveNoInteractions();
         then(passwordEncoder).shouldHaveNoInteractions();
         then(legacyUserPasswordRepository).shouldHaveNoInteractions();
-        then(updatePasswordUseCase).shouldHaveNoInteractions();
+        then(userAccountManager).shouldHaveNoInteractions();
     }
 
     @Test
@@ -145,14 +145,14 @@ class LoginServiceTest {
 
         then(tokenIssuer).shouldHaveNoInteractions();
         then(legacyUserPasswordRepository).shouldHaveNoInteractions();
-        then(updatePasswordUseCase).shouldHaveNoInteractions();
+        then(userAccountManager).shouldHaveNoInteractions();
     }
 
     @Test
     void 레거시_패스워드가_일치하지_않으면_이메일_로그인에_실패한다() {
         LoginByEmailCommand command = createLoginByEmailCommand();
         User user = createUserWithoutPasswordHash(USER_ID);
-        LegacyUserPassword legacyUserPassword = createLegacyUserPassword(USER_ID);
+        LegacyUserPassword legacyUserPassword = createLegacyUserPassword(user);
 
         given(userFinder.findByEmailAndLeaveFalse(command.email())).willReturn(Optional.of(user));
         given(legacyUserPasswordRepository.findByUserId(user.getUserId()))
@@ -167,7 +167,7 @@ class LoginServiceTest {
 
         then(tokenIssuer).shouldHaveNoInteractions();
         then(passwordEncoder).should(never()).encode(any());
-        then(updatePasswordUseCase).shouldHaveNoInteractions();
+        then(userAccountManager).shouldHaveNoInteractions();
         then(legacyUserPasswordRepository).should(never()).deleteByUserId(any());
     }
 

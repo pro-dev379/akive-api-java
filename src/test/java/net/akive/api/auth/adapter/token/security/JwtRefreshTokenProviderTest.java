@@ -18,7 +18,7 @@ import static net.akive.api.auth.adapter.token.security.JwtProviderFixture.*;
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
 import static net.akive.api.common.exception.business.UnauthorizedError.REFRESH_TOKEN_EXPIRED;
-import static net.akive.api.user.domain.RoleType.USER;
+import static net.akive.api.user.domain.RoleType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,7 +56,7 @@ class JwtRefreshTokenProviderTest {
 
         given(refreshTokenJwtEncoder.encode(any(JwtEncoderParameters.class))).willReturn(jwt);
 
-        RefreshToken refreshToken = jwtRefreshTokenProvider.create(USER_ID, CLIENT_INSTANCE_ID, USER);
+        RefreshToken refreshToken = jwtRefreshTokenProvider.create(USER_ID, CLIENT_INSTANCE_ID, MEMBER);
 
         assertThat(refreshToken).isEqualTo(createRefreshToken(tokenValue));
 
@@ -69,7 +69,7 @@ class JwtRefreshTokenProviderTest {
         assertThat(claims.getIssuedAt()).isEqualTo(NOW);
         assertThat(claims.getExpiresAt()).isEqualTo(EXPIRES_AT);
         assertThat(claims.getClaimAsString("client")).isEqualTo(CLIENT_INSTANCE_ID.toString());
-        assertThat(claims.getClaimAsString("role")).isEqualTo(USER.name());
+        assertThat(claims.getClaimAsString("role")).isEqualTo(MEMBER.name());
     }
 
     @Test
@@ -79,7 +79,7 @@ class JwtRefreshTokenProviderTest {
                 .header("alg", "HS256")
                 .subject(String.valueOf(USER_ID))
                 .claim("client", CLIENT_INSTANCE_ID.toString())
-                .claim("role", USER.name())
+                .claim("role", MEMBER.name())
                 .expiresAt(EXPIRES_AT)
                 .build();
 
@@ -89,7 +89,7 @@ class JwtRefreshTokenProviderTest {
 
         assertThat(payload.userId()).isEqualTo(USER_ID);
         assertThat(payload.clientInstanceId()).isEqualTo(CLIENT_INSTANCE_ID);
-        assertThat(payload.roleType()).isEqualTo(USER);
+        assertThat(payload.roleType()).isEqualTo(MEMBER);
         assertThat(payload.expiresAt()).isEqualTo(EXPIRES_AT);
     }
 

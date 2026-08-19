@@ -13,8 +13,11 @@ import static net.akive.api.common.exception.ErrorDomain.*;
 public enum ConflictError implements Error {
 
     EMAIL_ALREADY_EXISTS(USER, "Email already exists."),
+    NICKNAME_ALREADY_EXISTS(USER, "Nickname already exists"),
+
     SESSION_NAME_ALREADY_EXISTS(PLAN, "Session name already exists."),
     SUBJECT_NAME_ALREADY_EXISTS(PLAN, "Subject name already exists."),
+
     EMAIL_ALREADY_VERIFIED(EMAIL_VERIFICATION, "Email is already verified."),
     ;
 

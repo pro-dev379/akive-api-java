@@ -8,8 +8,8 @@ import net.akive.api.auth.application.emailverification.provided.EmailVerificati
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeVerifier;
 import net.akive.api.auth.application.login.provided.LoginProcessor;
 import net.akive.api.auth.application.token.provided.TokenIssuer;
-import net.akive.api.user.adapter.webapi.SignUpController;
-import net.akive.api.user.application.provided.SignUpByEmailUseCase;
+import net.akive.api.user.adapter.webapi.MemberAccountApi;
+import net.akive.api.user.application.provided.UserAccountManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,7 +22,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @WebMvcTest(controllers = {
         EmailVerificationApi.class,
-        SignUpController.class,
+        MemberAccountApi.class,
         LoginApi.class,
         TokenApi.class,
 })
@@ -46,7 +46,7 @@ public abstract class PublicApiTestSupport {
     protected EmailVerificationCodeVerifier emailVerificationCodeVerifier;
 
     @MockitoBean
-    protected SignUpByEmailUseCase signUpByEmailUseCase;
+    protected UserAccountManager userAccountManager;
 
     @MockitoBean
     protected LoginProcessor loginProcessor;

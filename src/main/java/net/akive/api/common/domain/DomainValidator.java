@@ -4,6 +4,7 @@ import net.akive.api.common.exception.business.BadRequestException;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import static net.akive.api.common.exception.business.BadRequestError.*;
 
@@ -51,6 +52,16 @@ public final class DomainValidator {
         return value;
     }
 
+    public static String requireMinLength(String value, int minLength) {
+        requireNonNull(value);
+
+        if (value.length() < minLength) {
+            throw new BadRequestException(MIN_LENGTH_NOT_MET);
+        }
+
+        return value;
+    }
+
     public static String requireMaxLengthIfPresent(String value, int maxLength) {
         if (value == null) {
             return null;
@@ -58,6 +69,17 @@ public final class DomainValidator {
 
         if (value.length() > maxLength) {
             throw new BadRequestException(MAX_LENGTH_EXCEEDED);
+        }
+
+        return value;
+    }
+
+    public static String requireMatches(String value, Pattern pattern) {
+        requireNonNull(value);
+        requireNonNull(pattern);
+
+        if (!pattern.matcher(value).matches()) {
+            throw new BadRequestException(INVALID_FORMAT);
         }
 
         return value;

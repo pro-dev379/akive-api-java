@@ -6,11 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.domain.Email;
 
+import java.util.Objects;
+
 import static lombok.AccessLevel.PRIVATE;
-import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
+import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
 import static net.akive.api.user.domain.LoginType.EMAIL;
-import static net.akive.api.user.domain.UserPolicy.AIM_MAX_LENGTH;
-import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -19,55 +20,47 @@ import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 public class User {
 
     private Long userId;
+
     private Email email;
+
     private RoleType roleType;
+
     private LoginType loginType;
-    private String nickname;
+
     private String passwordHash;
-    private String imgUrl;
-    private String aim;
-    private boolean leave;
-    private String leaveReason;
+
+    private UserDetail userDetail;
+
+    private Leave leave;
 
     public static User reconstruct(
             Long userId,
             Email email,
             RoleType roleType,
             LoginType loginType,
-            String nickname,
             String passwordHash,
-            String imgUrl,
-            String aim,
-            boolean leave,
-            String leaveReason
+            UserDetail userDetail,
+            Leave leave
     ) {
         return User.builder()
                 .userId(userId)
                 .email(requireNonNull(email))
                 .roleType(requireNonNull(roleType))
                 .loginType(requireNonNull(loginType))
-                .nickname(validateNickname(nickname))
                 .passwordHash(validatePasswordHash(passwordHash))
-                .imgUrl(imgUrl)
-                .aim(requireMaxLengthIfPresent(aim, AIM_MAX_LENGTH))
-                .leave(leave)
-                .leaveReason(leaveReason)
+                .userDetail(requireNonNull(userDetail))
+                .leave(requireNonNull(leave))
                 .build();
     }
 
-    public static User signUpByEmail(
-            Email email,
-            String nickname,
-            String encodedPassword,
-            RoleType roleType
-    ) {
+    public static User signUpByEmail(Email email, RoleType roleType, String passwordHash, String nickname) {
         return User.builder()
                 .email(requireNonNull(email))
                 .roleType(requireNonNull(roleType))
-                .loginType(requireNonNull(EMAIL))
-                .nickname(validateNickname(nickname))
-                .passwordHash(validateRequiredPasswordHash(encodedPassword))
-                .leave(false)
+                .loginType(EMAIL)
+                .passwordHash(validateRequiredPasswordHash(passwordHash))
+                .userDetail(UserDetail.initial(nickname))
+                .leave(Leave.none())
                 .build();
     }
 
@@ -75,12 +68,16 @@ public class User {
         return this.passwordHash != null;
     }
 
-    public void updatePassword(String encodedPassword) {
-        this.passwordHash = validateRequiredPasswordHash(encodedPassword);
+    public void updatePasswordHash(String passwordHash) {
+        this.passwordHash = validateRequiredPasswordHash(passwordHash);
     }
 
-    private static String validateNickname(String nickname) {
-        return requireMaxLength(requireNotBlank(nickname), NICKNAME_MAX_LENGTH);
+    public void updateUserDetail(String nickname, String imgUrl, String aim) {
+        this.userDetail = UserDetail.of(nickname, imgUrl, aim);
+    }
+
+    public void completeLeave(String reason) {
+        this.leave = Leave.completed(reason);
     }
 
     private static String validatePasswordHash(String passwordHash) {
@@ -89,5 +86,20 @@ public class User {
 
     private static String validateRequiredPasswordHash(String passwordHash) {
         return requireNotBlank(passwordHash);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User that = (User) o;
+
+        return this.userId != null && Objects.equals(this.userId, that.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

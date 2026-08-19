@@ -9,9 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.BadRequestError.BLANK_VALUE;
-import static net.akive.api.common.exception.business.BadRequestError.INVALID_EMAIL_FORMAT;
-import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -39,7 +37,7 @@ class EmailTest {
 
     private static Stream<Arguments> invalidEmailValues() {
         return Stream.of(
-                arguments("invalid-email", INVALID_EMAIL_FORMAT),
+                arguments("invalid-email", INVALID_FORMAT),
                 arguments("   ", BLANK_VALUE),
                 arguments(null, REQUIRED_VALUE_MISSING)
         );

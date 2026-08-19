@@ -2,98 +2,120 @@ package net.akive.api.user.adapter.persistence;
 
 import net.akive.api.common.domain.Email;
 import net.akive.api.support.RepositoryTestSupport;
-import net.akive.api.user.domain.User;
+import net.akive.api.user.domain.*;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.user.domain.RoleType.USER;
+import java.util.Optional;
+
+import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserJpaAdapterTest extends RepositoryTestSupport {
 
+    private static final Email EMAIL = createEmail("user@test.com");
+    private static final RoleType ROLE_TYPE = RoleType.MEMBER;
+    private static final LoginType LOGIN_TYPE = LoginType.EMAIL;
+    private static final Email LEFT_USER_EMAIL = createEmail("left-user@test.com");
+    private static final String NICKNAME = "member@abcdef1234";
+    private static final String LEFT_USER_NICKNAME = "left-member";
+    private static final String PASSWORD_HASH = "password-hash";
+    private static final String IMG_URL = "https://example.com/image.png";
+    private static final String AIM = "목표";
+
     @Test
-    void 이메일로_회원가입_후_회원을_저장한다() {
-        // given
-        User user = signUpByEmail();
+    void 회원을_저장한다() {
+        User user = User.reconstruct(
+                null,
+                EMAIL,
+                ROLE_TYPE,
+                LOGIN_TYPE,
+                PASSWORD_HASH,
+                UserDetail.of(NICKNAME, IMG_URL, AIM),
+                Leave.none()
+        );
 
-        // when
-        User savedUser = saveUserPort.save(user);
+        User savedUser = userRepository.save(user);
 
-        // then
         assertThat(savedUser.getUserId()).isNotNull();
+        assertThat(savedUser.getEmail()).isEqualTo(EMAIL);
+        assertThat(savedUser.getRoleType()).isEqualTo(ROLE_TYPE);
+        assertThat(savedUser.getLoginType()).isEqualTo(LOGIN_TYPE);
+        assertThat(savedUser.getPasswordHash()).isEqualTo(PASSWORD_HASH);
+        assertThat(savedUser.getUserDetail().nickname()).isEqualTo(NICKNAME);
+        assertThat(savedUser.getUserDetail().imgUrl()).isEqualTo(IMG_URL);
+        assertThat(savedUser.getUserDetail().aim()).isEqualTo(AIM);
+        assertThat(savedUser.getLeave()).isEqualTo(Leave.none());
     }
 
     @Test
-    void 이미_가입된_이메일로는_중복_검증을_통과할_수_없다() {
-        // given
-        User user = signUpByEmail();
-        User savedUser = saveUserPort.save(user);
+    void 회원_식별자로_탈퇴하지_않은_회원을_조회한다() {
+        User user = createUser(EMAIL, NICKNAME, Leave.none());
+        User savedUser = userRepository.save(user);
 
-        // when
-        boolean exists = validateUserPort.existsByEmail(savedUser.getEmail());
+        Optional<User> found = userRepository.findByUserIdAndLeaveFalse(savedUser.getUserId());
 
-        // then
-        assertThat(exists).isTrue();
+        assertThat(found).contains(savedUser);
     }
 
     @Test
-    void 아직_가입되지_않은_이메일은_중복_검증을_통과한다() {
-        // when
-        boolean exists = validateUserPort.existsByEmail(new Email("none@example.com"));
+    void 탈퇴한_회원은_회원_식별자로_조회되지_않는다() {
+        User user = createUser(LEFT_USER_EMAIL, LEFT_USER_NICKNAME, Leave.completed("탈퇴 사유"));
+        User savedUser = userRepository.save(user);
 
-        // then
-        assertThat(exists).isFalse();
+        Optional<User> found = userRepository.findByUserIdAndLeaveFalse(savedUser.getUserId());
+
+        assertThat(found).isEmpty();
     }
 
     @Test
-    void 이메일을_통해_이메일로_가입된_회원을_활성_상태로_조회할_수_있다() {
-        // given
-        User user = signUpByEmail();
-        User savedUser = saveUserPort.save(user);
+    void 이메일로_탈퇴하지_않은_회원을_조회한다() {
+        User user = createUser(EMAIL, NICKNAME, Leave.none());
+        User savedUser = userRepository.save(user);
 
-        // when
-        boolean exists = validateUserPort.existsByEmailAndLeaveFalse(savedUser.getEmail());
+        Optional<User> found = userRepository.findByEmailAndLeaveFalse(EMAIL);
 
-        // then
-        assertThat(exists).isTrue();
+        assertThat(found).contains(savedUser);
     }
 
     @Test
-    void 가입되지_않은_이메일로는_활성_회원을_조회할_수_없다() {
-        // when
-        boolean exists = validateUserPort.existsByEmailAndLeaveFalse(new Email("none@example.com"));
+    void 탈퇴한_회원은_이메일로_조회되지_않는다() {
+        User user = createUser(LEFT_USER_EMAIL, LEFT_USER_NICKNAME, Leave.completed("탈퇴 사유"));
+        userRepository.save(user);
 
-        // then
-        assertThat(exists).isFalse();
+        Optional<User> found = userRepository.findByEmailAndLeaveFalse(LEFT_USER_EMAIL);
+
+        assertThat(found).isEmpty();
     }
 
     @Test
-    void 식별자를_통해_이메일로_가입된_회원을_활성_상태로_조회할_수_있다() {
-        // given
-        User user = signUpByEmail();
-        User savedUser = saveUserPort.save(user);
+    void 이메일로_회원을_조회한다() {
+        User user = createUser(EMAIL, NICKNAME, Leave.none());
+        User savedUser = userRepository.save(user);
 
-        // when
-        boolean exists = validateUserPort.existsByUserIdAndLeaveFalse(savedUser.getUserId());
+        Optional<User> found = userRepository.findByEmail(EMAIL);
 
-        // then
-        assertThat(exists).isTrue();
+        assertThat(found).contains(savedUser);
     }
 
     @Test
-    void 존재하지_않는_회원_식별자로는_활성_회원을_조회할_수_없다() {
-        // when
-        boolean exists = validateUserPort.existsByUserIdAndLeaveFalse(999L);
+    void 닉네임으로_회원을_조회한다() {
+        User user = createUser(EMAIL, NICKNAME, Leave.none());
+        User savedUser = userRepository.save(user);
 
-        // then
-        assertThat(exists).isFalse();
+        Optional<User> found = userRepository.findByNickname(NICKNAME);
+
+        assertThat(found).contains(savedUser);
     }
 
-    private User signUpByEmail() {
-        return User.signUpByEmail(
-                new Email("test@example.com"),
-                "nickname",
-                "encodedPassword",
-                USER
+    private User createUser(Email email, String nickname, Leave leave) {
+        return User.reconstruct(
+                null,
+                email,
+                ROLE_TYPE,
+                LOGIN_TYPE,
+                PASSWORD_HASH,
+                UserDetail.initial(nickname),
+                leave
         );
     }
 }

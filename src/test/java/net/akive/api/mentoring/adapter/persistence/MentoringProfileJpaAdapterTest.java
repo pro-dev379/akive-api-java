@@ -12,7 +12,7 @@ class MentoringProfileJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 멘토링_프로필을_저장한다() {
-        User savedUser = saveUserPort.save(createUser());
+        User savedUser = userRepository.save(createUser());
         MentoringProfile mentoringProfile = MentoringProfile.create(savedUser);
 
         MentoringProfile savedMentoringProfile = mentoringProfileRepository.save(mentoringProfile);

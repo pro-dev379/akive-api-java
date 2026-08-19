@@ -7,7 +7,6 @@ import net.akive.api.common.exception.ErrorDomain;
 import org.springframework.http.HttpStatus;
 
 import static net.akive.api.common.exception.ErrorDomain.*;
-import static net.akive.api.common.exception.ErrorDomain.PLAN;
 
 @Getter
 @RequiredArgsConstructor
@@ -19,10 +18,11 @@ public enum BadRequestError implements Error {
     BLANK_VALUE(COMMON_DOMAIN, "Value must not be blank."),
     EMPTY_COLLECTION(COMMON_DOMAIN, "Collection must not be empty."),
     MAX_LENGTH_EXCEEDED(COMMON_DOMAIN, "Value is too long."),
+    MIN_LENGTH_NOT_MET(COMMON_DOMAIN, "Value is too short."),
     VALUE_NOT_POSITIVE(COMMON_DOMAIN, "Value must be positive."),
     VALUE_NEGATIVE(COMMON_DOMAIN, "Value must not be negative."),
     INVALID_DATE_RANGE(COMMON_DOMAIN, "Invalid date range."),
-    INVALID_EMAIL_FORMAT(COMMON_DOMAIN, "Invalid email format."),
+    INVALID_FORMAT(COMMON_DOMAIN, "Invalid format."),
 
     EMAIL_VERIFICATION_CODE_MISMATCH(EMAIL_VERIFICATION, "Email verification code mismatch."),
     EMAIL_NOT_VERIFIED(EMAIL_VERIFICATION, "Email is not verified."),

@@ -1,8 +1,8 @@
 package net.akive.api.auth.application.emailverification.service;
 
 import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationCodeVerifyCommand;
+import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationEnsureCommand;
 import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationIssueCommand;
-import net.akive.api.auth.application.emailverification.provided.dto.EmailVerifiedCheckCommand;
 import net.akive.api.auth.application.emailverification.required.EmailVerificationSender;
 import net.akive.api.auth.application.emailverification.required.EmailVerificationStore;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
@@ -95,7 +95,7 @@ class EmailVerificationServiceTest {
 
     @Test
     void 인증_완료_여부를_확인한다() {
-        emailVerificationService.checkVerified(createCheckCommand());
+        emailVerificationService.ensureEmailVerified(createEnsureCommand());
 
         then(emailVerificationDomainService).should().checkVerified(EMAIL, SIGN_UP);
     }
@@ -108,7 +108,7 @@ class EmailVerificationServiceTest {
         return new EmailVerificationCodeVerifyCommand(EMAIL, SIGN_UP, VERIFICATION_CODE);
     }
 
-    private EmailVerifiedCheckCommand createCheckCommand() {
-        return new EmailVerifiedCheckCommand(EMAIL, SIGN_UP);
+    private EmailVerificationEnsureCommand createEnsureCommand() {
+        return new EmailVerificationEnsureCommand(EMAIL, SIGN_UP);
     }
 }

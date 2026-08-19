@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.user.domain.User;
 
+import java.util.Objects;
+
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
@@ -56,5 +58,21 @@ public class MentoringProfile {
                 mentoringProfileUpdateInfo.behavioralPattern(),
                 mentoringProfileUpdateInfo.effectiveAdvice()
         );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MentoringProfile that = (MentoringProfile) o;
+
+        return this.mentoringProfileId != null
+                && Objects.equals(this.mentoringProfileId, that.mentoringProfileId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

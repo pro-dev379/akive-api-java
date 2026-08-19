@@ -22,7 +22,7 @@ import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshT
 import static net.akive.api.auth.domain.token.RefreshTokenPayloadFixture.createRefreshTokenPayload;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
 import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
-import static net.akive.api.user.domain.RoleType.USER;
+import static net.akive.api.user.domain.RoleType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,7 +55,7 @@ class RefreshTokenSessionServiceTest {
     void 리프레시_토큰_세션을_시작한다() {
         Long userId = 1L;
         ClientInstanceId clientInstanceId = createClientInstanceId();
-        RoleType roleType = USER;
+        RoleType roleType = MEMBER;
         RefreshToken refreshToken = createRefreshToken();
         Duration refreshTokenExpiration = Duration.ofDays(14);
 
@@ -78,7 +78,7 @@ class RefreshTokenSessionServiceTest {
     void 리프레시_토큰_교체가_필요하면_새_리프레시_토큰으로_교체한다() {
         Long userId = 1L;
         ClientInstanceId clientInstanceId = createClientInstanceId();
-        RoleType roleType = USER;
+        RoleType roleType = MEMBER;
         Instant expiresAt = Instant.parse("2026-07-03T00:01:00Z");
         RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
         RefreshToken newRefreshToken = createRefreshToken("new-refresh-token");
@@ -125,7 +125,7 @@ class RefreshTokenSessionServiceTest {
         ClientInstanceId clientInstanceId = createClientInstanceId();
         Instant expiresAt = Instant.parse("2026-07-03T00:01:00Z");
         RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
-        RefreshTokenPayload payload = createRefreshTokenPayload(userId, clientInstanceId, USER, expiresAt);
+        RefreshTokenPayload payload = createRefreshTokenPayload(userId, clientInstanceId, MEMBER, expiresAt);
 
         given(refreshTokenStore.findByUserIdAndClientInstantId(userId, clientInstanceId))
                 .willReturn(Optional.of(currentRefreshToken));
@@ -150,7 +150,7 @@ class RefreshTokenSessionServiceTest {
         RefreshTokenPayload payload = createRefreshTokenPayload(
                 userId,
                 clientInstanceId,
-                USER,
+                MEMBER,
                 Instant.parse("2026-07-03T00:01:00Z")
         );
 
@@ -175,7 +175,7 @@ class RefreshTokenSessionServiceTest {
         RefreshTokenPayload payload = createRefreshTokenPayload(
                 userId,
                 clientInstanceId,
-                USER,
+                MEMBER,
                 Instant.parse("2026-07-03T00:01:00Z")
         );
 
@@ -195,7 +195,7 @@ class RefreshTokenSessionServiceTest {
     void 리프레시_토큰_교체에_실패하면_예외를_던진다() {
         Long userId = 1L;
         ClientInstanceId clientInstanceId = createClientInstanceId();
-        RoleType roleType = USER;
+        RoleType roleType = MEMBER;
         Instant expiresAt = Instant.parse("2026-07-03T00:01:00Z");
         RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
         RefreshToken newRefreshToken = createRefreshToken("new-refresh-token");

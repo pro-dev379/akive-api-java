@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.EMAIL_ADDRESS;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
-import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.FIND_PASSWORD;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.PASSWORD_RESET;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_CODE_MISMATCH;
 import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
@@ -93,8 +93,8 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     }
 
     @Test
-    void 인증번호_발급_요청_시_패스워드를_찾을_회원이_없으면_404를_응답한다() throws Exception {
-        EmailVerificationCodeIssueRequest request = createIssueRequest(FIND_PASSWORD);
+    void 인증번호_발급_요청_시_패스워드를_리셋할_회원이_없으면_404를_응답한다() throws Exception {
+        EmailVerificationCodeIssueRequest request = createIssueRequest(PASSWORD_RESET);
         willThrow(new NotFoundException(USER_NOT_FOUND))
                 .given(emailVerificationCodeIssuer)
                 .issue(request.toCommand());

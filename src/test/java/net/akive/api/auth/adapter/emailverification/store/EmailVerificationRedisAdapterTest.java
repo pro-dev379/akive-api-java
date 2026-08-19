@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.*;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
-import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.FIND_PASSWORD;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.PASSWORD_RESET;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -46,7 +46,7 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
     @Test
     void 같은_이메일의_인증_정보는_목적별로_분리되어_저장된다() {
         EmailVerification signUpEmailVerification = createEmailVerification(SIGN_UP);
-        EmailVerification findPasswordEmailVerification = createEmailVerification(FIND_PASSWORD);
+        EmailVerification findPasswordEmailVerification = createEmailVerification(PASSWORD_RESET);
 
         emailVerificationStore.save(signUpEmailVerification, VERIFICATION_CODE_EXPIRATION_DURATION);
         emailVerificationStore.save(findPasswordEmailVerification, VERIFICATION_CODE_EXPIRATION_DURATION);
@@ -59,7 +59,7 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
         Optional<EmailVerification> foundFindPasswordEmailVerification =
                 emailVerificationStore.findByEmailAndVerificationPurpose(
                         findPasswordEmailVerification.getEmail(),
-                        FIND_PASSWORD
+                        PASSWORD_RESET
                 );
 
         assertThat(foundSignUpEmailVerification)
@@ -69,7 +69,7 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
         assertThat(foundFindPasswordEmailVerification)
                 .get()
                 .extracting(EmailVerification::getVerificationPurpose)
-                .isEqualTo(FIND_PASSWORD);
+                .isEqualTo(PASSWORD_RESET);
     }
 
     @Test

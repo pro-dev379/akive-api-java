@@ -3,10 +3,8 @@ package net.akive.api.support;
 import net.akive.api.auth.adapter.login.persistence.LegacyUserPasswordJpaRepository;
 import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
-import net.akive.api.plan.application.required.*;
-import net.akive.api.user.application.required.SaveGoalPort;
-import net.akive.api.user.application.required.SaveUserPort;
-import net.akive.api.user.application.required.ValidateUserPort;
+import net.akive.api.user.application.required.GoalRepository;
+import net.akive.api.user.application.required.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,13 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     @Autowired
-    protected ValidateUserPort validateUserPort;
+    protected UserRepository userRepository;
 
     @Autowired
-    protected SaveUserPort saveUserPort;
-
-    @Autowired
-    protected SaveGoalPort saveGoalPort;
+    protected GoalRepository goalRepository;
 
     @Autowired
     protected LegacyUserPasswordRepository legacyUserPasswordRepository;
@@ -30,29 +25,4 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     @Autowired
     protected MentoringProfileRepository mentoringProfileRepository;
-
-    @Autowired
-    protected LoadSessionalPlanPort loadSessionalPlanPort;
-
-    @Autowired
-    protected SaveSessionalPlanPort saveSessionalPlanPort;
-
-    @Autowired
-    protected DeleteSessionalPlanPort deleteSessionalPlanPort;
-
-    @Autowired
-    protected ValidateSessionalPlanPort validateSessionalPlanPort;
-
-    @Autowired
-    protected SaveTotalQuantityPort saveTotalQuantityPort;
-
-    @Autowired
-    protected LoadTotalQuantityPort loadTotalQuantityPort;
-
-    @Autowired
-    protected DeleteTotalQuantityPort deleteTotalQuantityPort;
-
-    @Autowired
-    protected ValidateTotalQuantityPort validateTotalQuantityPort;
-
 }

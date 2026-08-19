@@ -1,14 +1,14 @@
 package net.akive.api.auth.application.emailverification.service;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.auth.application.emailverification.provided.EmailVerificationChecker;
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeIssuer;
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeVerifier;
-import net.akive.api.auth.application.emailverification.provided.EmailVerifiedChecker;
 import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationCodeVerifyCommand;
+import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationEnsureCommand;
 import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationIssueCommand;
-import net.akive.api.auth.application.emailverification.provided.dto.EmailVerifiedCheckCommand;
-import net.akive.api.auth.application.emailverification.required.EmailVerificationStore;
 import net.akive.api.auth.application.emailverification.required.EmailVerificationSender;
+import net.akive.api.auth.application.emailverification.required.EmailVerificationStore;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,7 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPolic
 class EmailVerificationService implements
         EmailVerificationCodeIssuer,
         EmailVerificationCodeVerifier,
-        EmailVerifiedChecker {
+        EmailVerificationChecker {
 
     private final EmailVerificationStore emailVerificationStore;
     private final EmailVerificationSender emailVerificationSender;
@@ -55,7 +55,7 @@ class EmailVerificationService implements
 
     @Override
     @Transactional(readOnly = true)
-    public void checkVerified(EmailVerifiedCheckCommand command) {
+    public void ensureEmailVerified(EmailVerificationEnsureCommand command) {
         emailVerificationDomainService.checkVerified(command.email(), command.verificationPurpose());
     }
 }

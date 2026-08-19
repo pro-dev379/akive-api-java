@@ -6,9 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
+import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
-import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.common.domain.DomainValidator.requireNonNegative;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.user.domain.UserPolicy.*;
 
 @Getter
@@ -18,15 +20,20 @@ import static net.akive.api.user.domain.UserPolicy.*;
 public class Goal {
 
     private Long goalId;
-    private Long userId;
+
+    private User user;
+
     private LocalTime attendOn;
+
     private long rest10MinSec;
+
     private int mealNum;
+
     private long meal1TimeSec;
 
-    public static Goal create(
+    public static Goal reconstruct(
             Long goalId,
-            Long userId,
+            User user,
             LocalTime attendOn,
             long rest10MinSec,
             int mealNum,
@@ -34,7 +41,7 @@ public class Goal {
     ) {
         return Goal.builder()
                 .goalId(goalId)
-                .userId(requirePositive(userId))
+                .user(requireNonNull(user))
                 .attendOn(requireNonNull(attendOn))
                 .rest10MinSec(requireNonNegative(rest10MinSec))
                 .mealNum(requireNonNegative(mealNum))
@@ -42,13 +49,28 @@ public class Goal {
                 .build();
     }
 
-    public static Goal createDefault(Long userId) {
+    public static Goal createDefault(User user) {
         return Goal.builder()
-                .userId(requirePositive(userId))
+                .user(requireNonNull(user))
                 .attendOn(DEFAULT_GOAL_ATTEND_ON)
                 .rest10MinSec(DEFAULT_GOAL_REST_10_MIN_SEC)
                 .mealNum(DEFAULT_GOAL_MEAL_NUM)
                 .meal1TimeSec(DEFAULT_GOAL_MEAL_1_TIME_SEC)
                 .build();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Goal that = (Goal) o;
+
+        return this.goalId != null && Objects.equals(this.goalId, that.goalId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

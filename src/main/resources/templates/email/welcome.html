@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AKIVE 가입을 환영합니다</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #ffffff; font-family: Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; color: #111B40;">
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #ffffff; margin: 0; padding: 32px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; background-color: #ffffff;">
+
+                <tr>
+                    <td align="center" style="padding: 8px 32px 24px;">
+                        <div style="font-size: 30px; font-weight: 800; line-height: 1.2; color: #111B40; letter-spacing: 0.5px;">
+                            Welcome
+                        </div>
+                        <div style="margin-top: 10px; font-size: 13px; line-height: 1.6; color: #d1d5db;">
+                            학습의 모든 과정을 하나의 흐름으로
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 0 32px 32px;">
+                        <p style="margin: 0 0 26px; text-align: center; font-size: 15px; line-height: 1.7; font-weight: 700; color: #111B40;">
+                            AKIVE에 오신 것을 환영합니다!
+                        </p>
+
+                        <p th:if="${nickname != null and !nickname.trim().isEmpty()}"
+                           style="margin: 0 0 16px; font-size: 14px; line-height: 1.9; color: #111B40;">
+                            안녕하세요,
+                            <strong th:text="${nickname}">AKIVE 회원</strong>님.
+                        </p>
+
+                        <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.9; color: #374151;">
+                            AKIVE는 목표를 세우는 순간부터 계획하고, 실행하고, 기록하고, 돌아보는 학습의 전 과정을 하나의 흐름으로 운영할 수 있도록 돕는 <strong style="color: #111B40;">Learning OS</strong>입니다.
+                        </p>
+
+                        <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.9; color: #374151;">
+                            목표에 맞는 학습 계획을 세우고, 오늘 해야 할 일을 확인하며 계획을 하나씩 실행해 보세요.
+                            학습이 끝난 뒤에는 기록과 리포트를 통해 지금까지의 과정을 돌아보고, 그 결과를 다시 다음 계획으로 이어갈 수 있습니다.
+                        </p>
+
+                        <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.9; color: #374151;">
+                            처음부터 완벽할 필요는 없습니다. 작은 목표와 계획에서 시작해 보세요.
+                            실행하고 기록하는 과정이 쌓일수록 나만의 학습 방식과 흐름도 함께 만들어집니다.
+                            학습 과정에서 고민이 생긴다면 AI 멘토와 함께 방향을 찾아볼 수도 있습니다.
+                        </p>
+
+                        <p style="margin: 24px 0 24px; text-align: center; font-size: 14px; line-height: 1.9; font-weight: 700; color: #111B40;">
+                            계획에서 실행으로,<br />
+                            실행에서 기록으로,<br />
+                            기록에서 다시 다음 계획으로.
+                        </p>
+
+                        <p style="margin: 0 0 28px; font-size: 14px; line-height: 1.9; color: #374151;">
+                            지금 AKIVE에서 나만의 학습을 시작해 보세요.
+                            학습의 모든 과정이 자연스럽게 이어질 수 있도록 AKIVE가 함께하겠습니다.
+                        </p>
+
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: 0 auto 22px;">
+                            <tr>
+                                <td style="border-radius: 28px; background-color: #111B40;">
+                                    <a href="https://www.akive.net"
+                                       target="_blank"
+                                       style="display: inline-block; padding: 14px 28px; font-size: 14px; font-weight: 700; line-height: 1.4; color: #ffffff; text-decoration: none; border-radius: 28px;">
+                                        나의 학습 시작하기
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: 0 auto;">
+                            <tr>
+                                <td align="center" style="border-radius: 18px;">
+                                    <a th:href="|mailto:${supportEmail}|"
+                                       style="display: inline-block; padding: 6px 10px; font-size: 12px; font-weight: 700; line-height: 1.5; color: #111B40; text-decoration: none;">
+                                        도움이 필요하신가요?
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="center" style="padding: 22px 32px 34px;">
+                        <p style="margin: 0 0 8px; font-size: 11px; line-height: 1.6; color: #9ca3af;">
+                            본 메일은 발신 전용입니다.
+                        </p>
+                        <p style="margin: 0; font-size: 11px; line-height: 1.6; color: #9ca3af;">
+                            © AKIVE. All rights reserved.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

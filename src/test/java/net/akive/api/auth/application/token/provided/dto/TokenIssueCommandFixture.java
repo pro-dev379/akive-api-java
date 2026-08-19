@@ -4,12 +4,12 @@ import net.akive.api.common.domain.ClientInstanceId;
 import net.akive.api.user.domain.RoleType;
 
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
-import static net.akive.api.user.domain.RoleType.USER;
+import static net.akive.api.user.domain.RoleType.MEMBER;
 
 public class TokenIssueCommandFixture {
 
     public static TokenIssueCommand createTokenIssueCommand() {
-        return createTokenIssueCommand(1L, createClientInstanceId(), USER);
+        return createTokenIssueCommand(1L, createClientInstanceId(), MEMBER);
     }
 
     public static TokenIssueCommand createTokenIssueCommand(

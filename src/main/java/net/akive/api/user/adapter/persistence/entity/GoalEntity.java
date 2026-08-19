@@ -9,7 +9,7 @@ import net.akive.api.user.domain.Goal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import static jakarta.persistence.FetchType.*;
+import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -50,8 +50,9 @@ public class GoalEntity {
 
     public static GoalEntity from(Goal goal) {
         GoalEntity goalEntity = new GoalEntity();
+
         goalEntity.goalId = goal.getGoalId();
-        goalEntity.user = UserEntity.reference(goal.getUserId());
+        goalEntity.user = UserEntity.from(goal.getUser());
         goalEntity.attendOn = goal.getAttendOn();
         goalEntity.rest10MinSec = goal.getRest10MinSec();
         goalEntity.mealNum = goal.getMealNum();
@@ -61,9 +62,9 @@ public class GoalEntity {
     }
 
     public Goal to() {
-        return Goal.create(
+        return Goal.reconstruct(
                 this.goalId,
-                this.user.getUserId(),
+                this.user.to(),
                 this.attendOn,
                 this.rest10MinSec,
                 this.mealNum,

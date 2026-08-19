@@ -5,7 +5,7 @@ import net.akive.api.common.exception.business.BadRequestException;
 import java.util.regex.Pattern;
 
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
-import static net.akive.api.common.exception.business.BadRequestError.INVALID_EMAIL_FORMAT;
+import static net.akive.api.common.exception.business.BadRequestError.INVALID_FORMAT;
 
 public record Email(String value) {
 
@@ -15,7 +15,7 @@ public record Email(String value) {
         value = requireNotBlank(value);
 
         if (!EMAIL_PATTERN.matcher(value).matches()) {
-            throw new BadRequestException(INVALID_EMAIL_FORMAT);
+            throw new BadRequestException(INVALID_FORMAT);
         }
     }
 

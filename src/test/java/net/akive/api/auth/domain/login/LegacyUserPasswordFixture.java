@@ -1,5 +1,7 @@
 package net.akive.api.auth.domain.login;
 
+import net.akive.api.user.domain.User;
+
 public class LegacyUserPasswordFixture {
 
     public static final String RAW_PASSWORD = "password123!";
@@ -7,12 +9,12 @@ public class LegacyUserPasswordFixture {
             "zEkAbzXJyNtGVAJo/EfF1VesO+2IkCGA2datZo2Qk6qzA9VDMDInxZNwPzmkY0Kl1eoSp57EYGuNiiTgjG3qjA==";
     public static final String LEGACY_PASSWORD_SALT = "legacy-password-salt";
 
-    public static LegacyUserPassword createLegacyUserPassword(Long userId) {
-        return new LegacyUserPassword(userId, createLegacyPasswordHash());
+    public static LegacyUserPassword createLegacyUserPassword(User user) {
+        return new LegacyUserPassword(user, createLegacyPasswordHash());
     }
 
-    public static LegacyUserPassword createLegacyUserPassword(Long userId, String hash, String salt) {
-        return new LegacyUserPassword(userId, createLegacyPasswordHash(hash, salt));
+    public static LegacyUserPassword createLegacyUserPassword(User user, String hash, String salt) {
+        return new LegacyUserPassword(user, createLegacyPasswordHash(hash, salt));
     }
 
     public static LegacyPasswordHash createLegacyPasswordHash() {

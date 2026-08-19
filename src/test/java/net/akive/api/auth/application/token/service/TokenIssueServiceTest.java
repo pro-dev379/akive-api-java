@@ -22,7 +22,7 @@ import static net.akive.api.auth.domain.token.AccessTokenFixture.createAccessTok
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.auth.domain.token.RefreshTokenPayloadFixture.createRefreshTokenPayload;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
-import static net.akive.api.user.domain.RoleType.USER;
+import static net.akive.api.user.domain.RoleType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -46,7 +46,7 @@ class TokenIssueServiceTest {
     void 액세스_토큰과_리프레시_토큰을_발급한다() {
         Long userId = 1L;
         ClientInstanceId clientInstanceId = createClientInstanceId();
-        RoleType roleType = USER;
+        RoleType roleType = MEMBER;
         TokenIssueCommand command = createTokenIssueCommand(userId, clientInstanceId, roleType);
 
         AccessToken accessToken = createAccessToken();
@@ -68,7 +68,7 @@ class TokenIssueServiceTest {
     void 토큰_재발급_시_액세스_토큰과_교체된_리프레시_토큰을_반환한다() {
         Long userId = 1L;
         ClientInstanceId clientInstanceId = createClientInstanceId();
-        RoleType roleType = USER;
+        RoleType roleType = MEMBER;
         RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
         TokenReissueCommand command = createTokenReissueCommand(currentRefreshToken);
 
@@ -95,7 +95,7 @@ class TokenIssueServiceTest {
     void 토큰_재발급_시_리프레시_토큰_교체가_필요하지_않으면_액세스_토큰만_반환한다() {
         Long userId = 1L;
         ClientInstanceId clientInstanceId = createClientInstanceId();
-        RoleType roleType = USER;
+        RoleType roleType = MEMBER;
         RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
         TokenReissueCommand command = createTokenReissueCommand(currentRefreshToken);
 

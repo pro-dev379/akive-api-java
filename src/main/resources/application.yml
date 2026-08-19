@@ -31,4 +31,6 @@ jwt:
 
 email:
   from:
-    verification: akive@akive.net
+    verification: no-reply@akive.net
+    welcome: no-reply@akive.net
+    support: support@akive.net

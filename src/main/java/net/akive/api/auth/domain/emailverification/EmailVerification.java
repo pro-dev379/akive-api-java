@@ -100,8 +100,29 @@ public class EmailVerification {
             throw new TooManyRequestsException(EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED);
         }
 
-        if (Duration.between(this.lastSentAt, requestedAt).compareTo(EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL) < 0) {
+        if (isRenewalRequestedTooFrequently(requestedAt)) {
             throw new TooManyRequestsException(EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT);
         }
+    }
+
+    private boolean isRenewalRequestedTooFrequently(LocalDateTime requestedAt) {
+        return Duration.between(this.lastSentAt, requestedAt)
+                .compareTo(EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL) < 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        EmailVerification that = (EmailVerification) o;
+
+        return Objects.equals(this.email, that.email)
+                && verificationPurpose == that.verificationPurpose;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.email, this.verificationPurpose);
     }
 }

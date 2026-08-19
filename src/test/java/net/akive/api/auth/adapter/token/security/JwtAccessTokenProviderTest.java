@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
 import static net.akive.api.auth.adapter.token.security.JwtProviderFixture.*;
-import static net.akive.api.user.domain.RoleType.USER;
+import static net.akive.api.user.domain.RoleType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -46,7 +46,7 @@ class JwtAccessTokenProviderTest {
 
         given(accessTokenJwtEncoder.encode(any(JwtEncoderParameters.class))).willReturn(jwt);
 
-        AccessToken accessToken = jwtAccessTokenProvider.create(USER_ID, USER);
+        AccessToken accessToken = jwtAccessTokenProvider.create(USER_ID, MEMBER);
 
         assertThat(accessToken).isEqualTo(new AccessToken(tokenValue));
 
@@ -59,6 +59,6 @@ class JwtAccessTokenProviderTest {
         assertThat(claims.getIssuedAt()).isEqualTo(NOW);
         assertThat(claims.getExpiresAt())
                 .isEqualTo(NOW.plusSeconds(ACCESS_TOKEN_EXPIRATION_MINUTES * 60));
-        assertThat(claims.getClaimAsString("role")).isEqualTo(USER.name());
+        assertThat(claims.getClaimAsString("role")).isEqualTo(MEMBER.name());
     }
 }
