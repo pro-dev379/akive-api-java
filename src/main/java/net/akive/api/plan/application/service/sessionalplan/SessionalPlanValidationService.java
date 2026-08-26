@@ -1,0 +1,106 @@
+package net.akive.api.plan.application.service.sessionalplan;
+
+import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.plan.application.required.SessionalPlanRepository;
+import net.akive.api.plan.application.required.TotalQuantityRepository;
+import net.akive.api.plan.domain.model.SessionalPlan;
+import net.akive.api.plan.domain.value.SessionPeriod;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+
+import static net.akive.api.common.domain.DomainValidator.requireMaxLength;
+import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
+import static net.akive.api.common.exception.business.BadRequestError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.plan.domain.policy.PlanPolicy.IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT;
+import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
+
+@Component
+@RequiredArgsConstructor
+class SessionalPlanValidationService {
+
+    private final SessionalPlanRepository sessionalPlanRepository;
+    private final TotalQuantityRepository totalQuantityRepository;
+
+    void validateCreatable(Long userId, String sessionName, LocalDate requestedAt) {
+        String normalizedSessionName = validateSessionName(sessionName);
+
+        validateSessionNameUniqueForCreate(userId, normalizedSessionName);
+
+        validateInProgressSessionalPlanLimit(userId, requestedAt);
+    }
+
+    void validateUpdatable(
+            SessionalPlan currentSessionalPlan,
+            String sessionName,
+            SessionPeriod sessionPeriod
+    ) {
+        String normalizedSessionName = validateSessionName(sessionName);
+
+        validateSessionNameUniqueForUpdate(
+                currentSessionalPlan.getUser().getUserId(),
+                normalizedSessionName,
+                currentSessionalPlan.getSessionalPlanId()
+        );
+
+        validatePeriodChangeAllowed(currentSessionalPlan, sessionPeriod);
+    }
+
+    private String validateSessionName(String requestedSessionName) {
+        return requireMaxLength(requireNotBlank(requestedSessionName), SESSION_NAME_MAX_LENGTH);
+    }
+
+    private void validateSessionNameUniqueForCreate(Long userId, String sessionName) {
+        boolean isDuplicated = sessionalPlanRepository.existsByUserIdAndSessionName(userId, sessionName);
+
+        if (isDuplicated) {
+            throw new ConflictException(SESSION_NAME_ALREADY_EXISTS);
+        }
+    }
+
+    private void validateSessionNameUniqueForUpdate(
+            Long userId,
+            String sessionName,
+            Long currentSessionalPlanId
+    ) {
+        boolean isDuplicated = sessionalPlanRepository.existsByUserIdAndSessionNameAndSessionalPlanIdNot(
+                userId,
+                sessionName,
+                currentSessionalPlanId
+        );
+
+        if (isDuplicated) {
+            throw new ConflictException(SESSION_NAME_ALREADY_EXISTS);
+        }
+    }
+
+    private void validateInProgressSessionalPlanLimit(Long userId, LocalDate requestedAt) {
+        long inProgressSessionalPlanCount = sessionalPlanRepository.countInProgressByUserId(userId, requestedAt);
+
+        if (inProgressSessionalPlanCount >= IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT) {
+            throw new BadRequestException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
+        }
+    }
+
+    private void validatePeriodChangeAllowed(
+            SessionalPlan currentSessionalPlan,
+            SessionPeriod requestedSessionPeriod
+    ) {
+        boolean isPeriodChanged = !currentSessionalPlan.getSessionPeriod().equals(requestedSessionPeriod);
+        if (!isPeriodChanged) {
+            return;
+        }
+
+        boolean hasTotalQuantity = totalQuantityRepository.existsBySessionalPlanId(
+                currentSessionalPlan.getSessionalPlanId()
+        );
+
+        if (hasTotalQuantity) {
+            throw new BadRequestException(SESSION_PERIOD_CHANGE_NOT_ALLOWED);
+        }
+    }
+}

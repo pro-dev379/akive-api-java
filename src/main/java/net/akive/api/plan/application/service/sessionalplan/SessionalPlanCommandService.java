@@ -1,0 +1,72 @@
+package net.akive.api.plan.application.service.sessionalplan;
+
+import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreator;
+import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanCreateCommand;
+import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDeleteCommand;
+import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanUpdateCommand;
+import net.akive.api.plan.application.required.SessionalPlanRepository;
+import net.akive.api.plan.domain.model.SessionalPlan;
+import net.akive.api.user.application.provided.UserFinder;
+import net.akive.api.user.domain.User;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+class SessionalPlanCommandService implements SessionalPlanCreator {
+
+    private final UserFinder userFinder;
+
+    private final SessionalPlanRepository sessionalPlanRepository;
+    private final SessionalPlanDomainService sessionalPlanDomainService;
+
+    @Override
+    public Long create(SessionalPlanCreateCommand command)
+            throws BadRequestException, ConflictException, NotFoundException {
+        User user = userFinder.findByUserIdAndLeaveFalse(command.userId())
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+
+        SessionalPlan sessionalPlan = sessionalPlanDomainService.create(
+                user,
+                command.sessionName(),
+                command.sessionPeriod()
+        );
+
+        SessionalPlan savedSessionalPlan = sessionalPlanRepository.save(sessionalPlan);
+
+        return savedSessionalPlan.getSessionalPlanId();
+    }
+
+    @Override
+    public void delete(SessionalPlanDeleteCommand command) throws NotFoundException {
+        sessionalPlanRepository.deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+    }
+
+    @Override
+    public void update(SessionalPlanUpdateCommand command)
+            throws BadRequestException, ConflictException, NotFoundException {
+        SessionalPlan sessionalPlan = findSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
+
+        SessionalPlan updatedSessionalPlan = sessionalPlanDomainService.update(
+                sessionalPlan,
+                command.sessionName(),
+                command.sessionPeriod()
+        );
+
+        sessionalPlanRepository.save(updatedSessionalPlan);
+    }
+
+    private SessionalPlan findSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {
+        return sessionalPlanRepository
+                .findBySessionalPlanIdAndUserId(sessionalPlanId, userId)
+                .orElseThrow(() -> new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
+    }
+}

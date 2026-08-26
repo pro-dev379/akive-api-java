@@ -1,12 +1,24 @@
 package net.akive.api.support;
 
+import jakarta.persistence.EntityManager;
 import net.akive.api.auth.adapter.login.persistence.LegacyUserPasswordJpaRepository;
 import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
+import net.akive.api.plan.application.required.DailyPlanRepository;
+import net.akive.api.plan.application.required.SessionalPlanRepository;
+import net.akive.api.plan.application.required.TotalQuantityRepository;
+import net.akive.api.plan.application.required.WeeklyPlanRepository;
+import net.akive.api.plan.domain.model.SessionalPlan;
+import net.akive.api.plan.domain.model.TotalQuantity;
 import net.akive.api.user.application.required.GoalRepository;
 import net.akive.api.user.application.required.UserRepository;
+import net.akive.api.user.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import static net.akive.api.plan.domain.PlanFixture.createSessionalPlan;
+import static net.akive.api.plan.domain.PlanFixture.createTotalQuantity;
+import static net.akive.api.user.domain.UserFixture.createUser;
 
 @Transactional
 public abstract class RepositoryTestSupport extends IntegrationTestSupport {
@@ -25,4 +37,55 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     @Autowired
     protected MentoringProfileRepository mentoringProfileRepository;
+
+    @Autowired
+    protected SessionalPlanRepository sessionalPlanRepository;
+
+    @Autowired
+    protected TotalQuantityRepository totalQuantityRepository;
+
+    @Autowired
+    protected DailyPlanRepository dailyPlanRepository;
+
+    @Autowired
+    protected WeeklyPlanRepository weeklyPlanRepository;
+
+    @Autowired
+    protected EntityManager entityManager;
+
+    protected User saveUser() {
+        return userRepository.save(createUser());
+    }
+
+    protected User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    protected SessionalPlan saveSessionalPlan() {
+        SessionalPlan sessionalPlan = createSessionalPlan(saveUser());
+
+        return sessionalPlanRepository.save(sessionalPlan);
+    }
+
+    protected SessionalPlan saveSessionalPlan(String sessionName) {
+        return saveSessionalPlan(saveUser(), sessionName);
+    }
+
+    protected SessionalPlan saveSessionalPlan(User user, String sessionName) {
+        SessionalPlan sessionalPlan = createSessionalPlan(saveUser(user), sessionName);
+
+        return sessionalPlanRepository.save(sessionalPlan);
+    }
+
+    protected TotalQuantity saveTotalQuantity() {
+        SessionalPlan sessionalPlan = createSessionalPlan(saveUser());
+        SessionalPlan savedSessionalPlan = sessionalPlanRepository.save(sessionalPlan);
+
+        return totalQuantityRepository.save(createTotalQuantity(savedSessionalPlan));
+    }
+
+    protected void flushAndClear() {
+        entityManager.flush();
+        entityManager.clear();
+    }
 }

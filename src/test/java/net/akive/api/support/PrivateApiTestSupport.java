@@ -1,57 +1,94 @@
 package net.akive.api.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.akive.api.plan.apapter.webapi.DailyTodoController;
-import net.akive.api.plan.apapter.webapi.SessionalPlanController;
-import net.akive.api.plan.apapter.webapi.TotalQuantityController;
-import net.akive.api.plan.apapter.webapi.WeeklyPlanController;
-import net.akive.api.plan.application.provided.*;
+import net.akive.api.plan.adapter.webapi.dailyplan.DailyPlanApi;
+import net.akive.api.plan.adapter.webapi.sessionalplan.SessionalPlanApi;
+import net.akive.api.plan.adapter.webapi.totalquantity.TotalQuantityApi;
+import net.akive.api.plan.adapter.webapi.weeklyplan.WeeklyPlanApi;
+import net.akive.api.plan.application.provided.dailyplan.DailyPlanFinder;
+import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreator;
+import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
+import net.akive.api.plan.application.provided.totalquantity.TotalQuantityCreator;
+import net.akive.api.plan.application.provided.totalquantity.TotalQuantityFinder;
+import net.akive.api.plan.application.provided.weeklyplan.WeeklyPlanFinder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @WebMvcTest(controllers = {
-        SessionalPlanController.class,
-        DailyTodoController.class,
-        WeeklyPlanController.class,
-        TotalQuantityController.class
+        SessionalPlanApi.class,
+        DailyPlanApi.class,
+        WeeklyPlanApi.class,
+        TotalQuantityApi.class
 })
 public abstract class PrivateApiTestSupport {
 
     @Autowired
-    protected MockMvc mockMvc;
+    protected MockMvcTester mvcTester;
 
     @Autowired
     protected ObjectMapper objectMapper;
 
     @MockitoBean
-    protected GetSessionalPlansUseCase getSessionalPlansUseCase;
+    protected DailyPlanFinder dailyPlanFinder;
 
     @MockitoBean
-    protected GetDailyTodosUseCase getDailyTodosUseCase;
+    protected SessionalPlanFinder sessionalPlanFinder;
 
     @MockitoBean
-    protected GetSessionalPlanUseCase getSessionalPlanUseCase;
+    protected WeeklyPlanFinder weeklyPlanFinder;
 
     @MockitoBean
-    protected GetWeeklyPlanUseCase getWeeklyPlanUseCase;
+    protected SessionalPlanCreator sessionalPlanCreator;
 
     @MockitoBean
-    protected CreateSessionalPlanUseCase createSessionalPlanUseCase;
+    protected TotalQuantityCreator totalQuantityCreator;
 
     @MockitoBean
-    protected UpdateSessionalPlanUseCase updateSessionalPlanUseCase;
+    protected TotalQuantityFinder totalQuantityFinder;
 
-    @MockitoBean
-    protected DeleteSessionalPlanUseCase deleteSessionalPlanUseCase;
+    protected MvcTestResultAssert get(Long userId, String uri, Object... uriVariables) {
+        return mvcTester.get()
+                .uri(uri, uriVariables)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                .assertThat();
+    }
 
-    @MockitoBean
-    protected GetSessionalPlanTotalQuantityUseCase getSessionalPlanTotalQuantityUseCase;
+    protected MvcTestResultAssert postJson(Long userId, String uri, String json, Object... uriVariables) {
+        return mvcTester.post()
+                .uri(uri, uriVariables)
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                .assertThat();
+    }
 
-    @MockitoBean
-    protected CreateTotalQuantityUseCase createTotalQuantityUseCase;
+    protected MvcTestResultAssert putJson(Long userId, String uri, String json, Object... uriVariables) {
+        return mvcTester.put()
+                .uri(uri, uriVariables)
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                .assertThat();
+    }
 
-    @MockitoBean
-    protected DeleteTotalQuantityUseCase deleteTotalQuantityUseCase;
+    protected MvcTestResultAssert delete(Long userId, String uri, Object... uriVariables) {
+        return mvcTester.delete()
+                .uri(uri, uriVariables)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                .assertThat();
+    }
+
+    protected String toJson(Object body) {
+        try {
+            return objectMapper.writeValueAsString(body);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to serialize request body.", e);
+        }
+    }
 }

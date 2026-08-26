@@ -52,7 +52,7 @@ class UserSignUpDomainServiceTest {
     UserSignUpDomainService userSignUpDomainService;
 
     @Test
-    void 사용자_입력_닉네임으로_이메일_회원을_가입시킨다() {
+    void 회원_입력_닉네임으로_이메일_회원을_가입시킨다() {
         given(passwordEncoder.encode(PASSWORD)).willReturn(PASSWORD_HASH);
 
         User user = userSignUpDomainService.signUpMemberByEmail(EMAIL, PASSWORD, "  akive  ");
@@ -120,7 +120,7 @@ class UserSignUpDomainServiceTest {
     }
 
     @Test
-    void 사용자_입력_닉네임이_중복되면_회원_가입에_실패한다() {
+    void 회원_입력_닉네임이_중복되면_회원_가입에_실패한다() {
         willThrow(new ConflictException(NICKNAME_ALREADY_EXISTS))
                 .given(userValidator)
                 .validateNicknameNotDuplicate(NICKNAME);

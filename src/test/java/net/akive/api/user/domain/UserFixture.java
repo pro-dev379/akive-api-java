@@ -16,6 +16,18 @@ public class UserFixture {
         return User.signUpByEmail(EMAIL, ROLE_TYPE, PASSWORD_HASH, NICKNAME);
     }
 
+    public static User createUser(Email email, String nickname) {
+        return User.reconstruct(
+                null,
+                email,
+                ROLE_TYPE,
+                LOGIN_TYPE,
+                PASSWORD_HASH,
+                UserDetail.initial(nickname),
+                Leave.none()
+        );
+    }
+
     public static User createUser(Long userId) {
         return createPersistedUser(userId);
     }

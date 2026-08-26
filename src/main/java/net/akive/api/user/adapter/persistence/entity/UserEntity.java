@@ -53,14 +53,6 @@ public class UserEntity extends BaseTimeEntity {
     @Embedded
     private LeaveEntity leave;
 
-    @Deprecated
-    public static UserEntity reference(Long userId) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.userId = userId;
-
-        return userEntity;
-    }
-
     public static UserEntity from(User user) {
         return new UserEntity(
                 user.getUserId(),
