@@ -86,6 +86,30 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
+    void 자기_자신을_제외하고_같은_과목명의_세션_총량이_있는지_조회한다() {
+        SessionalPlan savedSessionalPlan = saveSessionalPlan();
+        TotalQuantity firstTotalQuantity = totalQuantityRepository.save(
+                createTotalQuantity(savedSessionalPlan, "수학")
+        );
+        TotalQuantity secondTotalQuantity = totalQuantityRepository.save(
+                createTotalQuantity(savedSessionalPlan, "영어")
+        );
+        Long sessionalPlanId = savedSessionalPlan.getSessionalPlanId();
+        flushAndClear();
+
+        assertThat(totalQuantityRepository.existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
+                sessionalPlanId,
+                "수학",
+                firstTotalQuantity.getTotalQuantityId()
+        )).isFalse();
+        assertThat(totalQuantityRepository.existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
+                sessionalPlanId,
+                "수학",
+                secondTotalQuantity.getTotalQuantityId()
+        )).isTrue();
+    }
+
+    @Test
     void 세션_총량을_삭제하면_주간_계획량과_일일_계획량도_모두_삭제된다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();

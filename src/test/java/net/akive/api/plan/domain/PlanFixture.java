@@ -108,6 +108,26 @@ public class PlanFixture {
         );
     }
 
+    public static WeeklyQuantity createWeeklyQuantity(
+            Long weeklyQuantityId,
+            LocalDate startOn,
+            LocalDate endOn,
+            int amount
+    ) {
+        WeekPeriod weekPeriod = new WeekPeriod(startOn, endOn);
+
+        return WeeklyQuantity.reconstruct(
+                weeklyQuantityId,
+                weekPeriod,
+                WeeklyQuantityAmount.of(amount, null),
+                List.of(DailyQuantity.reconstruct(
+                        weeklyQuantityId,
+                        startOn,
+                        DailyQuantityAmount.of(amount, 0, amount, null)
+                ))
+        );
+    }
+
     private static WeeklyQuantity createPersistedWeeklyQuantity(SessionWeek sessionWeek) {
         Long weeklyQuantityId = (long) sessionWeek.weekNum();
         WeekPeriod weekPeriod = sessionWeek.weekPeriod();

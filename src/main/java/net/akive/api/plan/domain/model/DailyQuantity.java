@@ -5,9 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.plan.domain.value.DailyQuantityAmount;
-import net.akive.api.plan.domain.value.WeekPeriod;
-import net.akive.api.plan.domain.value.WeeklyQuantityAmount;
+import net.akive.api.plan.domain.value.*;
 
 import java.time.LocalDate;
 
@@ -63,6 +61,45 @@ public class DailyQuantity {
                 .date(date)
                 .dailyQuantityAmount(dailyQuantityAmount)
                 .build();
+    }
+
+    DailyQuantity increaseQuantity(int amount) {
+        if (amount == 0) {
+            return this;
+        }
+
+        DailyQuantityAmount amountAfterIncrease = new DailyQuantityAmount(
+                this.dailyQuantityAmount.quantityAmount().plus(amount),
+                this.dailyQuantityAmount.completedQuantityAmount(),
+                this.dailyQuantityAmount.delayedQuantityAmount().plus(amount),
+                this.dailyQuantityAmount.quantityMemo()
+        );
+
+        return reconstruct(this.dailyQuantityId, this.date, amountAfterIncrease);
+    }
+
+    DailyQuantity reduceQuantity(int amount) {
+        if (amount == 0) {
+            return this;
+        }
+
+        int amountToReduce = Math.min(amount, this.dailyQuantityAmount.delayedQuantityAmount().value());
+        DailyQuantityAmount amountAfterReduce = new DailyQuantityAmount(
+                this.dailyQuantityAmount.quantityAmount().minus(amountToReduce),
+                this.dailyQuantityAmount.completedQuantityAmount(),
+                this.dailyQuantityAmount.delayedQuantityAmount().minus(amountToReduce),
+                this.dailyQuantityAmount.quantityMemo()
+        );
+
+        return reconstruct(this.dailyQuantityId, this.date, amountAfterReduce);
+    }
+
+    int getCompletedQuantityAmount() {
+        return this.dailyQuantityAmount.completedQuantityAmount().value();
+    }
+
+    int getDelayedQuantityAmount() {
+        return this.dailyQuantityAmount.delayedQuantityAmount().value();
     }
 
     private static void validateDateInWeekPeriod(LocalDate date, WeekPeriod weekPeriod) {

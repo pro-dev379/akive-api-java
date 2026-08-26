@@ -28,5 +28,11 @@ public interface TotalQuantityJpaRepository extends JpaRepository<TotalQuantityE
             String subjectName
     );
 
+    boolean existsBySessionalPlan_SessionalPlanIdAndSubject_NameAndTotalQuantityIdNot(
+            Long sessionalPlanId,
+            String subjectName,
+            Long totalQuantityId
+    );
+
     long countBySessionalPlan_SessionalPlanId(Long sessionalPlan);
 }

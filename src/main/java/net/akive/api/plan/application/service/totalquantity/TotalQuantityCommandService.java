@@ -7,6 +7,7 @@ import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityCreator;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityCreateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityUpdateCommand;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.TotalQuantity;
@@ -37,6 +38,20 @@ public class TotalQuantityCommandService implements TotalQuantityCreator {
         TotalQuantity savedTotalQuantity = totalQuantityRepository.save(totalQuantity);
 
         return savedTotalQuantity.getTotalQuantityId();
+    }
+
+    @Override
+    public void update(TotalQuantityUpdateCommand command)
+            throws BadRequestException, ConflictException, NotFoundException {
+        TotalQuantity updatedTotalQuantity = totalQuantityDomainService.update(
+                command.totalQuantityId(),
+                command.sessionalPlanId(),
+                command.userId(),
+                command.subject(),
+                command.totalQuantityAmount()
+        );
+
+        totalQuantityRepository.save(updatedTotalQuantity);
     }
 
     @Override

@@ -81,4 +81,49 @@ class TotalQuantityValidationServiceTest {
                 .existsBySessionalPlanIdAndSubjectName(sessionalPlanId, SUBJECT_NAME);
         then(totalQuantityRepository).should().countBySessionalPlanId(sessionalPlanId);
     }
+
+    @Test
+    void 세션_총량을_수정할_수_있는지_검증한다() {
+        Long sessionalPlanId = 1L;
+        Long totalQuantityId = 2L;
+        given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
+                sessionalPlanId,
+                SUBJECT_NAME,
+                totalQuantityId
+        )).willReturn(false);
+
+        totalQuantityValidationService.validateUpdatable(totalQuantityId, sessionalPlanId, SUBJECT_NAME);
+
+        then(totalQuantityRepository).should().existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
+                sessionalPlanId,
+                SUBJECT_NAME,
+                totalQuantityId
+        );
+    }
+
+    @Test
+    void 같은_과목명의_다른_세션_총량이_있으면_수정할_수_없다() {
+        Long sessionalPlanId = 1L;
+        Long totalQuantityId = 2L;
+        given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
+                sessionalPlanId,
+                SUBJECT_NAME,
+                totalQuantityId
+        )).willReturn(true);
+
+        assertThatExceptionOfType(ConflictException.class)
+                .isThrownBy(() -> totalQuantityValidationService.validateUpdatable(
+                        totalQuantityId,
+                        sessionalPlanId,
+                        SUBJECT_NAME
+                ))
+                .extracting(ConflictException::getError)
+                .isEqualTo(SUBJECT_NAME_ALREADY_EXISTS);
+
+        then(totalQuantityRepository).should().existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
+                sessionalPlanId,
+                SUBJECT_NAME,
+                totalQuantityId
+        );
+    }
 }

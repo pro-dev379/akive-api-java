@@ -20,6 +20,12 @@ public interface TotalQuantityRepository {
 
     boolean existsBySessionalPlanIdAndSubjectName(Long sessionalPlanId, String subjectName);
 
+    boolean existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
+            Long sessionalPlanId,
+            String subjectName,
+            Long totalQuantityId
+    );
+
     void deleteByTotalQuantityIdAndSessionalPlanId(Long totalQuantityId, Long sessionalPlanId);
 
     long countBySessionalPlanId(Long sessionalPlanId);

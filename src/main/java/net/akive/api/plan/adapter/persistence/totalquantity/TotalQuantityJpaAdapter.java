@@ -60,6 +60,19 @@ class TotalQuantityJpaAdapter implements TotalQuantityRepository {
     }
 
     @Override
+    public boolean existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
+            Long sessionalPlanId,
+            String subjectName,
+            Long totalQuantityId
+    ) {
+        return totalQuantityJpaRepository.existsBySessionalPlan_SessionalPlanIdAndSubject_NameAndTotalQuantityIdNot(
+                sessionalPlanId,
+                subjectName,
+                totalQuantityId
+        );
+    }
+
+    @Override
     public void deleteByTotalQuantityIdAndSessionalPlanId(Long totalQuantityId, Long sessionalPlanId) {
         TotalQuantityEntity totalQuantityEntity = totalQuantityJpaRepository
                 .findByTotalQuantityIdAndSessionalPlan_SessionalPlanId(totalQuantityId, sessionalPlanId)

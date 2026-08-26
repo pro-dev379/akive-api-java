@@ -17,12 +17,12 @@ class TotalQuantityValidationService {
     private final TotalQuantityRepository totalQuantityRepository;
 
     public void validateCreatable(Long sessionalPlanId, String subjectName) {
-        boolean hasSubject = totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(
+        boolean isDuplicated = totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(
                 sessionalPlanId,
                 subjectName
         );
 
-        if (hasSubject) {
+        if (isDuplicated) {
             throw new ConflictException(SUBJECT_NAME_ALREADY_EXISTS);
         }
 
@@ -30,6 +30,19 @@ class TotalQuantityValidationService {
 
         if (totalQuantityCount >= TOTAL_QUANTITY_MAX_COUNT) {
             throw new BadRequestException(TOTAL_QUANTITY_LIMIT_EXCEEDED);
+        }
+    }
+
+    public void validateUpdatable(Long totalQuantityId, Long sessionalPlanId, String subjectName) {
+        boolean isDuplicated = totalQuantityRepository
+                .existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
+                        sessionalPlanId,
+                        subjectName,
+                        totalQuantityId
+                );
+
+        if (isDuplicated) {
+            throw new ConflictException(SUBJECT_NAME_ALREADY_EXISTS);
         }
     }
 }

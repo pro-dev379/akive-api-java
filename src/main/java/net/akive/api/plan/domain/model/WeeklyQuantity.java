@@ -100,6 +100,52 @@ public class WeeklyQuantity {
         return dailyQuantities;
     }
 
+    WeeklyQuantity increaseFirstDailyQuantity(int amount) {
+        if (amount == 0) {
+            return this;
+        }
+
+        List<DailyQuantity> adjustedDailyQuantities = new ArrayList<>(this.dailyQuantities);
+        DailyQuantity firstDailyQuantity = adjustedDailyQuantities.getFirst().increaseQuantity(amount);
+        adjustedDailyQuantities.set(0, firstDailyQuantity);
+
+        return reconstructWithDailyQuantities(adjustedDailyQuantities);
+    }
+
+    QuantityReductionResult reduceQuantity(int amount) {
+        if (amount == 0) {
+            return new QuantityReductionResult(this, 0);
+        }
+
+        int remainingAmount = amount;
+        List<DailyQuantity> adjustedDailyQuantities = new ArrayList<>(this.dailyQuantities);
+
+        for (int i = 0; i < this.dailyQuantities.size(); i++) {
+            DailyQuantity dailyQuantity = this.dailyQuantities.get(i);
+            DailyQuantity adjustedDailyQuantity = dailyQuantity.reduceQuantity(remainingAmount);
+
+            remainingAmount -= dailyQuantity.getDelayedQuantityAmount()
+                    - adjustedDailyQuantity.getDelayedQuantityAmount();
+
+            adjustedDailyQuantities.set(i, adjustedDailyQuantity);
+
+            if (remainingAmount == 0) {
+                break;
+            }
+        }
+
+        return new QuantityReductionResult(
+                reconstructWithDailyQuantities(adjustedDailyQuantities),
+                remainingAmount
+        );
+    }
+
+    int getCompletedQuantityAmount() {
+        return dailyQuantities.stream()
+                .mapToInt(DailyQuantity::getCompletedQuantityAmount)
+                .sum();
+    }
+
     private static void validateWeekPeriodInSessionPeriod(
             WeekPeriod weekPeriod,
             SessionPeriod sessionPeriod
@@ -117,5 +163,27 @@ public class WeeklyQuantity {
         if (totalQuantityAmount.quantityAmount().value() < weeklyQuantityAmount.quantityAmount().value()) {
             throw new BadRequestException(WEEKLY_QUANTITY_EXCEEDS_TOTAL_QUANTITY);
         }
+    }
+
+    private WeeklyQuantity reconstructWithDailyQuantities(List<DailyQuantity> dailyQuantities) {
+        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(
+                sumDailyQuantityAmount(dailyQuantities),
+                this.weeklyQuantityAmount.quantityMemo().value()
+        );
+        return WeeklyQuantity.builder()
+                .weeklyQuantityId(this.weeklyQuantityId)
+                .weekPeriod(this.weekPeriod)
+                .weeklyQuantityAmount(weeklyQuantityAmount)
+                .dailyQuantities(List.copyOf(dailyQuantities))
+                .build();
+    }
+
+    private int sumDailyQuantityAmount(List<DailyQuantity> dailyQuantities) {
+        return dailyQuantities.stream()
+                .mapToInt(dailyQuantity -> dailyQuantity.getDailyQuantityAmount().quantityAmount().value())
+                .sum();
+    }
+
+    record QuantityReductionResult(WeeklyQuantity weeklyQuantity, int remainingAmount) {
     }
 }

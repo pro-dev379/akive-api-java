@@ -5,9 +5,11 @@ import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.adapter.webapi.common.dto.request.SubjectRequest;
 import net.akive.api.plan.adapter.webapi.common.dto.request.TotalQuantityAmountRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityCreateRequest;
+import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityUpdateRequest;
 import net.akive.api.plan.application.provided.totalquantity.dto.SessionalPlanTotalQuantityFindQuery;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityCreateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityUpdateCommand;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
@@ -21,6 +23,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ConflictError.TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY;
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.*;
@@ -67,9 +70,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
     @ParameterizedTest
     @MethodSource("invalidCreateRequests")
-    void 세션_총량_생성_요청값이_올바르지_않으면_400을_응답한다(
-            TotalQuantityCreateRequest request
-    ) {
+    void 세션_총량_생성_요청값이_올바르지_않으면_400을_응답한다(TotalQuantityCreateRequest request) {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
 
@@ -122,12 +123,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 sessionalPlanId
         ).hasStatus(CONFLICT);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("PLAN_409_SUBJECT_NAME_ALREADY_EXISTS");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Subject name already exists.");
+        assertSubjectNameAlreadyExistsResponse(result);
 
         then(totalQuantityCreator).should().create(command);
     }
@@ -230,6 +226,144 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 세션_총량을_수정한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
+
+        putJson(
+                userId,
+                TOTAL_QUANTITY_URL,
+                toJson(request),
+                sessionalPlanId,
+                totalQuantityId
+        ).hasStatus(NO_CONTENT);
+
+        then(totalQuantityCreator).should().update(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUpdateRequests")
+    void 세션_총량_수정_요청값이_올바르지_않으면_400을_응답한다(TotalQuantityUpdateRequest request) {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+
+        putJson(
+                userId,
+                TOTAL_QUANTITY_URL,
+                toJson(request),
+                sessionalPlanId,
+                totalQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        then(totalQuantityCreator).should(never()).update(any(TotalQuantityUpdateCommand.class));
+    }
+
+    @Test
+    void 세션_총량_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
+        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+                .given(totalQuantityCreator)
+                .update(command);
+
+        MvcTestResultAssert result = putJson(
+                userId,
+                TOTAL_QUANTITY_URL,
+                toJson(request),
+                sessionalPlanId,
+                totalQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        assertSessionalPlanNotFoundResponse(result);
+
+        then(totalQuantityCreator).should().update(command);
+    }
+
+    @Test
+    void 세션_총량_수정_시_세션_총량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
+        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+                .given(totalQuantityCreator)
+                .update(command);
+
+        MvcTestResultAssert result = putJson(
+                userId,
+                TOTAL_QUANTITY_URL,
+                toJson(request),
+                sessionalPlanId,
+                totalQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        assertTotalQuantityNotFoundResponse(result);
+
+        then(totalQuantityCreator).should().update(command);
+    }
+
+    @Test
+    void 세션_총량_수정_시_세션_과목이_중복되면_409를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
+        willThrow(new ConflictException(SUBJECT_NAME_ALREADY_EXISTS))
+                .given(totalQuantityCreator)
+                .update(command);
+
+        MvcTestResultAssert result = putJson(
+                userId,
+                TOTAL_QUANTITY_URL,
+                toJson(request),
+                sessionalPlanId,
+                totalQuantityId
+        ).hasStatus(CONFLICT);
+
+        assertSubjectNameAlreadyExistsResponse(result);
+
+        then(totalQuantityCreator).should().update(command);
+    }
+
+    @Test
+    void 세션_총량_수정_시_계획_달성량보다_적게_수정하면_409를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
+        willThrow(new ConflictException(TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY))
+                .given(totalQuantityCreator)
+                .update(command);
+
+        MvcTestResultAssert result = putJson(
+                userId,
+                TOTAL_QUANTITY_URL,
+                toJson(request),
+                sessionalPlanId,
+                totalQuantityId
+        ).hasStatus(CONFLICT);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_409_TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Total quantity cannot be less than completed quantity.");
+
+        then(totalQuantityCreator).should().update(command);
+    }
+
+    @Test
     void 세션_총량을_삭제한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
@@ -305,39 +439,56 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         );
     }
 
+    private static TotalQuantityUpdateRequest updateRequest() {
+        return new TotalQuantityUpdateRequest(
+                new SubjectRequest(SUBJECT_NAME, SUBJECT_CATEGORY),
+                new TotalQuantityAmountRequest(TOTAL_AMOUNT, QUANTITY_UNIT, null)
+        );
+    }
+
     private static Stream<TotalQuantityCreateRequest> invalidCreateRequests() {
+        return invalidRequestValues()
+                .map(value -> new TotalQuantityCreateRequest(value.subject(), value.totalQuantityAmount()));
+    }
+
+    private static Stream<TotalQuantityUpdateRequest> invalidUpdateRequests() {
+        return invalidRequestValues()
+                .map(value -> new TotalQuantityUpdateRequest(value.subject(), value.totalQuantityAmount()));
+    }
+
+    private static Stream<TotalQuantityRequestValue> invalidRequestValues() {
         return Stream.of(
-                new TotalQuantityCreateRequest(null, createTotalQuantityAmountRequest()),
-                new TotalQuantityCreateRequest(createSubjectRequest(), null),
-                new TotalQuantityCreateRequest(
+                new TotalQuantityRequestValue(null, createTotalQuantityAmountRequest()),
+                new TotalQuantityRequestValue(createSubjectRequest(), null),
+                new TotalQuantityRequestValue(
                         new SubjectRequest("", SUBJECT_CATEGORY),
                         createTotalQuantityAmountRequest()
                 ),
-                new TotalQuantityCreateRequest(
+                new TotalQuantityRequestValue(
                         new SubjectRequest("a".repeat(SUBJECT_NAME_MAX_LENGTH + 1), SUBJECT_CATEGORY),
                         createTotalQuantityAmountRequest()
                 ),
-                new TotalQuantityCreateRequest(
+                new TotalQuantityRequestValue(
                         new SubjectRequest(SUBJECT_NAME, ""),
                         createTotalQuantityAmountRequest()
                 ),
-                new TotalQuantityCreateRequest(
+                new TotalQuantityRequestValue(
                         new SubjectRequest(SUBJECT_NAME, "a".repeat(SUBJECT_CATEGORY_MAX_LENGTH + 1)),
                         createTotalQuantityAmountRequest()
                 ),
-                new TotalQuantityCreateRequest(
+                new TotalQuantityRequestValue(
                         createSubjectRequest(),
                         new TotalQuantityAmountRequest(null, QUANTITY_UNIT, null)
                 ),
-                new TotalQuantityCreateRequest(
+                new TotalQuantityRequestValue(
                         createSubjectRequest(),
                         new TotalQuantityAmountRequest(-1, QUANTITY_UNIT, null)
                 ),
-                new TotalQuantityCreateRequest(
+                new TotalQuantityRequestValue(
                         createSubjectRequest(),
                         new TotalQuantityAmountRequest(TOTAL_AMOUNT, "", null)
                 ),
-                new TotalQuantityCreateRequest(
+                new TotalQuantityRequestValue(
                         createSubjectRequest(),
                         new TotalQuantityAmountRequest(
                                 TOTAL_AMOUNT,
@@ -345,7 +496,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                                 null
                         )
                 ),
-                new TotalQuantityCreateRequest(
+                new TotalQuantityRequestValue(
                         createSubjectRequest(),
                         new TotalQuantityAmountRequest(
                                 TOTAL_AMOUNT,
@@ -380,5 +531,20 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Total quantity not found.");
+    }
+
+    private static void assertSubjectNameAlreadyExistsResponse(MvcTestResultAssert result) {
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_409_SUBJECT_NAME_ALREADY_EXISTS");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Subject name already exists.");
+    }
+
+    private record TotalQuantityRequestValue(
+            SubjectRequest subject,
+            TotalQuantityAmountRequest totalQuantityAmount
+    ) {
     }
 }

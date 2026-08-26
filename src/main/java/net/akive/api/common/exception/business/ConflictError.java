@@ -17,6 +17,10 @@ public enum ConflictError implements Error {
 
     SESSION_NAME_ALREADY_EXISTS(PLAN, "Session name already exists."),
     SUBJECT_NAME_ALREADY_EXISTS(PLAN, "Subject name already exists."),
+    TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY(
+            PLAN,
+            "Total quantity cannot be less than completed quantity."
+    ),
 
     EMAIL_ALREADY_VERIFIED(EMAIL_VERIFICATION, "Email is already verified."),
     ;

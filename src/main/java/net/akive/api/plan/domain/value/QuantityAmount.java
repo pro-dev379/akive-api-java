@@ -7,4 +7,12 @@ public record QuantityAmount(int value) {
     public QuantityAmount {
         requireNonNegative(value);
     }
+
+    public QuantityAmount plus(int amount) {
+        return new QuantityAmount(this.value + amount);
+    }
+
+    public QuantityAmount minus(int amount) {
+        return new QuantityAmount(this.value - amount);
+    }
 }
