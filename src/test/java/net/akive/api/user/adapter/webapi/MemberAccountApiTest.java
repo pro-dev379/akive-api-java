@@ -51,9 +51,14 @@ class MemberAccountApiTest extends PublicApiTestSupport {
     @Test
     void 이메일_멤버_가입_요청_시_이미_가입된_회원이라면_409를_응답한다() throws Exception {
         UserSignUpByEmailRequest request = createRequest();
+        UserSignUpByEmailCommand command = UserSignUpByEmailCommand.of(
+                request.email(),
+                request.password(),
+                request.nickname()
+        );
         willThrow(new ConflictException(EMAIL_ALREADY_EXISTS))
                 .given(userAccountManager)
-                .signUpMemberByEmail(UserSignUpByEmailCommand.of(request.email(), request.password(), request.nickname()));
+                .signUpMemberByEmail(command);
 
         MvcTestResultAssert result = postJson(SIGN_UP_MEMBER_BY_EMAIL_URL, request).hasStatus(CONFLICT);
 
@@ -68,9 +73,14 @@ class MemberAccountApiTest extends PublicApiTestSupport {
     @Test
     void 이메일_멤버_가입_요청_시_닉네임이_중복되면_409를_응답한다() throws Exception {
         UserSignUpByEmailRequest request = createRequest();
+        UserSignUpByEmailCommand command = UserSignUpByEmailCommand.of(
+                request.email(),
+                request.password(),
+                request.nickname()
+        );
         willThrow(new ConflictException(NICKNAME_ALREADY_EXISTS))
                 .given(userAccountManager)
-                .signUpMemberByEmail(UserSignUpByEmailCommand.of(request.email(), request.password(), request.nickname()));
+                .signUpMemberByEmail(command);
 
         postJson(SIGN_UP_MEMBER_BY_EMAIL_URL, request).hasStatus(CONFLICT);
     }
