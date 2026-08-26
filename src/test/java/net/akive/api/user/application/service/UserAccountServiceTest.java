@@ -3,7 +3,6 @@ package net.akive.api.user.application.service;
 import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.NotFoundException;
-import net.akive.api.mentoring.application.provided.MentoringProfileCreator;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import net.akive.api.user.application.required.GoalRepository;
@@ -41,9 +40,6 @@ class UserAccountServiceTest {
     private static final String PASSWORD_HASH = "password-hash";
 
     @Mock
-    MentoringProfileCreator mentoringProfileCreator;
-
-    @Mock
     UserRepository userRepository;
 
     @Mock
@@ -59,7 +55,7 @@ class UserAccountServiceTest {
     UserAccountService userAccountService;
 
     @Test
-    void 이메일로_회원을_가입시키고_기본_데이터를_생성한_뒤_웰컴_메일_전송_이벤트를_발행한다() {
+    void 이메일로_회원을_가입시키고_기본_목표를_생성한_뒤_회원_가입_이벤트를_발행한다() {
         UserSignUpByEmailCommand command = createUserSignUpByEmailCommand();
         User user = createUser();
         User savedUser = createPersistedUser(1L);
@@ -84,10 +80,9 @@ class UserAccountServiceTest {
         assertThat(goalCaptor.getValue().getMealNum()).isEqualTo(DEFAULT_GOAL_MEAL_NUM);
         assertThat(goalCaptor.getValue().getMeal1TimeSec()).isEqualTo(DEFAULT_GOAL_MEAL_1_TIME_SEC);
 
-        then(mentoringProfileCreator).should().create(savedUser.getUserId());
-
         ArgumentCaptor<UserSignedUpEvent> eventCaptor = ArgumentCaptor.forClass(UserSignedUpEvent.class);
         then(applicationEventPublisher).should().publishEvent(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().userId()).isEqualTo(savedUser.getUserId());
         assertThat(eventCaptor.getValue().email()).isEqualTo(savedUser.getEmail());
         assertThat(eventCaptor.getValue().nickname()).isEqualTo(savedUser.getUserDetail().nickname());
     }
@@ -107,7 +102,6 @@ class UserAccountServiceTest {
 
         then(userRepository).should(never()).save(any(User.class));
         then(goalRepository).shouldHaveNoInteractions();
-        then(mentoringProfileCreator).shouldHaveNoInteractions();
         then(applicationEventPublisher).shouldHaveNoInteractions();
     }
 

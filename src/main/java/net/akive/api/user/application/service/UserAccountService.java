@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
-import net.akive.api.mentoring.application.provided.MentoringProfileCreator;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
@@ -22,8 +21,6 @@ import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOU
 @Transactional
 @RequiredArgsConstructor
 public class UserAccountService implements UserAccountManager {
-
-    private final MentoringProfileCreator mentoringProfileCreator;
 
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
@@ -43,9 +40,8 @@ public class UserAccountService implements UserAccountManager {
 
         goalRepository.save(Goal.createDefault(savedUser));
 
-        mentoringProfileCreator.create(savedUser.getUserId());
-
         applicationEventPublisher.publishEvent(new UserSignedUpEvent(
+                savedUser.getUserId(),
                 savedUser.getEmail(),
                 savedUser.getUserDetail().nickname()
         ));

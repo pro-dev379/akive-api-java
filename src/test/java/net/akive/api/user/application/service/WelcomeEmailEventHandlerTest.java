@@ -15,6 +15,7 @@ import static org.mockito.BDDMockito.then;
 @ExtendWith(MockitoExtension.class)
 class WelcomeEmailEventHandlerTest {
 
+    private static final Long USER_ID = 1L;
     private static final Email EMAIL = createEmail();
     private static final String NICKNAME = "akive";
 
@@ -26,7 +27,7 @@ class WelcomeEmailEventHandlerTest {
 
     @Test
     void 회원_가입_이벤트를_처리해서_웰컴_메일을_발송한다() {
-        UserSignedUpEvent event = new UserSignedUpEvent(EMAIL, NICKNAME);
+        UserSignedUpEvent event = new UserSignedUpEvent(USER_ID, EMAIL, NICKNAME);
 
         welcomeEmailEventHandler.handle(event);
 
