@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
-    void 사용자_식별자로_레거시_패스워드를_조회한다() {
+    void 회원_식별자로_레거시_패스워드를_조회한다() {
         User savedUser = userRepository.save(createUser());
         LegacyUserPassword legacyUserPassword = createLegacyUserPassword(savedUser);
         legacyUserPasswordJpaRepository.save(LegacyUserPasswordEntity.from(legacyUserPassword));
@@ -33,7 +33,7 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 사용자_식별자로_레거시_패스워드를_삭제한다() {
+    void 회원_식별자로_레거시_패스워드를_삭제한다() {
         User savedUser = userRepository.save(createUser());
         LegacyUserPassword legacyUserPassword = createLegacyUserPassword(savedUser);
         legacyUserPasswordJpaRepository.save(LegacyUserPasswordEntity.from(legacyUserPassword));

@@ -49,7 +49,7 @@ class MemberAccountApiTest extends PublicApiTestSupport {
     }
 
     @Test
-    void 이메일_멤버_가입_요청_시_이메일이_중복되면_409를_응답한다() throws Exception {
+    void 이메일_멤버_가입_요청_시_이미_가입된_회원이라면_409를_응답한다() throws Exception {
         UserSignUpByEmailRequest request = createRequest();
         willThrow(new ConflictException(EMAIL_ALREADY_EXISTS))
                 .given(userAccountManager)
