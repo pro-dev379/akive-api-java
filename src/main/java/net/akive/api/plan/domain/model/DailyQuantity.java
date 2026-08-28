@@ -5,9 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.plan.domain.value.*;
+import net.akive.api.plan.domain.value.DailyQuantityAmount;
+import net.akive.api.plan.domain.value.WeekPeriod;
+import net.akive.api.plan.domain.value.WeeklyQuantityAmount;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -109,6 +112,21 @@ public class DailyQuantity {
         if (weeklyQuantityAmount.quantityAmount().value() < dailyQuantityAmount.quantityAmount().value()) {
             throw new BadRequestException(DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DailyQuantity that = (DailyQuantity) o;
+
+        return this.dailyQuantityId != null && Objects.equals(this.dailyQuantityId, that.dailyQuantityId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     record QuantityReductionResult(int quantityAmountToReduce) {

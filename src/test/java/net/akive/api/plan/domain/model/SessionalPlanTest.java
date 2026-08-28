@@ -151,4 +151,46 @@ class SessionalPlanTest {
                 .extracting(BadRequestException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
+
+    @Test
+    void 같은_식별자를_가진_세셔널_플랜은_같게_취급한다() {
+        SessionalPlan sessionalPlan = createSessionalPlan(1L);
+        SessionalPlan sameSessionalPlan = createSessionalPlan(1L);
+
+        assertThat(sessionalPlan).isEqualTo(sameSessionalPlan);
+        assertThat(sessionalPlan.hashCode()).isEqualTo(sameSessionalPlan.hashCode());
+    }
+
+    @Test
+    void 식별자가_다른_세셔널_플랜은_다르게_취급한다() {
+        SessionalPlan sessionalPlan = createSessionalPlan(1L);
+        SessionalPlan anotherSessionalPlan = createSessionalPlan(2L);
+
+        assertThat(sessionalPlan).isNotEqualTo(anotherSessionalPlan);
+    }
+
+    @Test
+    void 식별자가_없는_세셔널_플랜끼리는_나머지_값이_같더라도_다른_것으로_취급한다() {
+        User user = createPersistedUser(1L);
+        SessionPeriod sessionPeriod = new SessionPeriod(
+                LocalDate.of(2026, 1, 1),
+                LocalDate.of(2026, 1, 31)
+        );
+        SessionalPlan sessionalPlan = SessionalPlan.create(user, SESSION_NAME, sessionPeriod, REQUESTED_AT);
+        SessionalPlan anotherSessionalPlan = SessionalPlan.create(user, SESSION_NAME, sessionPeriod, REQUESTED_AT);
+
+        assertThat(sessionalPlan).isNotEqualTo(anotherSessionalPlan);
+    }
+
+    private SessionalPlan createSessionalPlan(Long sessionalPlanId) {
+        return SessionalPlan.reconstruct(
+                sessionalPlanId,
+                createPersistedUser(1L),
+                SESSION_NAME,
+                new SessionPeriod(
+                        LocalDate.of(2026, 1, 1),
+                        LocalDate.of(2026, 1, 31)
+                )
+        );
+    }
 }

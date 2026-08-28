@@ -9,6 +9,7 @@ import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -85,5 +86,20 @@ public class SessionalPlan {
                 !sessionPeriod.endOn().isAfter(requestedAt.toLocalDate())) {
             throw new BadRequestException(INVALID_SESSION_PERIOD);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SessionalPlan that = (SessionalPlan) o;
+
+        return this.sessionalPlanId != null && Objects.equals(this.sessionalPlanId, that.sessionalPlanId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }
