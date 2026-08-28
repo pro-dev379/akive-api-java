@@ -23,8 +23,8 @@ public record WeeklyQuantityReduceRequest(
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                weeklyQuantityAmount.quantityAmount(),
-                weeklyQuantityAmount.quantityMemo()
+                this.weeklyQuantityAmount.quantityAmount(),
+                this.weeklyQuantityAmount.quantityMemo()
         );
     }
 
