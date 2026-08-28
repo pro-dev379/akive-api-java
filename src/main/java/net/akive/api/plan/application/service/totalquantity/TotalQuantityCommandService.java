@@ -5,9 +5,11 @@ import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityCreator;
+import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityCreateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityUpdateCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityReduceCommand;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.TotalQuantity;
@@ -15,11 +17,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class TotalQuantityCommandService implements TotalQuantityCreator {
+public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQuantityModifier {
 
     private final SessionalPlanRepository sessionalPlanRepository;
     private final TotalQuantityRepository totalQuantityRepository;
@@ -62,6 +65,20 @@ public class TotalQuantityCommandService implements TotalQuantityCreator {
                 command.totalQuantityId(),
                 command.sessionalPlanId()
         );
+    }
+
+    @Override
+    public void reduceWeeklyQuantity(WeeklyQuantityReduceCommand command)
+            throws BadRequestException, ConflictException, NotFoundException {
+        validateSessionalPlan(command.sessionalPlanId(), command.userId());
+
+        TotalQuantity totalQuantity = totalQuantityRepository
+                .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
+                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+
+        totalQuantity.reduceWeeklyQuantity(command.weeklyQuantityId(), command.weeklyQuantityAmount());
+
+        totalQuantityRepository.save(totalQuantity);
     }
 
     private void validateSessionalPlan(Long sessionalPlanId, Long userId) {

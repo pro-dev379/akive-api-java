@@ -10,6 +10,7 @@ import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreato
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityCreator;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityFinder;
+import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
 import net.akive.api.plan.application.provided.weeklyplan.WeeklyPlanFinder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -52,6 +53,9 @@ public abstract class PrivateApiTestSupport {
     @MockitoBean
     protected TotalQuantityFinder totalQuantityFinder;
 
+    @MockitoBean
+    protected TotalQuantityModifier totalQuantityModifier;
+
     protected MvcTestResultAssert get(Long userId, String uri, Object... uriVariables) {
         return mvcTester.get()
                 .uri(uri, uriVariables)
@@ -70,6 +74,15 @@ public abstract class PrivateApiTestSupport {
 
     protected MvcTestResultAssert putJson(Long userId, String uri, String json, Object... uriVariables) {
         return mvcTester.put()
+                .uri(uri, uriVariables)
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))))
+                .assertThat();
+    }
+
+    protected MvcTestResultAssert patchJson(Long userId, String uri, String json, Object... uriVariables) {
+        return mvcTester.patch()
                 .uri(uri, uriVariables)
                 .contentType(APPLICATION_JSON)
                 .content(json)

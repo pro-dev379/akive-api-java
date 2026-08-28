@@ -5,11 +5,14 @@ import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.response.SessionalPlanFindResponse;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityCreateRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityUpdateRequest;
+import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.WeeklyQuantityReduceRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.response.TotalQuantityCreateResponse;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityCreator;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityFinder;
+import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
 import net.akive.api.plan.application.provided.totalquantity.dto.SessionalPlanTotalQuantityFindQuery;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityReduceCommand;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +25,9 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 @RequiredArgsConstructor
 public class TotalQuantityApi {
 
-    private final TotalQuantityFinder totalQuantityFinder;
     private final TotalQuantityCreator totalQuantityCreator;
+    private final TotalQuantityFinder totalQuantityFinder;
+    private final TotalQuantityModifier totalQuantityModifier;
 
     @PostMapping
     @ResponseStatus(CREATED)
@@ -60,7 +64,7 @@ public class TotalQuantityApi {
             @PathVariable Long totalQuantityId,
             @Validated @RequestBody TotalQuantityUpdateRequest request
     ) {
-        totalQuantityCreator.update(request.to(userId, sessionalPlanId, totalQuantityId));
+        totalQuantityModifier.update(request.to(userId, sessionalPlanId, totalQuantityId));
     }
 
     @DeleteMapping("/{totalQuantityId}")
@@ -70,6 +74,25 @@ public class TotalQuantityApi {
             @PathVariable Long sessionalPlanId,
             @PathVariable Long totalQuantityId
     ) {
-        totalQuantityCreator.delete(new TotalQuantityDeleteCommand(sessionalPlanId, userId, totalQuantityId));
+        totalQuantityModifier.delete(new TotalQuantityDeleteCommand(sessionalPlanId, userId, totalQuantityId));
+    }
+
+    @PatchMapping("/{totalQuantityId}/weekly-quantities/{weeklyQuantityId}")
+    @ResponseStatus(NO_CONTENT)
+    public void reduceWeeklyQuantity(
+            @AuthenticatedUserId Long userId,
+            @PathVariable Long sessionalPlanId,
+            @PathVariable Long totalQuantityId,
+            @PathVariable Long weeklyQuantityId,
+            @Validated @RequestBody WeeklyQuantityReduceRequest request
+    ) {
+        WeeklyQuantityReduceCommand command = request.to(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId
+        );
+
+        totalQuantityModifier.reduceWeeklyQuantity(command);
     }
 }

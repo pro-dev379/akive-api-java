@@ -9,7 +9,9 @@ import net.akive.api.user.domain.User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
 
@@ -108,6 +110,45 @@ public class PlanFixture {
         );
     }
 
+    public static TotalQuantity createTotalQuantityWithWeeklyAmounts(int... weeklyAmounts) {
+        return createTotalQuantityWithWeeklyAmounts(1L, createSessionalPlan(), weeklyAmounts);
+    }
+
+    public static TotalQuantity createTotalQuantityWithWeeklyAmounts(
+            Long totalQuantityId,
+            SessionalPlan sessionalPlan,
+            int... weeklyAmounts
+    ) {
+        List<SessionWeek> sessionWeeks = sessionalPlan.getSessionPeriod().splitIntoWeeks();
+
+        if (sessionWeeks.size() != weeklyAmounts.length) {
+            throw new IllegalArgumentException("Weekly amount count must match session week count.");
+        }
+
+        List<WeeklyQuantity> weeklyQuantities = IntStream.range(0, weeklyAmounts.length)
+                .mapToObj(index -> {
+                    SessionWeek sessionWeek = sessionWeeks.get(index);
+                    WeekPeriod weekPeriod = sessionWeek.weekPeriod();
+
+                    return createWeeklyQuantity(
+                            (long) sessionWeek.weekNum(),
+                            weekPeriod.startOn(),
+                            weekPeriod.endOn(),
+                            weeklyAmounts[index]
+                    );
+                })
+                .toList();
+        int totalAmount = Arrays.stream(weeklyAmounts).sum();
+
+        return TotalQuantity.reconstruct(
+                totalQuantityId,
+                sessionalPlan,
+                createSubject(),
+                TotalQuantityAmount.of(totalAmount, QUANTITY_UNIT, null),
+                weeklyQuantities
+        );
+    }
+
     public static WeeklyQuantity createWeeklyQuantity(
             Long weeklyQuantityId,
             LocalDate startOn,
@@ -131,21 +172,24 @@ public class PlanFixture {
     private static WeeklyQuantity createPersistedWeeklyQuantity(SessionWeek sessionWeek) {
         Long weeklyQuantityId = (long) sessionWeek.weekNum();
         WeekPeriod weekPeriod = sessionWeek.weekPeriod();
-        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(100, null);
+        int amount = sessionWeek.weekNum() == 1 ? TOTAL_AMOUNT : 0;
+        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(amount, null);
 
         return WeeklyQuantity.reconstruct(
                 weeklyQuantityId,
                 weekPeriod,
                 weeklyQuantityAmount,
-                List.of(createPersistedDailyQuantity(weeklyQuantityId, weekPeriod))
+                List.of(createPersistedDailyQuantity(weeklyQuantityId, weekPeriod, amount))
         );
     }
 
-    private static DailyQuantity createPersistedDailyQuantity(Long dailyQuantityId, WeekPeriod weekPeriod) {
+    private static DailyQuantity createPersistedDailyQuantity(Long dailyQuantityId, WeekPeriod weekPeriod, int amount) {
+        int completedAmount = amount == 0 ? 0 : 30;
+
         return DailyQuantity.reconstruct(
                 dailyQuantityId,
                 weekPeriod.startOn(),
-                DailyQuantityAmount.of(100, 30, 70, null)
+                DailyQuantityAmount.of(amount, completedAmount, amount - completedAmount, null)
         );
     }
 }

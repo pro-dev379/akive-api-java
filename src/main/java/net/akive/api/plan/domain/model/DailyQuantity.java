@@ -63,43 +63,37 @@ public class DailyQuantity {
                 .build();
     }
 
-    DailyQuantity increaseQuantity(int amount) {
+    void increase(int amount) {
         if (amount == 0) {
-            return this;
+            return;
         }
 
-        DailyQuantityAmount amountAfterIncrease = new DailyQuantityAmount(
+        this.dailyQuantityAmount = new DailyQuantityAmount(
                 this.dailyQuantityAmount.quantityAmount().plus(amount),
                 this.dailyQuantityAmount.completedQuantityAmount(),
                 this.dailyQuantityAmount.delayedQuantityAmount().plus(amount),
                 this.dailyQuantityAmount.quantityMemo()
         );
-
-        return reconstruct(this.dailyQuantityId, this.date, amountAfterIncrease);
     }
 
-    DailyQuantity reduceQuantity(int amount) {
+    QuantityReductionResult reduce(int amount) {
         if (amount == 0) {
-            return this;
+            return new QuantityReductionResult(0);
         }
 
-        int amountToReduce = Math.min(amount, this.dailyQuantityAmount.delayedQuantityAmount().value());
-        DailyQuantityAmount amountAfterReduce = new DailyQuantityAmount(
-                this.dailyQuantityAmount.quantityAmount().minus(amountToReduce),
+        int reducedAmount = Math.min(amount, this.dailyQuantityAmount.delayedQuantityAmount().value());
+        this.dailyQuantityAmount = new DailyQuantityAmount(
+                this.dailyQuantityAmount.quantityAmount().minus(reducedAmount),
                 this.dailyQuantityAmount.completedQuantityAmount(),
-                this.dailyQuantityAmount.delayedQuantityAmount().minus(amountToReduce),
+                this.dailyQuantityAmount.delayedQuantityAmount().minus(reducedAmount),
                 this.dailyQuantityAmount.quantityMemo()
         );
 
-        return reconstruct(this.dailyQuantityId, this.date, amountAfterReduce);
+        return new QuantityReductionResult(reducedAmount);
     }
 
     int getCompletedQuantityAmount() {
         return this.dailyQuantityAmount.completedQuantityAmount().value();
-    }
-
-    int getDelayedQuantityAmount() {
-        return this.dailyQuantityAmount.delayedQuantityAmount().value();
     }
 
     private static void validateDateInWeekPeriod(LocalDate date, WeekPeriod weekPeriod) {
@@ -115,5 +109,8 @@ public class DailyQuantity {
         if (weeklyQuantityAmount.quantityAmount().value() < dailyQuantityAmount.quantityAmount().value()) {
             throw new BadRequestException(DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY);
         }
+    }
+
+    record QuantityReductionResult(int reducedAmount) {
     }
 }

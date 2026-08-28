@@ -49,7 +49,9 @@ class TotalQuantityDomainService {
 
         totalQuantityValidationService.validateUpdatable(totalQuantityId, sessionalPlanId, subject.name());
 
-        return totalQuantity.update(subject, totalQuantityAmount);
+        totalQuantity.update(subject, totalQuantityAmount);
+
+        return totalQuantity;
     }
 
     private SessionalPlan findSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {

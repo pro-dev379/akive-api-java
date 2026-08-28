@@ -21,6 +21,10 @@ public enum ConflictError implements Error {
             PLAN,
             "Total quantity cannot be less than completed quantity."
     ),
+    WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY(
+            PLAN,
+            "Weekly quantity cannot be less than completed quantity."
+    ),
 
     EMAIL_ALREADY_VERIFIED(EMAIL_VERIFICATION, "Email is already verified."),
     ;

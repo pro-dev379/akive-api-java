@@ -1,15 +1,13 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
+import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.adapter.webapi.common.dto.request.SubjectRequest;
 import net.akive.api.plan.adapter.webapi.common.dto.request.TotalQuantityAmountRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityCreateRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityUpdateRequest;
-import net.akive.api.plan.application.provided.totalquantity.dto.SessionalPlanTotalQuantityFindQuery;
-import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityCreateCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityUpdateCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.*;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
@@ -22,10 +20,10 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.ConflictError.TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY;
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.ConflictError.*;
+import static net.akive.api.common.exception.business.NotFoundError.*;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static net.akive.api.plan.domain.policy.PlanPolicy.*;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
@@ -38,6 +36,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
     private static final String TOTAL_QUANTITIES_URL = "/sessional-plans/{sessionalPlanId}/total-quantities";
     private static final String TOTAL_QUANTITY_URL = TOTAL_QUANTITIES_URL + "/{totalQuantityId}";
+    private static final String WEEKLY_QUANTITY_URL = TOTAL_QUANTITY_URL + "/weekly-quantities/{weeklyQuantityId}";
 
     @Test
     void 세션_총량을_생성한다() {
@@ -241,7 +240,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 totalQuantityId
         ).hasStatus(NO_CONTENT);
 
-        then(totalQuantityCreator).should().update(command);
+        then(totalQuantityModifier).should().update(command);
     }
 
     @ParameterizedTest
@@ -259,7 +258,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 totalQuantityId
         ).hasStatus(BAD_REQUEST);
 
-        then(totalQuantityCreator).should(never()).update(any(TotalQuantityUpdateCommand.class));
+        then(totalQuantityModifier).should(never()).update(any(TotalQuantityUpdateCommand.class));
     }
 
     @Test
@@ -270,7 +269,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         TotalQuantityUpdateRequest request = updateRequest();
         TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
         willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
-                .given(totalQuantityCreator)
+                .given(totalQuantityModifier)
                 .update(command);
 
         MvcTestResultAssert result = putJson(
@@ -283,7 +282,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
         assertSessionalPlanNotFoundResponse(result);
 
-        then(totalQuantityCreator).should().update(command);
+        then(totalQuantityModifier).should().update(command);
     }
 
     @Test
@@ -294,7 +293,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         TotalQuantityUpdateRequest request = updateRequest();
         TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
         willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
-                .given(totalQuantityCreator)
+                .given(totalQuantityModifier)
                 .update(command);
 
         MvcTestResultAssert result = putJson(
@@ -307,7 +306,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
         assertTotalQuantityNotFoundResponse(result);
 
-        then(totalQuantityCreator).should().update(command);
+        then(totalQuantityModifier).should().update(command);
     }
 
     @Test
@@ -318,7 +317,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         TotalQuantityUpdateRequest request = updateRequest();
         TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
         willThrow(new ConflictException(SUBJECT_NAME_ALREADY_EXISTS))
-                .given(totalQuantityCreator)
+                .given(totalQuantityModifier)
                 .update(command);
 
         MvcTestResultAssert result = putJson(
@@ -331,7 +330,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
         assertSubjectNameAlreadyExistsResponse(result);
 
-        then(totalQuantityCreator).should().update(command);
+        then(totalQuantityModifier).should().update(command);
     }
 
     @Test
@@ -342,7 +341,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         TotalQuantityUpdateRequest request = updateRequest();
         TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
         willThrow(new ConflictException(TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY))
-                .given(totalQuantityCreator)
+                .given(totalQuantityModifier)
                 .update(command);
 
         MvcTestResultAssert result = putJson(
@@ -360,7 +359,273 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.message")
                 .isEqualTo("Total quantity cannot be less than completed quantity.");
 
-        then(totalQuantityCreator).should().update(command);
+        then(totalQuantityModifier).should().update(command);
+    }
+
+    @Test
+    void 주간_계획량을_줄인다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        String body = weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, null);
+        WeeklyQuantityReduceCommand command = WeeklyQuantityReduceCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                TOTAL_AMOUNT,
+                null
+        );
+
+        patchJson(
+                userId,
+                WEEKLY_QUANTITY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(NO_CONTENT);
+
+        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidWeeklyQuantityReduceRequests")
+    void 주간_계획량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+
+        patchJson(
+                userId,
+                WEEKLY_QUANTITY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        then(totalQuantityModifier).should(never()).reduceWeeklyQuantity(any(WeeklyQuantityReduceCommand.class));
+    }
+
+    @Test
+    void 주간_계획량_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        String body = weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, null);
+        WeeklyQuantityReduceCommand command = WeeklyQuantityReduceCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                TOTAL_AMOUNT,
+                null
+        );
+        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .reduceWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        assertSessionalPlanNotFoundResponse(result);
+
+        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+    }
+
+    @Test
+    void 주간_계획량_수정_시_세션_총량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        String body = weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, null);
+        WeeklyQuantityReduceCommand command = WeeklyQuantityReduceCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                TOTAL_AMOUNT,
+                null
+        );
+        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .reduceWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        assertTotalQuantityNotFoundResponse(result);
+
+        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+    }
+
+    @Test
+    void 주간_계획량_수정_시_주간_계획량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        String body = weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, null);
+        WeeklyQuantityReduceCommand command = WeeklyQuantityReduceCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                TOTAL_AMOUNT,
+                null
+        );
+        willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .reduceWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_WEEKLY_QUANTITY_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Weekly quantity not found.");
+
+        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+    }
+
+    @Test
+    void 주간_계획량_수정_시_마지막_주간_계획량을_줄이면_400을_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        String body = weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, null);
+        WeeklyQuantityReduceCommand command = WeeklyQuantityReduceCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                TOTAL_AMOUNT,
+                null
+        );
+        willThrow(new BadRequestException(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED))
+                .given(totalQuantityModifier)
+                .reduceWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_400_LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Last weekly quantity cannot be reduced.");
+
+        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+    }
+
+    @Test
+    void 주간_계획량_수정_시_주간_계획량을_늘리면_400을_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        String body = weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, null);
+        WeeklyQuantityReduceCommand command = WeeklyQuantityReduceCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                TOTAL_AMOUNT,
+                null
+        );
+        willThrow(new BadRequestException(WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED))
+                .given(totalQuantityModifier)
+                .reduceWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_400_WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Weekly quantity cannot be increased here.");
+
+        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+    }
+
+    @Test
+    void 주간_계획량_수정_시_주간_계획_달성량보다_적게_수정하면_409를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        String body = weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, null);
+        WeeklyQuantityReduceCommand command = WeeklyQuantityReduceCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                TOTAL_AMOUNT,
+                null
+        );
+        willThrow(new ConflictException(WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY))
+                .given(totalQuantityModifier)
+                .reduceWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(CONFLICT);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_409_WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Weekly quantity cannot be less than completed quantity.");
+
+        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
     }
 
     @Test
@@ -376,7 +641,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 totalQuantityId
         ).hasStatus(NO_CONTENT);
 
-        then(totalQuantityCreator).should()
+        then(totalQuantityModifier).should()
                 .delete(new TotalQuantityDeleteCommand(sessionalPlanId, userId, totalQuantityId));
     }
 
@@ -391,7 +656,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 totalQuantityId
         );
         willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
-                .given(totalQuantityCreator)
+                .given(totalQuantityModifier)
                 .delete(command);
 
         MvcTestResultAssert result = delete(
@@ -403,7 +668,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
         assertSessionalPlanNotFoundResponse(result);
 
-        then(totalQuantityCreator).should().delete(command);
+        then(totalQuantityModifier).should().delete(command);
     }
 
     @Test
@@ -417,7 +682,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 totalQuantityId
         );
         willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
-                .given(totalQuantityCreator)
+                .given(totalQuantityModifier)
                 .delete(command);
 
         MvcTestResultAssert result = delete(
@@ -429,7 +694,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
         assertTotalQuantityNotFoundResponse(result);
 
-        then(totalQuantityCreator).should().delete(command);
+        then(totalQuantityModifier).should().delete(command);
     }
 
     private static TotalQuantityCreateRequest createRequest() {
@@ -454,6 +719,33 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     private static Stream<TotalQuantityUpdateRequest> invalidUpdateRequests() {
         return invalidRequestValues()
                 .map(value -> new TotalQuantityUpdateRequest(value.subject(), value.totalQuantityAmount()));
+    }
+
+    private static Stream<String> invalidWeeklyQuantityReduceRequests() {
+        return Stream.of(
+                """
+                        {
+                          "weeklyQuantityAmount": null
+                        }
+                        """,
+                weeklyQuantityReduceRequestJson(null, null),
+                weeklyQuantityReduceRequestJson(-1, null),
+                weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, "a".repeat(QUANTITY_MEMO_MAX_LENGTH + 1))
+        );
+    }
+
+    private static String weeklyQuantityReduceRequestJson(Integer quantityAmount, String quantityMemo) {
+        return """
+                {
+                  "weeklyQuantityAmount": {
+                    "quantityAmount": %s,
+                    "quantityMemo": %s
+                  }
+                }
+                """.formatted(
+                quantityAmount,
+                quantityMemo == null ? null : "\"" + quantityMemo + "\""
+        );
     }
 
     private static Stream<TotalQuantityRequestValue> invalidRequestValues() {

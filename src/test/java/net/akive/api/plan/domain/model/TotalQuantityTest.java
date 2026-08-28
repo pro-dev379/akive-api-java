@@ -1,21 +1,22 @@
 package net.akive.api.plan.domain.model;
 
+import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.plan.domain.value.DailyQuantityAmount;
-import net.akive.api.plan.domain.value.Subject;
-import net.akive.api.plan.domain.value.TotalQuantityAmount;
-import net.akive.api.plan.domain.value.WeekPeriod;
-import net.akive.api.plan.domain.value.WeeklyQuantityAmount;
+import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.plan.domain.value.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static net.akive.api.common.exception.business.ConflictError.TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY;
+import static net.akive.api.common.exception.business.ConflictError.WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY;
+import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
+import static net.akive.api.plan.domain.PlanAssertions.assertWeeklyQuantityAmounts;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class TotalQuantityTest {
 
@@ -61,6 +62,30 @@ class TotalQuantityTest {
         assertThat(totalQuantity.getSubject()).isEqualTo(subject);
         assertThat(totalQuantity.getTotalQuantityAmount()).isEqualTo(totalQuantityAmount);
         assertThat(totalQuantity.getWeeklyQuantities()).containsExactlyElementsOf(weeklyQuantities);
+    }
+
+    @Test
+    void 주간_계획량_합계가_세션_총량과_다르면_복원할_수_없다() {
+        TotalQuantityAmount totalQuantityAmount = TotalQuantityAmount.of(100, QUANTITY_UNIT, null);
+        List<WeeklyQuantity> weeklyQuantities = List.of(
+                createWeeklyQuantity(
+                        1L,
+                        LocalDate.of(2026, 1, 1),
+                        LocalDate.of(2026, 1, 4),
+                        60
+                )
+        );
+
+        assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> TotalQuantity.reconstruct(
+                        1L,
+                        createSessionalPlan(),
+                        createSubject(),
+                        totalQuantityAmount,
+                        weeklyQuantities
+                ))
+                .extracting(BadRequestException::getError)
+                .isEqualTo(TOTAL_QUANTITY_AMOUNT_MISMATCH);
     }
 
     @Test
@@ -165,36 +190,36 @@ class TotalQuantityTest {
 
     @Test
     void 세션_총량을_늘리면_첫_주의_첫날_계획량을_늘린다() {
-        TotalQuantity totalQuantity = createReconstructedTotalQuantity(30, 40, 30);
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
         TotalQuantityAmount newTotalQuantityAmount = TotalQuantityAmount.of(130, QUANTITY_UNIT, null);
 
-        TotalQuantity updatedTotalQuantity = totalQuantity.update(createSubject(), newTotalQuantityAmount);
+        totalQuantity.update(createSubject(), newTotalQuantityAmount);
 
-        assertWeeklyQuantityAmounts(updatedTotalQuantity, 60, 40, 30);
+        assertWeeklyQuantityAmounts(totalQuantity, 60, 40, 30);
         assertDailyQuantityAmount(
-                updatedTotalQuantity.getWeeklyQuantities().getFirst().getDailyQuantities().getFirst(),
+                totalQuantity.getWeeklyQuantities().getFirst().getDailyQuantities().getFirst(),
                 60
         );
     }
 
     @Test
     void 세션_총량을_줄이면_앞_주차부터_계획량을_줄인다() {
-        TotalQuantity totalQuantity = createReconstructedTotalQuantity(30, 40, 30);
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
         TotalQuantityAmount newTotalQuantityAmount = TotalQuantityAmount.of(50, QUANTITY_UNIT, null);
 
-        TotalQuantity updatedTotalQuantity = totalQuantity.update(createSubject(), newTotalQuantityAmount);
+        totalQuantity.update(createSubject(), newTotalQuantityAmount);
 
-        assertWeeklyQuantityAmounts(updatedTotalQuantity, 0, 20, 30);
+        assertWeeklyQuantityAmounts(totalQuantity, 0, 20, 30);
         assertDailyQuantityAmount(
-                updatedTotalQuantity.getWeeklyQuantities().get(0).getDailyQuantities().getFirst(),
+                totalQuantity.getWeeklyQuantities().get(0).getDailyQuantities().getFirst(),
                 0
         );
         assertDailyQuantityAmount(
-                updatedTotalQuantity.getWeeklyQuantities().get(1).getDailyQuantities().getFirst(),
+                totalQuantity.getWeeklyQuantities().get(1).getDailyQuantities().getFirst(),
                 20
         );
         assertDailyQuantityAmount(
-                updatedTotalQuantity.getWeeklyQuantities().get(2).getDailyQuantities().getFirst(),
+                totalQuantity.getWeeklyQuantities().get(2).getDailyQuantities().getFirst(),
                 30
         );
     }
@@ -204,10 +229,90 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedAmount(100, 30);
         TotalQuantityAmount newTotalQuantityAmount = TotalQuantityAmount.of(20, QUANTITY_UNIT, null);
 
-        assertThatThrownBy(() -> totalQuantity.update(createSubject(), newTotalQuantityAmount))
-                .isInstanceOf(ConflictException.class)
-                .extracting("error")
+        assertThatExceptionOfType(ConflictException.class)
+                .isThrownBy(() -> totalQuantity.update(createSubject(), newTotalQuantityAmount))
+                .extracting(ConflictException::getError)
                 .isEqualTo(TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY);
+    }
+
+    @Test
+    void 주간_계획량을_줄이면_다음_주간_계획량을_늘린다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
+        WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20, "첫 주 조정");
+
+        totalQuantity.reduceWeeklyQuantity(1L, reducedWeeklyQuantityAmount);
+
+        assertWeeklyQuantityAmounts(totalQuantity, 20, 50, 30);
+        assertThat(totalQuantity.getWeeklyQuantities().getFirst().getWeeklyQuantityAmount())
+                .isEqualTo(reducedWeeklyQuantityAmount);
+        assertDailyQuantityAmount(
+                totalQuantity.getWeeklyQuantities().getFirst().getDailyQuantities().getFirst(),
+                20
+        );
+        assertDailyQuantityAmount(
+                totalQuantity.getWeeklyQuantities().get(1).getDailyQuantities().getFirst(),
+                50
+        );
+    }
+
+    @Test
+    void 주간_계획량을_수정하지_않으면_메모만_수정한다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
+        WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(30, "메모 수정");
+
+        totalQuantity.reduceWeeklyQuantity(1L, reducedWeeklyQuantityAmount);
+
+        assertWeeklyQuantityAmounts(totalQuantity, 30, 40, 30);
+        assertThat(totalQuantity.getWeeklyQuantities()
+                .getFirst()
+                .getWeeklyQuantityAmount()
+                .quantityMemo()
+                .value())
+                .isEqualTo("메모 수정");
+    }
+
+    @Test
+    void 마지막_주간_계획량은_줄일_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
+        WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20, null);
+
+        assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantity(3L, reducedWeeklyQuantityAmount))
+                .extracting(BadRequestException::getError)
+                .isEqualTo(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED);
+    }
+
+    @Test
+    void 주간_계획량을_늘릴_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
+        WeeklyQuantityAmount increasedWeeklyQuantityAmount = WeeklyQuantityAmount.of(40, null);
+
+        assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantity(1L, increasedWeeklyQuantityAmount))
+                .extracting(BadRequestException::getError)
+                .isEqualTo(WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED);
+    }
+
+    @Test
+    void 주간_계획량을_주간_계획_완료량보다_적게_줄일_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedFirstWeek(100, 30);
+        WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20, null);
+
+        assertThatExceptionOfType(ConflictException.class)
+                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantity(1L, reducedWeeklyQuantityAmount))
+                .extracting(ConflictException::getError)
+                .isEqualTo(WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY);
+    }
+
+    @Test
+    void 존재하지_않는_주간_계획량은_줄일_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
+        WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20, null);
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantity(999L, reducedWeeklyQuantityAmount))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
     }
 
     private void assertDailyQuantityAmount(DailyQuantity dailyQuantity, int expectedAmount) {
@@ -216,47 +321,6 @@ class TotalQuantityTest {
         assertThat(dailyQuantityAmount.quantityAmount().value()).isEqualTo(expectedAmount);
         assertThat(dailyQuantityAmount.completedQuantityAmount().value()).isZero();
         assertThat(dailyQuantityAmount.delayedQuantityAmount().value()).isEqualTo(expectedAmount);
-    }
-
-    private void assertWeeklyQuantityAmounts(TotalQuantity totalQuantity, int... expectedAmounts) {
-        assertThat(totalQuantity.getWeeklyQuantities())
-                .extracting(weeklyQuantity -> weeklyQuantity.getWeeklyQuantityAmount()
-                        .quantityAmount()
-                        .value())
-                .containsExactlyElementsOf(Arrays.stream(expectedAmounts).boxed().toList());
-    }
-
-    private TotalQuantity createReconstructedTotalQuantity(
-            int firstWeekAmount,
-            int secondWeekAmount,
-            int thirdWeekAmount
-    ) {
-        return TotalQuantity.reconstruct(
-                1L,
-                createSessionalPlan(),
-                createSubject(),
-                createTotalQuantityAmount(),
-                List.of(
-                        createWeeklyQuantity(
-                                1L,
-                                LocalDate.of(2026, 1, 1),
-                                LocalDate.of(2026, 1, 4),
-                                firstWeekAmount
-                        ),
-                        createWeeklyQuantity(
-                                2L,
-                                LocalDate.of(2026, 1, 5),
-                                LocalDate.of(2026, 1, 11),
-                                secondWeekAmount
-                        ),
-                        createWeeklyQuantity(
-                                3L,
-                                LocalDate.of(2026, 1, 12),
-                                LocalDate.of(2026, 1, 12),
-                                thirdWeekAmount
-                        )
-                )
-        );
     }
 
     private TotalQuantity createTotalQuantityWithCompletedAmount(int quantityAmount, int completedQuantityAmount) {
@@ -282,6 +346,54 @@ class TotalQuantityTest {
                                         null
                                 )
                         ))
+                ))
+        );
+    }
+
+    private TotalQuantity createTotalQuantityWithCompletedFirstWeek(int quantityAmount, int completedQuantityAmount) {
+        return TotalQuantity.reconstruct(
+                1L,
+                createSessionalPlan(),
+                createSubject(),
+                TotalQuantityAmount.of(quantityAmount, QUANTITY_UNIT, null),
+                List.of(
+                        createWeeklyQuantityWithCompletedAmount(
+                                1L,
+                                LocalDate.of(2026, 1, 1),
+                                LocalDate.of(2026, 1, 4),
+                                quantityAmount,
+                                completedQuantityAmount
+                        ),
+                        createWeeklyQuantity(
+                                2L,
+                                LocalDate.of(2026, 1, 5),
+                                LocalDate.of(2026, 1, 11),
+                                0
+                        )
+                )
+        );
+    }
+
+    private WeeklyQuantity createWeeklyQuantityWithCompletedAmount(
+            Long weeklyQuantityId,
+            LocalDate startOn,
+            LocalDate endOn,
+            int quantityAmount,
+            int completedQuantityAmount
+    ) {
+        return WeeklyQuantity.reconstruct(
+                weeklyQuantityId,
+                new WeekPeriod(startOn, endOn),
+                WeeklyQuantityAmount.of(quantityAmount, null),
+                List.of(DailyQuantity.reconstruct(
+                        weeklyQuantityId,
+                        startOn,
+                        DailyQuantityAmount.of(
+                                quantityAmount,
+                                completedQuantityAmount,
+                                quantityAmount - completedQuantityAmount,
+                                null
+                        )
                 ))
         );
     }
