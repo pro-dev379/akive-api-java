@@ -16,7 +16,7 @@ import java.util.Optional;
 import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.domain.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
@@ -63,9 +63,9 @@ class MentoringProfileServiceTest {
         Long userId = 999L;
         given(userFinder.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> mentoringProfileService.create(userId))
-                .isInstanceOf(NotFoundException.class)
-                .extracting("error")
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> mentoringProfileService.create(userId))
+                .extracting(NotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
         then(mentoringProfileRepository).should(never()).save(any());

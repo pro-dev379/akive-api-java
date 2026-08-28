@@ -20,7 +20,7 @@ import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_
 import static net.akive.api.common.exception.business.UnauthorizedError.REFRESH_TOKEN_EXPIRED;
 import static net.akive.api.user.domain.RoleType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -100,9 +100,9 @@ class JwtRefreshTokenProviderTest {
         given(refreshTokenJwtDecoder.decode(refreshToken.value()))
                 .willThrow(new BadJwtException("Signed JWT rejected: Invalid signature"));
 
-        assertThatThrownBy(() -> jwtRefreshTokenProvider.parse(refreshToken))
-                .isInstanceOf(UnauthorizedException.class)
-                .extracting("error")
+        assertThatExceptionOfType(UnauthorizedException.class)
+                .isThrownBy(() -> jwtRefreshTokenProvider.parse(refreshToken))
+                .extracting(UnauthorizedException::getError)
                 .isEqualTo(INVALID_REFRESH_TOKEN);
     }
 
@@ -118,9 +118,9 @@ class JwtRefreshTokenProviderTest {
         given(refreshTokenJwtDecoder.decode(refreshToken.value()))
                 .willThrow(new JwtValidationException("Jwt expired", List.of(expiredError)));
 
-        assertThatThrownBy(() -> jwtRefreshTokenProvider.parse(refreshToken))
-                .isInstanceOf(UnauthorizedException.class)
-                .extracting("error")
+        assertThatExceptionOfType(UnauthorizedException.class)
+                .isThrownBy(() -> jwtRefreshTokenProvider.parse(refreshToken))
+                .extracting(UnauthorizedException::getError)
                 .isEqualTo(REFRESH_TOKEN_EXPIRED);
     }
 }
