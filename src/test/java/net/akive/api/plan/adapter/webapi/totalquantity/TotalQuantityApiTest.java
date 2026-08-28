@@ -21,6 +21,8 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_TARGET_SAME_AS_SOURCE;
 import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.ConflictError.*;
 import static net.akive.api.common.exception.business.NotFoundError.*;
@@ -37,6 +39,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     private static final String TOTAL_QUANTITIES_URL = "/sessional-plans/{sessionalPlanId}/total-quantities";
     private static final String TOTAL_QUANTITY_URL = TOTAL_QUANTITIES_URL + "/{totalQuantityId}";
     private static final String WEEKLY_QUANTITY_URL = TOTAL_QUANTITY_URL + "/weekly-quantities/{weeklyQuantityId}";
+    private static final String WEEKLY_QUANTITY_DELAY_URL = WEEKLY_QUANTITY_URL + "/delays";
 
     @Test
     void 세션_총량을_생성한다() {
@@ -629,6 +632,246 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 주간_딜레이를_다른_주로_옮긴다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long targetWeeklyQuantityId = 40L;
+        int quantityAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        WeeklyQuantityDelayCommand command = WeeklyQuantityDelayCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetWeeklyQuantityId,
+                quantityAmountToDelay
+        );
+
+        patchJson(
+                userId,
+                WEEKLY_QUANTITY_DELAY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(NO_CONTENT);
+
+        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidWeeklyQuantityDelayRequests")
+    void 주간_딜레이_이동_요청값이_올바르지_않으면_400을_응답한다(String body) {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+
+        patchJson(
+                userId,
+                WEEKLY_QUANTITY_DELAY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        then(totalQuantityModifier).should(never()).delayWeeklyQuantity(any(WeeklyQuantityDelayCommand.class));
+    }
+
+    @Test
+    void 주간_딜레이_이동_시_세셔널_플랜이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long targetWeeklyQuantityId = 40L;
+        int quantityAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        WeeklyQuantityDelayCommand command = WeeklyQuantityDelayCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetWeeklyQuantityId,
+                quantityAmountToDelay
+        );
+        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .delayWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_DELAY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        assertSessionalPlanNotFoundResponse(result);
+
+        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+    }
+
+    @Test
+    void 주간_딜레이_이동_시_세션_총량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long targetWeeklyQuantityId = 40L;
+        int quantityAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        WeeklyQuantityDelayCommand command = WeeklyQuantityDelayCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetWeeklyQuantityId,
+                quantityAmountToDelay
+        );
+        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .delayWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_DELAY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        assertTotalQuantityNotFoundResponse(result);
+
+        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+    }
+
+    @Test
+    void 주간_딜레이_이동_시_주간_계획량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long targetWeeklyQuantityId = 40L;
+        int quantityAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        WeeklyQuantityDelayCommand command = WeeklyQuantityDelayCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetWeeklyQuantityId,
+                quantityAmountToDelay
+        );
+        willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .delayWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_DELAY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_WEEKLY_QUANTITY_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Weekly quantity not found.");
+
+        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+    }
+
+    @Test
+    void 주간_딜레이_이동_시_같은_주로_옮기면_400을_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long targetWeeklyQuantityId = 30L;
+        int quantityAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        WeeklyQuantityDelayCommand command = WeeklyQuantityDelayCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetWeeklyQuantityId,
+                quantityAmountToDelay
+        );
+        willThrow(new BadRequestException(WEEKLY_DELAY_TARGET_SAME_AS_SOURCE))
+                .given(totalQuantityModifier)
+                .delayWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_DELAY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_400_WEEKLY_DELAY_TARGET_SAME_AS_SOURCE");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Weekly delay target must be different from source weekly quantity.");
+
+        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+    }
+
+    @Test
+    void 주간_딜레이_이동_시_현재_주간_딜레이보다_많은_수량을_옮기면_400을_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long targetWeeklyQuantityId = 40L;
+        int quantityAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        WeeklyQuantityDelayCommand command = WeeklyQuantityDelayCommand.of(
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetWeeklyQuantityId,
+                quantityAmountToDelay
+        );
+        willThrow(new BadRequestException(WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY))
+                .given(totalQuantityModifier)
+                .delayWeeklyQuantity(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                WEEKLY_QUANTITY_DELAY_URL,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_400_WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Weekly delay quantity exceeds current weekly delayed quantity.");
+
+        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+    }
+
+    @Test
     void 세션_총량을_삭제한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
@@ -734,6 +977,15 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         );
     }
 
+    private static Stream<String> invalidWeeklyQuantityDelayRequests() {
+        return Stream.of(
+                weeklyQuantityDelayRequestJson(null, TOTAL_AMOUNT),
+                weeklyQuantityDelayRequestJson(30L, null),
+                weeklyQuantityDelayRequestJson(-1L, TOTAL_AMOUNT),
+                weeklyQuantityDelayRequestJson(30L, -1)
+        );
+    }
+
     private static String weeklyQuantityReduceRequestJson(Integer quantityAmount, String quantityMemo) {
         return """
                 {
@@ -746,6 +998,15 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 quantityAmount,
                 quantityMemo == null ? null : "\"" + quantityMemo + "\""
         );
+    }
+
+    private static String weeklyQuantityDelayRequestJson(Long targetWeeklyQuantityId, Integer quantityAmountToDelay) {
+        return """
+                {
+                  "targetWeeklyQuantityId": %s,
+                  "quantityAmountToDelay": %s
+                }
+                """.formatted(targetWeeklyQuantityId, quantityAmountToDelay);
     }
 
     private static Stream<TotalQuantityRequestValue> invalidRequestValues() {

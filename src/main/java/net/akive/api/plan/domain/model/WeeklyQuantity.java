@@ -11,15 +11,12 @@ import net.akive.api.plan.domain.value.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_AMOUNT_MISMATCH;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_EXCEEDS_TOTAL_QUANTITY;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static net.akive.api.common.exception.business.ConflictError.WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY;
 
 @Getter
@@ -135,6 +132,18 @@ public class WeeklyQuantity {
         return new QuantityReductionResult(result.remainingAmount(), quantityAmountToReduce);
     }
 
+    void delayTo(WeeklyQuantity targetWeeklyQuantity, QuantityAmount quantityAmountToDelay) {
+        requireNonNull(targetWeeklyQuantity);
+        requireNonNull(quantityAmountToDelay);
+
+        if (quantityAmountToDelay.value() > getDelayedQuantityAmount()) {
+            throw new BadRequestException(WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY);
+        }
+
+        reduceDailyQuantities(quantityAmountToDelay.value());
+        targetWeeklyQuantity.increase(quantityAmountToDelay.value());
+    }
+
     int calculateReductionAmount(WeeklyQuantityAmount reducedWeeklyQuantityAmount) {
         requireNonNull(reducedWeeklyQuantityAmount);
 
@@ -200,23 +209,6 @@ public class WeeklyQuantity {
         }
     }
 
-    private void updateWeeklyQuantityAmountByDailyQuantities() {
-        this.weeklyQuantityAmount = WeeklyQuantityAmount.of(
-                sumDailyQuantityAmount(this.dailyQuantities),
-                this.weeklyQuantityAmount.quantityMemo().value()
-        );
-    }
-
-    private void validateReducible(WeeklyQuantityAmount reducedWeeklyQuantityAmount, int quantityAmountToReduce) {
-        if (quantityAmountToReduce < 0) {
-            throw new BadRequestException(WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED);
-        }
-
-        if (reducedWeeklyQuantityAmount.quantityAmount().value() < getCompletedQuantityAmount()) {
-            throw new ConflictException(WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY);
-        }
-    }
-
     private static List<DailyQuantity> createDailyQuantities(
             WeekPeriod weekPeriod,
             WeeklyQuantityAmount weeklyQuantityAmount,
@@ -241,6 +233,44 @@ public class WeeklyQuantity {
         }
 
         return dailyQuantities;
+    }
+
+    private void updateWeeklyQuantityAmountByDailyQuantities() {
+        this.weeklyQuantityAmount = WeeklyQuantityAmount.of(
+                sumDailyQuantityAmount(this.dailyQuantities),
+                this.weeklyQuantityAmount.quantityMemo().value()
+        );
+    }
+
+    private void validateReducible(WeeklyQuantityAmount reducedWeeklyQuantityAmount, int quantityAmountToReduce) {
+        if (quantityAmountToReduce < 0) {
+            throw new BadRequestException(WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED);
+        }
+
+        if (reducedWeeklyQuantityAmount.quantityAmount().value() < getCompletedQuantityAmount()) {
+            throw new ConflictException(WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY);
+        }
+    }
+
+    private int getDelayedQuantityAmount() {
+        return dailyQuantities.stream()
+                .mapToInt(dailyQuantity -> dailyQuantity.getDailyQuantityAmount().delayedQuantityAmount().value())
+                .sum();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WeeklyQuantity that = (WeeklyQuantity) o;
+
+        return this.weeklyQuantityId != null && Objects.equals(this.weeklyQuantityId, that.weeklyQuantityId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     record QuantityReductionResult(int remainingAmount, int quantityAmountToReduce) {

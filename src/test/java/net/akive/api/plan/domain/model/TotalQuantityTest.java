@@ -315,6 +315,154 @@ class TotalQuantityTest {
                 .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
     }
 
+    @Test
+    void 주간_딜레이를_다른_주로_옮긴다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
+
+        totalQuantity.delayWeeklyQuantity(1L, 3L, new QuantityAmount(10));
+
+        assertWeeklyQuantityAmounts(totalQuantity, 20, 40, 40);
+        assertDailyQuantityAmount(
+                totalQuantity.getWeeklyQuantities().getFirst().getDailyQuantities().getFirst(),
+                20
+        );
+        assertDailyQuantityAmount(
+                totalQuantity.getWeeklyQuantities().get(2).getDailyQuantities().getFirst(),
+                40
+        );
+    }
+
+    @Test
+    void 주간_딜레이를_옮길_때_해당_주의_첫_날부터_줄이고_그만큼_다른_주로_옮긴다() {
+        TotalQuantity totalQuantity = TotalQuantity.reconstruct(
+                1L,
+                createSessionalPlan(),
+                createSubject(),
+                createTotalQuantityAmount(),
+                List.of(
+                        WeeklyQuantity.reconstruct(
+                                1L,
+                                new WeekPeriod(
+                                        LocalDate.of(2026, 1, 1),
+                                        LocalDate.of(2026, 1, 4)
+                                ),
+                                WeeklyQuantityAmount.of(30, null),
+                                List.of(
+                                        DailyQuantity.reconstruct(
+                                                1L,
+                                                LocalDate.of(2026, 1, 1),
+                                                DailyQuantityAmount.of(10, 0, 10, null)
+                                        ),
+                                        DailyQuantity.reconstruct(
+                                                2L,
+                                                LocalDate.of(2026, 1, 2),
+                                                DailyQuantityAmount.of(20, 0, 20, null)
+                                        )
+                                )
+                        ),
+                        createWeeklyQuantity(
+                                2L,
+                                LocalDate.of(2026, 1, 5),
+                                LocalDate.of(2026, 1, 11),
+                                70
+                        ),
+                        createWeeklyQuantity(
+                                3L,
+                                LocalDate.of(2026, 1, 12),
+                                LocalDate.of(2026, 1, 12),
+                                0
+                        )
+                )
+        );
+
+        totalQuantity.delayWeeklyQuantity(1L, 3L, new QuantityAmount(15));
+
+        assertWeeklyQuantityAmounts(totalQuantity, 15, 70, 15);
+        assertDailyQuantityAmount(
+                totalQuantity.getWeeklyQuantities().getFirst().getDailyQuantities().getFirst(),
+                0
+        );
+        assertDailyQuantityAmount(
+                totalQuantity.getWeeklyQuantities().getFirst().getDailyQuantities().get(1),
+                15
+        );
+        assertDailyQuantityAmount(
+                totalQuantity.getWeeklyQuantities().get(2).getDailyQuantities().getFirst(),
+                15
+        );
+    }
+
+    @Test
+    void 현재_딜레이보다_많은_수량을_다른_주로_옮길_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedFirstWeek(100, 30);
+
+        assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> totalQuantity.delayWeeklyQuantity(1L, 2L, new QuantityAmount(80)))
+                .extracting(BadRequestException::getError)
+                .isEqualTo(WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY);
+    }
+
+    @Test
+    void 같은_주에_딜레이를_옮길_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
+
+        assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> totalQuantity.delayWeeklyQuantity(1L, 1L, new QuantityAmount(10)))
+                .extracting(BadRequestException::getError)
+                .isEqualTo(WEEKLY_DELAY_TARGET_SAME_AS_SOURCE);
+    }
+
+    @Test
+    void 주간_계획량이_존재하지_않으면_딜레이를_옮길_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantity.delayWeeklyQuantity(999L, 2L, new QuantityAmount(10)))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantity.delayWeeklyQuantity(1L, 999L, new QuantityAmount(10)))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 같은_식별자를_가진_세션_총량은_같게_취급한다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(1L, createSessionalPlan(), 30, 40, 30);
+        TotalQuantity sameTotalQuantity = createTotalQuantityWithWeeklyAmounts(1L, createSessionalPlan(), 20, 50, 30);
+
+        assertThat(totalQuantity).isEqualTo(sameTotalQuantity);
+        assertThat(totalQuantity.hashCode()).isEqualTo(sameTotalQuantity.hashCode());
+    }
+
+    @Test
+    void 식별자가_다른_세션_총량은_다르게_취급한다() {
+        TotalQuantity totalQuantity =
+                createTotalQuantityWithWeeklyAmounts(1L, createSessionalPlan(), 30, 40, 30);
+        TotalQuantity anotherTotalQuantity =
+                createTotalQuantityWithWeeklyAmounts(2L, createSessionalPlan(), 30, 40, 30);
+
+        assertThat(totalQuantity).isNotEqualTo(anotherTotalQuantity);
+    }
+
+    @Test
+    void 식별자가_없는_세션_총량끼리는_나머지_값이_같더라도_다른_것으로_취급한다() {
+        SessionalPlan sessionalPlan = createSessionalPlan();
+        TotalQuantity totalQuantity = TotalQuantity.create(
+                sessionalPlan,
+                createSubject(),
+                createTotalQuantityAmount()
+        );
+        TotalQuantity anotherTotalQuantity = TotalQuantity.create(
+                sessionalPlan,
+                createSubject(),
+                createTotalQuantityAmount()
+        );
+
+        assertThat(totalQuantity).isNotEqualTo(anotherTotalQuantity);
+    }
+
     private void assertDailyQuantityAmount(DailyQuantity dailyQuantity, int expectedAmount) {
         DailyQuantityAmount dailyQuantityAmount = dailyQuantity.getDailyQuantityAmount();
 
@@ -323,7 +471,10 @@ class TotalQuantityTest {
         assertThat(dailyQuantityAmount.delayedQuantityAmount().value()).isEqualTo(expectedAmount);
     }
 
-    private TotalQuantity createTotalQuantityWithCompletedAmount(int quantityAmount, int completedQuantityAmount) {
+    private TotalQuantity createTotalQuantityWithCompletedAmount(
+            int quantityAmount,
+            int completedQuantityAmount
+    ) {
         return TotalQuantity.reconstruct(
                 1L,
                 createSessionalPlan(),
@@ -350,7 +501,10 @@ class TotalQuantityTest {
         );
     }
 
-    private TotalQuantity createTotalQuantityWithCompletedFirstWeek(int quantityAmount, int completedQuantityAmount) {
+    private TotalQuantity createTotalQuantityWithCompletedFirstWeek(
+            int quantityAmount,
+            int completedQuantityAmount
+    ) {
         return TotalQuantity.reconstruct(
                 1L,
                 createSessionalPlan(),

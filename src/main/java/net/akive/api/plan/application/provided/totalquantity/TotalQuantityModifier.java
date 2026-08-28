@@ -5,6 +5,7 @@ import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityUpdateCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityDelayCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityReduceCommand;
 
 public interface TotalQuantityModifier {
@@ -15,4 +16,6 @@ public interface TotalQuantityModifier {
 
     void reduceWeeklyQuantity(WeeklyQuantityReduceCommand command)
             throws BadRequestException, ConflictException, NotFoundException;
+
+    void delayWeeklyQuantity(WeeklyQuantityDelayCommand command) throws BadRequestException, NotFoundException;
 }

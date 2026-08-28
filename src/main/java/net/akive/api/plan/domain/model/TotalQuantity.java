@@ -11,12 +11,12 @@ import net.akive.api.plan.domain.value.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.common.exception.business.BadRequestError.TOTAL_QUANTITY_AMOUNT_MISMATCH;
-import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static net.akive.api.common.exception.business.ConflictError.TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY;
 import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
 
@@ -98,7 +98,10 @@ public class TotalQuantity {
     ) {
         requireNonNull(subject);
         requireNonNull(totalQuantityAmount);
-        validateUpdatable(totalQuantityAmount);
+
+        if (totalQuantityAmount.quantityAmount().value() < getCompletedQuantityAmount()) {
+            throw new ConflictException(TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY);
+        }
 
         int amountDelta = calculateAmountDelta(totalQuantityAmount);
         adjustWeeklyQuantities(amountDelta);
@@ -124,10 +127,25 @@ public class TotalQuantity {
         carryOverReducedAmountToNextWeek(weeklyQuantityIndex, result.quantityAmountToReduce());
     }
 
-    private void validateUpdatable(TotalQuantityAmount newTotalQuantityAmount) {
-        if (newTotalQuantityAmount.quantityAmount().value() < getCompletedQuantityAmount()) {
-            throw new ConflictException(TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY);
+    public void delayWeeklyQuantity(
+            Long weeklyQuantityId,
+            Long targetWeeklyQuantityId,
+            QuantityAmount quantityToDelay
+    ) {
+        requirePositive(weeklyQuantityId);
+        requirePositive(targetWeeklyQuantityId);
+        requireNonNull(quantityToDelay);
+
+        if (weeklyQuantityId.equals(targetWeeklyQuantityId)) {
+            throw new BadRequestException(WEEKLY_DELAY_TARGET_SAME_AS_SOURCE);
         }
+
+        WeeklyQuantity weeklyQuantity =
+                this.weeklyQuantities.get(findWeeklyQuantityIndex(weeklyQuantityId));
+        WeeklyQuantity targetWeeklyQuantity =
+                this.weeklyQuantities.get(findWeeklyQuantityIndex(targetWeeklyQuantityId));
+
+        weeklyQuantity.delayTo(targetWeeklyQuantity, quantityToDelay);
     }
 
     private int getCompletedQuantityAmount() {
@@ -205,5 +223,20 @@ public class TotalQuantity {
 
     private boolean isLastWeek(int weeklyQuantityIndex) {
         return weeklyQuantityIndex == this.weeklyQuantities.size() - 1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TotalQuantity that = (TotalQuantity) o;
+
+        return this.totalQuantityId != null && Objects.equals(this.totalQuantityId, that.totalQuantityId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

@@ -11,6 +11,9 @@ import java.util.List;
 
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
 import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_AMOUNT_MISMATCH;
+import static net.akive.api.plan.domain.PlanFixture.createSessionalPlan;
+import static net.akive.api.plan.domain.PlanFixture.createSubject;
+import static net.akive.api.plan.domain.PlanFixture.createTotalQuantityAmount;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -95,5 +98,57 @@ class WeeklyQuantityTest {
                 ))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
+    }
+
+    @Test
+    void 같은_식별자를_가진_주간_계획량은_같게_취급한다() {
+        WeeklyQuantity weeklyQuantity = createWeeklyQuantity(1L);
+        WeeklyQuantity sameWeeklyQuantity = createWeeklyQuantity(1L);
+
+        assertThat(weeklyQuantity).isEqualTo(sameWeeklyQuantity);
+        assertThat(weeklyQuantity.hashCode()).isEqualTo(sameWeeklyQuantity.hashCode());
+    }
+
+    @Test
+    void 식별자가_다른_주간_계획량은_다르게_취급한다() {
+        WeeklyQuantity weeklyQuantity = createWeeklyQuantity(1L);
+        WeeklyQuantity anotherWeeklyQuantity = createWeeklyQuantity(2L);
+
+        assertThat(weeklyQuantity).isNotEqualTo(anotherWeeklyQuantity);
+    }
+
+    @Test
+    void 식별자가_없는_주간_계획량끼리는_나머지_값이_같더라도_다른_것으로_취급한다() {
+        TotalQuantity totalQuantity = TotalQuantity.create(
+                createSessionalPlan(),
+                createSubject(),
+                createTotalQuantityAmount()
+        );
+        TotalQuantity anotherTotalQuantity = TotalQuantity.create(
+                createSessionalPlan(),
+                createSubject(),
+                createTotalQuantityAmount()
+        );
+
+        assertThat(totalQuantity.getWeeklyQuantities().getFirst())
+                .isNotEqualTo(anotherTotalQuantity.getWeeklyQuantities().getFirst());
+    }
+
+    private WeeklyQuantity createWeeklyQuantity(Long weeklyQuantityId) {
+        WeekPeriod weekPeriod = new WeekPeriod(
+                LocalDate.of(2026, 1, 1),
+                LocalDate.of(2026, 1, 4)
+        );
+
+        return WeeklyQuantity.reconstruct(
+                weeklyQuantityId,
+                weekPeriod,
+                WeeklyQuantityAmount.of(100, null),
+                List.of(DailyQuantity.reconstruct(
+                        1L,
+                        LocalDate.of(2026, 1, 1),
+                        DailyQuantityAmount.of(100, 0, 100, null)
+                ))
+        );
     }
 }

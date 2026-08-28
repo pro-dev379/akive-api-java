@@ -6,10 +6,7 @@ import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityCreator;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
-import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityCreateCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityUpdateCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityReduceCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.*;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.TotalQuantity;
@@ -77,6 +74,24 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
                 .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
         totalQuantity.reduceWeeklyQuantity(command.weeklyQuantityId(), command.weeklyQuantityAmount());
+
+        totalQuantityRepository.save(totalQuantity);
+    }
+
+    @Override
+    public void delayWeeklyQuantity(WeeklyQuantityDelayCommand command)
+            throws BadRequestException, NotFoundException {
+        validateSessionalPlan(command.sessionalPlanId(), command.userId());
+
+        TotalQuantity totalQuantity = totalQuantityRepository
+                .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
+                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+
+        totalQuantity.delayWeeklyQuantity(
+                command.weeklyQuantityId(),
+                command.targetWeeklyQuantityId(),
+                command.quantityAmountToDelay()
+        );
 
         totalQuantityRepository.save(totalQuantity);
     }
