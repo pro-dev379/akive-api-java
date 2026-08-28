@@ -19,8 +19,8 @@ public record SessionalPlanUpdateRequest(
                 sessionalPlanId,
                 userId,
                 this.sessionName,
-                sessionPeriod.startOn(),
-                sessionPeriod.endOn()
+                this.sessionPeriod.startOn(),
+                this.sessionPeriod.endOn()
         );
     }
 }

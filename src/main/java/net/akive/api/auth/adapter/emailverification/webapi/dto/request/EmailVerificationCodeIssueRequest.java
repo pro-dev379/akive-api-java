@@ -11,6 +11,6 @@ public record EmailVerificationCodeIssueRequest(
         @NotNull EmailVerificationPurpose verificationPurpose
 ) {
     public EmailVerificationIssueCommand toCommand() {
-        return EmailVerificationIssueCommand.of(email, verificationPurpose);
+        return EmailVerificationIssueCommand.of(this.email, this.verificationPurpose);
     }
 }

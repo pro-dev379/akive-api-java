@@ -17,9 +17,9 @@ public record SessionalPlanCreateRequest(
     public SessionalPlanCreateCommand to(Long userId) {
         return SessionalPlanCreateCommand.of(
                 userId,
-                sessionName,
-                sessionPeriod.startOn(),
-                sessionPeriod.endOn()
+                this.sessionName,
+                this.sessionPeriod.startOn(),
+                this.sessionPeriod.endOn()
         );
     }
 }

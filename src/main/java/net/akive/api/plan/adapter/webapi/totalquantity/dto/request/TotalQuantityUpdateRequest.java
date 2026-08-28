@@ -16,11 +16,11 @@ public record TotalQuantityUpdateRequest(
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                subject.name(),
-                subject.category(),
+                this.subject.name(),
+                this.subject.category(),
                 totalQuantityAmount().quantityAmount(),
                 totalQuantityAmount().quantityUnit(),
-                totalQuantityAmount.quantityMemo()
+                this.totalQuantityAmount.quantityMemo()
         );
     }
 }
