@@ -81,15 +81,15 @@ public class DailyQuantity {
             return new QuantityReductionResult(0);
         }
 
-        int reducedAmount = Math.min(amount, this.dailyQuantityAmount.delayedQuantityAmount().value());
+        int quantityAmountToReduce = Math.min(amount, this.dailyQuantityAmount.delayedQuantityAmount().value());
         this.dailyQuantityAmount = new DailyQuantityAmount(
-                this.dailyQuantityAmount.quantityAmount().minus(reducedAmount),
+                this.dailyQuantityAmount.quantityAmount().minus(quantityAmountToReduce),
                 this.dailyQuantityAmount.completedQuantityAmount(),
-                this.dailyQuantityAmount.delayedQuantityAmount().minus(reducedAmount),
+                this.dailyQuantityAmount.delayedQuantityAmount().minus(quantityAmountToReduce),
                 this.dailyQuantityAmount.quantityMemo()
         );
 
-        return new QuantityReductionResult(reducedAmount);
+        return new QuantityReductionResult(quantityAmountToReduce);
     }
 
     int getCompletedQuantityAmount() {
@@ -111,6 +111,6 @@ public class DailyQuantity {
         }
     }
 
-    record QuantityReductionResult(int reducedAmount) {
+    record QuantityReductionResult(int quantityAmountToReduce) {
     }
 }

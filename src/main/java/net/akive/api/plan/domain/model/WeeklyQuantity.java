@@ -104,7 +104,7 @@ public class WeeklyQuantity {
         for (DailyQuantity dailyQuantity : this.dailyQuantities) {
             DailyQuantity.QuantityReductionResult result = dailyQuantity.reduce(remainingAmount);
 
-            remainingAmount -= result.reducedAmount();
+            remainingAmount -= result.quantityAmountToReduce();
 
             if (remainingAmount == 0) {
                 break;
@@ -119,20 +119,20 @@ public class WeeklyQuantity {
     QuantityReductionResult reduce(WeeklyQuantityAmount reducedWeeklyQuantityAmount) {
         requireNonNull(reducedWeeklyQuantityAmount);
 
-        int reducedAmount = calculateReductionAmount(reducedWeeklyQuantityAmount);
+        int quantityAmountToReduce = calculateReductionAmount(reducedWeeklyQuantityAmount);
 
-        validateReducible(reducedWeeklyQuantityAmount, reducedAmount);
+        validateReducible(reducedWeeklyQuantityAmount, quantityAmountToReduce);
 
-        if (reducedAmount == 0) {
+        if (quantityAmountToReduce == 0) {
             this.weeklyQuantityAmount = reducedWeeklyQuantityAmount;
 
             return new QuantityReductionResult(0, 0);
         }
 
-        QuantityReductionResult result = reduceDailyQuantities(reducedAmount);
+        QuantityReductionResult result = reduceDailyQuantities(quantityAmountToReduce);
         this.weeklyQuantityAmount = reducedWeeklyQuantityAmount;
 
-        return new QuantityReductionResult(result.remainingAmount(), reducedAmount);
+        return new QuantityReductionResult(result.remainingAmount(), quantityAmountToReduce);
     }
 
     int calculateReductionAmount(WeeklyQuantityAmount reducedWeeklyQuantityAmount) {
@@ -207,8 +207,8 @@ public class WeeklyQuantity {
         );
     }
 
-    private void validateReducible(WeeklyQuantityAmount reducedWeeklyQuantityAmount, int reducedAmount) {
-        if (reducedAmount < 0) {
+    private void validateReducible(WeeklyQuantityAmount reducedWeeklyQuantityAmount, int quantityAmountToReduce) {
+        if (quantityAmountToReduce < 0) {
             throw new BadRequestException(WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED);
         }
 
@@ -243,6 +243,6 @@ public class WeeklyQuantity {
         return dailyQuantities;
     }
 
-    record QuantityReductionResult(int remainingAmount, int reducedAmount) {
+    record QuantityReductionResult(int remainingAmount, int quantityAmountToReduce) {
     }
 }

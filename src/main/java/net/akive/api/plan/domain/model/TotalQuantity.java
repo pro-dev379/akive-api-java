@@ -116,12 +116,12 @@ public class TotalQuantity {
 
         int weeklyQuantityIndex = findWeeklyQuantityIndex(weeklyQuantityId);
         WeeklyQuantity weeklyQuantity = this.weeklyQuantities.get(weeklyQuantityIndex);
-        int reducedAmount = weeklyQuantity.calculateReductionAmount(reducedWeeklyQuantityAmount);
+        int quantityAmountToReduce = weeklyQuantity.calculateReductionAmount(reducedWeeklyQuantityAmount);
 
-        validateNotLastWeekReduction(weeklyQuantityIndex, reducedAmount);
+        validateNotLastWeekReduction(weeklyQuantityIndex, quantityAmountToReduce);
 
         WeeklyQuantity.QuantityReductionResult result = weeklyQuantity.reduce(reducedWeeklyQuantityAmount);
-        carryOverReducedAmountToNextWeek(weeklyQuantityIndex, result.reducedAmount());
+        carryOverReducedAmountToNextWeek(weeklyQuantityIndex, result.quantityAmountToReduce());
     }
 
     private void validateUpdatable(TotalQuantityAmount newTotalQuantityAmount) {
@@ -167,8 +167,8 @@ public class TotalQuantity {
         reduceWeeklyQuantities(Math.abs(amountDelta));
     }
 
-    private void reduceWeeklyQuantities(int reducedAmount) {
-        int remainingAmount = reducedAmount;
+    private void reduceWeeklyQuantities(int quantityAmountToReduce) {
+        int remainingAmount = quantityAmountToReduce;
 
         for (WeeklyQuantity weeklyQuantity : this.weeklyQuantities) {
             WeeklyQuantity.QuantityReductionResult result = weeklyQuantity.reduceDailyQuantities(remainingAmount);
@@ -191,15 +191,15 @@ public class TotalQuantity {
         throw new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND);
     }
 
-    private void validateNotLastWeekReduction(int weeklyQuantityIndex, int reducedAmount) {
-        if (reducedAmount > 0 && isLastWeek(weeklyQuantityIndex)) {
+    private void validateNotLastWeekReduction(int weeklyQuantityIndex, int quantityAmountToReduce) {
+        if (quantityAmountToReduce > 0 && isLastWeek(weeklyQuantityIndex)) {
             throw new BadRequestException(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED);
         }
     }
 
-    private void carryOverReducedAmountToNextWeek(int weeklyQuantityIndex, int reducedAmount) {
-        if (reducedAmount > 0) {
-            this.weeklyQuantities.get(weeklyQuantityIndex + 1).increase(reducedAmount);
+    private void carryOverReducedAmountToNextWeek(int weeklyQuantityIndex, int quantityAmountToReduce) {
+        if (quantityAmountToReduce > 0) {
+            this.weeklyQuantities.get(weeklyQuantityIndex + 1).increase(quantityAmountToReduce);
         }
     }
 
