@@ -225,7 +225,7 @@ class TotalQuantityTest {
     }
 
     @Test
-    void 세션_총량을_현재_완료량보다_적게_수정할_수_없다() {
+    void 세션_총량을_현재_달성량보다_적게_수정할_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedAmount(100, 30);
         TotalQuantityAmount newTotalQuantityAmount = TotalQuantityAmount.of(20, QUANTITY_UNIT, null);
 
@@ -294,7 +294,7 @@ class TotalQuantityTest {
     }
 
     @Test
-    void 주간_계획량을_주간_계획_완료량보다_적게_줄일_수_없다() {
+    void 주간_계획량을_주간_계획_달성량보다_적게_줄일_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedFirstWeek(100, 30);
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20, null);
 

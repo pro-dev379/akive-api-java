@@ -42,7 +42,7 @@ class WeeklyPlanQueryServiceTest {
     WeeklyPlanQueryService weeklyPlanQueryService;
 
     @Test
-    void 주간_계획을_조회한다() {
+    void 위클리_플랜을_조회한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
@@ -80,7 +80,7 @@ class WeeklyPlanQueryServiceTest {
     }
 
     @Test
-    void 세셔널_플랜이_없으면_주간_계획_조회에_실패하고_예외를_던진다() {
+    void 세셔널_플랜이_없으면_위클리_플랜_조회에_실패하고_예외를_던진다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         int weekNum = 1;
@@ -100,7 +100,7 @@ class WeeklyPlanQueryServiceTest {
     }
 
     @Test
-    void 주차가_세션_기간을_벗어나면_주간_계획_조회에_실패하고_예외를_던진다() {
+    void 주차가_세션_기간을_벗어나면_위클리_플랜_조회에_실패하고_예외를_던진다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         int weekNum = 999;

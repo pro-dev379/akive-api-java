@@ -22,7 +22,7 @@ import static org.mockito.BDDMockito.then;
 class WeeklyPlanApiTest extends PrivateApiTestSupport {
 
     @Test
-    void 주간_계획을_조회한다() {
+    void 위클리_플랜을_조회한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         Integer weekNum = 1;
@@ -73,7 +73,7 @@ class WeeklyPlanApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 주간_계획에_총량이_없으면_빈_목록을_응답한다() {
+    void 위클리_플랜에_주간_계획량이_없으면_빈_목록을_응답한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         Integer weekNum = 1;

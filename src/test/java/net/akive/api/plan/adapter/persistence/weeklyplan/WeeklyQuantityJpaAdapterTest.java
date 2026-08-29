@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
-    void 주간_계획을_조회한다() {
+    void 주간_계획량을_조회한다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         WeekPeriod weekPeriod = new WeekPeriod(
                 LocalDate.of(2026, 1, 1),
@@ -50,7 +50,7 @@ class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 주간_계획_내_특정_주간_계획량을_조회한다() {
+    void 위클리_플랜_내_특정_주간_계획량을_조회한다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
         Long userId = savedTotalQuantity.getSessionalPlan().getUser().getUserId();
