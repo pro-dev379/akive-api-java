@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
-public class PlanPolicy {
+public final class PlanPolicy {
 
     public static final int SESSION_NAME_MAX_LENGTH = 50;
     public static final int SUBJECT_NAME_MAX_LENGTH = 50;

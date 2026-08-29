@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
-public class MentoringPolicy {
+public final class MentoringPolicy {
 
     public static final int GOAL_MAX_LENGTH = 140;
     public static final int PREFERENCE_MAX_LENGTH = 100;

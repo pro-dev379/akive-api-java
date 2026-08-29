@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
-public class EmailVerificationPolicy {
+public final class EmailVerificationPolicy {
 
     public static final int VERIFICATION_CODE_LENGTH = 6;
     public static final int VERIFICATION_CODE_BOUND = 1_000_000;

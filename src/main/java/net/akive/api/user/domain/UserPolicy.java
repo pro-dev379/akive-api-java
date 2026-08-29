@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
-public class UserPolicy {
+public final class UserPolicy {
 
     public static final int NICKNAME_MAX_LENGTH = 20;
     public static final int ROLE_BASED_NICKNAME_SUFFIX_LENGTH = 10;
