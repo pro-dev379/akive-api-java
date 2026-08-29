@@ -5,7 +5,7 @@ import net.akive.api.plan.application.required.data.DailyPlanData;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface DailyPlanRepository {
+public interface DailyQuantityRepository {
 
-    List<DailyPlanData> findDailyPlanDataByUserIdAndDate(Long userId, LocalDate date);
+    List<DailyPlanData> findAllDailyPlanDataByUserIdAndDate(Long userId, LocalDate date);
 }

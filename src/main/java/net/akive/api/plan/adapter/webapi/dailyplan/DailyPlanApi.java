@@ -24,8 +24,8 @@ public class DailyPlanApi {
     private final DailyPlanFinder dailyPlanFinder;
 
     @GetMapping("/{date}")
-    public DailyPlansFindResponse find(@AuthenticatedUserId Long userId, @PathVariable LocalDate date) {
-        List<DailyPlan> result = dailyPlanFinder.find(new DailyPlansFindQuery(userId, date));
+    public DailyPlansFindResponse findAll(@AuthenticatedUserId Long userId, @PathVariable LocalDate date) {
+        List<DailyPlan> result = dailyPlanFinder.findAll(new DailyPlansFindQuery(userId, date));
 
         return DailyPlansFindResponse.from(result);
     }

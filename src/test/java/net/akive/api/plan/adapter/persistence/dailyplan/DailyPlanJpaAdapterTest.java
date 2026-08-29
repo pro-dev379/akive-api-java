@@ -19,7 +19,7 @@ class DailyPlanJpaAdapterTest extends RepositoryTestSupport {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         flushAndClear();
 
-        List<DailyPlanData> dailyPlans = dailyPlanRepository.findDailyPlanDataByUserIdAndDate(
+        List<DailyPlanData> dailyPlans = dailyQuantityRepository.findAllDailyPlanDataByUserIdAndDate(
                 savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
                 QUERY_DATE
         );

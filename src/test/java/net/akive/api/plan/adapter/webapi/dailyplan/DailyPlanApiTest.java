@@ -27,7 +27,7 @@ class DailyPlanApiTest extends PrivateApiTestSupport {
         DailyPlan dailyPlan = createDailyPlan(date);
         DailyPlansFindQuery query = new DailyPlansFindQuery(userId, date);
 
-        given(dailyPlanFinder.find(query)).willReturn(List.of(dailyPlan));
+        given(dailyPlanFinder.findAll(query)).willReturn(List.of(dailyPlan));
 
         MvcTestResultAssert result = get(userId, DAILY_PLAN, date)
                 .hasStatusOk();
@@ -46,7 +46,7 @@ class DailyPlanApiTest extends PrivateApiTestSupport {
         result.bodyJson().extractingPath("$.dailyPlans[0].amount.quantityUnit").isEqualTo(QUANTITY_UNIT);
         result.bodyJson().extractingPath("$.dailyPlans[0].amount.quantityMemo").isNull();
 
-        then(dailyPlanFinder).should().find(query);
+        then(dailyPlanFinder).should().findAll(query);
     }
 
     @Test
@@ -55,14 +55,14 @@ class DailyPlanApiTest extends PrivateApiTestSupport {
         LocalDate date = LocalDate.of(2026, 1, 1);
         DailyPlansFindQuery query = new DailyPlansFindQuery(userId, date);
 
-        given(dailyPlanFinder.find(query)).willReturn(List.of());
+        given(dailyPlanFinder.findAll(query)).willReturn(List.of());
 
         MvcTestResultAssert result = get(userId, DAILY_PLAN, date)
                 .hasStatusOk();
 
         result.bodyJson().extractingPath("$.dailyPlans").asArray().isEmpty();
 
-        then(dailyPlanFinder).should().find(query);
+        then(dailyPlanFinder).should().findAll(query);
     }
 
     private DailyPlan createDailyPlan(LocalDate date) {

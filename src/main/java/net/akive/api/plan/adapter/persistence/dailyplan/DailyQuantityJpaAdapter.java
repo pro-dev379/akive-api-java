@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.adapter.persistence.entity.DailyQuantityEntity;
 import net.akive.api.plan.adapter.persistence.entity.TotalQuantityEntity;
 import net.akive.api.plan.adapter.persistence.entity.WeeklyQuantityEntity;
-import net.akive.api.plan.application.required.DailyPlanRepository;
+import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.data.DailyPlanData;
 import net.akive.api.plan.domain.value.QuantityUnit;
 import org.springframework.stereotype.Repository;
@@ -14,14 +14,14 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class DailyPlanJpaAdapter implements DailyPlanRepository {
+public class DailyQuantityJpaAdapter implements DailyQuantityRepository {
 
     private final DailyQuantityJpaRepository dailyQuantityJpaRepository;
 
     @Override
-    public List<DailyPlanData> findDailyPlanDataByUserIdAndDate(Long userId, LocalDate date) {
+    public List<DailyPlanData> findAllDailyPlanDataByUserIdAndDate(Long userId, LocalDate date) {
         return dailyQuantityJpaRepository
-                .findDailyQuantitiesByUserIdAndDate(userId, date)
+                .findAllDailyQuantityByUserIdAndDate(userId, date)
                 .stream()
                 .map(this::toDailyPlanData)
                 .toList();

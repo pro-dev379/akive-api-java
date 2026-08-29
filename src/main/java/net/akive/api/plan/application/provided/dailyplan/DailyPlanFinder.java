@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface DailyPlanFinder {
 
-    List<DailyPlan> find(DailyPlansFindQuery query);
+    List<DailyPlan> findAll(DailyPlansFindQuery query);
 }

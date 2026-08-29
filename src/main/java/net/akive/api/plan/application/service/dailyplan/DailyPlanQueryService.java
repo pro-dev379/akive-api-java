@@ -3,7 +3,7 @@ package net.akive.api.plan.application.service.dailyplan;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.application.provided.dailyplan.DailyPlanFinder;
 import net.akive.api.plan.application.provided.dailyplan.dto.DailyPlansFindQuery;
-import net.akive.api.plan.application.required.DailyPlanRepository;
+import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.data.DailyPlanData;
 import net.akive.api.plan.application.result.DailyPlan;
 import org.springframework.stereotype.Service;
@@ -16,11 +16,11 @@ import java.util.List;
 @RequiredArgsConstructor
 class DailyPlanQueryService implements DailyPlanFinder {
 
-    private final DailyPlanRepository dailyPlanRepository;
+    private final DailyQuantityRepository dailyQuantityRepository;
 
     @Override
-    public List<DailyPlan> find(DailyPlansFindQuery query) {
-        return dailyPlanRepository.findDailyPlanDataByUserIdAndDate(query.userId(), query.date())
+    public List<DailyPlan> findAll(DailyPlansFindQuery query) {
+        return dailyQuantityRepository.findAllDailyPlanDataByUserIdAndDate(query.userId(), query.date())
                 .stream()
                 .map(this::toDailyPlan)
                 .toList();

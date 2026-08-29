@@ -19,5 +19,5 @@ public interface DailyQuantityJpaRepository extends JpaRepository<DailyQuantityE
             and dq.date = :date
         order by sp.sessionalPlanId asc, tq.totalQuantityId asc, wq.weeklyQuantityId asc
     """)
-    List<DailyQuantityEntity> findDailyQuantitiesByUserIdAndDate(Long userId, LocalDate date);
+    List<DailyQuantityEntity> findAllDailyQuantityByUserIdAndDate(Long userId, LocalDate date);
 }

@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import net.akive.api.auth.adapter.login.persistence.LegacyUserPasswordJpaRepository;
 import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
-import net.akive.api.plan.application.required.DailyPlanRepository;
+import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.application.required.WeeklyQuantityRepository;
@@ -45,7 +45,7 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
     protected TotalQuantityRepository totalQuantityRepository;
 
     @Autowired
-    protected DailyPlanRepository dailyPlanRepository;
+    protected DailyQuantityRepository dailyQuantityRepository;
 
     @Autowired
     protected WeeklyQuantityRepository weeklyQuantityRepository;

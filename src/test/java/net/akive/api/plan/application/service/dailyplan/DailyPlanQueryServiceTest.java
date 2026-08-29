@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.dailyplan;
 
 import net.akive.api.plan.application.provided.dailyplan.dto.DailyPlansFindQuery;
-import net.akive.api.plan.application.required.DailyPlanRepository;
+import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.data.DailyPlanData;
 import net.akive.api.plan.application.result.DailyPlan;
 import net.akive.api.plan.domain.model.DailyQuantity;
@@ -26,7 +26,7 @@ import static org.mockito.BDDMockito.then;
 class DailyPlanQueryServiceTest {
 
     @Mock
-    DailyPlanRepository dailyPlanRepository;
+    DailyQuantityRepository dailyQuantityRepository;
 
     @InjectMocks
     DailyPlanQueryService dailyPlanQueryService;
@@ -36,10 +36,10 @@ class DailyPlanQueryServiceTest {
         Long userId = 1L;
         LocalDate date = LocalDate.of(2026, 1, 1);
         DailyPlanData dailyPlanData = createDailyPlanData(date);
-        given(dailyPlanRepository.findDailyPlanDataByUserIdAndDate(userId, date))
+        given(dailyQuantityRepository.findAllDailyPlanDataByUserIdAndDate(userId, date))
                 .willReturn(List.of(dailyPlanData));
 
-        List<DailyPlan> dailyPlans = dailyPlanQueryService.find(new DailyPlansFindQuery(userId, date));
+        List<DailyPlan> dailyPlans = dailyPlanQueryService.findAll(new DailyPlansFindQuery(userId, date));
 
         assertThat(dailyPlans).hasSize(1);
         DailyPlan dailyPlan = dailyPlans.getFirst();
@@ -50,7 +50,7 @@ class DailyPlanQueryServiceTest {
         assertThat(dailyPlan.dailyQuantity()).isEqualTo(dailyPlanData.dailyQuantity());
         assertThat(dailyPlan.quantityUnit()).isEqualTo(dailyPlanData.quantityUnit());
 
-        then(dailyPlanRepository).should().findDailyPlanDataByUserIdAndDate(userId, date);
+        then(dailyQuantityRepository).should().findAllDailyPlanDataByUserIdAndDate(userId, date);
     }
 
     private DailyPlanData createDailyPlanData(LocalDate date) {
