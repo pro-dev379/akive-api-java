@@ -7,7 +7,7 @@ import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.plan.application.required.DailyPlanRepository;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
-import net.akive.api.plan.application.required.WeeklyPlanRepository;
+import net.akive.api.plan.application.required.WeeklyQuantityRepository;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
 import net.akive.api.user.application.required.GoalRepository;
@@ -48,7 +48,7 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
     protected DailyPlanRepository dailyPlanRepository;
 
     @Autowired
-    protected WeeklyPlanRepository weeklyPlanRepository;
+    protected WeeklyQuantityRepository weeklyQuantityRepository;
 
     @Autowired
     protected EntityManager entityManager;

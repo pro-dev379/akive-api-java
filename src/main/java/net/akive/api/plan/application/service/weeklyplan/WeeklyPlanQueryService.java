@@ -5,7 +5,7 @@ import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.weeklyplan.WeeklyPlanFinder;
 import net.akive.api.plan.application.provided.weeklyplan.dto.WeeklyPlanFindQuery;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
-import net.akive.api.plan.application.required.WeeklyPlanRepository;
+import net.akive.api.plan.application.required.WeeklyQuantityRepository;
 import net.akive.api.plan.application.required.data.WeeklyPlanData;
 import net.akive.api.plan.application.result.WeeklyPlan;
 import net.akive.api.plan.domain.value.SessionPeriod;
@@ -24,7 +24,7 @@ import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_
 class WeeklyPlanQueryService implements WeeklyPlanFinder {
 
     private final SessionalPlanRepository sessionalPlanRepository;
-    private final WeeklyPlanRepository weeklyPlanRepository;
+    private final WeeklyQuantityRepository weeklyQuantityRepository;
 
     @Override
     public WeeklyPlan find(WeeklyPlanFindQuery query) throws NotFoundException {
@@ -32,7 +32,7 @@ class WeeklyPlanQueryService implements WeeklyPlanFinder {
         SessionWeek sessionWeek = getSessionWeekOrThrow(sessionPeriod, query.weekNum());
 
         List<WeeklyPlan.WeeklyPlanItem> weeklyPlanItems =
-                weeklyPlanRepository.findWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
+                weeklyQuantityRepository.findAllWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
                         query.sessionalPlanId(),
                         sessionWeek.weekPeriod()
                 )

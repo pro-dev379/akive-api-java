@@ -29,6 +29,8 @@ import java.util.stream.Stream;
 import static net.akive.api.common.exception.business.BadRequestError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.SESSIONAL_PLAN;
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.SESSIONAL_PLANS;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
@@ -51,7 +53,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         );
         given(sessionalPlanCreator.create(command)).willReturn(sessionalPlanId);
 
-        MvcTestResultAssert result = postJson(userId, "/sessional-plans", toJson(createRequest()))
+        MvcTestResultAssert result = postJson(userId, SESSIONAL_PLANS, toJson(createRequest()))
                 .hasStatus(CREATED);
 
         result.bodyJson().extractingPath("$.sessionalPlanId").isEqualTo(10);
@@ -66,7 +68,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     ) {
         Long userId = 1L;
 
-        postJson(userId, "/sessional-plans", toJson(request))
+        postJson(userId, SESSIONAL_PLANS, toJson(request))
                 .hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).create(any(SessionalPlanCreateCommand.class));
@@ -77,7 +79,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         Long userId = 1L;
         String body = invalidDateFormatRequestJson();
 
-        postJson(userId, "/sessional-plans", body)
+        postJson(userId, SESSIONAL_PLANS, body)
                 .hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).create(any(SessionalPlanCreateCommand.class));
@@ -92,7 +94,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
                 .given(sessionalPlanCreator)
                 .create(command);
 
-        MvcTestResultAssert result = postJson(userId, "/sessional-plans", toJson(request))
+        MvcTestResultAssert result = postJson(userId, SESSIONAL_PLANS, toJson(request))
                 .hasStatus(CONFLICT);
 
         result.bodyJson()
@@ -114,7 +116,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
                 .given(sessionalPlanCreator)
                 .create(command);
 
-        MvcTestResultAssert result = postJson(userId, "/sessional-plans", toJson(request))
+        MvcTestResultAssert result = postJson(userId, SESSIONAL_PLANS, toJson(request))
                 .hasStatus(BAD_REQUEST);
 
         result.bodyJson()
@@ -133,7 +135,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(10L, createPersistedUser(userId));
         given(sessionalPlanFinder.findAll(userId)).willReturn(List.of(sessionalPlan));
 
-        MvcTestResultAssert result = get(userId, "/sessional-plans")
+        MvcTestResultAssert result = get(userId, SESSIONAL_PLANS)
                 .hasStatusOk();
 
         result.bodyJson().extractingPath("$.sessionalPlans[0].sessionalPlanId")
@@ -165,7 +167,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         );
         given(sessionalPlanFinder.find(query)).willReturn(detail);
 
-        MvcTestResultAssert result = get(userId, "/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+        MvcTestResultAssert result = get(userId, SESSIONAL_PLAN, sessionalPlanId)
                 .hasStatusOk();
 
         result.bodyJson().extractingPath("$.sessionalPlanId").isEqualTo(10);
@@ -199,7 +201,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         given(sessionalPlanFinder.find(query))
                 .willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
-        MvcTestResultAssert result = get(userId, "/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+        MvcTestResultAssert result = get(userId, SESSIONAL_PLAN, sessionalPlanId)
                 .hasStatus(NOT_FOUND);
 
         assertSessionalPlanNotFoundResponse(result);
@@ -220,7 +222,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         );
         String body = toJson(createUpdateRequest());
 
-        putJson(userId, "/sessional-plans/{sessionalPlanId}", body, sessionalPlanId)
+        putJson(userId, SESSIONAL_PLAN, body, sessionalPlanId)
                 .hasStatus(NO_CONTENT);
 
         then(sessionalPlanCreator).should().update(command);
@@ -234,7 +236,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
 
-        putJson(userId, "/sessional-plans/{sessionalPlanId}", toJson(request), sessionalPlanId)
+        putJson(userId, SESSIONAL_PLAN, toJson(request), sessionalPlanId)
                 .hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).update(any(SessionalPlanUpdateCommand.class));
@@ -246,7 +248,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 10L;
         String body = invalidDateFormatRequestJson();
 
-        putJson(userId, "/sessional-plans/{sessionalPlanId}", body, sessionalPlanId)
+        putJson(userId, SESSIONAL_PLAN, body, sessionalPlanId)
                 .hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).update(any(SessionalPlanUpdateCommand.class));
@@ -264,7 +266,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
 
         MvcTestResultAssert result = putJson(
                 userId,
-                "/sessional-plans/{sessionalPlanId}",
+                SESSIONAL_PLAN,
                 toJson(request),
                 sessionalPlanId
         ).hasStatus(NOT_FOUND);
@@ -279,7 +281,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
 
-        delete(userId, "/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+        delete(userId, SESSIONAL_PLAN, sessionalPlanId)
                 .hasStatus(NO_CONTENT);
 
         then(sessionalPlanCreator).should().delete(new SessionalPlanDeleteCommand(userId, sessionalPlanId));
@@ -294,7 +296,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
                 .given(sessionalPlanCreator)
                 .delete(command);
 
-        MvcTestResultAssert result = delete(userId, "/sessional-plans/{sessionalPlanId}", sessionalPlanId)
+        MvcTestResultAssert result = delete(userId, SESSIONAL_PLAN, sessionalPlanId)
                 .hasStatus(NOT_FOUND);
 
         assertSessionalPlanNotFoundResponse(result);

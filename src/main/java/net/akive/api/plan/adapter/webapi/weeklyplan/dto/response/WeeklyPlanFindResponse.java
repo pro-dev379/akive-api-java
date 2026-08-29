@@ -42,7 +42,7 @@ public record WeeklyPlanFindResponse(
             List<DailyQuantityResponse> dailyQuantities
     ) {
 
-        private static WeeklyQuantityResponse from(WeeklyPlan.WeeklyPlanItem result) {
+        public static WeeklyQuantityResponse from(WeeklyPlan.WeeklyPlanItem result) {
             return new WeeklyQuantityResponse(
                     result.sessionalPlanId(),
                     result.totalQuantityId(),

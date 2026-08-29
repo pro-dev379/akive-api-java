@@ -13,14 +13,13 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.List;
 
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.WEEKLY_PLAN;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 class WeeklyPlanApiTest extends PrivateApiTestSupport {
-
-    private static final String WEEKLY_PLANS_URL = "/sessional-plans/{sessionalPlanId}/weekly-plans/{weekNum}";
 
     @Test
     void 주간_계획을_조회한다() {
@@ -32,7 +31,7 @@ class WeeklyPlanApiTest extends PrivateApiTestSupport {
 
         given(weeklyPlanFinder.find(query)).willReturn(weeklyPlan);
 
-        MvcTestResultAssert result = get(userId, WEEKLY_PLANS_URL, sessionalPlanId, weekNum)
+        MvcTestResultAssert result = get(userId, WEEKLY_PLAN, sessionalPlanId, weekNum)
                 .hasStatusOk();
 
         result.bodyJson().extractingPath("$.sessionWeek.weekNum").isEqualTo(1);
@@ -84,7 +83,7 @@ class WeeklyPlanApiTest extends PrivateApiTestSupport {
 
         given(weeklyPlanFinder.find(query)).willReturn(weeklyPlan);
 
-        MvcTestResultAssert result = get(userId, WEEKLY_PLANS_URL, sessionalPlanId, weekNum)
+        MvcTestResultAssert result = get(userId, WEEKLY_PLAN, sessionalPlanId, weekNum)
                 .hasStatusOk();
 
         result.bodyJson().extractingPath("$.sessionWeek.weekNum").isEqualTo(1);

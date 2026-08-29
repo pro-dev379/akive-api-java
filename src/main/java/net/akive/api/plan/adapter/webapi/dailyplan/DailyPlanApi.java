@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
 
-@RequestMapping("/sessional-plans/daily-plans")
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_PLANS;
+
 @RestController
+@RequestMapping(DAILY_PLANS)
 @RequiredArgsConstructor
 public class DailyPlanApi {
 

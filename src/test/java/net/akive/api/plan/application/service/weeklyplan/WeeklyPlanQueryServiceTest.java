@@ -3,7 +3,7 @@ package net.akive.api.plan.application.service.weeklyplan;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.weeklyplan.dto.WeeklyPlanFindQuery;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
-import net.akive.api.plan.application.required.WeeklyPlanRepository;
+import net.akive.api.plan.application.required.WeeklyQuantityRepository;
 import net.akive.api.plan.application.required.data.WeeklyPlanData;
 import net.akive.api.plan.application.result.WeeklyPlan;
 import net.akive.api.plan.domain.model.SessionalPlan;
@@ -36,7 +36,7 @@ class WeeklyPlanQueryServiceTest {
     SessionalPlanRepository sessionalPlanRepository;
 
     @Mock
-    WeeklyPlanRepository weeklyPlanRepository;
+    WeeklyQuantityRepository weeklyQuantityRepository;
 
     @InjectMocks
     WeeklyPlanQueryService weeklyPlanQueryService;
@@ -56,7 +56,7 @@ class WeeklyPlanQueryServiceTest {
 
         given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(sessionalPlan.getSessionPeriod()));
-        given(weeklyPlanRepository.findWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
+        given(weeklyQuantityRepository.findAllWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
                 sessionalPlanId,
                 sessionWeek.weekPeriod()
         )).willReturn(List.of(weeklyPlanData));
@@ -75,8 +75,8 @@ class WeeklyPlanQueryServiceTest {
 
         then(sessionalPlanRepository).should()
                 .findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(weeklyPlanRepository).should()
-                .findWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(sessionalPlanId, sessionWeek.weekPeriod());
+        then(weeklyQuantityRepository).should()
+                .findAllWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(sessionalPlanId, sessionWeek.weekPeriod());
     }
 
     @Test
@@ -96,7 +96,7 @@ class WeeklyPlanQueryServiceTest {
 
         then(sessionalPlanRepository).should()
                 .findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(weeklyPlanRepository).shouldHaveNoInteractions();
+        then(weeklyQuantityRepository).shouldHaveNoInteractions();
     }
 
     @Test
@@ -118,7 +118,7 @@ class WeeklyPlanQueryServiceTest {
 
         then(sessionalPlanRepository).should()
                 .findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(weeklyPlanRepository).shouldHaveNoInteractions();
+        then(weeklyQuantityRepository).shouldHaveNoInteractions();
     }
 
     private WeeklyPlanData createWeeklyPlanData(Long sessionalPlanId, TotalQuantity totalQuantity) {

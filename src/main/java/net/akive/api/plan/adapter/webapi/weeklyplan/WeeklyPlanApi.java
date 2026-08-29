@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.WEEKLY_PLANS;
+
 @RestController
-@RequestMapping("/sessional-plans/{sessionalPlanId}/weekly-plans")
+@RequestMapping(WEEKLY_PLANS)
 @RequiredArgsConstructor
 public class WeeklyPlanApi {
 

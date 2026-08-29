@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.time.LocalDate;
 import java.util.List;
 
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_PLAN;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -28,7 +29,7 @@ class DailyPlanApiTest extends PrivateApiTestSupport {
 
         given(dailyPlanFinder.find(query)).willReturn(List.of(dailyPlan));
 
-        MvcTestResultAssert result = get(userId, "/sessional-plans/daily-plans/{date}", date)
+        MvcTestResultAssert result = get(userId, DAILY_PLAN, date)
                 .hasStatusOk();
 
         result.bodyJson().extractingPath("$.dailyPlans[0].sessionalPlanId").isEqualTo(1);
@@ -56,7 +57,7 @@ class DailyPlanApiTest extends PrivateApiTestSupport {
 
         given(dailyPlanFinder.find(query)).willReturn(List.of());
 
-        MvcTestResultAssert result = get(userId, "/sessional-plans/daily-plans/{date}", date)
+        MvcTestResultAssert result = get(userId, DAILY_PLAN, date)
                 .hasStatusOk();
 
         result.bodyJson().extractingPath("$.dailyPlans").asArray().isEmpty();

@@ -4,22 +4,23 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.adapter.persistence.entity.TotalQuantityEntity;
 import net.akive.api.plan.adapter.persistence.entity.WeekPeriodEntity;
 import net.akive.api.plan.adapter.persistence.entity.WeeklyQuantityEntity;
-import net.akive.api.plan.application.required.WeeklyPlanRepository;
+import net.akive.api.plan.application.required.WeeklyQuantityRepository;
 import net.akive.api.plan.application.required.data.WeeklyPlanData;
 import net.akive.api.plan.domain.value.QuantityUnit;
 import net.akive.api.plan.domain.value.WeekPeriod;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class WeeklyPlanJpaAdapter implements WeeklyPlanRepository {
+public class WeeklyQuantityJpaAdapter implements WeeklyQuantityRepository {
 
     private final WeeklyQuantityJpaRepository weeklyQuantityJpaRepository;
 
     @Override
-    public List<WeeklyPlanData> findWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
+    public List<WeeklyPlanData> findAllWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
             Long sessionalPlanId,
             WeekPeriod weekPeriod
     ) {
@@ -31,6 +32,22 @@ public class WeeklyPlanJpaAdapter implements WeeklyPlanRepository {
                 .stream()
                 .map(this::toWeeklyPlanData)
                 .toList();
+    }
+
+    @Override
+    public Optional<WeeklyPlanData> findWeeklyPlanDataBySessionalPlanIdAndUserIdAndTotalQuantityIdAndWeeklyQuantityId(
+            Long sessionalPlanId,
+            Long userId,
+            Long totalQuantityId,
+            Long weeklyQuantityId
+    ) {
+        return weeklyQuantityJpaRepository
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityIdAndWeeklyQuantityId(
+                        sessionalPlanId,
+                        userId,
+                        totalQuantityId,
+                        weeklyQuantityId
+                ).map(this::toWeeklyPlanData);
     }
 
     private WeeklyPlanData toWeeklyPlanData(WeeklyQuantityEntity weeklyQuantityEntity) {

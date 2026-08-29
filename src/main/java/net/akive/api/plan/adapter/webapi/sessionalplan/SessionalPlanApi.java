@@ -15,11 +15,12 @@ import net.akive.api.plan.application.result.SessionalPlanDetail;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.SESSIONAL_PLANS;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
-@RequestMapping("/sessional-plans")
+@RequestMapping(SESSIONAL_PLANS)
 @RequiredArgsConstructor
 public class SessionalPlanApi {
 
