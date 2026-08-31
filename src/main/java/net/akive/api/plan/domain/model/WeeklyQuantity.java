@@ -17,7 +17,7 @@ import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.ConflictError.WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY;
+import static net.akive.api.common.exception.business.ConflictError.WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -39,15 +39,13 @@ public class WeeklyQuantity {
             WeeklyQuantityAmount weeklyQuantityAmount,
             List<DailyQuantity> dailyQuantities
     ) {
-        requireNotEmpty(dailyQuantities);
-        validateDailyQuantitiesInWeekPeriod(dailyQuantities, weekPeriod);
-        validateWeeklyQuantityAmountMatchesDailyQuantities(weeklyQuantityAmount, dailyQuantities);
+        validateReconstructable(weekPeriod, weeklyQuantityAmount, dailyQuantities);
 
         return WeeklyQuantity.builder()
                 .weeklyQuantityId(requirePositive(weeklyQuantityId))
                 .weekPeriod(requireNonNull(weekPeriod))
                 .weeklyQuantityAmount(requireNonNull(weeklyQuantityAmount))
-                .dailyQuantities(List.copyOf(dailyQuantities))
+                .dailyQuantities(requireNotEmpty(List.copyOf(dailyQuantities)))
                 .build();
     }
 
@@ -56,105 +54,123 @@ public class WeeklyQuantity {
             SessionPeriod sessionPeriod,
             WeekPeriod weekPeriod,
             WeeklyQuantityAmount weeklyQuantityAmount,
-            boolean isInitialAllocationWeek
+            boolean isFirstWeek
     ) {
-        requireNonNull(totalQuantityAmount);
-        requireNonNull(sessionPeriod);
-        requireNonNull(weekPeriod);
-        requireNonNull(weeklyQuantityAmount);
-        validateWeekPeriodInSessionPeriod(weekPeriod, sessionPeriod);
-        validateWeeklyQuantityAmountInTotalQuantityAmount(
-                weeklyQuantityAmount,
-                totalQuantityAmount
-        );
+        validateCreatable(totalQuantityAmount, sessionPeriod, weekPeriod, weeklyQuantityAmount);
 
         List<DailyQuantity> dailyQuantities = createDailyQuantities(
                 weekPeriod,
                 weeklyQuantityAmount,
-                isInitialAllocationWeek
+                isFirstWeek
         );
 
         return WeeklyQuantity.builder()
-                .weekPeriod(weekPeriod)
-                .weeklyQuantityAmount(weeklyQuantityAmount)
-                .dailyQuantities(List.copyOf(dailyQuantities))
+                .weekPeriod(requireNonNull(weekPeriod))
+                .weeklyQuantityAmount(requireNonNull(weeklyQuantityAmount))
+                .dailyQuantities(requireNotEmpty(List.copyOf(dailyQuantities)))
                 .build();
     }
 
-    void increase(int amount) {
-        if (amount == 0) {
+    void increase(QuantityAmount weeklyAmountToIncrease) {
+        if (weeklyAmountToIncrease.isZero()) {
             return;
         }
 
-        this.dailyQuantities.getFirst().increase(amount);
+        this.dailyQuantities.getFirst().increase(weeklyAmountToIncrease);
 
         updateWeeklyQuantityAmountByDailyQuantities();
     }
 
-    QuantityReductionResult reduceDailyQuantities(int amount) {
-        if (amount == 0) {
-            return new QuantityReductionResult(0, 0);
+    void reduce(WeeklyQuantityAmount targetWeeklyQuantityAmount) {
+        requireNonNull(targetWeeklyQuantityAmount);
+        validateReducible(targetWeeklyQuantityAmount.quantityAmount());
+
+        QuantityAmountDelta weeklyAmountDelta = calculateAmountDeltaTo(targetWeeklyQuantityAmount.quantityAmount());
+
+        if (weeklyAmountDelta.isZero()) {
+            this.weeklyQuantityAmount = targetWeeklyQuantityAmount;
+            return;
         }
 
-        int remainingAmount = amount;
+        reduceDailyQuantities(weeklyAmountDelta.absoluteAmount());
+
+        this.weeklyQuantityAmount = targetWeeklyQuantityAmount;
+    }
+
+    QuantityAmount reduceDailyQuantities(QuantityAmount weeklyAmountToReduce) {
+        QuantityAmount remainingAmountToReduce = weeklyAmountToReduce;
+
+        if (remainingAmountToReduce.isZero()) {
+            return QuantityAmount.ZERO;
+        }
 
         for (DailyQuantity dailyQuantity : this.dailyQuantities) {
-            DailyQuantity.QuantityReductionResult result = dailyQuantity.reduce(remainingAmount);
+            QuantityAmount appliedReductionAmount = dailyQuantity.reduceAsMuchAsPossible(remainingAmountToReduce);
 
-            remainingAmount -= result.quantityAmountToReduce();
+            remainingAmountToReduce = remainingAmountToReduce.minus(appliedReductionAmount);
 
-            if (remainingAmount == 0) {
+            if (remainingAmountToReduce.isZero()) {
                 break;
             }
         }
 
         updateWeeklyQuantityAmountByDailyQuantities();
 
-        return new QuantityReductionResult(remainingAmount, amount - remainingAmount);
+        return remainingAmountToReduce;
     }
 
-    QuantityReductionResult reduce(WeeklyQuantityAmount reducedWeeklyQuantityAmount) {
-        requireNonNull(reducedWeeklyQuantityAmount);
-
-        int quantityAmountToReduce = calculateReductionAmount(reducedWeeklyQuantityAmount);
-
-        validateReducible(reducedWeeklyQuantityAmount, quantityAmountToReduce);
-
-        if (quantityAmountToReduce == 0) {
-            this.weeklyQuantityAmount = reducedWeeklyQuantityAmount;
-
-            return new QuantityReductionResult(0, 0);
-        }
-
-        QuantityReductionResult result = reduceDailyQuantities(quantityAmountToReduce);
-        this.weeklyQuantityAmount = reducedWeeklyQuantityAmount;
-
-        return new QuantityReductionResult(result.remainingAmount(), quantityAmountToReduce);
-    }
-
-    void delayTo(WeeklyQuantity targetWeeklyQuantity, QuantityAmount quantityAmountToDelay) {
+    void delayTo(WeeklyQuantity targetWeeklyQuantity, QuantityAmount weeklyAmountToDelay) {
         requireNonNull(targetWeeklyQuantity);
-        requireNonNull(quantityAmountToDelay);
+        requireNonNull(weeklyAmountToDelay);
 
-        if (quantityAmountToDelay.value() > getDelayedQuantityAmount()) {
-            throw new BadRequestException(WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY);
+        validateDelayable(weeklyAmountToDelay);
+
+        reduceDailyQuantities(weeklyAmountToDelay);
+        targetWeeklyQuantity.increase(weeklyAmountToDelay);
+    }
+
+    QuantityAmountDelta calculateAmountDeltaTo(QuantityAmount targetWeeklyAmount) {
+        requireNonNull(targetWeeklyAmount);
+
+        return this.weeklyQuantityAmount.quantityAmount().deltaTo(targetWeeklyAmount);
+    }
+
+    QuantityAmount getCompletedAmount() {
+        return dailyQuantities.stream()
+                .map(DailyQuantity::getCompletedAmount)
+                .reduce(QuantityAmount.ZERO, QuantityAmount::plus);
+    }
+
+    private static void validateReconstructable(
+            WeekPeriod weekPeriod,
+            WeeklyQuantityAmount weeklyQuantityAmount,
+            List<DailyQuantity> dailyQuantities
+    ) {
+        requireNotEmpty(dailyQuantities);
+
+        validateDailyQuantitiesInWeekPeriod(dailyQuantities, weekPeriod);
+        validateWeeklyQuantityAmountMatchesDailyAmounts(weeklyQuantityAmount, dailyQuantities);
+    }
+
+    private static void validateCreatable(
+            TotalQuantityAmount totalQuantityAmount,
+            SessionPeriod sessionPeriod,
+            WeekPeriod weekPeriod,
+            WeeklyQuantityAmount weeklyQuantityAmount
+    ) {
+        requireNonNull(totalQuantityAmount);
+        requireNonNull(sessionPeriod);
+        requireNonNull(weekPeriod);
+        requireNonNull(weeklyQuantityAmount);
+
+        if (weekPeriod.startOn().isBefore(sessionPeriod.startOn()) ||
+                weekPeriod.endOn().isAfter(sessionPeriod.endOn())) {
+            throw new BadRequestException(WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION);
         }
 
-        reduceDailyQuantities(quantityAmountToDelay.value());
-        targetWeeklyQuantity.increase(quantityAmountToDelay.value());
-    }
-
-    int calculateReductionAmount(WeeklyQuantityAmount reducedWeeklyQuantityAmount) {
-        requireNonNull(reducedWeeklyQuantityAmount);
-
-        return this.weeklyQuantityAmount.quantityAmount().value()
-                - reducedWeeklyQuantityAmount.quantityAmount().value();
-    }
-
-    int getCompletedQuantityAmount() {
-        return dailyQuantities.stream()
-                .mapToInt(DailyQuantity::getCompletedQuantityAmount)
-                .sum();
+        if (totalQuantityAmount.quantityAmount().isLessThan(weeklyQuantityAmount.quantityAmount())) {
+            throw new BadRequestException(WEEKLY_AMOUNT_EXCEEDS_TOTAL_AMOUNT);
+        }
     }
 
     private static void validateDailyQuantitiesInWeekPeriod(
@@ -165,68 +181,50 @@ public class WeeklyQuantity {
 
         dailyQuantities.forEach(dailyQuantity -> {
             LocalDate date = dailyQuantity.getDate();
+
             if (date.isBefore(weekPeriod.startOn()) || date.isAfter(weekPeriod.endOn())) {
                 throw new BadRequestException(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
             }
         });
     }
 
-    private static void validateWeeklyQuantityAmountMatchesDailyQuantities(
+    private static void validateWeeklyQuantityAmountMatchesDailyAmounts(
             WeeklyQuantityAmount weeklyQuantityAmount,
             List<DailyQuantity> dailyQuantities
     ) {
         requireNonNull(weeklyQuantityAmount);
 
-        int dailyQuantityAmount = sumDailyQuantityAmount(dailyQuantities);
+        QuantityAmount summedDailyAmount = sumDailyQuantityAmount(dailyQuantities);
 
-        if (weeklyQuantityAmount.quantityAmount().value() != dailyQuantityAmount) {
-            throw new BadRequestException(WEEKLY_QUANTITY_AMOUNT_MISMATCH);
+        if (!weeklyQuantityAmount.quantityAmount().equals(summedDailyAmount)) {
+            throw new BadRequestException(WEEKLY_AMOUNT_MISMATCH);
         }
     }
 
-    private static int sumDailyQuantityAmount(List<DailyQuantity> dailyQuantities) {
+    private static QuantityAmount sumDailyQuantityAmount(List<DailyQuantity> dailyQuantities) {
         return dailyQuantities.stream()
-                .mapToInt(dailyQuantity -> dailyQuantity.getDailyQuantityAmount().quantityAmount().value())
-                .sum();
-    }
-
-    private static void validateWeekPeriodInSessionPeriod(
-            WeekPeriod weekPeriod,
-            SessionPeriod sessionPeriod
-    ) {
-        if (weekPeriod.startOn().isBefore(sessionPeriod.startOn()) ||
-                weekPeriod.endOn().isAfter(sessionPeriod.endOn())) {
-            throw new BadRequestException(WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION);
-        }
-    }
-
-    private static void validateWeeklyQuantityAmountInTotalQuantityAmount(
-            WeeklyQuantityAmount weeklyQuantityAmount,
-            TotalQuantityAmount totalQuantityAmount
-    ) {
-        if (totalQuantityAmount.quantityAmount().value() < weeklyQuantityAmount.quantityAmount().value()) {
-            throw new BadRequestException(WEEKLY_QUANTITY_EXCEEDS_TOTAL_QUANTITY);
-        }
+                .map(dailyQuantity -> dailyQuantity.getDailyQuantityAmount().quantityAmount())
+                .reduce(QuantityAmount.ZERO, QuantityAmount::plus);
     }
 
     private static List<DailyQuantity> createDailyQuantities(
             WeekPeriod weekPeriod,
             WeeklyQuantityAmount weeklyQuantityAmount,
-            boolean isInitialAllocationWeek
+            boolean isFirstWeek
     ) {
         List<PlanDate> planDates = weekPeriod.splitIntoDates();
         List<DailyQuantity> dailyQuantities = new ArrayList<>();
 
         for (int i = 0; i < planDates.size(); i++) {
-            int amount = isInitialAllocationWeek && i == 0
-                    ? weeklyQuantityAmount.quantityAmount().value()
-                    : 0;
+            QuantityAmount dailyAmount = isFirstWeek && i == 0
+                    ? weeklyQuantityAmount.quantityAmount()
+                    : QuantityAmount.ZERO;
 
             DailyQuantity dailyQuantity = DailyQuantity.create(
                     weekPeriod,
                     weeklyQuantityAmount,
                     planDates.get(i).date(),
-                    DailyQuantityAmount.of(amount, 0, amount, null)
+                    new DailyQuantityAmount(dailyAmount, QuantityAmount.ZERO, dailyAmount, QuantityMemo.NONE)
             );
 
             dailyQuantities.add(dailyQuantity);
@@ -236,26 +234,38 @@ public class WeeklyQuantity {
     }
 
     private void updateWeeklyQuantityAmountByDailyQuantities() {
-        this.weeklyQuantityAmount = WeeklyQuantityAmount.of(
+        this.weeklyQuantityAmount = new WeeklyQuantityAmount(
                 sumDailyQuantityAmount(this.dailyQuantities),
-                this.weeklyQuantityAmount.quantityMemo().value()
+                this.weeklyQuantityAmount.quantityMemo()
         );
     }
 
-    private void validateReducible(WeeklyQuantityAmount reducedWeeklyQuantityAmount, int quantityAmountToReduce) {
-        if (quantityAmountToReduce < 0) {
-            throw new BadRequestException(WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED);
+    private void validateReducible(QuantityAmount targetWeeklyAmount) {
+        QuantityAmountDelta weeklyAmountDelta = calculateAmountDeltaTo(targetWeeklyAmount);
+
+        if (weeklyAmountDelta.isPositive()) {
+            throw new BadRequestException(WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED);
         }
 
-        if (reducedWeeklyQuantityAmount.quantityAmount().value() < getCompletedQuantityAmount()) {
-            throw new ConflictException(WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY);
+        if (targetWeeklyAmount.isLessThan(getCompletedAmount())) {
+            throw new ConflictException(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
     }
 
-    private int getDelayedQuantityAmount() {
+    private void validateDelayable(QuantityAmount weeklyAmountToDelay) {
+        requireNonNull(weeklyAmountToDelay);
+
+        QuantityAmount delayedWeeklyAmount = getDelayedQuantityAmount();
+
+        if (delayedWeeklyAmount.isLessThan(weeklyAmountToDelay)) {
+            throw new BadRequestException(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
+        }
+    }
+
+    private QuantityAmount getDelayedQuantityAmount() {
         return dailyQuantities.stream()
-                .mapToInt(dailyQuantity -> dailyQuantity.getDailyQuantityAmount().delayedQuantityAmount().value())
-                .sum();
+                .map(dailyQuantity -> dailyQuantity.getDailyQuantityAmount().delayedQuantityAmount())
+                .reduce(QuantityAmount.ZERO, QuantityAmount::plus);
     }
 
     @Override
@@ -271,8 +281,5 @@ public class WeeklyQuantity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    record QuantityReductionResult(int remainingAmount, int quantityAmountToReduce) {
     }
 }

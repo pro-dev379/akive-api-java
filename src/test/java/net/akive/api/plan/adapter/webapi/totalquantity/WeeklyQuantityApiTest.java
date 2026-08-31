@@ -20,10 +20,10 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT;
 import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_TARGET_SAME_AS_SOURCE;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.ConflictError.WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.ConflictError.WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_ITEM_NOT_FOUND;
@@ -325,7 +325,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 TOTAL_AMOUNT,
                 null
         );
-        willThrow(new BadRequestException(WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED))
+        willThrow(new BadRequestException(WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED))
                 .given(totalQuantityModifier)
                 .reduceWeeklyQuantity(command);
 
@@ -340,10 +340,10 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED");
+                .isEqualTo("PLAN_400_WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED");
         result.bodyJson()
                 .extractingPath("$.message")
-                .isEqualTo("Weekly quantity cannot be increased here.");
+                .isEqualTo("Weekly amount cannot be increased here.");
 
         then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
     }
@@ -363,7 +363,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 TOTAL_AMOUNT,
                 null
         );
-        willThrow(new ConflictException(WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY))
+        willThrow(new ConflictException(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
                 .given(totalQuantityModifier)
                 .reduceWeeklyQuantity(command);
 
@@ -378,10 +378,10 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_409_WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY");
+                .isEqualTo("PLAN_409_WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
-                .isEqualTo("Weekly quantity cannot be less than completed quantity.");
+                .isEqualTo("Weekly amount cannot be less than completed amount.");
 
         then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
     }
@@ -603,7 +603,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 targetWeeklyQuantityId,
                 quantityAmountToDelay
         );
-        willThrow(new BadRequestException(WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY))
+        willThrow(new BadRequestException(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT))
                 .given(totalQuantityModifier)
                 .delayWeeklyQuantity(command);
 
@@ -618,10 +618,10 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY");
+                .isEqualTo("PLAN_400_WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
-                .isEqualTo("Weekly delay quantity exceeds current weekly delayed quantity.");
+                .isEqualTo("Weekly delay amount exceeds current weekly delayed amount.");
 
         then(totalQuantityModifier).should().delayWeeklyQuantity(command);
     }

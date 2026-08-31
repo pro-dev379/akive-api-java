@@ -62,7 +62,7 @@ class DailyPlanQueryServiceTest {
                 DailyQuantity.reconstruct(
                         4L,
                         date,
-                        DailyQuantityAmount.of(100, 30, 70, null)
+                        DailyQuantityAmount.of(100, 30, 70)
                 ),
                 new QuantityUnit(QUANTITY_UNIT)
         );

@@ -26,8 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY;
-import static net.akive.api.common.exception.business.ConflictError.TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT;
+import static net.akive.api.common.exception.business.ConflictError.TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanAssertions.assertWeeklyQuantityAmounts;
@@ -161,7 +161,7 @@ class TotalQuantityCommandServiceTest {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Subject subject = createSubject();
-        TotalQuantityAmount totalQuantityAmount = TotalQuantityAmount.of(20, QUANTITY_UNIT, null);
+        TotalQuantityAmount totalQuantityAmount = TotalQuantityAmount.of(20, QUANTITY_UNIT);
         TotalQuantityUpdateCommand command = new TotalQuantityUpdateCommand(
                 totalQuantityId,
                 sessionalPlanId,
@@ -169,7 +169,7 @@ class TotalQuantityCommandServiceTest {
                 subject,
                 totalQuantityAmount
         );
-        ConflictException exception = new ConflictException(TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY);
+        ConflictException exception = new ConflictException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
 
         willThrow(exception)
                 .given(totalQuantityDomainService)
@@ -285,7 +285,7 @@ class TotalQuantityCommandServiceTest {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 1L;
-        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(20, null);
+        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(20);
         WeeklyQuantityReduceCommand command = new WeeklyQuantityReduceCommand(
                 weeklyQuantityId,
                 totalQuantityId,
@@ -314,7 +314,7 @@ class TotalQuantityCommandServiceTest {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 1L;
-        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(20, null);
+        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(20);
         WeeklyQuantityReduceCommand command = new WeeklyQuantityReduceCommand(
                 weeklyQuantityId,
                 totalQuantityId,
@@ -348,7 +348,7 @@ class TotalQuantityCommandServiceTest {
         User user = createPersistedUser(userId);
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(totalQuantityId, sessionalPlan, 30, 40, 30);
-        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(20, null);
+        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(20);
         WeeklyQuantityReduceCommand command = new WeeklyQuantityReduceCommand(
                 weeklyQuantityId,
                 totalQuantityId,
@@ -474,7 +474,7 @@ class TotalQuantityCommandServiceTest {
         User user = createPersistedUser(userId);
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(totalQuantityId, sessionalPlan, 100, 0, 0);
-        totalQuantity.reduceWeeklyQuantity(weeklyQuantityId, WeeklyQuantityAmount.of(30, null));
+        totalQuantity.reduceWeeklyQuantity(weeklyQuantityId, WeeklyQuantityAmount.of(30));
         WeeklyQuantityDelayCommand command = WeeklyQuantityDelayCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
@@ -492,7 +492,7 @@ class TotalQuantityCommandServiceTest {
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayWeeklyQuantity(command))
                 .extracting(BadRequestException::getError)
-                .isEqualTo(WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY);
+                .isEqualTo(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
 
         then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()

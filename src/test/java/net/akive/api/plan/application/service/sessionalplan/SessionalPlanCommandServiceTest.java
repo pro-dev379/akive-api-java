@@ -128,8 +128,6 @@ class SessionalPlanCommandServiceTest {
 
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(currentSessionalPlan));
-        given(sessionalPlanDomainService.update(currentSessionalPlan, newSessionName, sessionPeriod))
-                .willReturn(updatedSessionalPlan);
 
         sessionalPlanCommandService.update(command);
 

@@ -21,6 +21,7 @@ public enum NotFoundError implements Error {
     WEEKLY_QUANTITY_NOT_FOUND(PLAN, "Weekly quantity not found."),
     WEEKLY_PLAN_NOT_FOUND(PLAN, "Weekly plan not found."),
     WEEKLY_PLAN_ITEM_NOT_FOUND(PLAN, "Weekly plan item not found."),
+    DAILY_QUANTITY_NOT_FOUND(PLAN, "Daily quantity not found"),
 
     EMAIL_VERIFICATION_NOT_FOUND(EMAIL_VERIFICATION, "Email verification not found."),
     ;

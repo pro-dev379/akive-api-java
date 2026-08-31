@@ -79,7 +79,7 @@ public class PlanFixture {
     }
 
     public static TotalQuantityAmount createTotalQuantityAmount() {
-        return TotalQuantityAmount.of(TOTAL_AMOUNT, QUANTITY_UNIT, null);
+        return TotalQuantityAmount.of(TOTAL_AMOUNT, QUANTITY_UNIT);
     }
 
     public static TotalQuantity createTotalQuantity(SessionalPlan sessionalPlan) {
@@ -144,7 +144,7 @@ public class PlanFixture {
                 totalQuantityId,
                 sessionalPlan,
                 createSubject(),
-                TotalQuantityAmount.of(totalAmount, QUANTITY_UNIT, null),
+                TotalQuantityAmount.of(totalAmount, QUANTITY_UNIT),
                 weeklyQuantities
         );
     }
@@ -160,11 +160,11 @@ public class PlanFixture {
         return WeeklyQuantity.reconstruct(
                 weeklyQuantityId,
                 weekPeriod,
-                WeeklyQuantityAmount.of(amount, null),
+                WeeklyQuantityAmount.of(amount),
                 List.of(DailyQuantity.reconstruct(
                         weeklyQuantityId,
                         startOn,
-                        DailyQuantityAmount.of(amount, 0, amount, null)
+                        DailyQuantityAmount.of(amount, 0, amount)
                 ))
         );
     }
@@ -173,7 +173,7 @@ public class PlanFixture {
         Long weeklyQuantityId = (long) sessionWeek.weekNum();
         WeekPeriod weekPeriod = sessionWeek.weekPeriod();
         int amount = sessionWeek.weekNum() == 1 ? TOTAL_AMOUNT : 0;
-        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(amount, null);
+        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(amount);
 
         return WeeklyQuantity.reconstruct(
                 weeklyQuantityId,
@@ -189,7 +189,7 @@ public class PlanFixture {
         return DailyQuantity.reconstruct(
                 dailyQuantityId,
                 weekPeriod.startOn(),
-                DailyQuantityAmount.of(amount, completedAmount, amount - completedAmount, null)
+                DailyQuantityAmount.of(amount, completedAmount, amount - completedAmount)
         );
     }
 }

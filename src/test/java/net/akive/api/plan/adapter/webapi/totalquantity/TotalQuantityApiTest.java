@@ -335,7 +335,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         Long totalQuantityId = 20L;
         TotalQuantityUpdateRequest request = updateRequest();
         TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
-        willThrow(new ConflictException(TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY))
+        willThrow(new ConflictException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
                 .given(totalQuantityModifier)
                 .update(command);
 
@@ -349,10 +349,10 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_409_TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY");
+                .isEqualTo("PLAN_409_TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
-                .isEqualTo("Total quantity cannot be less than completed quantity.");
+                .isEqualTo("Total amount cannot be less than completed amount.");
 
         then(totalQuantityModifier).should().update(command);
     }

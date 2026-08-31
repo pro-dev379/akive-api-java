@@ -17,13 +17,17 @@ public enum ConflictError implements Error {
 
     SESSION_NAME_ALREADY_EXISTS(PLAN, "Session name already exists."),
     SUBJECT_NAME_ALREADY_EXISTS(PLAN, "Subject name already exists."),
-    TOTAL_QUANTITY_LESS_THAN_COMPLETED_QUANTITY(
+    TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT(
             PLAN,
-            "Total quantity cannot be less than completed quantity."
+            "Total amount cannot be less than completed amount."
     ),
-    WEEKLY_QUANTITY_LESS_THAN_COMPLETED_QUANTITY(
+    WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT(
             PLAN,
-            "Weekly quantity cannot be less than completed quantity."
+            "Weekly amount cannot be less than completed amount."
+    ),
+    DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT(
+            PLAN,
+            "Daily amount cannot be less than completed amount."
     ),
 
     EMAIL_ALREADY_VERIFIED(EMAIL_VERIFICATION, "Email is already verified."),

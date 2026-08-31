@@ -3,7 +3,7 @@ package net.akive.api.plan.domain.value;
 import net.akive.api.common.exception.business.BadRequestException;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_AMOUNT_MISMATCH;
+import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_MISMATCH;
 
 public record DailyQuantityAmount(
         QuantityAmount quantityAmount,
@@ -16,11 +16,12 @@ public record DailyQuantityAmount(
         requireNonNull(quantityAmount);
         requireNonNull(completedQuantityAmount);
         requireNonNull(delayedQuantityAmount);
-        quantityMemo = quantityMemo == null ? new QuantityMemo(null) : quantityMemo;
+        quantityMemo = quantityMemo == null ? QuantityMemo.NONE : quantityMemo;
 
-        int calculatedQuantityAmount = completedQuantityAmount.value() + delayedQuantityAmount.value();
-        if (calculatedQuantityAmount != quantityAmount.value()) {
-            throw new BadRequestException(DAILY_QUANTITY_AMOUNT_MISMATCH);
+        QuantityAmount calculatedQuantityAmount = completedQuantityAmount.plus(delayedQuantityAmount);
+
+        if (!calculatedQuantityAmount.equals(quantityAmount)) {
+            throw new BadRequestException(DAILY_AMOUNT_MISMATCH);
         }
     }
 
@@ -35,6 +36,19 @@ public record DailyQuantityAmount(
                 new QuantityAmount(completedQuantityAmount),
                 new QuantityAmount(delayedQuantityAmount),
                 new QuantityMemo(quantityMemo)
+        );
+    }
+
+    public static DailyQuantityAmount of(
+            int quantityAmount,
+            int completedQuantityAmount,
+            int delayedQuantityAmount
+    ) {
+        return new DailyQuantityAmount(
+                new QuantityAmount(quantityAmount),
+                new QuantityAmount(completedQuantityAmount),
+                new QuantityAmount(delayedQuantityAmount),
+                QuantityMemo.NONE
         );
     }
 }

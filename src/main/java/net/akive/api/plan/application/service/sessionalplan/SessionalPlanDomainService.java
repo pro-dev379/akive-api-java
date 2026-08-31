@@ -24,13 +24,13 @@ class SessionalPlanDomainService {
         return SessionalPlan.create(user, sessionName, sessionPeriod, now);
     }
 
-    SessionalPlan update(
+    void update(
             SessionalPlan currentSessionalPlan,
             String sessionName,
             SessionPeriod sessionPeriod
     ) {
         sessionalPlanValidationService.validateUpdatable(currentSessionalPlan, sessionName, sessionPeriod);
 
-        return currentSessionalPlan.update(sessionName, sessionPeriod, currentTimeProvider.now());
+        currentSessionalPlan.update(sessionName, sessionPeriod, currentTimeProvider.now());
     }
 }

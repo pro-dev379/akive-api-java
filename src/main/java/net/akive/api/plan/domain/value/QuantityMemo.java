@@ -5,6 +5,8 @@ import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENG
 
 public record QuantityMemo(String value) {
 
+    public static final QuantityMemo NONE = new QuantityMemo(null);
+
     public QuantityMemo {
         requireMaxLengthIfPresent(value, QUANTITY_MEMO_MAX_LENGTH);
     }

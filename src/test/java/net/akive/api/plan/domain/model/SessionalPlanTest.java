@@ -82,16 +82,14 @@ class SessionalPlanTest {
                 LocalDate.of(2026, 2, 28)
         );
 
-        SessionalPlan updatedSessionalPlan = sessionalPlan.update(
+        sessionalPlan.update(
                 "  " + updatedSessionName + "  ",
                 updatedSessionPeriod,
                 REQUESTED_AT
         );
 
-        assertThat(updatedSessionalPlan.getSessionalPlanId()).isEqualTo(SESSIONAL_PLAN_ID);
-        assertThat(updatedSessionalPlan.getUser()).isEqualTo(user);
-        assertThat(updatedSessionalPlan.getSessionName()).isEqualTo(updatedSessionName);
-        assertThat(updatedSessionalPlan.getSessionPeriod()).isEqualTo(updatedSessionPeriod);
+        assertThat(sessionalPlan.getSessionName()).isEqualTo(updatedSessionName);
+        assertThat(sessionalPlan.getSessionPeriod()).isEqualTo(updatedSessionPeriod);
     }
 
     @Test

@@ -33,24 +33,25 @@ public enum BadRequestError implements Error {
     SESSION_PERIOD_MAX_MONTHS_EXCEEDED(PLAN, "Session period is too long."),
     IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED(PLAN, "Too many in-progress sessional plans."),
     TOTAL_QUANTITY_LIMIT_EXCEEDED(PLAN, "Total quantity limit exceeded."),
-    TOTAL_QUANTITY_AMOUNT_MISMATCH(PLAN, "Total quantity amount mismatch."),
+    TOTAL_AMOUNT_MISMATCH(PLAN, "Total amount mismatch."),
     WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION(PLAN, "Weekly quantity period is outside session period."),
-    WEEKLY_QUANTITY_EXCEEDS_TOTAL_QUANTITY(PLAN, "Weekly quantity exceeds total quantity."),
-    WEEKLY_QUANTITY_AMOUNT_MISMATCH(PLAN, "Weekly quantity amount mismatch."),
+    WEEKLY_AMOUNT_EXCEEDS_TOTAL_AMOUNT(PLAN, "Weekly amount exceeds total amount."),
+    WEEKLY_AMOUNT_MISMATCH(PLAN, "Weekly amount mismatch."),
     LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED(PLAN, "Last weekly quantity cannot be reduced."),
-    WEEKLY_QUANTITY_INCREASE_NOT_ALLOWED(PLAN, "Weekly quantity cannot be increased here."),
+    WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED(PLAN, "Weekly amount cannot be increased here."),
     WEEKLY_DELAY_TARGET_SAME_AS_SOURCE(
             PLAN,
             "Weekly delay target must be different from source weekly quantity."
     ),
-    WEEKLY_DELAY_QUANTITY_EXCEEDS_CURRENT_WEEKLY_DELAYED_QUANTITY(
+    WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT(
             PLAN,
-            "Weekly delay quantity exceeds current weekly delayed quantity."
+            "Weekly delay amount exceeds current weekly delayed amount."
     ),
+    DAILY_AMOUNT_INCREASE_NOT_ALLOWED(PLAN, "Daily amount cannot be increased here."),
     INVALID_WEEK_PERIOD(PLAN, "Invalid week period."),
     DAILY_QUANTITY_DATE_OUT_OF_WEEK(PLAN, "Daily quantity date is outside week period."),
-    DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY(PLAN, "Daily quantity exceeds weekly quantity."),
-    DAILY_QUANTITY_AMOUNT_MISMATCH(PLAN, "Daily quantity amount mismatch."),
+    DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT(PLAN, "Daily amount exceeds weekly amount."),
+    DAILY_AMOUNT_MISMATCH(PLAN, "Daily amount mismatch."),
     ;
 
     private final ErrorDomain domain;

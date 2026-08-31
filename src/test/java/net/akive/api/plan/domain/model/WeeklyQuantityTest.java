@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_QUANTITY_AMOUNT_MISMATCH;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_AMOUNT_MISMATCH;
 import static net.akive.api.plan.domain.PlanFixture.createSessionalPlan;
 import static net.akive.api.plan.domain.PlanFixture.createSubject;
 import static net.akive.api.plan.domain.PlanFixture.createTotalQuantityAmount;
@@ -26,12 +26,12 @@ class WeeklyQuantityTest {
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 4)
         );
-        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(100, null);
+        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(100);
         List<DailyQuantity> dailyQuantities = List.of(
                 DailyQuantity.reconstruct(
                         1L,
                         LocalDate.of(2026, 1, 1),
-                        DailyQuantityAmount.of(100, 0, 100, null)
+                        DailyQuantityAmount.of(100, 0, 100)
                 )
         );
 
@@ -54,12 +54,12 @@ class WeeklyQuantityTest {
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 4)
         );
-        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(100, null);
+        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(100);
         List<DailyQuantity> dailyQuantities = List.of(
                 DailyQuantity.reconstruct(
                         1L,
                         LocalDate.of(2026, 1, 1),
-                        DailyQuantityAmount.of(60, 0, 60, null)
+                        DailyQuantityAmount.of(60, 0, 60)
                 )
         );
 
@@ -71,7 +71,7 @@ class WeeklyQuantityTest {
                         dailyQuantities
                 ))
                 .extracting(BadRequestException::getError)
-                .isEqualTo(WEEKLY_QUANTITY_AMOUNT_MISMATCH);
+                .isEqualTo(WEEKLY_AMOUNT_MISMATCH);
     }
 
     @Test
@@ -80,12 +80,12 @@ class WeeklyQuantityTest {
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 4)
         );
-        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(100, null);
+        WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(100);
         List<DailyQuantity> dailyQuantities = List.of(
                 DailyQuantity.reconstruct(
                         1L,
                         LocalDate.of(2026, 1, 5),
-                        DailyQuantityAmount.of(100, 0, 100, null)
+                        DailyQuantityAmount.of(100, 0, 100)
                 )
         );
 
@@ -143,11 +143,11 @@ class WeeklyQuantityTest {
         return WeeklyQuantity.reconstruct(
                 weeklyQuantityId,
                 weekPeriod,
-                WeeklyQuantityAmount.of(100, null),
+                WeeklyQuantityAmount.of(100),
                 List.of(DailyQuantity.reconstruct(
                         1L,
                         LocalDate.of(2026, 1, 1),
-                        DailyQuantityAmount.of(100, 0, 100, null)
+                        DailyQuantityAmount.of(100, 0, 100)
                 ))
         );
     }

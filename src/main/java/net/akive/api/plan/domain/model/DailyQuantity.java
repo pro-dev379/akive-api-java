@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.plan.domain.value.DailyQuantityAmount;
+import net.akive.api.plan.domain.value.QuantityAmount;
 import net.akive.api.plan.domain.value.WeekPeriod;
 import net.akive.api.plan.domain.value.WeeklyQuantityAmount;
 
@@ -17,7 +18,7 @@ import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY;
+import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -49,68 +50,64 @@ public class DailyQuantity {
             LocalDate date,
             DailyQuantityAmount dailyQuantityAmount
     ) {
-        requireNonNull(weekPeriod);
-        requireNonNull(weeklyQuantityAmount);
-        requireNonNull(date);
-        validateDateInWeekPeriod(date, weekPeriod);
-        requireNonNull(dailyQuantityAmount);
-
-        validateDailyQuantityAmountInWeeklyQuantityAmount(
-                dailyQuantityAmount,
-                weeklyQuantityAmount
-        );
+        validateCreatable(weekPeriod, weeklyQuantityAmount, date, dailyQuantityAmount);
 
         return DailyQuantity.builder()
-                .date(date)
-                .dailyQuantityAmount(dailyQuantityAmount)
+                .date(requireNonNull(date))
+                .dailyQuantityAmount(requireNonNull(dailyQuantityAmount))
                 .build();
     }
 
-    void increase(int amount) {
-        if (amount == 0) {
+    void increase(QuantityAmount dailyAmountToIncrease) {
+        if (dailyAmountToIncrease.isZero()) {
             return;
         }
 
         this.dailyQuantityAmount = new DailyQuantityAmount(
-                this.dailyQuantityAmount.quantityAmount().plus(amount),
+                this.dailyQuantityAmount.quantityAmount().plus(dailyAmountToIncrease),
                 this.dailyQuantityAmount.completedQuantityAmount(),
-                this.dailyQuantityAmount.delayedQuantityAmount().plus(amount),
+                this.dailyQuantityAmount.delayedQuantityAmount().plus(dailyAmountToIncrease),
                 this.dailyQuantityAmount.quantityMemo()
         );
     }
 
-    QuantityReductionResult reduce(int amount) {
-        if (amount == 0) {
-            return new QuantityReductionResult(0);
-        }
+    QuantityAmount reduceAsMuchAsPossible(QuantityAmount dailyAmountToReduce) {
+        QuantityAmount appliedReductionAmount = QuantityAmount.min(
+                dailyAmountToReduce,
+                this.dailyQuantityAmount.delayedQuantityAmount()
+        );
 
-        int quantityAmountToReduce = Math.min(amount, this.dailyQuantityAmount.delayedQuantityAmount().value());
         this.dailyQuantityAmount = new DailyQuantityAmount(
-                this.dailyQuantityAmount.quantityAmount().minus(quantityAmountToReduce),
+                this.dailyQuantityAmount.quantityAmount().minus(appliedReductionAmount),
                 this.dailyQuantityAmount.completedQuantityAmount(),
-                this.dailyQuantityAmount.delayedQuantityAmount().minus(quantityAmountToReduce),
+                this.dailyQuantityAmount.delayedQuantityAmount().minus(appliedReductionAmount),
                 this.dailyQuantityAmount.quantityMemo()
         );
 
-        return new QuantityReductionResult(quantityAmountToReduce);
+        return appliedReductionAmount;
     }
 
-    int getCompletedQuantityAmount() {
-        return this.dailyQuantityAmount.completedQuantityAmount().value();
+    QuantityAmount getCompletedAmount() {
+        return this.dailyQuantityAmount.completedQuantityAmount();
     }
 
-    private static void validateDateInWeekPeriod(LocalDate date, WeekPeriod weekPeriod) {
+    private static void validateCreatable(
+            WeekPeriod weekPeriod,
+            WeeklyQuantityAmount weeklyQuantityAmount,
+            LocalDate date,
+            DailyQuantityAmount dailyQuantityAmount
+    ) {
+        requireNonNull(weekPeriod);
+        requireNonNull(weeklyQuantityAmount);
+        requireNonNull(date);
+        requireNonNull(dailyQuantityAmount);
+
         if (date.isBefore(weekPeriod.startOn()) || date.isAfter(weekPeriod.endOn())) {
             throw new BadRequestException(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
         }
-    }
 
-    private static void validateDailyQuantityAmountInWeeklyQuantityAmount(
-            DailyQuantityAmount dailyQuantityAmount,
-            WeeklyQuantityAmount weeklyQuantityAmount
-    ) {
-        if (weeklyQuantityAmount.quantityAmount().value() < dailyQuantityAmount.quantityAmount().value()) {
-            throw new BadRequestException(DAILY_QUANTITY_EXCEEDS_WEEKLY_QUANTITY);
+        if (weeklyQuantityAmount.quantityAmount().isLessThan(dailyQuantityAmount.quantityAmount())) {
+            throw new BadRequestException(DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT);
         }
     }
 
@@ -127,8 +124,5 @@ public class DailyQuantity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    record QuantityReductionResult(int quantityAmountToReduce) {
     }
 }

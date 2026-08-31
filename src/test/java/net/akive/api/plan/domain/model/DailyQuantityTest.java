@@ -16,7 +16,7 @@ class DailyQuantityTest {
     void 저장된_일일_계획량을_복원한다() {
         Long dailyQuantityId = 1L;
         LocalDate date = LocalDate.of(2026, 1, 1);
-        DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(100, 0, 100, null);
+        DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(100, 0, 100);
 
         DailyQuantity dailyQuantity = DailyQuantity.reconstruct(
                 dailyQuantityId,
@@ -67,7 +67,7 @@ class DailyQuantityTest {
         return DailyQuantity.reconstruct(
                 dailyQuantityId,
                 LocalDate.of(2026, 1, 1),
-                DailyQuantityAmount.of(100, 0, 100, null)
+                DailyQuantityAmount.of(100, 0, 100)
         );
     }
 }

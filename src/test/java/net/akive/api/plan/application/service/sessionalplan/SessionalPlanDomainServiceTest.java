@@ -78,15 +78,10 @@ class SessionalPlanDomainServiceTest {
         LocalDateTime requestedAt = REQUESTED_AT.plusDays(1);
         given(currentTimeProvider.now()).willReturn(requestedAt);
 
-        SessionalPlan updatedSessionalPlan = sessionalPlanDomainService.update(
-                currentSessionalPlan,
-                newSessionName,
-                sessionPeriod
-        );
+        sessionalPlanDomainService.update(currentSessionalPlan, newSessionName, sessionPeriod);
 
-        assertThat(updatedSessionalPlan.getUser()).isEqualTo(user);
-        assertThat(updatedSessionalPlan.getSessionName()).isEqualTo(newSessionName);
-        assertThat(updatedSessionalPlan.getSessionPeriod()).isEqualTo(sessionPeriod);
+        assertThat(currentSessionalPlan.getSessionName()).isEqualTo(newSessionName);
+        assertThat(currentSessionalPlan.getSessionPeriod()).isEqualTo(sessionPeriod);
 
         then(sessionalPlanValidationService).should()
                 .validateUpdatable(currentSessionalPlan, newSessionName, sessionPeriod);

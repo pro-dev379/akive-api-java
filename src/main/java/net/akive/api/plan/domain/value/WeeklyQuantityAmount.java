@@ -6,10 +6,14 @@ public record WeeklyQuantityAmount(QuantityAmount quantityAmount, QuantityMemo q
 
     public WeeklyQuantityAmount {
         requireNonNull(quantityAmount);
-        quantityMemo = quantityMemo == null ? new QuantityMemo(null) : quantityMemo;
+        quantityMemo = quantityMemo == null ? QuantityMemo.NONE : quantityMemo;
     }
 
     public static WeeklyQuantityAmount of(int quantityAmount, String quantityMemo) {
         return new WeeklyQuantityAmount(new QuantityAmount(quantityAmount), new QuantityMemo(quantityMemo));
+    }
+
+    public static WeeklyQuantityAmount of(int quantityAmount) {
+        return new WeeklyQuantityAmount(new QuantityAmount(quantityAmount), QuantityMemo.NONE);
     }
 }

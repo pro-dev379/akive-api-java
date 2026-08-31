@@ -55,13 +55,9 @@ class SessionalPlanCommandService implements SessionalPlanCreator {
             throws BadRequestException, ConflictException, NotFoundException {
         SessionalPlan sessionalPlan = findSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
 
-        SessionalPlan updatedSessionalPlan = sessionalPlanDomainService.update(
-                sessionalPlan,
-                command.sessionName(),
-                command.sessionPeriod()
-        );
+        sessionalPlanDomainService.update(sessionalPlan, command.sessionName(), command.sessionPeriod());
 
-        sessionalPlanRepository.save(updatedSessionalPlan);
+        sessionalPlanRepository.save(sessionalPlan);
     }
 
     private SessionalPlan findSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {

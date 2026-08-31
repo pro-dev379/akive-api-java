@@ -11,7 +11,7 @@ public record TotalQuantityAmount(
     public TotalQuantityAmount {
         requireNonNull(quantityAmount);
         requireNonNull(quantityUnit);
-        quantityMemo = quantityMemo == null ? new QuantityMemo(null) : quantityMemo;
+        quantityMemo = quantityMemo == null ? QuantityMemo.NONE : quantityMemo;
     }
 
     public static TotalQuantityAmount of(int quantityAmount, String quantityUnit, String quantityMemo) {
@@ -19,6 +19,14 @@ public record TotalQuantityAmount(
                 new QuantityAmount(quantityAmount),
                 new QuantityUnit(quantityUnit),
                 new QuantityMemo(quantityMemo)
+        );
+    }
+
+    public static TotalQuantityAmount of(int quantityAmount, String quantityUnit) {
+        return new TotalQuantityAmount(
+                new QuantityAmount(quantityAmount),
+                new QuantityUnit(quantityUnit),
+                QuantityMemo.NONE
         );
     }
 }

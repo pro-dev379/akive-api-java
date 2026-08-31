@@ -60,19 +60,15 @@ public class SessionalPlan {
                 .build();
     }
 
-    public SessionalPlan update(
+    public void update(
             String sessionName,
             SessionPeriod sessionPeriod,
             LocalDateTime requestedAt
     ) {
         validateSchedulableSessionPeriod(sessionPeriod, requestedAt);
 
-        return SessionalPlan.builder()
-                .sessionalPlanId(this.sessionalPlanId)
-                .user(this.user)
-                .sessionName(requireMaxLength(requireNotBlank(sessionName), SESSION_NAME_MAX_LENGTH))
-                .sessionPeriod(sessionPeriod)
-                .build();
+        this.sessionName = requireMaxLength(requireNotBlank(sessionName), SESSION_NAME_MAX_LENGTH);
+        this.sessionPeriod = sessionPeriod;
     }
 
     private static void validateSchedulableSessionPeriod(
