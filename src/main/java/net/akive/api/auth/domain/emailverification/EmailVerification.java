@@ -1,5 +1,6 @@
 package net.akive.api.auth.domain.emailverification;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,7 +38,8 @@ public class EmailVerification {
 
     private int renewalCount;
 
-    private boolean verified;
+    @JsonProperty("verified")
+    private boolean isVerified;
 
     private LocalDateTime expiresAt;
 
@@ -58,7 +60,7 @@ public class EmailVerification {
                 .verificationPurpose(requireNonNull(verificationPurpose))
                 .verificationCode(requireNonNull(verificationCode))
                 .renewalCount(0)
-                .verified(false)
+                .isVerified(false)
                 .expiresAt(validatedRequestedAt.plus(VERIFICATION_CODE_EXPIRATION_DURATION))
                 .lastSentAt(validatedRequestedAt)
                 .createdAt(validatedRequestedAt)
@@ -71,7 +73,7 @@ public class EmailVerification {
 
         this.verificationCode = requireNonNull(verificationCode);
         this.renewalCount++;
-        this.verified = false;
+        this.isVerified = false;
         this.expiresAt = requestedAt.plus(VERIFICATION_CODE_EXPIRATION_DURATION);
         this.lastSentAt = requestedAt;
     }
@@ -80,7 +82,7 @@ public class EmailVerification {
         EmailVerificationCode validatedInputVerificationCode = requireNonNull(inputVerificationCode);
         requireNonNull(requestedAt);
 
-        if (this.verified) {
+        if (this.isVerified) {
             throw new ConflictException(EMAIL_ALREADY_VERIFIED);
         }
 
@@ -92,7 +94,7 @@ public class EmailVerification {
             throw new BadRequestException(EMAIL_VERIFICATION_CODE_MISMATCH);
         }
 
-        this.verified = true;
+        this.isVerified = true;
     }
 
     private void validateRenewable(LocalDateTime requestedAt) {
