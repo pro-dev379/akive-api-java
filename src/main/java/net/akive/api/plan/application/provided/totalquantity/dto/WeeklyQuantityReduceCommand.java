@@ -12,7 +12,7 @@ public record WeeklyQuantityReduceCommand(
         Long totalQuantityId,
         Long sessionalPlanId,
         Long userId,
-        WeeklyQuantityAmount weeklyQuantityAmount
+        WeeklyQuantityAmount targetWeeklyQuantityAmount
 ) {
 
     public WeeklyQuantityReduceCommand {
@@ -20,7 +20,7 @@ public record WeeklyQuantityReduceCommand(
         requirePositive(totalQuantityId);
         requirePositive(sessionalPlanId);
         requirePositive(userId);
-        requireNonNull(weeklyQuantityAmount);
+        requireNonNull(targetWeeklyQuantityAmount);
     }
 
     public static WeeklyQuantityReduceCommand of(

@@ -10,16 +10,16 @@ public record TotalQuantityUpdateCommand(
         Long totalQuantityId,
         Long sessionalPlanId,
         Long userId,
-        Subject subject,
-        TotalQuantityAmount totalQuantityAmount
+        Subject targetSubject,
+        TotalQuantityAmount targetTotalQuantityAmount
 ) {
 
     public TotalQuantityUpdateCommand {
         requirePositive(totalQuantityId);
         requirePositive(sessionalPlanId);
         requirePositive(userId);
-        requireNonNull(subject);
-        requireNonNull(totalQuantityAmount);
+        requireNonNull(targetSubject);
+        requireNonNull(targetTotalQuantityAmount);
     }
 
     public static TotalQuantityUpdateCommand of(

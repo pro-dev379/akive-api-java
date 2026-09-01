@@ -9,15 +9,15 @@ import static net.akive.api.common.domain.DomainValidator.*;
 public record SessionalPlanUpdateCommand(
         Long sessionalPlanId,
         Long userId,
-        String sessionName,
-        SessionPeriod sessionPeriod
+        String targetSessionName,
+        SessionPeriod targetSessionPeriod
 ) {
 
     public SessionalPlanUpdateCommand {
         requirePositive(sessionalPlanId);
         requirePositive(userId);
-        sessionName = requireNotBlank(sessionName);
-        requireNonNull(sessionPeriod);
+        targetSessionName = requireNotBlank(targetSessionName);
+        requireNonNull(targetSessionPeriod);
     }
 
     public static SessionalPlanUpdateCommand of(

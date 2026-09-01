@@ -35,7 +35,7 @@ class QuantityAmountTest {
     void 계획량을_더한다() {
         QuantityAmount quantityAmount = new QuantityAmount(10);
 
-        QuantityAmount summedAmount = quantityAmount.plus(new QuantityAmount(5));
+        QuantityAmount summedAmount = quantityAmount.add(new QuantityAmount(5));
 
         assertThat(summedAmount).isEqualTo(new QuantityAmount(15));
     }
@@ -44,7 +44,7 @@ class QuantityAmountTest {
     void 계획량을_뺀다() {
         QuantityAmount quantityAmount = new QuantityAmount(10);
 
-        QuantityAmount subtractedAmount = quantityAmount.minus(new QuantityAmount(5));
+        QuantityAmount subtractedAmount = quantityAmount.subtract(new QuantityAmount(5));
 
         assertThat(subtractedAmount).isEqualTo(new QuantityAmount(5));
     }
@@ -54,7 +54,7 @@ class QuantityAmountTest {
         QuantityAmount quantityAmount = new QuantityAmount(10);
 
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> quantityAmount.minus(new QuantityAmount(15)))
+                .isThrownBy(() -> quantityAmount.subtract(new QuantityAmount(15)))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(VALUE_NEGATIVE);
     }

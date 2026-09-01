@@ -47,8 +47,8 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
                 command.totalQuantityId(),
                 command.sessionalPlanId(),
                 command.userId(),
-                command.subject(),
-                command.totalQuantityAmount()
+                command.targetSubject(),
+                command.targetTotalQuantityAmount()
         );
 
         totalQuantityRepository.save(updatedTotalQuantity);
@@ -65,7 +65,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
     }
 
     @Override
-    public void reduceWeeklyQuantity(WeeklyQuantityReduceCommand command)
+    public void reduceWeeklyQuantityTo(WeeklyQuantityReduceCommand command)
             throws BadRequestException, ConflictException, NotFoundException {
         validateSessionalPlan(command.sessionalPlanId(), command.userId());
 
@@ -73,13 +73,13 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
                 .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
                 .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
-        totalQuantity.reduceWeeklyQuantity(command.weeklyQuantityId(), command.weeklyQuantityAmount());
+        totalQuantity.reduceWeeklyQuantityTo(command.weeklyQuantityId(), command.targetWeeklyQuantityAmount());
 
         totalQuantityRepository.save(totalQuantity);
     }
 
     @Override
-    public void delayWeeklyQuantity(WeeklyQuantityDelayCommand command)
+    public void delayWeeklyQuantityTo(WeeklyQuantityDelayCommand command)
             throws BadRequestException, NotFoundException {
         validateSessionalPlan(command.sessionalPlanId(), command.userId());
 
@@ -87,10 +87,10 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
                 .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
                 .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
-        totalQuantity.delayWeeklyQuantity(
+        totalQuantity.delayWeeklyQuantityTo(
                 command.weeklyQuantityId(),
                 command.targetWeeklyQuantityId(),
-                command.quantityAmountToDelay()
+                command.weeklyAmountToDelay()
         );
 
         totalQuantityRepository.save(totalQuantity);

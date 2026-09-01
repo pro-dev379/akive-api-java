@@ -1,9 +1,11 @@
 package net.akive.api.plan.domain.value;
 
 import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.ConflictException;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_MISMATCH;
+import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 
 public record DailyQuantityAmount(
         QuantityAmount quantityAmount,
@@ -18,7 +20,7 @@ public record DailyQuantityAmount(
         requireNonNull(delayedQuantityAmount);
         quantityMemo = quantityMemo == null ? QuantityMemo.NONE : quantityMemo;
 
-        QuantityAmount calculatedQuantityAmount = completedQuantityAmount.plus(delayedQuantityAmount);
+        QuantityAmount calculatedQuantityAmount = completedQuantityAmount.add(delayedQuantityAmount);
 
         if (!calculatedQuantityAmount.equals(quantityAmount)) {
             throw new BadRequestException(DAILY_AMOUNT_MISMATCH);
@@ -49,6 +51,30 @@ public record DailyQuantityAmount(
                 new QuantityAmount(completedQuantityAmount),
                 new QuantityAmount(delayedQuantityAmount),
                 QuantityMemo.NONE
+        );
+    }
+
+    public DailyQuantityAmount increaseBy(QuantityAmount amountToIncrease) {
+        return new DailyQuantityAmount(
+                this.quantityAmount.add(amountToIncrease),
+                this.completedQuantityAmount,
+                this.delayedQuantityAmount.add(amountToIncrease),
+                this.quantityMemo
+        );
+    }
+
+    public DailyQuantityAmount reduceBy(QuantityAmount amountToReduce) {
+        QuantityAmount remainingAmount = this.quantityAmount.subtract(amountToReduce);
+
+        if (remainingAmount.isLessThan(this.completedQuantityAmount)) {
+            throw new ConflictException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+        }
+
+        return new DailyQuantityAmount(
+                remainingAmount,
+                this.completedQuantityAmount,
+                this.delayedQuantityAmount.subtract(amountToReduce),
+                this.quantityMemo
         );
     }
 }

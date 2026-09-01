@@ -69,19 +69,16 @@ public class TotalQuantity {
                 .build();
     }
 
-    public void update(
-            Subject subject,
-            TotalQuantityAmount totalQuantityAmount
-    ) {
-        validateUpdatable(subject, totalQuantityAmount);
+    public void update(Subject targetSubject, TotalQuantityAmount targetTotalQuantityAmount) {
+        validateUpdatable(targetSubject, targetTotalQuantityAmount);
 
-        adjustWeeklyQuantitiesTo(totalQuantityAmount.quantityAmount());
+        adjustWeeklyQuantitiesTo(targetTotalQuantityAmount.quantityAmount());
 
-        this.subject = requireNonNull(subject);
-        this.totalQuantityAmount = requireNonNull(totalQuantityAmount);
+        this.subject = requireNonNull(targetSubject);
+        this.totalQuantityAmount = requireNonNull(targetTotalQuantityAmount);
     }
 
-    public void reduceWeeklyQuantity(Long weeklyQuantityId, WeeklyQuantityAmount targetWeeklyQuantityAmount) {
+    public void reduceWeeklyQuantityTo(Long weeklyQuantityId, WeeklyQuantityAmount targetWeeklyQuantityAmount) {
         requirePositive(weeklyQuantityId);
         requireNonNull(targetWeeklyQuantityAmount);
 
@@ -92,11 +89,11 @@ public class TotalQuantity {
 
         validateNotLastWeekReduction(weeklyQuantityIndex, weeklyAmountDelta);
 
-        weeklyQuantity.reduce(targetWeeklyQuantityAmount);
+        weeklyQuantity.reduceTo(targetWeeklyQuantityAmount);
         carryOverReducedAmountToNextWeek(weeklyQuantityIndex, weeklyAmountDelta);
     }
 
-    public void delayWeeklyQuantity(
+    public void delayWeeklyQuantityTo(
             Long weeklyQuantityId,
             Long targetWeeklyQuantityId,
             QuantityAmount weeklyAmountToDelay
@@ -129,11 +126,11 @@ public class TotalQuantity {
 
         for (int i = 0; i < sessionWeeks.size(); i++) {
             boolean isFirstWeek = i == 0;
-            QuantityAmount weeklyAmount = isFirstWeek
+            QuantityAmount initialWeeklyAmount = isFirstWeek
                     ? totalQuantityAmount.quantityAmount()
                     : QuantityAmount.ZERO;
             WeeklyQuantityAmount weeklyQuantityAmount = new WeeklyQuantityAmount(
-                    weeklyAmount,
+                    initialWeeklyAmount,
                     QuantityMemo.NONE
             );
             WeekPeriod weekPeriod = sessionWeeks.get(i).weekPeriod();
@@ -152,11 +149,11 @@ public class TotalQuantity {
         return weeklyQuantities;
     }
 
-    private void validateUpdatable(Subject subject, TotalQuantityAmount totalQuantityAmount) {
-        requireNonNull(subject);
-        requireNonNull(totalQuantityAmount);
+    private void validateUpdatable(Subject targetSubject, TotalQuantityAmount targetTotalQuantityAmount) {
+        requireNonNull(targetSubject);
+        requireNonNull(targetTotalQuantityAmount);
 
-        if (totalQuantityAmount.quantityAmount().isLessThan(getCompletedAmount())) {
+        if (targetTotalQuantityAmount.quantityAmount().isLessThan(getCompletedAmount())) {
             throw new ConflictException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
     }
@@ -164,7 +161,7 @@ public class TotalQuantity {
     private QuantityAmount getCompletedAmount() {
         return weeklyQuantities.stream()
                 .map(WeeklyQuantity::getCompletedAmount)
-                .reduce(QuantityAmount.ZERO, QuantityAmount::plus);
+                .reduce(QuantityAmount.ZERO, QuantityAmount::add);
     }
 
     private static void validateTotalQuantityAmountMatchesWeeklyAmounts(
@@ -176,7 +173,7 @@ public class TotalQuantity {
 
         QuantityAmount summedWeeklyAmount = weeklyQuantities.stream()
                 .map(weeklyQuantity -> weeklyQuantity.getWeeklyQuantityAmount().quantityAmount())
-                .reduce(QuantityAmount.ZERO, QuantityAmount::plus);
+                .reduce(QuantityAmount.ZERO, QuantityAmount::add);
 
         if (!totalQuantityAmount.quantityAmount().equals(summedWeeklyAmount)) {
             throw new BadRequestException(TOTAL_AMOUNT_MISMATCH);
@@ -185,27 +182,25 @@ public class TotalQuantity {
 
     private void adjustWeeklyQuantitiesTo(QuantityAmount targetTotalAmount) {
         QuantityAmountDelta totalAmountDelta =
-                this.totalQuantityAmount
-                        .quantityAmount()
-                        .deltaTo(targetTotalAmount);
+                this.totalQuantityAmount.quantityAmount().deltaTo(targetTotalAmount);
 
         if (totalAmountDelta.isZero()) {
             return;
         }
 
         if (totalAmountDelta.isPositive()) {
-            this.weeklyQuantities.getFirst().increase(totalAmountDelta.absoluteAmount());
+            this.weeklyQuantities.getFirst().increaseBy(totalAmountDelta.toAbsoluteAmount());
             return;
         }
 
-        reduceWeeklyQuantities(totalAmountDelta.absoluteAmount());
+        reduceWeeklyQuantitiesBy(totalAmountDelta.toAbsoluteAmount());
     }
 
-    private void reduceWeeklyQuantities(QuantityAmount totalAmountToReduce) {
+    private void reduceWeeklyQuantitiesBy(QuantityAmount totalAmountToReduce) {
         QuantityAmount remainingAmountToReduce = totalAmountToReduce;
 
         for (WeeklyQuantity weeklyQuantity : this.weeklyQuantities) {
-            remainingAmountToReduce = weeklyQuantity.reduceDailyQuantities(remainingAmountToReduce);
+            remainingAmountToReduce = weeklyQuantity.reduceDailyQuantitiesBy(remainingAmountToReduce);
 
             if (remainingAmountToReduce.isZero()) {
                 break;
@@ -237,7 +232,7 @@ public class TotalQuantity {
             QuantityAmountDelta weeklyAmountDelta
     ) {
         if (weeklyAmountDelta.isNegative()) {
-            this.weeklyQuantities.get(weeklyQuantityIndex + 1).increase(weeklyAmountDelta.absoluteAmount());
+            this.weeklyQuantities.get(weeklyQuantityIndex + 1).increaseBy(weeklyAmountDelta.toAbsoluteAmount());
         }
     }
 

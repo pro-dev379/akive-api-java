@@ -11,22 +11,22 @@ public record QuantityAmount(int value) implements Comparable<QuantityAmount> {
         requireNonNegative(value);
     }
 
-    public QuantityAmount plus(QuantityAmount amount) {
-        requireNonNull(amount);
+    public QuantityAmount add(QuantityAmount amountToAdd) {
+        requireNonNull(amountToAdd);
 
-        return new QuantityAmount(this.value + amount.value);
+        return new QuantityAmount(this.value + amountToAdd.value);
     }
 
-    public QuantityAmount minus(QuantityAmount amount) {
-        requireNonNull(amount);
+    public QuantityAmount subtract(QuantityAmount amountToSubtract) {
+        requireNonNull(amountToSubtract);
 
-        return new QuantityAmount(this.value - amount.value);
+        return new QuantityAmount(this.value - amountToSubtract.value);
     }
 
     public QuantityAmountDelta deltaTo(QuantityAmount after) {
         requireNonNull(after);
 
-        return QuantityAmountDelta.calculate(this.value, after.value);
+        return QuantityAmountDelta.calculate(this, after);
     }
 
     public static QuantityAmount min(QuantityAmount a, QuantityAmount b) {
@@ -38,6 +38,12 @@ public record QuantityAmount(int value) implements Comparable<QuantityAmount> {
 
     public boolean isZero() {
         return this.value == 0;
+    }
+
+    public boolean isGreaterThan(QuantityAmount other) {
+        requireNonNull(other);
+
+        return this.value > other.value;
     }
 
     public boolean isLessThan(QuantityAmount other) {

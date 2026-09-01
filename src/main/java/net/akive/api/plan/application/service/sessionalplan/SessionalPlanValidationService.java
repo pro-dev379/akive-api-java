@@ -36,10 +36,10 @@ class SessionalPlanValidationService {
 
     void validateUpdatable(
             SessionalPlan currentSessionalPlan,
-            String sessionName,
-            SessionPeriod sessionPeriod
+            String targetSessionName,
+            SessionPeriod targetSessionPeriod
     ) {
-        String normalizedSessionName = validateSessionName(sessionName);
+        String normalizedSessionName = validateSessionName(targetSessionName);
 
         validateSessionNameUniqueForUpdate(
                 currentSessionalPlan.getUser().getUserId(),
@@ -47,7 +47,7 @@ class SessionalPlanValidationService {
                 currentSessionalPlan.getSessionalPlanId()
         );
 
-        validatePeriodChangeAllowed(currentSessionalPlan, sessionPeriod);
+        validatePeriodChangeAllowed(currentSessionalPlan, targetSessionPeriod);
     }
 
     private String validateSessionName(String requestedSessionName) {
@@ -88,9 +88,9 @@ class SessionalPlanValidationService {
 
     private void validatePeriodChangeAllowed(
             SessionalPlan currentSessionalPlan,
-            SessionPeriod requestedSessionPeriod
+            SessionPeriod targetSessionPeriod
     ) {
-        boolean isPeriodChanged = !currentSessionalPlan.getSessionPeriod().equals(requestedSessionPeriod);
+        boolean isPeriodChanged = !currentSessionalPlan.getSessionPeriod().equals(targetSessionPeriod);
         if (!isPeriodChanged) {
             return;
         }

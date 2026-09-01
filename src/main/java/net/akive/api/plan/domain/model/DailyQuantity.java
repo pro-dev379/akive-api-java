@@ -17,8 +17,8 @@ import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT;
+import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -58,31 +58,21 @@ public class DailyQuantity {
                 .build();
     }
 
-    void increase(QuantityAmount dailyAmountToIncrease) {
+    void increaseBy(QuantityAmount dailyAmountToIncrease) {
         if (dailyAmountToIncrease.isZero()) {
             return;
         }
 
-        this.dailyQuantityAmount = new DailyQuantityAmount(
-                this.dailyQuantityAmount.quantityAmount().plus(dailyAmountToIncrease),
-                this.dailyQuantityAmount.completedQuantityAmount(),
-                this.dailyQuantityAmount.delayedQuantityAmount().plus(dailyAmountToIncrease),
-                this.dailyQuantityAmount.quantityMemo()
-        );
+        this.dailyQuantityAmount = this.dailyQuantityAmount.increaseBy(dailyAmountToIncrease);
     }
 
-    QuantityAmount reduceAsMuchAsPossible(QuantityAmount dailyAmountToReduce) {
+    QuantityAmount reduceByAsMuchAsPossible(QuantityAmount dailyAmountToReduce) {
         QuantityAmount appliedReductionAmount = QuantityAmount.min(
                 dailyAmountToReduce,
                 this.dailyQuantityAmount.delayedQuantityAmount()
         );
 
-        this.dailyQuantityAmount = new DailyQuantityAmount(
-                this.dailyQuantityAmount.quantityAmount().minus(appliedReductionAmount),
-                this.dailyQuantityAmount.completedQuantityAmount(),
-                this.dailyQuantityAmount.delayedQuantityAmount().minus(appliedReductionAmount),
-                this.dailyQuantityAmount.quantityMemo()
-        );
+        this.dailyQuantityAmount = this.dailyQuantityAmount.reduceBy(appliedReductionAmount);
 
         return appliedReductionAmount;
     }

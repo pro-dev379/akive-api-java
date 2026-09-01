@@ -8,9 +8,21 @@ class QuantityAmountDeltaTest {
 
     @Test
     void 계획량_변경_이전과_이후간의_변화량을_계산한다() {
-        QuantityAmountDelta quantityAmountDelta = QuantityAmountDelta.calculate(100, 70);
+        QuantityAmount before = new QuantityAmount(100);
+        QuantityAmount after = new QuantityAmount(70);
+
+        QuantityAmountDelta quantityAmountDelta = QuantityAmountDelta.calculate(before, after);
 
         assertThat(quantityAmountDelta).isEqualTo(new QuantityAmountDelta(-30));
+    }
+
+    @Test
+    void 계획량_변화분에_절대값을_적용해서_계획량으로_변환한다() {
+        QuantityAmountDelta quantityAmountDelta = new QuantityAmountDelta(-30);
+
+        QuantityAmount absoluteAmount = quantityAmountDelta.toAbsoluteAmount();
+
+        assertThat(absoluteAmount).isEqualTo(new QuantityAmount(30));
     }
 
     @Test
@@ -38,15 +50,6 @@ class QuantityAmountDeltaTest {
         assertThat(quantityAmountDelta.isPositive()).isFalse();
         assertThat(quantityAmountDelta.isNegative()).isFalse();
         assertThat(quantityAmountDelta.isZero()).isTrue();
-    }
-
-    @Test
-    void 계획량_변화분에_절대값을_적용해서_계획량으로_변환한다() {
-        QuantityAmountDelta quantityAmountDelta = new QuantityAmountDelta(-30);
-
-        QuantityAmount absoluteAmount = quantityAmountDelta.absoluteAmount();
-
-        assertThat(absoluteAmount).isEqualTo(new QuantityAmount(30));
     }
 
     @Test

@@ -145,7 +145,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 weeklyQuantityId
         ).hasStatus(NO_CONTENT);
 
-        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+        then(totalQuantityModifier).should().reduceWeeklyQuantityTo(command);
     }
 
     @ParameterizedTest
@@ -165,7 +165,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 weeklyQuantityId
         ).hasStatus(BAD_REQUEST);
 
-        then(totalQuantityModifier).should(never()).reduceWeeklyQuantity(any(WeeklyQuantityReduceCommand.class));
+        then(totalQuantityModifier).should(never()).reduceWeeklyQuantityTo(any(WeeklyQuantityReduceCommand.class));
     }
 
     @Test
@@ -185,7 +185,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(totalQuantityModifier)
-                .reduceWeeklyQuantity(command);
+                .reduceWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -198,7 +198,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
 
         assertSessionalPlanNotFoundResponse(result);
 
-        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+        then(totalQuantityModifier).should().reduceWeeklyQuantityTo(command);
     }
 
     @Test
@@ -218,7 +218,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
-                .reduceWeeklyQuantity(command);
+                .reduceWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -231,7 +231,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
 
         assertTotalQuantityNotFoundResponse(result);
 
-        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+        then(totalQuantityModifier).should().reduceWeeklyQuantityTo(command);
     }
 
     @Test
@@ -251,7 +251,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
-                .reduceWeeklyQuantity(command);
+                .reduceWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -269,7 +269,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.message")
                 .isEqualTo("Weekly quantity not found.");
 
-        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+        then(totalQuantityModifier).should().reduceWeeklyQuantityTo(command);
     }
 
     @Test
@@ -289,7 +289,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new BadRequestException(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED))
                 .given(totalQuantityModifier)
-                .reduceWeeklyQuantity(command);
+                .reduceWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -307,7 +307,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.message")
                 .isEqualTo("Last weekly quantity cannot be reduced.");
 
-        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+        then(totalQuantityModifier).should().reduceWeeklyQuantityTo(command);
     }
 
     @Test
@@ -327,7 +327,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new BadRequestException(WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED))
                 .given(totalQuantityModifier)
-                .reduceWeeklyQuantity(command);
+                .reduceWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -345,7 +345,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.message")
                 .isEqualTo("Weekly amount cannot be increased here.");
 
-        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+        then(totalQuantityModifier).should().reduceWeeklyQuantityTo(command);
     }
 
     @Test
@@ -365,7 +365,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new ConflictException(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
                 .given(totalQuantityModifier)
-                .reduceWeeklyQuantity(command);
+                .reduceWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -383,7 +383,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.message")
                 .isEqualTo("Weekly amount cannot be less than completed amount.");
 
-        then(totalQuantityModifier).should().reduceWeeklyQuantity(command);
+        then(totalQuantityModifier).should().reduceWeeklyQuantityTo(command);
     }
 
     @Test
@@ -413,7 +413,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 weeklyQuantityId
         ).hasStatus(NO_CONTENT);
 
-        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+        then(totalQuantityModifier).should().delayWeeklyQuantityTo(command);
     }
 
     @ParameterizedTest
@@ -433,7 +433,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 weeklyQuantityId
         ).hasStatus(BAD_REQUEST);
 
-        then(totalQuantityModifier).should(never()).delayWeeklyQuantity(any(WeeklyQuantityDelayCommand.class));
+        then(totalQuantityModifier).should(never()).delayWeeklyQuantityTo(any(WeeklyQuantityDelayCommand.class));
     }
 
     @Test
@@ -455,7 +455,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(totalQuantityModifier)
-                .delayWeeklyQuantity(command);
+                .delayWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -468,7 +468,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
 
         assertSessionalPlanNotFoundResponse(result);
 
-        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+        then(totalQuantityModifier).should().delayWeeklyQuantityTo(command);
     }
 
     @Test
@@ -490,7 +490,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
-                .delayWeeklyQuantity(command);
+                .delayWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -503,7 +503,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
 
         assertTotalQuantityNotFoundResponse(result);
 
-        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+        then(totalQuantityModifier).should().delayWeeklyQuantityTo(command);
     }
 
     @Test
@@ -525,7 +525,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
-                .delayWeeklyQuantity(command);
+                .delayWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -543,7 +543,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.message")
                 .isEqualTo("Weekly quantity not found.");
 
-        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+        then(totalQuantityModifier).should().delayWeeklyQuantityTo(command);
     }
 
     @Test
@@ -565,7 +565,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new BadRequestException(WEEKLY_DELAY_TARGET_SAME_AS_SOURCE))
                 .given(totalQuantityModifier)
-                .delayWeeklyQuantity(command);
+                .delayWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -583,7 +583,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.message")
                 .isEqualTo("Weekly delay target must be different from source weekly quantity.");
 
-        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+        then(totalQuantityModifier).should().delayWeeklyQuantityTo(command);
     }
 
     @Test
@@ -605,7 +605,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
         willThrow(new BadRequestException(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT))
                 .given(totalQuantityModifier)
-                .delayWeeklyQuantity(command);
+                .delayWeeklyQuantityTo(command);
 
         MvcTestResultAssert result = patchJson(
                 userId,
@@ -623,7 +623,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.message")
                 .isEqualTo("Weekly delay amount exceeds current weekly delayed amount.");
 
-        then(totalQuantityModifier).should().delayWeeklyQuantity(command);
+        then(totalQuantityModifier).should().delayWeeklyQuantityTo(command);
     }
 
     private static Stream<String> invalidWeeklyQuantityReduceRequests() {

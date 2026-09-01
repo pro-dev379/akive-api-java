@@ -4,25 +4,28 @@ import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 
 public record QuantityAmountDelta(int value) implements Comparable<QuantityAmountDelta> {
 
-        public boolean isPositive() {
-            return this.value > 0;
-        }
+    public static QuantityAmountDelta calculate(QuantityAmount before, QuantityAmount after) {
+        requireNonNull(before);
+        requireNonNull(after);
 
-        public boolean isNegative() {
-            return this.value < 0;
-        }
+        return new QuantityAmountDelta(after.value() - before.value());
+    }
 
-        public boolean isZero() {
-            return this.value == 0;
-        }
+    public QuantityAmount toAbsoluteAmount() {
+        return new QuantityAmount(Math.abs(this.value));
+    }
 
-        public QuantityAmount absoluteAmount() {
-            return new QuantityAmount(Math.abs(this.value));
-        }
+    public boolean isPositive() {
+        return this.value > 0;
+    }
 
-        public static QuantityAmountDelta calculate(int before, int after) {
-            return new QuantityAmountDelta(after - before);
-        }
+    public boolean isNegative() {
+        return this.value < 0;
+    }
+
+    public boolean isZero() {
+        return this.value == 0;
+    }
 
     @Override
     public int compareTo(QuantityAmountDelta other) {

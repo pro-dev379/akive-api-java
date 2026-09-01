@@ -61,14 +61,14 @@ public class SessionalPlan {
     }
 
     public void update(
-            String sessionName,
-            SessionPeriod sessionPeriod,
+            String targetSessionName,
+            SessionPeriod targetSessionPeriod,
             LocalDateTime requestedAt
     ) {
-        validateSchedulableSessionPeriod(sessionPeriod, requestedAt);
+        validateSchedulableSessionPeriod(targetSessionPeriod, requestedAt);
 
-        this.sessionName = requireMaxLength(requireNotBlank(sessionName), SESSION_NAME_MAX_LENGTH);
-        this.sessionPeriod = sessionPeriod;
+        this.sessionName = requireMaxLength(requireNotBlank(targetSessionName), SESSION_NAME_MAX_LENGTH);
+        this.sessionPeriod = targetSessionPeriod;
     }
 
     private static void validateSchedulableSessionPeriod(

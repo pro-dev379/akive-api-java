@@ -26,11 +26,15 @@ class SessionalPlanDomainService {
 
     void update(
             SessionalPlan currentSessionalPlan,
-            String sessionName,
-            SessionPeriod sessionPeriod
+            String targetSessionName,
+            SessionPeriod targetSessionPeriod
     ) {
-        sessionalPlanValidationService.validateUpdatable(currentSessionalPlan, sessionName, sessionPeriod);
+        sessionalPlanValidationService.validateUpdatable(
+                currentSessionalPlan,
+                targetSessionName,
+                targetSessionPeriod
+        );
 
-        currentSessionalPlan.update(sessionName, sessionPeriod, currentTimeProvider.now());
+        currentSessionalPlan.update(targetSessionName, targetSessionPeriod, currentTimeProvider.now());
     }
 }

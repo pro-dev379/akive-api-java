@@ -71,17 +71,18 @@ public class WeeklyQuantity {
                 .build();
     }
 
-    void increase(QuantityAmount weeklyAmountToIncrease) {
+    void increaseBy(QuantityAmount weeklyAmountToIncrease) {
         if (weeklyAmountToIncrease.isZero()) {
             return;
         }
 
-        this.dailyQuantities.getFirst().increase(weeklyAmountToIncrease);
+        this.weeklyQuantityAmount = this.weeklyQuantityAmount.increaseBy(weeklyAmountToIncrease);
+        this.dailyQuantities.getFirst().increaseBy(weeklyAmountToIncrease);
 
-        updateWeeklyQuantityAmountByDailyQuantities();
+        validateWeeklyQuantityAmountMatchesDailyAmounts();
     }
 
-    void reduce(WeeklyQuantityAmount targetWeeklyQuantityAmount) {
+    void reduceTo(WeeklyQuantityAmount targetWeeklyQuantityAmount) {
         requireNonNull(targetWeeklyQuantityAmount);
         validateReducible(targetWeeklyQuantityAmount.quantityAmount());
 
@@ -92,12 +93,14 @@ public class WeeklyQuantity {
             return;
         }
 
-        reduceDailyQuantities(weeklyAmountDelta.absoluteAmount());
+        reduceDailyQuantitiesBy(weeklyAmountDelta.toAbsoluteAmount());
 
         this.weeklyQuantityAmount = targetWeeklyQuantityAmount;
+
+        validateWeeklyQuantityAmountMatchesDailyAmounts();
     }
 
-    QuantityAmount reduceDailyQuantities(QuantityAmount weeklyAmountToReduce) {
+    QuantityAmount reduceDailyQuantitiesBy(QuantityAmount weeklyAmountToReduce) {
         QuantityAmount remainingAmountToReduce = weeklyAmountToReduce;
 
         if (remainingAmountToReduce.isZero()) {
@@ -105,16 +108,19 @@ public class WeeklyQuantity {
         }
 
         for (DailyQuantity dailyQuantity : this.dailyQuantities) {
-            QuantityAmount appliedReductionAmount = dailyQuantity.reduceAsMuchAsPossible(remainingAmountToReduce);
+            QuantityAmount appliedReductionAmount = dailyQuantity.reduceByAsMuchAsPossible(remainingAmountToReduce);
 
-            remainingAmountToReduce = remainingAmountToReduce.minus(appliedReductionAmount);
+            remainingAmountToReduce = remainingAmountToReduce.subtract(appliedReductionAmount);
 
             if (remainingAmountToReduce.isZero()) {
                 break;
             }
         }
 
-        updateWeeklyQuantityAmountByDailyQuantities();
+        QuantityAmount totalAppliedReductionAmount = weeklyAmountToReduce.subtract(remainingAmountToReduce);
+        this.weeklyQuantityAmount = this.weeklyQuantityAmount.reduceBy(totalAppliedReductionAmount);
+
+        validateWeeklyQuantityAmountMatchesDailyAmounts();
 
         return remainingAmountToReduce;
     }
@@ -125,8 +131,8 @@ public class WeeklyQuantity {
 
         validateDelayable(weeklyAmountToDelay);
 
-        reduceDailyQuantities(weeklyAmountToDelay);
-        targetWeeklyQuantity.increase(weeklyAmountToDelay);
+        reduceDailyQuantitiesBy(weeklyAmountToDelay);
+        targetWeeklyQuantity.increaseBy(weeklyAmountToDelay);
     }
 
     QuantityAmountDelta calculateAmountDeltaTo(QuantityAmount targetWeeklyAmount) {
@@ -138,7 +144,7 @@ public class WeeklyQuantity {
     QuantityAmount getCompletedAmount() {
         return dailyQuantities.stream()
                 .map(DailyQuantity::getCompletedAmount)
-                .reduce(QuantityAmount.ZERO, QuantityAmount::plus);
+                .reduce(QuantityAmount.ZERO, QuantityAmount::add);
     }
 
     private static void validateReconstructable(
@@ -201,10 +207,18 @@ public class WeeklyQuantity {
         }
     }
 
+    private void validateWeeklyQuantityAmountMatchesDailyAmounts() {
+        QuantityAmount summedDailyAmount = sumDailyQuantityAmount(this.dailyQuantities);
+
+        if (!this.weeklyQuantityAmount.quantityAmount().equals(summedDailyAmount)) {
+            throw new BadRequestException(WEEKLY_AMOUNT_MISMATCH);
+        }
+    }
+
     private static QuantityAmount sumDailyQuantityAmount(List<DailyQuantity> dailyQuantities) {
         return dailyQuantities.stream()
                 .map(dailyQuantity -> dailyQuantity.getDailyQuantityAmount().quantityAmount())
-                .reduce(QuantityAmount.ZERO, QuantityAmount::plus);
+                .reduce(QuantityAmount.ZERO, QuantityAmount::add);
     }
 
     private static List<DailyQuantity> createDailyQuantities(
@@ -216,7 +230,7 @@ public class WeeklyQuantity {
         List<DailyQuantity> dailyQuantities = new ArrayList<>();
 
         for (int i = 0; i < planDates.size(); i++) {
-            QuantityAmount dailyAmount = isFirstWeek && i == 0
+            QuantityAmount initialDailyAmount = isFirstWeek && i == 0
                     ? weeklyQuantityAmount.quantityAmount()
                     : QuantityAmount.ZERO;
 
@@ -224,7 +238,11 @@ public class WeeklyQuantity {
                     weekPeriod,
                     weeklyQuantityAmount,
                     planDates.get(i).date(),
-                    new DailyQuantityAmount(dailyAmount, QuantityAmount.ZERO, dailyAmount, QuantityMemo.NONE)
+                    new DailyQuantityAmount(
+                            initialDailyAmount,
+                            QuantityAmount.ZERO,
+                            initialDailyAmount, QuantityMemo.NONE
+                    )
             );
 
             dailyQuantities.add(dailyQuantity);
@@ -233,17 +251,8 @@ public class WeeklyQuantity {
         return dailyQuantities;
     }
 
-    private void updateWeeklyQuantityAmountByDailyQuantities() {
-        this.weeklyQuantityAmount = new WeeklyQuantityAmount(
-                sumDailyQuantityAmount(this.dailyQuantities),
-                this.weeklyQuantityAmount.quantityMemo()
-        );
-    }
-
     private void validateReducible(QuantityAmount targetWeeklyAmount) {
-        QuantityAmountDelta weeklyAmountDelta = calculateAmountDeltaTo(targetWeeklyAmount);
-
-        if (weeklyAmountDelta.isPositive()) {
+        if (targetWeeklyAmount.isGreaterThan(this.weeklyQuantityAmount.quantityAmount())) {
             throw new BadRequestException(WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED);
         }
 
@@ -265,7 +274,7 @@ public class WeeklyQuantity {
     private QuantityAmount getDelayedQuantityAmount() {
         return dailyQuantities.stream()
                 .map(dailyQuantity -> dailyQuantity.getDailyQuantityAmount().delayedQuantityAmount())
-                .reduce(QuantityAmount.ZERO, QuantityAmount::plus);
+                .reduce(QuantityAmount.ZERO, QuantityAmount::add);
     }
 
     @Override

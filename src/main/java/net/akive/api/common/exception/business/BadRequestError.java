@@ -47,8 +47,9 @@ public enum BadRequestError implements Error {
             PLAN,
             "Weekly delay amount exceeds current weekly delayed amount."
     ),
-    DAILY_AMOUNT_INCREASE_NOT_ALLOWED(PLAN, "Daily amount cannot be increased here."),
     INVALID_WEEK_PERIOD(PLAN, "Invalid week period."),
+    LAST_DAILY_QUANTITY_REDUCTION_NOT_ALLOWED(PLAN, "Last daily quantity cannot be reduced."),
+    DAILY_AMOUNT_INCREASE_NOT_ALLOWED(PLAN, "Daily amount cannot be increased here."),
     DAILY_QUANTITY_DATE_OUT_OF_WEEK(PLAN, "Daily quantity date is outside week period."),
     DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT(PLAN, "Daily amount exceeds weekly amount."),
     DAILY_AMOUNT_MISMATCH(PLAN, "Daily amount mismatch."),

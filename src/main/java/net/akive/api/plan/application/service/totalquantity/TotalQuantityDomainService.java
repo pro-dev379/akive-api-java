@@ -38,8 +38,8 @@ class TotalQuantityDomainService {
             Long totalQuantityId,
             Long sessionalPlanId,
             Long userId,
-            Subject subject,
-            TotalQuantityAmount totalQuantityAmount
+            Subject targetSubject,
+            TotalQuantityAmount targetTotalQuantityAmount
     ) {
         findSessionalPlanOrThrow(sessionalPlanId, userId);
 
@@ -47,9 +47,9 @@ class TotalQuantityDomainService {
                 .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId)
                 .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
-        totalQuantityValidationService.validateUpdatable(totalQuantityId, sessionalPlanId, subject.name());
+        totalQuantityValidationService.validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
 
-        totalQuantity.update(subject, totalQuantityAmount);
+        totalQuantity.update(targetSubject, targetTotalQuantityAmount);
 
         return totalQuantity;
     }

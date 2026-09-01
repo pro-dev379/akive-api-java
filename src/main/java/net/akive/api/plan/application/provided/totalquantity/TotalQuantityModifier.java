@@ -14,8 +14,8 @@ public interface TotalQuantityModifier {
 
     void delete(TotalQuantityDeleteCommand command) throws NotFoundException;
 
-    void reduceWeeklyQuantity(WeeklyQuantityReduceCommand command)
+    void reduceWeeklyQuantityTo(WeeklyQuantityReduceCommand command)
             throws BadRequestException, ConflictException, NotFoundException;
 
-    void delayWeeklyQuantity(WeeklyQuantityDelayCommand command) throws BadRequestException, NotFoundException;
+    void delayWeeklyQuantityTo(WeeklyQuantityDelayCommand command) throws BadRequestException, NotFoundException;
 }

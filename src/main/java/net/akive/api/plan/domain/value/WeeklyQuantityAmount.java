@@ -16,4 +16,18 @@ public record WeeklyQuantityAmount(QuantityAmount quantityAmount, QuantityMemo q
     public static WeeklyQuantityAmount of(int quantityAmount) {
         return new WeeklyQuantityAmount(new QuantityAmount(quantityAmount), QuantityMemo.NONE);
     }
+
+    public WeeklyQuantityAmount increaseBy(QuantityAmount amountToIncrease) {
+        return new WeeklyQuantityAmount(
+                this.quantityAmount.add(amountToIncrease),
+                this.quantityMemo
+        );
+    }
+
+    public WeeklyQuantityAmount reduceBy(QuantityAmount amountToReduce) {
+        return new WeeklyQuantityAmount(
+                this.quantityAmount.subtract(amountToReduce),
+                this.quantityMemo
+        );
+    }
 }

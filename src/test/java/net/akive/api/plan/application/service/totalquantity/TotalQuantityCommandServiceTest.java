@@ -263,7 +263,7 @@ class TotalQuantityCommandServiceTest {
         given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
                 .willReturn(Optional.of(totalQuantity));
 
-        totalQuantityCommandService.reduceWeeklyQuantity(command);
+        totalQuantityCommandService.reduceWeeklyQuantityTo(command);
 
         assertWeeklyQuantityAmounts(totalQuantity, 20, 50, 30);
         assertThat(totalQuantity.getWeeklyQuantities()
@@ -298,7 +298,7 @@ class TotalQuantityCommandServiceTest {
                 .willReturn(false);
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> totalQuantityCommandService.reduceWeeklyQuantity(command))
+                .isThrownBy(() -> totalQuantityCommandService.reduceWeeklyQuantityTo(command))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
@@ -329,7 +329,7 @@ class TotalQuantityCommandServiceTest {
                 .willReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> totalQuantityCommandService.reduceWeeklyQuantity(command))
+                .isThrownBy(() -> totalQuantityCommandService.reduceWeeklyQuantityTo(command))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
@@ -363,7 +363,7 @@ class TotalQuantityCommandServiceTest {
                 .willReturn(Optional.of(totalQuantity));
 
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> totalQuantityCommandService.reduceWeeklyQuantity(command))
+                .isThrownBy(() -> totalQuantityCommandService.reduceWeeklyQuantityTo(command))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED);
 
@@ -397,7 +397,7 @@ class TotalQuantityCommandServiceTest {
         given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
                 .willReturn(Optional.of(totalQuantity));
 
-        totalQuantityCommandService.delayWeeklyQuantity(command);
+        totalQuantityCommandService.delayWeeklyQuantityTo(command);
 
         assertWeeklyQuantityAmounts(totalQuantity, 20, 40, 40);
         then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
@@ -424,7 +424,7 @@ class TotalQuantityCommandServiceTest {
                 .willReturn(false);
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> totalQuantityCommandService.delayWeeklyQuantity(command))
+                .isThrownBy(() -> totalQuantityCommandService.delayWeeklyQuantityTo(command))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
@@ -454,7 +454,7 @@ class TotalQuantityCommandServiceTest {
                 .willReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> totalQuantityCommandService.delayWeeklyQuantity(command))
+                .isThrownBy(() -> totalQuantityCommandService.delayWeeklyQuantityTo(command))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
@@ -474,7 +474,7 @@ class TotalQuantityCommandServiceTest {
         User user = createPersistedUser(userId);
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(totalQuantityId, sessionalPlan, 100, 0, 0);
-        totalQuantity.reduceWeeklyQuantity(weeklyQuantityId, WeeklyQuantityAmount.of(30));
+        totalQuantity.reduceWeeklyQuantityTo(weeklyQuantityId, WeeklyQuantityAmount.of(30));
         WeeklyQuantityDelayCommand command = WeeklyQuantityDelayCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
@@ -490,7 +490,7 @@ class TotalQuantityCommandServiceTest {
                 .willReturn(Optional.of(totalQuantity));
 
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> totalQuantityCommandService.delayWeeklyQuantity(command))
+                .isThrownBy(() -> totalQuantityCommandService.delayWeeklyQuantityTo(command))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
 

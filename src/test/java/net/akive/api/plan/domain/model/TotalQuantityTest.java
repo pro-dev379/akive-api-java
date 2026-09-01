@@ -240,7 +240,7 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20, "첫 주 조정");
 
-        totalQuantity.reduceWeeklyQuantity(1L, reducedWeeklyQuantityAmount);
+        totalQuantity.reduceWeeklyQuantityTo(1L, reducedWeeklyQuantityAmount);
 
         assertWeeklyQuantityAmounts(totalQuantity, 20, 50, 30);
         assertThat(totalQuantity.getWeeklyQuantities().getFirst().getWeeklyQuantityAmount())
@@ -260,7 +260,7 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(30, "메모 수정");
 
-        totalQuantity.reduceWeeklyQuantity(1L, reducedWeeklyQuantityAmount);
+        totalQuantity.reduceWeeklyQuantityTo(1L, reducedWeeklyQuantityAmount);
 
         assertWeeklyQuantityAmounts(totalQuantity, 30, 40, 30);
         assertThat(totalQuantity.getWeeklyQuantities()
@@ -277,7 +277,7 @@ class TotalQuantityTest {
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20);
 
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantity(3L, reducedWeeklyQuantityAmount))
+                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantityTo(3L, reducedWeeklyQuantityAmount))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED);
     }
@@ -288,7 +288,7 @@ class TotalQuantityTest {
         WeeklyQuantityAmount increasedWeeklyQuantityAmount = WeeklyQuantityAmount.of(40);
 
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantity(1L, increasedWeeklyQuantityAmount))
+                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantityTo(1L, increasedWeeklyQuantityAmount))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED);
     }
@@ -299,7 +299,7 @@ class TotalQuantityTest {
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20);
 
         assertThatExceptionOfType(ConflictException.class)
-                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantity(1L, reducedWeeklyQuantityAmount))
+                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantityTo(1L, reducedWeeklyQuantityAmount))
                 .extracting(ConflictException::getError)
                 .isEqualTo(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
     }
@@ -310,7 +310,7 @@ class TotalQuantityTest {
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20);
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantity(999L, reducedWeeklyQuantityAmount))
+                .isThrownBy(() -> totalQuantity.reduceWeeklyQuantityTo(999L, reducedWeeklyQuantityAmount))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
     }
@@ -319,7 +319,7 @@ class TotalQuantityTest {
     void 주간_딜레이를_다른_주로_옮긴다() {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
 
-        totalQuantity.delayWeeklyQuantity(1L, 3L, new QuantityAmount(10));
+        totalQuantity.delayWeeklyQuantityTo(1L, 3L, new QuantityAmount(10));
 
         assertWeeklyQuantityAmounts(totalQuantity, 20, 40, 40);
         assertDailyQuantityAmount(
@@ -375,7 +375,7 @@ class TotalQuantityTest {
                 )
         );
 
-        totalQuantity.delayWeeklyQuantity(1L, 3L, new QuantityAmount(15));
+        totalQuantity.delayWeeklyQuantityTo(1L, 3L, new QuantityAmount(15));
 
         assertWeeklyQuantityAmounts(totalQuantity, 15, 70, 15);
         assertDailyQuantityAmount(
@@ -397,7 +397,7 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedFirstWeek(100, 30);
 
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> totalQuantity.delayWeeklyQuantity(1L, 2L, new QuantityAmount(80)))
+                .isThrownBy(() -> totalQuantity.delayWeeklyQuantityTo(1L, 2L, new QuantityAmount(80)))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
     }
@@ -407,7 +407,7 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
 
         assertThatExceptionOfType(BadRequestException.class)
-                .isThrownBy(() -> totalQuantity.delayWeeklyQuantity(1L, 1L, new QuantityAmount(10)))
+                .isThrownBy(() -> totalQuantity.delayWeeklyQuantityTo(1L, 1L, new QuantityAmount(10)))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(WEEKLY_DELAY_TARGET_SAME_AS_SOURCE);
     }
@@ -417,12 +417,12 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> totalQuantity.delayWeeklyQuantity(999L, 2L, new QuantityAmount(10)))
+                .isThrownBy(() -> totalQuantity.delayWeeklyQuantityTo(999L, 2L, new QuantityAmount(10)))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> totalQuantity.delayWeeklyQuantity(1L, 999L, new QuantityAmount(10)))
+                .isThrownBy(() -> totalQuantity.delayWeeklyQuantityTo(1L, 999L, new QuantityAmount(10)))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
     }

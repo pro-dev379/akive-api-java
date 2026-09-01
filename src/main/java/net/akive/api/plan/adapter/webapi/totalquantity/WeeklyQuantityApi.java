@@ -46,7 +46,7 @@ public class WeeklyQuantityApi {
 
     @PatchMapping
     @ResponseStatus(NO_CONTENT)
-    public void reduce(
+    public void reduceTo(
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId,
             @PathVariable Long totalQuantityId,
@@ -60,12 +60,12 @@ public class WeeklyQuantityApi {
                 userId
         );
 
-        totalQuantityModifier.reduceWeeklyQuantity(command);
+        totalQuantityModifier.reduceWeeklyQuantityTo(command);
     }
 
     @PatchMapping("/delays")
     @ResponseStatus(NO_CONTENT)
-    public void delay(
+    public void delayTo(
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId,
             @PathVariable Long totalQuantityId,
@@ -81,6 +81,6 @@ public class WeeklyQuantityApi {
                 request.quantityAmountToDelay()
         );
 
-        totalQuantityModifier.delayWeeklyQuantity(command);
+        totalQuantityModifier.delayWeeklyQuantityTo(command);
     }
 }
