@@ -96,7 +96,7 @@ public record DailyQuantityAmount(
 
     public DailyQuantityAmount completeBy(QuantityAmount amountToComplete) {
         if (amountToComplete.isGreaterThan(this.delayedQuantityAmount)) {
-            throw new ConflictException(DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT);
+            throw new ConflictException(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
         }
 
         return new DailyQuantityAmount(
@@ -109,7 +109,7 @@ public record DailyQuantityAmount(
 
     public DailyQuantityAmount cancelCompletionBy(QuantityAmount amountToCancelCompletion) {
         if (amountToCancelCompletion.isGreaterThan(this.completedQuantityAmount)) {
-            throw new ConflictException(DAILY_COMPLETION_CANCELLATION_AMOUNT_EXCEEDS_COMPLETED_AMOUNT);
+            throw new ConflictException(DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT);
         }
 
         return new DailyQuantityAmount(

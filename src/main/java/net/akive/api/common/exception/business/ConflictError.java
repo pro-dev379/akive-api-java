@@ -29,13 +29,13 @@ public enum ConflictError implements Error {
             PLAN,
             "Daily amount cannot be less than completed amount."
     ),
-    DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT(
+    DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT(
             PLAN,
-            "Daily completed amount cannot exceed delayed amount."
+            "Daily amount to complete cannot exceed delayed amount."
     ),
-    DAILY_COMPLETION_CANCELLATION_AMOUNT_EXCEEDS_COMPLETED_AMOUNT(
+    DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT(
             PLAN,
-            "Daily completion cancellation amount cannot exceed completed amount."
+            "Daily amount to cancel completion cannot exceed completed amount."
     ),
 
     EMAIL_ALREADY_VERIFIED(EMAIL_VERIFICATION, "Email is already verified."),

@@ -548,13 +548,13 @@ class TotalQuantityTest {
     }
 
     @Test
-    void 일일_계획_달성량을_딜레이량보다_많이_늘릴_수_없다() {
+    void 일일_계획_달성량_증가분이_딜레이량보다_많으면_수정할_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
 
         assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> totalQuantity.updateDailyCompletedAmount(1L, 1L, new QuantityAmount(50)))
                 .extracting(ConflictException::getError)
-                .isEqualTo(DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT);
+                .isEqualTo(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
     }
 
     @Test

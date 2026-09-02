@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_INCREASE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.BadRequestError.LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT;
+import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT;
 import static net.akive.api.common.exception.business.NotFoundError.*;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_COMPLETED_QUANTITIES;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_QUANTITY;
@@ -586,7 +586,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 일일_계획_달성량_수정_시_딜레이량보다_많이_늘리면_409를_응답한다() {
+    void 일일_계획_달성량_수정_시_달성량_증가분이_딜레이량보다_많으면_409를_응답한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
@@ -602,7 +602,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 userId,
                 targetDailyCompletedAmount
         );
-        willThrow(new ConflictException(DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT))
+        willThrow(new ConflictException(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT))
                 .given(totalQuantityModifier)
                 .updateDailyCompletedAmount(command);
 
@@ -618,10 +618,10 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_409_DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT");
+                .isEqualTo("PLAN_409_DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
-                .isEqualTo("Daily completed amount cannot exceed delayed amount.");
+                .isEqualTo("Daily amount to complete cannot exceed delayed amount.");
         then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
     }
 

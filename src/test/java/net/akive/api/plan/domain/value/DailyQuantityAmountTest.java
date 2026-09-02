@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_MISMATCH;
 import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_COMPLETION_CANCELLATION_AMOUNT_EXCEEDS_COMPLETED_AMOUNT;
+import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT;
+import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -112,13 +112,13 @@ class DailyQuantityAmountTest {
     }
 
     @Test
-    void 일일_계획_달성량을_딜레이량보다_많이_늘릴_수_없다() {
+    void 일일_계획_달성량_증가분은_딜레이량보다_많을_수_없다() {
         DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(100, 30, 70);
 
         assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> dailyQuantityAmount.completeBy(new QuantityAmount(80)))
                 .extracting(ConflictException::getError)
-                .isEqualTo(DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT);
+                .isEqualTo(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
     }
 
     @Test
@@ -153,6 +153,6 @@ class DailyQuantityAmountTest {
         assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> dailyQuantityAmount.cancelCompletionBy(new QuantityAmount(40)))
                 .extracting(ConflictException::getError)
-                .isEqualTo(DAILY_COMPLETION_CANCELLATION_AMOUNT_EXCEEDS_COMPLETED_AMOUNT);
+                .isEqualTo(DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT);
     }
 }
