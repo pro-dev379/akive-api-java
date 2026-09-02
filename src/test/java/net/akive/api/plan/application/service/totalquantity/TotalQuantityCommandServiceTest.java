@@ -3,6 +3,7 @@ package net.akive.api.plan.application.service.totalquantity;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.plan.application.provided.totalquantity.dto.DailyCompletedAmountUpdateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountUpdateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityCreateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
@@ -36,6 +37,7 @@ import java.util.Optional;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_INCREASE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT;
+import static net.akive.api.common.exception.business.ConflictError.DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT;
 import static net.akive.api.common.exception.business.ConflictError.TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
@@ -647,12 +649,217 @@ class TotalQuantityCommandServiceTest {
         then(totalQuantityRepository).should(never()).save(any());
     }
 
+    @Test
+    void 일일_계획_달성량을_수정한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 1L;
+        Long dailyQuantityId = 1L;
+        User user = createPersistedUser(userId);
+        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(
+                totalQuantityId,
+                sessionalPlan,
+                40,
+                10,
+                60
+        );
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                30
+        );
+
+        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(true);
+        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
+                .willReturn(Optional.of(totalQuantity));
+
+        totalQuantityCommandService.updateDailyCompletedAmount(command);
+
+        WeeklyQuantity weeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
+        assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().getFirst(), 40, 30, 10);
+        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+        then(totalQuantityRepository).should().save(totalQuantity);
+    }
+
+    @Test
+    void 세셔널_플랜이_없으면_일일_계획_달성량을_수정할_수_없다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                1L,
+                1L,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                30
+        );
+
+        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(false);
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+
+        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(totalQuantityRepository).should(never())
+                .findBySessionalPlanIdAndTotalQuantityId(any(), any());
+        then(totalQuantityRepository).should(never()).save(any());
+    }
+
+    @Test
+    void 세션_총량이_없으면_일일_계획_달성량을_수정할_수_없다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                1L,
+                1L,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                30
+        );
+
+        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(true);
+        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
+                .willReturn(Optional.empty());
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
+
+        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+        then(totalQuantityRepository).should(never()).save(any());
+    }
+
+    @Test
+    void 일일_계획_달성량_수정에_실패하면_저장하지_않는다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 1L;
+        Long dailyQuantityId = 1L;
+        User user = createPersistedUser(userId);
+        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(
+                totalQuantityId,
+                sessionalPlan,
+                40,
+                10,
+                60
+        );
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                50
+        );
+
+        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(true);
+        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
+                .willReturn(Optional.of(totalQuantity));
+
+        assertThatExceptionOfType(ConflictException.class)
+                .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
+                .extracting(ConflictException::getError)
+                .isEqualTo(DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT);
+
+        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+        then(totalQuantityRepository).should(never()).save(any());
+    }
+
     private void assertDailyQuantityAmount(DailyQuantity dailyQuantity, int expectedDailyAmount) {
         DailyQuantityAmount dailyQuantityAmount = dailyQuantity.getDailyQuantityAmount();
 
         assertThat(dailyQuantityAmount.quantityAmount().value()).isEqualTo(expectedDailyAmount);
         assertThat(dailyQuantityAmount.completedQuantityAmount().value()).isZero();
         assertThat(dailyQuantityAmount.delayedQuantityAmount().value()).isEqualTo(expectedDailyAmount);
+    }
+
+    private void assertDailyQuantityAmount(
+            DailyQuantity dailyQuantity,
+            int expectedDailyAmount,
+            int expectedDailyCompletedAmount,
+            int expectedDailyDelayedAmount
+    ) {
+        DailyQuantityAmount dailyQuantityAmount = dailyQuantity.getDailyQuantityAmount();
+
+        assertThat(dailyQuantityAmount.quantityAmount().value()).isEqualTo(expectedDailyAmount);
+        assertThat(dailyQuantityAmount.completedQuantityAmount().value()).isEqualTo(expectedDailyCompletedAmount);
+        assertThat(dailyQuantityAmount.delayedQuantityAmount().value()).isEqualTo(expectedDailyDelayedAmount);
+    }
+
+    private TotalQuantity createTotalQuantityWithCompletedDailyAmount(
+            Long totalQuantityId,
+            SessionalPlan sessionalPlan,
+            int firstDailyAmount,
+            int firstCompletedDailyAmount,
+            int secondDailyAmount
+    ) {
+        return TotalQuantity.reconstruct(
+                totalQuantityId,
+                sessionalPlan,
+                createSubject(),
+                TotalQuantityAmount.of(firstDailyAmount + secondDailyAmount, QUANTITY_UNIT),
+                List.of(
+                        WeeklyQuantity.reconstruct(
+                                1L,
+                                new WeekPeriod(
+                                        LocalDate.of(2026, 1, 1),
+                                        LocalDate.of(2026, 1, 4)
+                                ),
+                                WeeklyQuantityAmount.of(firstDailyAmount + secondDailyAmount),
+                                List.of(
+                                        DailyQuantity.reconstruct(
+                                                1L,
+                                                LocalDate.of(2026, 1, 1),
+                                                DailyQuantityAmount.of(
+                                                        firstDailyAmount,
+                                                        firstCompletedDailyAmount,
+                                                        firstDailyAmount - firstCompletedDailyAmount
+                                                )
+                                        ),
+                                        DailyQuantity.reconstruct(
+                                                2L,
+                                                LocalDate.of(2026, 1, 2),
+                                                DailyQuantityAmount.of(secondDailyAmount, 0, secondDailyAmount)
+                                        )
+                                )
+                        ),
+                        createWeeklyQuantity(
+                                2L,
+                                LocalDate.of(2026, 1, 5),
+                                LocalDate.of(2026, 1, 11),
+                                0
+                        ),
+                        createWeeklyQuantity(
+                                3L,
+                                LocalDate.of(2026, 1, 12),
+                                LocalDate.of(2026, 1, 12),
+                                0
+                        )
+                )
+        );
     }
 
     private TotalQuantity createTotalQuantityWithDailyAmounts(

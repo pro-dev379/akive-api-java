@@ -133,6 +133,20 @@ public class TotalQuantity {
         weeklyQuantity.updateDailyAmount(dailyQuantityId, targetDailyAmount, targetDailyMemo);
     }
 
+    public void updateDailyCompletedAmount(
+            Long weeklyQuantityId,
+            Long dailyQuantityId,
+            QuantityAmount targetDailyCompletedAmount
+    ) {
+        requirePositive(weeklyQuantityId);
+        requirePositive(dailyQuantityId);
+        requireNonNull(targetDailyCompletedAmount);
+
+        WeeklyQuantity weeklyQuantity = this.weeklyQuantities.get(findWeeklyQuantityIndex(weeklyQuantityId));
+
+        weeklyQuantity.updateDailyCompletedAmount(dailyQuantityId, targetDailyCompletedAmount);
+    }
+
     private static List<WeeklyQuantity> createWeeklyQuantities(
             SessionalPlan sessionalPlan,
             TotalQuantityAmount totalQuantityAmount

@@ -115,6 +115,24 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
         totalQuantityRepository.save(totalQuantity);
     }
 
+    @Override
+    public void updateDailyCompletedAmount(DailyCompletedAmountUpdateCommand command)
+            throws ConflictException, NotFoundException {
+        validateSessionalPlan(command.sessionalPlanId(), command.userId());
+
+        TotalQuantity totalQuantity = totalQuantityRepository
+                .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
+                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+
+        totalQuantity.updateDailyCompletedAmount(
+                command.weeklyQuantityId(),
+                command.dailyQuantityId(),
+                command.targetDailyCompletedAmount()
+        );
+
+        totalQuantityRepository.save(totalQuantity);
+    }
+
     private void validateSessionalPlan(Long sessionalPlanId, Long userId) {
         boolean hasSessionalPlan = sessionalPlanRepository
                 .existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);

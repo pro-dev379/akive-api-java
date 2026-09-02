@@ -5,6 +5,7 @@ import net.akive.api.common.exception.business.ConflictException;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_MISMATCH;
+import static net.akive.api.common.exception.business.ConflictError.*;
 import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 
 public record DailyQuantityAmount(
@@ -90,6 +91,32 @@ public record DailyQuantityAmount(
                 this.completedQuantityAmount,
                 this.delayedQuantityAmount.subtract(amountToReduce),
                 targetMemo
+        );
+    }
+
+    public DailyQuantityAmount completeBy(QuantityAmount amountToComplete) {
+        if (amountToComplete.isGreaterThan(this.delayedQuantityAmount)) {
+            throw new ConflictException(DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT);
+        }
+
+        return new DailyQuantityAmount(
+                this.quantityAmount,
+                this.completedQuantityAmount.add(amountToComplete),
+                this.delayedQuantityAmount.subtract(amountToComplete),
+                this.quantityMemo
+        );
+    }
+
+    public DailyQuantityAmount cancelCompletionBy(QuantityAmount amountToCancelCompletion) {
+        if (amountToCancelCompletion.isGreaterThan(this.completedQuantityAmount)) {
+            throw new ConflictException(DAILY_COMPLETION_CANCELLATION_AMOUNT_EXCEEDS_COMPLETED_AMOUNT);
+        }
+
+        return new DailyQuantityAmount(
+                this.quantityAmount,
+                this.completedQuantityAmount.subtract(amountToCancelCompletion),
+                this.delayedQuantityAmount.add(amountToCancelCompletion),
+                this.quantityMemo
         );
     }
 

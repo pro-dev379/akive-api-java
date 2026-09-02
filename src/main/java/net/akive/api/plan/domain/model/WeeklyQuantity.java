@@ -121,6 +121,13 @@ public class WeeklyQuantity {
         validateWeeklyAmountMatchesDailyAmounts();
     }
 
+    void updateDailyCompletedAmount(Long dailyQuantityId, QuantityAmount targetDailyCompletedAmount) {
+        int dailyQuantityIndex = findDailyQuantityIndex(dailyQuantityId);
+        DailyQuantity dailyQuantity = this.dailyQuantities.get(dailyQuantityIndex);
+
+        dailyQuantity.updateCompletedAmount(targetDailyCompletedAmount);
+    }
+
     QuantityAmount reduceDailyAmountsBy(QuantityAmount weeklyAmountToReduce) {
         QuantityAmount remainingAmountToReduce = weeklyAmountToReduce;
 

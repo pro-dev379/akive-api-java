@@ -10,9 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.ConflictError.TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
+import static net.akive.api.common.exception.business.ConflictError.*;
 import static net.akive.api.common.exception.business.NotFoundError.DAILY_QUANTITY_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanAssertions.assertWeeklyQuantityAmounts;
@@ -506,6 +504,70 @@ class TotalQuantityTest {
     }
 
     @Test
+    void 일일_계획_달성량을_늘린다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
+
+        totalQuantity.updateDailyCompletedAmount(1L, 1L, new QuantityAmount(30));
+
+        WeeklyQuantity weeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
+        assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().getFirst(), 40, 30, 10);
+        assertWeeklyQuantityAmounts(totalQuantity, 100, 0, 0);
+    }
+
+    @Test
+    void 일일_계획_달성량을_일부_취소한다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
+
+        totalQuantity.updateDailyCompletedAmount(1L, 1L, new QuantityAmount(5));
+
+        WeeklyQuantity weeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
+        assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().getFirst(), 40, 5, 35);
+        assertWeeklyQuantityAmounts(totalQuantity, 100, 0, 0);
+    }
+
+    @Test
+    void 일일_계획_달성량을_모두_취소한다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
+
+        totalQuantity.updateDailyCompletedAmount(1L, 1L, QuantityAmount.ZERO);
+
+        WeeklyQuantity weeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
+        assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().getFirst(), 40, 0, 40);
+        assertWeeklyQuantityAmounts(totalQuantity, 100, 0, 0);
+    }
+
+    @Test
+    void 일일_계획_달성량이_이전과_같다면_수정하지_않는다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
+
+        totalQuantity.updateDailyCompletedAmount(1L, 1L, new QuantityAmount(10));
+
+        WeeklyQuantity weeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
+        assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().getFirst(), 40, 10, 30);
+        assertWeeklyQuantityAmounts(totalQuantity, 100, 0, 0);
+    }
+
+    @Test
+    void 일일_계획_달성량을_딜레이량보다_많이_늘릴_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
+
+        assertThatExceptionOfType(ConflictException.class)
+                .isThrownBy(() -> totalQuantity.updateDailyCompletedAmount(1L, 1L, new QuantityAmount(50)))
+                .extracting(ConflictException::getError)
+                .isEqualTo(DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT);
+    }
+
+    @Test
+    void 존재하지_않는_일일_계획량은_완료량을_수정할_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantity.updateDailyCompletedAmount(1L, 999L, new QuantityAmount(20)))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(DAILY_QUANTITY_NOT_FOUND);
+    }
+
+    @Test
     void 같은_식별자를_가진_세션_총량은_같게_취급한다() {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(1L, createSessionalPlan(), 30, 40, 30);
         TotalQuantity sameTotalQuantity = createTotalQuantityWithWeeklyAmounts(1L, createSessionalPlan(), 20, 50, 30);
@@ -547,6 +609,19 @@ class TotalQuantityTest {
         assertThat(dailyQuantityAmount.quantityAmount().value()).isEqualTo(expectedAmount);
         assertThat(dailyQuantityAmount.completedQuantityAmount().value()).isZero();
         assertThat(dailyQuantityAmount.delayedQuantityAmount().value()).isEqualTo(expectedAmount);
+    }
+
+    private void assertDailyQuantityAmount(
+            DailyQuantity dailyQuantity,
+            int expectedDailyAmount,
+            int expectedDailyCompletedAmount,
+            int expectedDailyDelayedAmount
+    ) {
+        DailyQuantityAmount dailyQuantityAmount = dailyQuantity.getDailyQuantityAmount();
+
+        assertThat(dailyQuantityAmount.quantityAmount().value()).isEqualTo(expectedDailyAmount);
+        assertThat(dailyQuantityAmount.completedQuantityAmount().value()).isEqualTo(expectedDailyCompletedAmount);
+        assertThat(dailyQuantityAmount.delayedQuantityAmount().value()).isEqualTo(expectedDailyDelayedAmount);
     }
 
     private TotalQuantity createTotalQuantityWithCompletedAmount(

@@ -4,6 +4,7 @@ import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountUpdateCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.DailyCompletedAmountUpdateCommand;
 import net.akive.api.support.PrivateApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +16,9 @@ import java.util.stream.Stream;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_INCREASE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.BadRequestError.LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
+import static net.akive.api.common.exception.business.ConflictError.DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT;
 import static net.akive.api.common.exception.business.NotFoundError.*;
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_COMPLETED_QUANTITIES;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_QUANTITY;
 import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENGTH;
 import static org.mockito.ArgumentMatchers.any;
@@ -368,6 +371,260 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityModifier).should().updateDailyAmount(command);
     }
 
+    @Test
+    void 일일_계획_달성량을_수정한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        int targetDailyCompletedAmount = 50;
+        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetDailyCompletedAmount
+        );
+
+        patchJson(
+                userId,
+                DAILY_COMPLETED_QUANTITIES,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NO_CONTENT);
+
+        then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidDailyCompletedAmountUpdateRequests")
+    void 일일_계획_달성량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+
+        patchJson(
+                userId,
+                DAILY_COMPLETED_QUANTITIES,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        then(totalQuantityModifier).should(never())
+                .updateDailyCompletedAmount(any(DailyCompletedAmountUpdateCommand.class));
+    }
+
+    @Test
+    void 일일_계획_달성량_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        int targetDailyCompletedAmount = 50;
+        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetDailyCompletedAmount
+        );
+        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .updateDailyCompletedAmount(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_COMPLETED_QUANTITIES,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_SESSIONAL_PLAN_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Sessional plan not found.");
+        then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
+    }
+
+    @Test
+    void 일일_계획_달성량_수정_시_세션_총량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        int targetDailyCompletedAmount = 50;
+        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetDailyCompletedAmount
+        );
+        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .updateDailyCompletedAmount(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_COMPLETED_QUANTITIES,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_TOTAL_QUANTITY_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Total quantity not found.");
+        then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
+    }
+
+    @Test
+    void 일일_계획_달성량_수정_시_주간_계획량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        int targetDailyCompletedAmount = 50;
+        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetDailyCompletedAmount
+        );
+        willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .updateDailyCompletedAmount(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_COMPLETED_QUANTITIES,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_WEEKLY_QUANTITY_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Weekly quantity not found.");
+        then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
+    }
+
+    @Test
+    void 일일_계획_달성량_수정_시_일일_계획량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        int targetDailyCompletedAmount = 50;
+        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetDailyCompletedAmount
+        );
+        willThrow(new NotFoundException(DAILY_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .updateDailyCompletedAmount(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_COMPLETED_QUANTITIES,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_DAILY_QUANTITY_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Daily quantity not found");
+        then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
+    }
+
+    @Test
+    void 일일_계획_달성량_수정_시_딜레이량보다_많이_늘리면_409를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        int targetDailyCompletedAmount = 50;
+        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetDailyCompletedAmount
+        );
+        willThrow(new ConflictException(DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT))
+                .given(totalQuantityModifier)
+                .updateDailyCompletedAmount(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_COMPLETED_QUANTITIES,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(CONFLICT);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_409_DAILY_COMPLETED_AMOUNT_EXCEEDS_DELAYED_AMOUNT");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Daily completed amount cannot exceed delayed amount.");
+        then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
+    }
+
     private static Stream<String> invalidDailyAmountUpdateRequests() {
         return Stream.of(
                 """
@@ -378,6 +635,18 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 dailyAmountUpdateRequestJson(null, null),
                 dailyAmountUpdateRequestJson(-1, null),
                 dailyAmountUpdateRequestJson(50, "a".repeat(QUANTITY_MEMO_MAX_LENGTH + 1))
+        );
+    }
+
+    private static Stream<String> invalidDailyCompletedAmountUpdateRequests() {
+        return Stream.of(
+                """
+                {
+                  "targetDailyCompletedAmount": null
+                }
+                """,
+                dailyCompletedAmountUpdateRequestJson(null),
+                dailyCompletedAmountUpdateRequestJson(-1)
         );
     }
 
@@ -393,5 +662,13 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 targetDailyAmount,
                 targetDailyMemo == null ? null : "\"" + targetDailyMemo + "\""
         );
+    }
+
+    private static String dailyCompletedAmountUpdateRequestJson(Integer targetDailyCompletedAmount) {
+        return """
+                {
+                  "targetDailyCompletedAmount": %s
+                }
+                """.formatted(targetDailyCompletedAmount);
     }
 }

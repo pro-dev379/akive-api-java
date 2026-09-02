@@ -77,6 +77,24 @@ public class DailyQuantity {
         this.dailyQuantityAmount = this.dailyQuantityAmount.reduceBy(dailyAmountToReduce, targetDailyMemo);
     }
 
+    void updateCompletedAmount(QuantityAmount targetCompletedAmount) {
+        QuantityAmountDelta completedAmountDelta =
+                this.dailyQuantityAmount.completedQuantityAmount().deltaTo(targetCompletedAmount);
+
+        if (completedAmountDelta.isZero()) {
+            return;
+        }
+
+        if (completedAmountDelta.isNegative()) {
+            this.dailyQuantityAmount =
+                    this.dailyQuantityAmount.cancelCompletionBy(completedAmountDelta.toAbsoluteAmount());
+            return;
+        }
+
+        this.dailyQuantityAmount =
+                this.dailyQuantityAmount.completeBy(completedAmountDelta.toAbsoluteAmount());
+    }
+
     QuantityAmount reduceByAsMuchAsPossible(QuantityAmount dailyAmountToReduce) {
         QuantityAmount appliedReductionAmount = QuantityAmount.min(
                 dailyAmountToReduce,
