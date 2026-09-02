@@ -160,6 +160,18 @@ public class WeeklyQuantity {
         receivingWeeklyQuantity.increaseBy(weeklyAmountToDelay);
     }
 
+    void delayDailyAmountTo(
+            Long dailyQuantityId,
+            Long receivingDailyQuantityId,
+            QuantityAmount dailyAmountToDelay
+    ) {
+        DailyQuantity dailyQuantity = this.dailyQuantities.get(findDailyQuantityIndex(dailyQuantityId));
+        DailyQuantity receivingDailyQuantity =
+                this.dailyQuantities.get(findDailyQuantityIndex(receivingDailyQuantityId));
+
+        dailyQuantity.delayTo(receivingDailyQuantity, dailyAmountToDelay);
+    }
+
     QuantityAmount calculateAmountToReduceTo(QuantityAmount targetWeeklyAmount) {
         validateReducible(targetWeeklyAmount);
 
@@ -281,8 +293,6 @@ public class WeeklyQuantity {
     }
 
     private void validateDelayable(QuantityAmount weeklyAmountToDelay) {
-        requireNonNull(weeklyAmountToDelay);
-
         QuantityAmount delayedWeeklyAmount = getDelayedQuantityAmount();
 
         if (delayedWeeklyAmount.isLessThan(weeklyAmountToDelay)) {

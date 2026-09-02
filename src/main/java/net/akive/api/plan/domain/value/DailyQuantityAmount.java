@@ -6,7 +6,6 @@ import net.akive.api.common.exception.business.ConflictException;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_MISMATCH;
 import static net.akive.api.common.exception.business.ConflictError.*;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 
 public record DailyQuantityAmount(
         QuantityAmount quantityAmount,

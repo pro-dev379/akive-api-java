@@ -21,4 +21,6 @@ public interface TotalQuantityModifier {
 
     void updateDailyCompletedAmount(DailyCompletedAmountUpdateCommand command)
             throws ConflictException, NotFoundException;
+
+    void delayDailyAmountTo(DailyAmountDelayCommand command) throws BadRequestException, NotFoundException;
 }

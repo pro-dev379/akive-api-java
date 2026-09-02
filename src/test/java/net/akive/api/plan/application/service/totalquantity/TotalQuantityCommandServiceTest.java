@@ -3,6 +3,7 @@ package net.akive.api.plan.application.service.totalquantity;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountDelayCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyCompletedAmountUpdateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountUpdateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityCreateCommand;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_INCREASE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.BadRequestError.DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT;
 import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT;
 import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT;
@@ -504,6 +506,146 @@ class TotalQuantityCommandServiceTest {
                 .isThrownBy(() -> totalQuantityCommandService.delayWeeklyAmountTo(command))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
+
+        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+        then(totalQuantityRepository).should(never()).save(any());
+    }
+
+    @Test
+    void 일일_딜레이를_같은_주의_다른_날로_옮긴다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 1L;
+        Long dailyQuantityId = 1L;
+        Long receivingDailyQuantityId = 2L;
+        User user = createPersistedUser(userId);
+        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
+        TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(totalQuantityId, sessionalPlan, 40, 60);
+        DailyAmountDelayCommand command = new DailyAmountDelayCommand(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                receivingDailyQuantityId,
+                new QuantityAmount(10)
+        );
+
+        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(true);
+        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
+                .willReturn(Optional.of(totalQuantity));
+
+        totalQuantityCommandService.delayDailyAmountTo(command);
+
+        WeeklyQuantity weeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
+        assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().getFirst(), 30);
+        assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().get(1), 70);
+        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+        then(totalQuantityRepository).should().save(totalQuantity);
+    }
+
+    @Test
+    void 세셔널_플랜이_없으면_일일_딜레이를_옮길_수_없다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                1L,
+                1L,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                2L,
+                10
+        );
+
+        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(false);
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantityCommandService.delayDailyAmountTo(command))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+
+        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(totalQuantityRepository).should(never())
+                .findBySessionalPlanIdAndTotalQuantityId(any(), any());
+        then(totalQuantityRepository).should(never()).save(any());
+    }
+
+    @Test
+    void 세션_총량이_없으면_일일_딜레이를_옮길_수_없다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                1L,
+                1L,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                2L,
+                10
+        );
+
+        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(true);
+        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
+                .willReturn(Optional.empty());
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantityCommandService.delayDailyAmountTo(command))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
+
+        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+        then(totalQuantityRepository).should(never()).save(any());
+    }
+
+    @Test
+    void 일일_딜레이_이동에_실패하면_저장하지_않는다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 1L;
+        Long dailyQuantityId = 1L;
+        Long receivingDailyQuantityId = 2L;
+        User user = createPersistedUser(userId);
+        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(
+                totalQuantityId,
+                sessionalPlan,
+                40,
+                10,
+                60
+        );
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                receivingDailyQuantityId,
+                40
+        );
+
+        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+                .willReturn(true);
+        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
+                .willReturn(Optional.of(totalQuantity));
+
+        assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> totalQuantityCommandService.delayDailyAmountTo(command))
+                .extracting(BadRequestException::getError)
+                .isEqualTo(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT);
 
         then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()

@@ -428,6 +428,53 @@ class TotalQuantityTest {
     }
 
     @Test
+    void 일일_딜레이를_같은_주의_다른_날로_옮긴다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(40, 60);
+
+        totalQuantity.delayDailyAmountTo(1L, 1L, 2L, new QuantityAmount(10));
+
+        WeeklyQuantity weeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
+        assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().getFirst(), 30);
+        assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().get(1), 70);
+        assertWeeklyQuantityAmounts(totalQuantity, 100, 0, 0);
+    }
+
+    @Test
+    void 현재_일일_딜레이보다_많은_수량을_다른_날로_옮길_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
+
+        assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> totalQuantity.delayDailyAmountTo(1L, 1L, 2L, new QuantityAmount(40)))
+                .extracting(BadRequestException::getError)
+                .isEqualTo(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT);
+    }
+
+    @Test
+    void 같은_날로_딜레이를_옮길_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(40, 60);
+
+        assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> totalQuantity.delayDailyAmountTo(1L, 1L, 1L, new QuantityAmount(10)))
+                .extracting(BadRequestException::getError)
+                .isEqualTo(DAILY_DELAY_RECEIVER_SAME_AS_SOURCE);
+    }
+
+    @Test
+    void 존재하지_않는_일일_계획량으로_딜레이를_옮길_수_없다() {
+        TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(40, 60);
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantity.delayDailyAmountTo(1L, 999L, 2L, new QuantityAmount(10)))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(DAILY_QUANTITY_NOT_FOUND);
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> totalQuantity.delayDailyAmountTo(1L, 1L, 999L, new QuantityAmount(10)))
+                .extracting(NotFoundException::getError)
+                .isEqualTo(DAILY_QUANTITY_NOT_FOUND);
+    }
+
+    @Test
     void 일일_계획량을_줄이면_다음_일일_계획량을_늘린다() {
         TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(40, 60);
         QuantityMemo targetDailyMemo = new QuantityMemo("첫날 조정");

@@ -53,6 +53,14 @@ public enum BadRequestError implements Error {
     DAILY_QUANTITY_DATE_OUT_OF_WEEK(PLAN, "Daily quantity date is outside week period."),
     DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT(PLAN, "Daily amount exceeds weekly amount."),
     DAILY_AMOUNT_MISMATCH(PLAN, "Daily amount mismatch."),
+    DAILY_DELAY_RECEIVER_SAME_AS_SOURCE(
+            PLAN,
+            "Daily quantity receiving the delay must be different from source daily quantity."
+    ),
+    DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT(
+            PLAN,
+            "Daily delay amount exceeds current daily delayed amount."
+    )
     ;
 
     private final ErrorDomain domain;

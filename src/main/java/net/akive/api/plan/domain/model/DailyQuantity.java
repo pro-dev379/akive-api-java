@@ -64,6 +64,14 @@ public class DailyQuantity {
         this.dailyQuantityAmount = this.dailyQuantityAmount.increaseBy(dailyAmountToIncrease);
     }
 
+    void reduceBy(QuantityAmount dailyAmountToReduce) {
+        if (dailyAmountToReduce.isZero()) {
+            return;
+        }
+
+        this.dailyQuantityAmount = this.dailyQuantityAmount.reduceBy(dailyAmountToReduce);
+    }
+
     void updateAmount(QuantityAmount targetDailyAmount, QuantityMemo targetDailyMemo) {
         validateReducible(targetDailyAmount);
 
@@ -104,6 +112,15 @@ public class DailyQuantity {
         this.dailyQuantityAmount = this.dailyQuantityAmount.reduceBy(appliedReductionAmount);
 
         return appliedReductionAmount;
+    }
+
+    void delayTo(DailyQuantity receivingDailyQuantity, QuantityAmount dailyAmountToDelay) {
+        if (dailyAmountToDelay.isGreaterThan(getDailyQuantityAmount().delayedQuantityAmount())) {
+            throw new BadRequestException(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT);
+        }
+
+        this.reduceBy(dailyAmountToDelay);
+        receivingDailyQuantity.increaseBy(dailyAmountToDelay);
     }
 
     QuantityAmount calculateAmountToReduceTo(QuantityAmount targetDailyAmount) {

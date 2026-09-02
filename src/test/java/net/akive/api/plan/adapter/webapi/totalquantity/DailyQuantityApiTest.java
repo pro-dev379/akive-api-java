@@ -3,6 +3,7 @@ package net.akive.api.plan.adapter.webapi.totalquantity;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountDelayCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountUpdateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyCompletedAmountUpdateCommand;
 import net.akive.api.support.PrivateApiTestSupport;
@@ -14,12 +15,15 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_INCREASE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.BadRequestError.DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT;
+import static net.akive.api.common.exception.business.BadRequestError.DAILY_DELAY_RECEIVER_SAME_AS_SOURCE;
 import static net.akive.api.common.exception.business.BadRequestError.LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT;
 import static net.akive.api.common.exception.business.NotFoundError.*;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_COMPLETED_QUANTITIES;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_QUANTITY;
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_QUANTITY_DELAYS;
 import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENGTH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -372,6 +376,313 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 일일_딜레이를_같은_주의_다른_날로_옮긴다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        Long receivingDailyQuantityId = 50L;
+        int dailyAmountToDelay = 10;
+        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                receivingDailyQuantityId,
+                dailyAmountToDelay
+        );
+
+        patchJson(
+                userId,
+                DAILY_QUANTITY_DELAYS,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NO_CONTENT);
+
+        then(totalQuantityModifier).should().delayDailyAmountTo(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidDailyAmountDelayRequests")
+    void 일일_딜레이_옮길_시_요청값이_올바르지_않으면_400을_응답한다(String body) {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+
+        patchJson(
+                userId,
+                DAILY_QUANTITY_DELAYS,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        then(totalQuantityModifier).should(never()).delayDailyAmountTo(any(DailyAmountDelayCommand.class));
+    }
+
+    @Test
+    void 일일_딜레이_옮길_시_세셔널_플랜이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        Long receivingDailyQuantityId = 50L;
+        int dailyAmountToDelay = 10;
+        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                receivingDailyQuantityId,
+                dailyAmountToDelay
+        );
+        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .delayDailyAmountTo(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_QUANTITY_DELAYS,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_SESSIONAL_PLAN_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Sessional plan not found.");
+        then(totalQuantityModifier).should().delayDailyAmountTo(command);
+    }
+
+    @Test
+    void 일일_딜레이_옮길_시_세션_총량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        Long receivingDailyQuantityId = 50L;
+        int dailyAmountToDelay = 10;
+        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                receivingDailyQuantityId,
+                dailyAmountToDelay
+        );
+        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .delayDailyAmountTo(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_QUANTITY_DELAYS,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_TOTAL_QUANTITY_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Total quantity not found.");
+        then(totalQuantityModifier).should().delayDailyAmountTo(command);
+    }
+
+    @Test
+    void 일일_딜레이_옮길_시_주간_계획량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        Long receivingDailyQuantityId = 50L;
+        int dailyAmountToDelay = 10;
+        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                receivingDailyQuantityId,
+                dailyAmountToDelay
+        );
+        willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .delayDailyAmountTo(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_QUANTITY_DELAYS,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_WEEKLY_QUANTITY_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Weekly quantity not found.");
+        then(totalQuantityModifier).should().delayDailyAmountTo(command);
+    }
+
+    @Test
+    void 일일_딜레이_옮길_시_일일_계획량이_없으면_404를_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        Long receivingDailyQuantityId = 50L;
+        int dailyAmountToDelay = 10;
+        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                receivingDailyQuantityId,
+                dailyAmountToDelay
+        );
+        willThrow(new NotFoundException(DAILY_QUANTITY_NOT_FOUND))
+                .given(totalQuantityModifier)
+                .delayDailyAmountTo(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_QUANTITY_DELAYS,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(NOT_FOUND);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_404_DAILY_QUANTITY_NOT_FOUND");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Daily quantity not found");
+        then(totalQuantityModifier).should().delayDailyAmountTo(command);
+    }
+
+    @Test
+    void 일일_딜레이_옮길_시_같은_날로_옮기면_400을_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        Long receivingDailyQuantityId = 50L;
+        int dailyAmountToDelay = 10;
+        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                receivingDailyQuantityId,
+                dailyAmountToDelay
+        );
+        willThrow(new BadRequestException(DAILY_DELAY_RECEIVER_SAME_AS_SOURCE))
+                .given(totalQuantityModifier)
+                .delayDailyAmountTo(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_QUANTITY_DELAYS,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_400_DAILY_DELAY_RECEIVER_SAME_AS_SOURCE");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Daily quantity receiving the delay must be different from source daily quantity.");
+        then(totalQuantityModifier).should().delayDailyAmountTo(command);
+    }
+
+    @Test
+    void 일일_딜레이_옮길_시_현재_일일_딜레이보다_많은_수량을_옮기면_400을_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        Long receivingDailyQuantityId = 50L;
+        int dailyAmountToDelay = 10;
+        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                receivingDailyQuantityId,
+                dailyAmountToDelay
+        );
+        willThrow(new BadRequestException(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT))
+                .given(totalQuantityModifier)
+                .delayDailyAmountTo(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_QUANTITY_DELAYS,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_400_DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Daily delay amount exceeds current daily delayed amount.");
+        then(totalQuantityModifier).should().delayDailyAmountTo(command);
+    }
+
+    @Test
     void 일일_계획_달성량을_수정한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
@@ -650,6 +961,20 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
         );
     }
 
+    private static Stream<String> invalidDailyAmountDelayRequests() {
+        return Stream.of(
+                """
+                {
+                  "receivingDailyQuantityId": null,
+                  "dailyAmountToDelay": 10
+                }
+                """,
+                dailyAmountDelayRequestJson(-1L, 10),
+                dailyAmountDelayRequestJson(50L, null),
+                dailyAmountDelayRequestJson(50L, -1)
+        );
+    }
+
     private static String dailyAmountUpdateRequestJson(Integer targetDailyAmount, String targetDailyMemo) {
         return """
                 {
@@ -670,5 +995,14 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                   "targetDailyCompletedAmount": %s
                 }
                 """.formatted(targetDailyCompletedAmount);
+    }
+
+    private static String dailyAmountDelayRequestJson(Long receivingDailyQuantityId, Integer dailyAmountToDelay) {
+        return """
+                {
+                  "receivingDailyQuantityId": %s,
+                  "dailyAmountToDelay": %s
+                }
+                """.formatted(receivingDailyQuantityId, dailyAmountToDelay);
     }
 }

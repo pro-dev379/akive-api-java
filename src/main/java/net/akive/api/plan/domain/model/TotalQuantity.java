@@ -147,6 +147,26 @@ public class TotalQuantity {
         weeklyQuantity.updateDailyCompletedAmount(dailyQuantityId, targetDailyCompletedAmount);
     }
 
+    public void delayDailyAmountTo(
+            Long weeklyQuantityId,
+            Long dailyQuantityId,
+            Long receivingDailyQuantityId,
+            QuantityAmount dailyAmountToDelay
+    ) {
+        requirePositive(weeklyQuantityId);
+        requirePositive(dailyQuantityId);
+        requirePositive(receivingDailyQuantityId);
+        requireNonNull(dailyAmountToDelay);
+
+        if (dailyQuantityId.equals(receivingDailyQuantityId)) {
+            throw new BadRequestException(DAILY_DELAY_RECEIVER_SAME_AS_SOURCE);
+        }
+
+        WeeklyQuantity weeklyQuantity = this.weeklyQuantities.get(findWeeklyQuantityIndex(weeklyQuantityId));
+
+        weeklyQuantity.delayDailyAmountTo(dailyQuantityId, receivingDailyQuantityId, dailyAmountToDelay);
+    }
+
     private static List<WeeklyQuantity> createWeeklyQuantities(
             SessionalPlan sessionalPlan,
             TotalQuantityAmount totalQuantityAmount
