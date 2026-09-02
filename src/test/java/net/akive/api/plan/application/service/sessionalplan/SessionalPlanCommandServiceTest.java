@@ -104,7 +104,7 @@ class SessionalPlanCommandServiceTest {
     void 세셔널_플랜을_수정한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
-        String newSessionName = "2026 2월 학습";
+        String targetSessionName = "2026 2월 학습";
         User user = createPersistedUser(userId);
         SessionPeriod sessionPeriod = createSessionPeriod();
         SessionalPlan currentSessionalPlan = SessionalPlan.reconstruct(
@@ -116,13 +116,13 @@ class SessionalPlanCommandServiceTest {
         SessionalPlan updatedSessionalPlan = SessionalPlan.reconstruct(
                 sessionalPlanId,
                 user,
-                newSessionName,
+                targetSessionName,
                 sessionPeriod
         );
         SessionalPlanUpdateCommand command = new SessionalPlanUpdateCommand(
                 sessionalPlanId,
                 userId,
-                newSessionName,
+                targetSessionName,
                 sessionPeriod
         );
 
@@ -132,7 +132,7 @@ class SessionalPlanCommandServiceTest {
         sessionalPlanCommandService.update(command);
 
         then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(sessionalPlanDomainService).should().update(currentSessionalPlan, newSessionName, sessionPeriod);
+        then(sessionalPlanDomainService).should().update(currentSessionalPlan, targetSessionName, sessionPeriod);
         then(sessionalPlanRepository).should().save(updatedSessionalPlan);
     }
 

@@ -79,8 +79,8 @@ class TotalQuantityDomainServiceTest {
         User user = createPersistedUser(userId);
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         TotalQuantity totalQuantity = createPersistedTotalQuantity(totalQuantityId, sessionalPlan);
-        Subject subject = new Subject("영어", "공부");
-        TotalQuantityAmount totalQuantityAmount = TotalQuantityAmount.of(130, "페이지", "문법");
+        Subject targetSubject = new Subject("영어", "공부");
+        TotalQuantityAmount targetTotalQuantityAmount = TotalQuantityAmount.of(130, "페이지", "문법");
 
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(sessionalPlan));
@@ -91,13 +91,13 @@ class TotalQuantityDomainServiceTest {
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                subject,
-                totalQuantityAmount
+                targetSubject,
+                targetTotalQuantityAmount
         );
 
         assertThat(updatedTotalQuantity.getTotalQuantityId()).isEqualTo(totalQuantityId);
-        assertThat(updatedTotalQuantity.getSubject()).isEqualTo(subject);
-        assertThat(updatedTotalQuantity.getTotalQuantityAmount()).isEqualTo(totalQuantityAmount);
+        assertThat(updatedTotalQuantity.getSubject()).isEqualTo(targetSubject);
+        assertThat(updatedTotalQuantity.getTotalQuantityAmount()).isEqualTo(targetTotalQuantityAmount);
 
         then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should().findBySessionalPlanIdAndTotalQuantityId(
@@ -105,7 +105,7 @@ class TotalQuantityDomainServiceTest {
                 totalQuantityId
         );
         then(totalQuantityValidationService).should()
-                .validateUpdatable(totalQuantityId, sessionalPlanId, subject.name());
+                .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
     }
 
     @Test
@@ -137,8 +137,8 @@ class TotalQuantityDomainServiceTest {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
-        Subject subject = createSubject();
-        TotalQuantityAmount totalQuantityAmount = createTotalQuantityAmount();
+        Subject targetSubject = createSubject();
+        TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
 
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.empty());
@@ -148,8 +148,8 @@ class TotalQuantityDomainServiceTest {
                         totalQuantityId,
                         sessionalPlanId,
                         userId,
-                        subject,
-                        totalQuantityAmount
+                        targetSubject,
+                        targetTotalQuantityAmount
                 ))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
@@ -168,8 +168,8 @@ class TotalQuantityDomainServiceTest {
         Long totalQuantityId = 20L;
         User user = createPersistedUser(userId);
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
-        Subject subject = createSubject();
-        TotalQuantityAmount totalQuantityAmount = createTotalQuantityAmount();
+        Subject targetSubject = createSubject();
+        TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
 
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(sessionalPlan));
@@ -181,8 +181,8 @@ class TotalQuantityDomainServiceTest {
                         totalQuantityId,
                         sessionalPlanId,
                         userId,
-                        subject,
-                        totalQuantityAmount
+                        targetSubject,
+                        targetTotalQuantityAmount
                 ))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
@@ -233,8 +233,8 @@ class TotalQuantityDomainServiceTest {
         User user = createPersistedUser(userId);
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         TotalQuantity totalQuantity = createPersistedTotalQuantity(totalQuantityId, sessionalPlan);
-        Subject subject = createSubject();
-        TotalQuantityAmount totalQuantityAmount = createTotalQuantityAmount();
+        Subject targetSubject = createSubject();
+        TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
         ConflictException exception = new ConflictException(SUBJECT_NAME_ALREADY_EXISTS);
 
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
@@ -243,15 +243,15 @@ class TotalQuantityDomainServiceTest {
                 .willReturn(Optional.of(totalQuantity));
         willThrow(exception)
                 .given(totalQuantityValidationService)
-                .validateUpdatable(totalQuantityId, sessionalPlanId, subject.name());
+                .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
 
         assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> totalQuantityDomainService.update(
                         totalQuantityId,
                         sessionalPlanId,
                         userId,
-                        subject,
-                        totalQuantityAmount
+                        targetSubject,
+                        targetTotalQuantityAmount
                 ))
                 .isSameAs(exception);
 
@@ -261,6 +261,6 @@ class TotalQuantityDomainServiceTest {
                 totalQuantityId
         );
         then(totalQuantityValidationService).should()
-                .validateUpdatable(totalQuantityId, sessionalPlanId, subject.name());
+                .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
     }
 }

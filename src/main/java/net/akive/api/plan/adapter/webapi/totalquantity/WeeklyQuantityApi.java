@@ -2,14 +2,14 @@ package net.akive.api.plan.adapter.webapi.totalquantity;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
-import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.WeeklyQuantityDelayRequest;
-import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.WeeklyQuantityReduceRequest;
+import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.WeeklyAmountDelayRequest;
+import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.WeeklyQuantityAmountUpdateRequest;
 import net.akive.api.plan.adapter.webapi.weeklyplan.dto.response.WeeklyPlanFindResponse;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
 import net.akive.api.plan.application.provided.totalquantity.WeeklyQuantityFinder;
 import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyPlanItemFindQuery;
-import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityDelayCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityReduceCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyAmountDelayCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityAmountUpdateCommand;
 import net.akive.api.plan.application.result.WeeklyPlan;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,33 +46,35 @@ public class WeeklyQuantityApi {
 
     @PatchMapping
     @ResponseStatus(NO_CONTENT)
-    public void reduceTo(
+    public void updateQuantityAmount(
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId,
             @PathVariable Long totalQuantityId,
             @PathVariable Long weeklyQuantityId,
-            @Validated @RequestBody WeeklyQuantityReduceRequest request
+            @Validated @RequestBody WeeklyQuantityAmountUpdateRequest request
     ) {
-        WeeklyQuantityReduceCommand command = request.to(
+        WeeklyQuantityAmountUpdateCommand command = WeeklyQuantityAmountUpdateCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
-                userId
+                userId,
+                request.targetWeeklyQuantityAmount().quantityAmount(),
+                request.targetWeeklyQuantityAmount().quantityMemo()
         );
 
-        totalQuantityModifier.reduceWeeklyQuantityTo(command);
+        totalQuantityModifier.updateWeeklyQuantityAmount(command);
     }
 
     @PatchMapping("/delays")
     @ResponseStatus(NO_CONTENT)
-    public void delayTo(
+    public void delayAmountTo(
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId,
             @PathVariable Long totalQuantityId,
             @PathVariable Long weeklyQuantityId,
-            @Validated @RequestBody WeeklyQuantityDelayRequest request
+            @Validated @RequestBody WeeklyAmountDelayRequest request
     ) {
-        WeeklyQuantityDelayCommand command = WeeklyQuantityDelayCommand.of(
+        WeeklyAmountDelayCommand command = WeeklyAmountDelayCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
@@ -81,6 +83,6 @@ public class WeeklyQuantityApi {
                 request.quantityAmountToDelay()
         );
 
-        totalQuantityModifier.delayWeeklyQuantityTo(command);
+        totalQuantityModifier.delayWeeklyAmountTo(command);
     }
 }

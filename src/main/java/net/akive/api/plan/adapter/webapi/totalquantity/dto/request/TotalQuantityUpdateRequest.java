@@ -7,8 +7,8 @@ import net.akive.api.plan.adapter.webapi.common.dto.request.TotalQuantityAmountR
 import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityUpdateCommand;
 
 public record TotalQuantityUpdateRequest(
-        @NotNull @Valid SubjectRequest subject,
-        @NotNull @Valid TotalQuantityAmountRequest totalQuantityAmount
+        @NotNull @Valid SubjectRequest targetSubject,
+        @NotNull @Valid TotalQuantityAmountRequest targetTotalQuantityAmount
 ) {
 
     public TotalQuantityUpdateCommand to(Long userId, Long sessionalPlanId, Long totalQuantityId) {
@@ -16,11 +16,11 @@ public record TotalQuantityUpdateRequest(
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                this.subject.name(),
-                this.subject.category(),
-                totalQuantityAmount().quantityAmount(),
-                totalQuantityAmount().quantityUnit(),
-                this.totalQuantityAmount.quantityMemo()
+                this.targetSubject.name(),
+                this.targetSubject.category(),
+                targetTotalQuantityAmount().quantityAmount(),
+                targetTotalQuantityAmount().quantityUnit(),
+                this.targetTotalQuantityAmount.quantityMemo()
         );
     }
 }

@@ -77,7 +77,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     @Test
     void 세셔널_플랜_생성_요청의_날짜_형식이_올바르지_않으면_400을_응답한다() {
         Long userId = 1L;
-        String body = invalidDateFormatRequestJson();
+        String body = createInvalidDateFormatRequestJson();
 
         postJson(userId, SESSIONAL_PLANS, body)
                 .hasStatus(BAD_REQUEST);
@@ -246,7 +246,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     void 세셔널_플랜_수정_요청의_날짜_형식이_올바르지_않으면_400을_응답한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
-        String body = invalidDateFormatRequestJson();
+        String body = updateInvalidDateFormatRequestJson();
 
         putJson(userId, SESSIONAL_PLAN, body, sessionalPlanId)
                 .hasStatus(BAD_REQUEST);
@@ -366,8 +366,8 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         return createUpdateRequest(createSessionPeriodRequest());
     }
 
-    private SessionalPlanUpdateRequest createUpdateRequest(SessionPeriodRequest sessionPeriod) {
-        return new SessionalPlanUpdateRequest(SESSION_NAME, sessionPeriod);
+    private SessionalPlanUpdateRequest createUpdateRequest(SessionPeriodRequest targetSessionPeriod) {
+        return new SessionalPlanUpdateRequest(SESSION_NAME, targetSessionPeriod);
     }
 
     private static SessionPeriodRequest createSessionPeriodRequest() {
@@ -376,11 +376,23 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         return new SessionPeriodRequest(sessionPeriod.startOn(), sessionPeriod.endOn());
     }
 
-    private static String invalidDateFormatRequestJson() {
+    private static String createInvalidDateFormatRequestJson() {
         return """
                 {
                   "sessionName": "%s",
                   "sessionPeriod": {
+                    "startOn": "2026/01/01",
+                    "endOn": "2026-02-01"
+                  }
+                }
+                """.formatted(SESSION_NAME);
+    }
+
+    private static String updateInvalidDateFormatRequestJson() {
+        return """
+                {
+                  "targetSessionName": "%s",
+                  "targetSessionPeriod": {
                     "startOn": "2026/01/01",
                     "endOn": "2026-02-01"
                   }

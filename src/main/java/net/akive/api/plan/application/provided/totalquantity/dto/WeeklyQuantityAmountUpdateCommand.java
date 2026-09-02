@@ -1,43 +1,45 @@
 package net.akive.api.plan.application.provided.totalquantity.dto;
 
 import net.akive.api.plan.domain.value.QuantityAmount;
+import net.akive.api.plan.domain.value.QuantityMemo;
+import net.akive.api.plan.domain.value.WeeklyQuantityAmount;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
 
-public record WeeklyQuantityDelayCommand(
+public record WeeklyQuantityAmountUpdateCommand(
         Long weeklyQuantityId,
         Long totalQuantityId,
         Long sessionalPlanId,
         Long userId,
-        Long targetWeeklyQuantityId,
-        QuantityAmount weeklyAmountToDelay
+        WeeklyQuantityAmount targetWeeklyQuantityAmount
 ) {
 
-    public WeeklyQuantityDelayCommand {
+    public WeeklyQuantityAmountUpdateCommand {
         requirePositive(weeklyQuantityId);
         requirePositive(totalQuantityId);
         requirePositive(sessionalPlanId);
         requirePositive(userId);
-        requirePositive(targetWeeklyQuantityId);
-        requireNonNull(weeklyAmountToDelay);
+        requireNonNull(targetWeeklyQuantityAmount);
     }
 
-    public static WeeklyQuantityDelayCommand of(
+    public static WeeklyQuantityAmountUpdateCommand of(
             Long weeklyQuantityId,
             Long totalQuantityId,
             Long sessionalPlanId,
             Long userId,
-            Long targetWeeklyQuantityId,
-            int weeklyAmountToDelay
+            int quantityAmount,
+            String quantityMemo
     ) {
-        return new WeeklyQuantityDelayCommand(
+        return new WeeklyQuantityAmountUpdateCommand(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
-                new QuantityAmount(weeklyAmountToDelay)
+                new WeeklyQuantityAmount(
+                        new QuantityAmount(quantityAmount),
+                        new QuantityMemo(quantityMemo)
+                )
         );
     }
 }

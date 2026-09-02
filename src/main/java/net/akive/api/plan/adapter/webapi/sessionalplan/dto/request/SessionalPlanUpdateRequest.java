@@ -10,17 +10,17 @@ import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanUp
 import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 
 public record SessionalPlanUpdateRequest(
-        @NotBlank @Size(max = SESSION_NAME_MAX_LENGTH) String sessionName,
-        @NotNull @Valid SessionPeriodRequest sessionPeriod
+        @NotBlank @Size(max = SESSION_NAME_MAX_LENGTH) String targetSessionName,
+        @NotNull @Valid SessionPeriodRequest targetSessionPeriod
 ) {
 
     public SessionalPlanUpdateCommand to(Long sessionalPlanId, Long userId) {
         return SessionalPlanUpdateCommand.of(
                 sessionalPlanId,
                 userId,
-                this.sessionName,
-                this.sessionPeriod.startOn(),
-                this.sessionPeriod.endOn()
+                this.targetSessionName,
+                this.targetSessionPeriod.startOn(),
+                this.targetSessionPeriod.endOn()
         );
     }
 }

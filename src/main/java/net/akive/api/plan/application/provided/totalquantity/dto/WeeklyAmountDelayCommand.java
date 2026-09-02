@@ -1,45 +1,43 @@
 package net.akive.api.plan.application.provided.totalquantity.dto;
 
 import net.akive.api.plan.domain.value.QuantityAmount;
-import net.akive.api.plan.domain.value.QuantityMemo;
-import net.akive.api.plan.domain.value.WeeklyQuantityAmount;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
 
-public record WeeklyQuantityReduceCommand(
+public record WeeklyAmountDelayCommand(
         Long weeklyQuantityId,
         Long totalQuantityId,
         Long sessionalPlanId,
         Long userId,
-        WeeklyQuantityAmount targetWeeklyQuantityAmount
+        Long targetWeeklyQuantityId,
+        QuantityAmount weeklyAmountToDelay
 ) {
 
-    public WeeklyQuantityReduceCommand {
+    public WeeklyAmountDelayCommand {
         requirePositive(weeklyQuantityId);
         requirePositive(totalQuantityId);
         requirePositive(sessionalPlanId);
         requirePositive(userId);
-        requireNonNull(targetWeeklyQuantityAmount);
+        requirePositive(targetWeeklyQuantityId);
+        requireNonNull(weeklyAmountToDelay);
     }
 
-    public static WeeklyQuantityReduceCommand of(
+    public static WeeklyAmountDelayCommand of(
             Long weeklyQuantityId,
             Long totalQuantityId,
             Long sessionalPlanId,
             Long userId,
-            int quantityAmount,
-            String quantityMemo
+            Long targetWeeklyQuantityId,
+            int weeklyAmountToDelay
     ) {
-        return new WeeklyQuantityReduceCommand(
+        return new WeeklyAmountDelayCommand(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                new WeeklyQuantityAmount(
-                        new QuantityAmount(quantityAmount),
-                        new QuantityMemo(quantityMemo)
-                )
+                targetWeeklyQuantityId,
+                new QuantityAmount(weeklyAmountToDelay)
         );
     }
 }

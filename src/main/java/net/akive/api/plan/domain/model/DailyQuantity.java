@@ -5,10 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.plan.domain.value.DailyQuantityAmount;
-import net.akive.api.plan.domain.value.QuantityAmount;
-import net.akive.api.plan.domain.value.WeekPeriod;
-import net.akive.api.plan.domain.value.WeeklyQuantityAmount;
+import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.plan.domain.value.*;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -17,8 +15,8 @@ import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
+import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -66,6 +64,19 @@ public class DailyQuantity {
         this.dailyQuantityAmount = this.dailyQuantityAmount.increaseBy(dailyAmountToIncrease);
     }
 
+    void updateAmount(QuantityAmount targetDailyAmount, QuantityMemo targetDailyMemo) {
+        validateReducible(targetDailyAmount);
+
+        QuantityAmount dailyAmountToReduce = calculateAmountToReduceTo(targetDailyAmount);
+
+        if (dailyAmountToReduce.isZero()) {
+            this.dailyQuantityAmount = this.dailyQuantityAmount.updateMemo(targetDailyMemo);
+            return;
+        }
+
+        this.dailyQuantityAmount = this.dailyQuantityAmount.reduceBy(dailyAmountToReduce, targetDailyMemo);
+    }
+
     QuantityAmount reduceByAsMuchAsPossible(QuantityAmount dailyAmountToReduce) {
         QuantityAmount appliedReductionAmount = QuantityAmount.min(
                 dailyAmountToReduce,
@@ -75,6 +86,12 @@ public class DailyQuantity {
         this.dailyQuantityAmount = this.dailyQuantityAmount.reduceBy(appliedReductionAmount);
 
         return appliedReductionAmount;
+    }
+
+    QuantityAmount calculateAmountToReduceTo(QuantityAmount targetDailyAmount) {
+        validateReducible(targetDailyAmount);
+
+        return this.dailyQuantityAmount.quantityAmount().subtract(targetDailyAmount);
     }
 
     QuantityAmount getCompletedAmount() {
@@ -98,6 +115,16 @@ public class DailyQuantity {
 
         if (weeklyQuantityAmount.quantityAmount().isLessThan(dailyQuantityAmount.quantityAmount())) {
             throw new BadRequestException(DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT);
+        }
+    }
+
+    private void validateReducible(QuantityAmount targetDailyAmount) {
+        if (targetDailyAmount.isGreaterThan(this.dailyQuantityAmount.quantityAmount())) {
+            throw new BadRequestException(DAILY_AMOUNT_INCREASE_NOT_ALLOWED);
+        }
+
+        if (targetDailyAmount.isLessThan(getCompletedAmount())) {
+            throw new ConflictException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
     }
 

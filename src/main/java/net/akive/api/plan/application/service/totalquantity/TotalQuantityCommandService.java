@@ -65,7 +65,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
     }
 
     @Override
-    public void reduceWeeklyQuantityTo(WeeklyQuantityReduceCommand command)
+    public void updateWeeklyQuantityAmount(WeeklyQuantityAmountUpdateCommand command)
             throws BadRequestException, ConflictException, NotFoundException {
         validateSessionalPlan(command.sessionalPlanId(), command.userId());
 
@@ -73,13 +73,13 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
                 .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
                 .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
-        totalQuantity.reduceWeeklyQuantityTo(command.weeklyQuantityId(), command.targetWeeklyQuantityAmount());
+        totalQuantity.updateWeeklyQuantityAmount(command.weeklyQuantityId(), command.targetWeeklyQuantityAmount());
 
         totalQuantityRepository.save(totalQuantity);
     }
 
     @Override
-    public void delayWeeklyQuantityTo(WeeklyQuantityDelayCommand command)
+    public void delayWeeklyAmountTo(WeeklyAmountDelayCommand command)
             throws BadRequestException, NotFoundException {
         validateSessionalPlan(command.sessionalPlanId(), command.userId());
 
@@ -87,10 +87,29 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
                 .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
                 .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
-        totalQuantity.delayWeeklyQuantityTo(
+        totalQuantity.delayWeeklyAmountTo(
                 command.weeklyQuantityId(),
                 command.targetWeeklyQuantityId(),
                 command.weeklyAmountToDelay()
+        );
+
+        totalQuantityRepository.save(totalQuantity);
+    }
+
+    @Override
+    public void updateDailyAmount(DailyAmountUpdateCommand command)
+            throws BadRequestException, ConflictException, NotFoundException {
+        validateSessionalPlan(command.sessionalPlanId(), command.userId());
+
+        TotalQuantity totalQuantity = totalQuantityRepository
+                .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
+                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+
+        totalQuantity.updateDailyAmount(
+                command.weeklyQuantityId(),
+                command.dailyQuantityId(),
+                command.targetDailyAmount(),
+                command.targetDailyMemo()
         );
 
         totalQuantityRepository.save(totalQuantity);

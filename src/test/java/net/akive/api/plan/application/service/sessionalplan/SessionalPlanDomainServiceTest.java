@@ -71,44 +71,44 @@ class SessionalPlanDomainServiceTest {
 
     @Test
     void 세셔널_플랜을_수정한다() {
-        String newSessionName = "2026 2월 학습";
+        String targetSessionName = "2026 2월 학습";
         User user = createPersistedUser(1L);
         SessionalPlan currentSessionalPlan = createSessionalPlan(user);
         SessionPeriod sessionPeriod = createSessionPeriod();
         LocalDateTime requestedAt = REQUESTED_AT.plusDays(1);
         given(currentTimeProvider.now()).willReturn(requestedAt);
 
-        sessionalPlanDomainService.update(currentSessionalPlan, newSessionName, sessionPeriod);
+        sessionalPlanDomainService.update(currentSessionalPlan, targetSessionName, sessionPeriod);
 
-        assertThat(currentSessionalPlan.getSessionName()).isEqualTo(newSessionName);
+        assertThat(currentSessionalPlan.getSessionName()).isEqualTo(targetSessionName);
         assertThat(currentSessionalPlan.getSessionPeriod()).isEqualTo(sessionPeriod);
 
         then(sessionalPlanValidationService).should()
-                .validateUpdatable(currentSessionalPlan, newSessionName, sessionPeriod);
+                .validateUpdatable(currentSessionalPlan, targetSessionName, sessionPeriod);
         then(currentTimeProvider).should().now();
     }
 
     @Test
     void 세셔널_플랜_수정_검증에_실패하면_예외를_던진다() {
-        String newSessionName = "2026 2월 학습";
+        String targetSessionName = "2026 2월 학습";
         User user = createPersistedUser(1L);
         SessionalPlan currentSessionalPlan = createSessionalPlan(user);
         SessionPeriod sessionPeriod = createSessionPeriod();
         ConflictException exception = new ConflictException(SESSION_NAME_ALREADY_EXISTS);
         willThrow(exception)
                 .given(sessionalPlanValidationService)
-                .validateUpdatable(currentSessionalPlan, newSessionName, sessionPeriod);
+                .validateUpdatable(currentSessionalPlan, targetSessionName, sessionPeriod);
 
         assertThatExceptionOfType(ConflictException.class)
                 .isThrownBy(() -> sessionalPlanDomainService.update(
                         currentSessionalPlan,
-                        newSessionName,
+                        targetSessionName,
                         sessionPeriod
                 ))
                 .isSameAs(exception);
 
         then(sessionalPlanValidationService).should()
-                .validateUpdatable(currentSessionalPlan, newSessionName, sessionPeriod);
+                .validateUpdatable(currentSessionalPlan, targetSessionName, sessionPeriod);
         then(currentTimeProvider).should(never()).now();
     }
 }

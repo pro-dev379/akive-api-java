@@ -3,6 +3,7 @@ package net.akive.api.support;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.plan.adapter.webapi.dailyplan.DailyPlanApi;
 import net.akive.api.plan.adapter.webapi.sessionalplan.SessionalPlanApi;
+import net.akive.api.plan.adapter.webapi.totalquantity.DailyQuantityApi;
 import net.akive.api.plan.adapter.webapi.totalquantity.TotalQuantityApi;
 import net.akive.api.plan.adapter.webapi.totalquantity.WeeklyQuantityApi;
 import net.akive.api.plan.adapter.webapi.weeklyplan.WeeklyPlanApi;
@@ -28,6 +29,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
         DailyPlanApi.class,
         WeeklyPlanApi.class,
         TotalQuantityApi.class,
+        DailyQuantityApi.class,
         WeeklyQuantityApi.class
 })
 public abstract class PrivateApiTestSupport {

@@ -77,4 +77,28 @@ public record DailyQuantityAmount(
                 this.quantityMemo
         );
     }
+
+    public DailyQuantityAmount reduceBy(QuantityAmount amountToReduce, QuantityMemo targetMemo) {
+        QuantityAmount remainingAmount = this.quantityAmount.subtract(amountToReduce);
+
+        if (remainingAmount.isLessThan(this.completedQuantityAmount)) {
+            throw new ConflictException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+        }
+
+        return new DailyQuantityAmount(
+                remainingAmount,
+                this.completedQuantityAmount,
+                this.delayedQuantityAmount.subtract(amountToReduce),
+                targetMemo
+        );
+    }
+
+    public DailyQuantityAmount updateMemo(QuantityMemo targetMemo) {
+        return new DailyQuantityAmount(
+                this.quantityAmount,
+                this.completedQuantityAmount,
+                this.delayedQuantityAmount,
+                targetMemo
+        );
+    }
 }
