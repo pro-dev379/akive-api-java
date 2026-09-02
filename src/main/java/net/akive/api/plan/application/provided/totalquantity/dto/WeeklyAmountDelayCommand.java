@@ -10,7 +10,7 @@ public record WeeklyAmountDelayCommand(
         Long totalQuantityId,
         Long sessionalPlanId,
         Long userId,
-        Long targetWeeklyQuantityId,
+        Long receivingWeeklyQuantityId,
         QuantityAmount weeklyAmountToDelay
 ) {
 
@@ -19,7 +19,7 @@ public record WeeklyAmountDelayCommand(
         requirePositive(totalQuantityId);
         requirePositive(sessionalPlanId);
         requirePositive(userId);
-        requirePositive(targetWeeklyQuantityId);
+        requirePositive(receivingWeeklyQuantityId);
         requireNonNull(weeklyAmountToDelay);
     }
 
@@ -28,7 +28,7 @@ public record WeeklyAmountDelayCommand(
             Long totalQuantityId,
             Long sessionalPlanId,
             Long userId,
-            Long targetWeeklyQuantityId,
+            Long receivingWeeklyQuantityId,
             int weeklyAmountToDelay
     ) {
         return new WeeklyAmountDelayCommand(
@@ -36,7 +36,7 @@ public record WeeklyAmountDelayCommand(
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
+                receivingWeeklyQuantityId,
                 new QuantityAmount(weeklyAmountToDelay)
         );
     }

@@ -89,7 +89,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
         totalQuantity.delayWeeklyAmountTo(
                 command.weeklyQuantityId(),
-                command.targetWeeklyQuantityId(),
+                command.receivingWeeklyQuantityId(),
                 command.weeklyAmountToDelay()
         );
 

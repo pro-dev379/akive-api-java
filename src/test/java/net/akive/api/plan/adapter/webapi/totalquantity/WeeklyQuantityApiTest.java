@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_TARGET_SAME_AS_SOURCE;
+import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE;
 import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.ConflictError.WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
@@ -394,16 +394,16 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 30L;
-        Long targetWeeklyQuantityId = 40L;
-        int quantityAmountToDelay = 10;
-        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        Long receivingWeeklyQuantityId = 40L;
+        int weeklyAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(receivingWeeklyQuantityId, weeklyAmountToDelay);
         WeeklyAmountDelayCommand command = WeeklyAmountDelayCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
-                quantityAmountToDelay
+                receivingWeeklyQuantityId,
+                weeklyAmountToDelay
         );
 
         patchJson(
@@ -444,16 +444,16 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 30L;
-        Long targetWeeklyQuantityId = 40L;
-        int quantityAmountToDelay = 10;
-        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        Long receivingWeeklyQuantityId = 40L;
+        int weeklyAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(receivingWeeklyQuantityId, weeklyAmountToDelay);
         WeeklyAmountDelayCommand command = WeeklyAmountDelayCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
-                quantityAmountToDelay
+                receivingWeeklyQuantityId,
+                weeklyAmountToDelay
         );
         willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(totalQuantityModifier)
@@ -479,16 +479,16 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 30L;
-        Long targetWeeklyQuantityId = 40L;
-        int quantityAmountToDelay = 10;
-        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        Long receivingWeeklyQuantityId = 40L;
+        int weeklyAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(receivingWeeklyQuantityId, weeklyAmountToDelay);
         WeeklyAmountDelayCommand command = WeeklyAmountDelayCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
-                quantityAmountToDelay
+                receivingWeeklyQuantityId,
+                weeklyAmountToDelay
         );
         willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
@@ -514,16 +514,16 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 30L;
-        Long targetWeeklyQuantityId = 40L;
-        int quantityAmountToDelay = 10;
-        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        Long receivingWeeklyQuantityId = 40L;
+        int weeklyAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(receivingWeeklyQuantityId, weeklyAmountToDelay);
         WeeklyAmountDelayCommand command = WeeklyAmountDelayCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
-                quantityAmountToDelay
+                receivingWeeklyQuantityId,
+                weeklyAmountToDelay
         );
         willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
@@ -554,18 +554,18 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 30L;
-        Long targetWeeklyQuantityId = 30L;
-        int quantityAmountToDelay = 10;
-        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        Long receivingWeeklyQuantityId = 30L;
+        int weeklyAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(receivingWeeklyQuantityId, weeklyAmountToDelay);
         WeeklyAmountDelayCommand command = WeeklyAmountDelayCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
-                quantityAmountToDelay
+                receivingWeeklyQuantityId,
+                weeklyAmountToDelay
         );
-        willThrow(new BadRequestException(WEEKLY_DELAY_TARGET_SAME_AS_SOURCE))
+        willThrow(new BadRequestException(WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE))
                 .given(totalQuantityModifier)
                 .delayWeeklyAmountTo(command);
 
@@ -580,10 +580,10 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_WEEKLY_DELAY_TARGET_SAME_AS_SOURCE");
+                .isEqualTo("PLAN_400_WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE");
         result.bodyJson()
                 .extractingPath("$.message")
-                .isEqualTo("Weekly delay target must be different from source weekly quantity.");
+                .isEqualTo("Weekly quantity receiving the delay must be different from source weekly quantity.");
 
         then(totalQuantityModifier).should().delayWeeklyAmountTo(command);
     }
@@ -594,16 +594,16 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 30L;
-        Long targetWeeklyQuantityId = 40L;
-        int quantityAmountToDelay = 10;
-        String body = weeklyQuantityDelayRequestJson(targetWeeklyQuantityId, quantityAmountToDelay);
+        Long receivingWeeklyQuantityId = 40L;
+        int weeklyAmountToDelay = 10;
+        String body = weeklyQuantityDelayRequestJson(receivingWeeklyQuantityId, weeklyAmountToDelay);
         WeeklyAmountDelayCommand command = WeeklyAmountDelayCommand.of(
                 weeklyQuantityId,
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
-                quantityAmountToDelay
+                receivingWeeklyQuantityId,
+                weeklyAmountToDelay
         );
         willThrow(new BadRequestException(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT))
                 .given(totalQuantityModifier)
@@ -664,13 +664,13 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         );
     }
 
-    private static String weeklyQuantityDelayRequestJson(Long targetWeeklyQuantityId, Integer quantityAmountToDelay) {
+    private static String weeklyQuantityDelayRequestJson(Long receivingWeeklyQuantityId, Integer weeklyAmountToDelay) {
         return """
                 {
-                  "targetWeeklyQuantityId": %s,
-                  "quantityAmountToDelay": %s
+                  "receivingWeeklyQuantityId": %s,
+                  "weeklyAmountToDelay": %s
                 }
-                """.formatted(targetWeeklyQuantityId, quantityAmountToDelay);
+                """.formatted(receivingWeeklyQuantityId, weeklyAmountToDelay);
     }
 
     private static WeeklyPlan.WeeklyPlanItem createWeeklyPlanItem(

@@ -409,7 +409,7 @@ class TotalQuantityTest {
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantity.delayWeeklyAmountTo(1L, 1L, new QuantityAmount(10)))
                 .extracting(BadRequestException::getError)
-                .isEqualTo(WEEKLY_DELAY_TARGET_SAME_AS_SOURCE);
+                .isEqualTo(WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE);
     }
 
     @Test

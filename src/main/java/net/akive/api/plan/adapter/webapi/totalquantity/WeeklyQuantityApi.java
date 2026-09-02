@@ -79,8 +79,8 @@ public class WeeklyQuantityApi {
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                request.targetWeeklyQuantityId(),
-                request.quantityAmountToDelay()
+                request.receivingWeeklyQuantityId(),
+                request.weeklyAmountToDelay()
         );
 
         totalQuantityModifier.delayWeeklyAmountTo(command);

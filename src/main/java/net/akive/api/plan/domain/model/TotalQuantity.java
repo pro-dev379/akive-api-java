@@ -99,21 +99,21 @@ public class TotalQuantity {
 
     public void delayWeeklyAmountTo(
             Long weeklyQuantityId,
-            Long targetWeeklyQuantityId,
+            Long receivingWeeklyQuantityId,
             QuantityAmount weeklyAmountToDelay
     ) {
         requirePositive(weeklyQuantityId);
-        requirePositive(targetWeeklyQuantityId);
+        requirePositive(receivingWeeklyQuantityId);
         requireNonNull(weeklyAmountToDelay);
 
-        if (weeklyQuantityId.equals(targetWeeklyQuantityId)) {
-            throw new BadRequestException(WEEKLY_DELAY_TARGET_SAME_AS_SOURCE);
+        if (weeklyQuantityId.equals(receivingWeeklyQuantityId)) {
+            throw new BadRequestException(WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE);
         }
 
         WeeklyQuantity weeklyQuantity =
                 this.weeklyQuantities.get(findWeeklyQuantityIndex(weeklyQuantityId));
         WeeklyQuantity targetWeeklyQuantity =
-                this.weeklyQuantities.get(findWeeklyQuantityIndex(targetWeeklyQuantityId));
+                this.weeklyQuantities.get(findWeeklyQuantityIndex(receivingWeeklyQuantityId));
 
         weeklyQuantity.delayAmountTo(targetWeeklyQuantity, weeklyAmountToDelay);
     }

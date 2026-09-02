@@ -153,11 +153,11 @@ public class WeeklyQuantity {
         return remainingAmountToReduce;
     }
 
-    void delayAmountTo(WeeklyQuantity targetWeeklyQuantity, QuantityAmount weeklyAmountToDelay) {
+    void delayAmountTo(WeeklyQuantity receivingWeeklyQuantity, QuantityAmount weeklyAmountToDelay) {
         validateDelayable(weeklyAmountToDelay);
 
         reduceDailyAmountsBy(weeklyAmountToDelay);
-        targetWeeklyQuantity.increaseBy(weeklyAmountToDelay);
+        receivingWeeklyQuantity.increaseBy(weeklyAmountToDelay);
     }
 
     QuantityAmount calculateAmountToReduceTo(QuantityAmount targetWeeklyAmount) {

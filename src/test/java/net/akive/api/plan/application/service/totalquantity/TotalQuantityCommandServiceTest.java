@@ -390,7 +390,7 @@ class TotalQuantityCommandServiceTest {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 1L;
-        Long targetWeeklyQuantityId = 3L;
+        Long receivingWeeklyQuantityId = 3L;
         User user = createPersistedUser(userId);
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(totalQuantityId, sessionalPlan, 30, 40, 30);
@@ -399,7 +399,7 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
+                receivingWeeklyQuantityId,
                 new QuantityAmount(10)
         );
 
@@ -481,7 +481,7 @@ class TotalQuantityCommandServiceTest {
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
         Long weeklyQuantityId = 1L;
-        Long targetWeeklyQuantityId = 2L;
+        Long receivingWeeklyQuantityId = 2L;
         User user = createPersistedUser(userId);
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(totalQuantityId, sessionalPlan, 100, 0, 0);
@@ -491,7 +491,7 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId,
                 sessionalPlanId,
                 userId,
-                targetWeeklyQuantityId,
+                receivingWeeklyQuantityId,
                 80
         );
 

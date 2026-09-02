@@ -39,9 +39,9 @@ public enum BadRequestError implements Error {
     WEEKLY_AMOUNT_MISMATCH(PLAN, "Weekly amount mismatch."),
     LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED(PLAN, "Last weekly quantity cannot be reduced."),
     WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED(PLAN, "Weekly amount cannot be increased here."),
-    WEEKLY_DELAY_TARGET_SAME_AS_SOURCE(
+    WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE(
             PLAN,
-            "Weekly delay target must be different from source weekly quantity."
+            "Weekly quantity receiving the delay must be different from source weekly quantity."
     ),
     WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT(
             PLAN,
