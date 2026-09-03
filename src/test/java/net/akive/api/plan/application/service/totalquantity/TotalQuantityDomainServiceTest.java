@@ -82,10 +82,11 @@ class TotalQuantityDomainServiceTest {
         Subject targetSubject = new Subject("영어", "공부");
         TotalQuantityAmount targetTotalQuantityAmount = TotalQuantityAmount.of(130, "페이지", "문법");
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.of(sessionalPlan));
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         TotalQuantity updatedTotalQuantity = totalQuantityDomainService.update(
                 totalQuantityId,
@@ -99,11 +100,8 @@ class TotalQuantityDomainServiceTest {
         assertThat(updatedTotalQuantity.getSubject()).isEqualTo(targetSubject);
         assertThat(updatedTotalQuantity.getTotalQuantityAmount()).isEqualTo(targetTotalQuantityAmount);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should().findBySessionalPlanIdAndTotalQuantityId(
-                sessionalPlanId,
-                totalQuantityId
-        );
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityValidationService).should()
                 .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
     }
@@ -140,9 +138,6 @@ class TotalQuantityDomainServiceTest {
         Subject targetSubject = createSubject();
         TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.empty());
-
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityDomainService.update(
                         totalQuantityId,
@@ -152,11 +147,10 @@ class TotalQuantityDomainServiceTest {
                         targetTotalQuantityAmount
                 ))
                 .extracting(NotFoundException::getError)
-                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should(never())
-                .findBySessionalPlanIdAndTotalQuantityId(any(), any());
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityValidationService).should(never())
                 .validateUpdatable(any(), any(), any());
     }
@@ -166,15 +160,14 @@ class TotalQuantityDomainServiceTest {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         Subject targetSubject = createSubject();
         TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.of(sessionalPlan));
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.empty());
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityDomainService.update(
@@ -187,11 +180,8 @@ class TotalQuantityDomainServiceTest {
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should().findBySessionalPlanIdAndTotalQuantityId(
-                sessionalPlanId,
-                totalQuantityId
-        );
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityValidationService).should(never())
                 .validateUpdatable(any(), any(), any());
     }
@@ -237,10 +227,11 @@ class TotalQuantityDomainServiceTest {
         TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
         ConflictException exception = new ConflictException(SUBJECT_NAME_ALREADY_EXISTS);
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.of(sessionalPlan));
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
         willThrow(exception)
                 .given(totalQuantityValidationService)
                 .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
@@ -255,11 +246,8 @@ class TotalQuantityDomainServiceTest {
                 ))
                 .isSameAs(exception);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should().findBySessionalPlanIdAndTotalQuantityId(
-                sessionalPlanId,
-                totalQuantityId
-        );
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityValidationService).should()
                 .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
     }

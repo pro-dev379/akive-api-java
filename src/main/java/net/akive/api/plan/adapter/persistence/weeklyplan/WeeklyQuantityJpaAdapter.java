@@ -20,13 +20,15 @@ public class WeeklyQuantityJpaAdapter implements WeeklyQuantityRepository {
     private final WeeklyQuantityJpaRepository weeklyQuantityJpaRepository;
 
     @Override
-    public List<WeeklyPlanData> findAllWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
+    public List<WeeklyPlanData> findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
             Long sessionalPlanId,
+            Long userId,
             WeekPeriod weekPeriod
     ) {
         return weeklyQuantityJpaRepository
-                .findWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
+                .findWeeklyQuantitiesBySessionalPlanIdAndUserIdAndWeekPeriod(
                         sessionalPlanId,
+                        userId,
                         WeekPeriodEntity.from(weekPeriod)
                 )
                 .stream()

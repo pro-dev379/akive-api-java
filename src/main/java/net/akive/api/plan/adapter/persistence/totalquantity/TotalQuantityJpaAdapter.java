@@ -37,12 +37,17 @@ class TotalQuantityJpaAdapter implements TotalQuantityRepository {
     }
 
     @Override
-    public Optional<TotalQuantity> findBySessionalPlanIdAndTotalQuantityId(
+    public Optional<TotalQuantity> findBySessionalPlanIdAndUserIdAndTotalQuantityId(
             Long sessionalPlanId,
+            Long userId,
             Long totalQuantityId
     ) {
         return totalQuantityJpaRepository
-                .findBySessionalPlan_SessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId)
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                        sessionalPlanId,
+                        userId,
+                        totalQuantityId
+                )
                 .map(TotalQuantityEntity::to);
     }
 
@@ -73,9 +78,17 @@ class TotalQuantityJpaAdapter implements TotalQuantityRepository {
     }
 
     @Override
-    public void deleteByTotalQuantityIdAndSessionalPlanId(Long totalQuantityId, Long sessionalPlanId) {
+    public void deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+            Long sessionalPlanId,
+            Long userId,
+            Long totalQuantityId
+    ) {
         TotalQuantityEntity totalQuantityEntity = totalQuantityJpaRepository
-                .findByTotalQuantityIdAndSessionalPlan_SessionalPlanId(totalQuantityId, sessionalPlanId)
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                        sessionalPlanId,
+                        userId,
+                        totalQuantityId
+                )
                 .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
         totalQuantityJpaRepository.delete(totalQuantityEntity);

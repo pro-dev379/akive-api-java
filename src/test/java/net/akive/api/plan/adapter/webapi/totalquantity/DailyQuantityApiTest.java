@@ -80,46 +80,6 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityModifier).should(never()).updateDailyAmount(any(DailyAmountUpdateCommand.class));
     }
 
-    @Test
-    void 일일_계획량_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyAmount = 50;
-        String body = dailyAmountUpdateRequestJson(targetDailyAmount, null);
-        DailyAmountUpdateCommand command = DailyAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyAmount,
-                null
-        );
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
-                .given(totalQuantityModifier)
-                .updateDailyAmount(command);
-
-        MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY,
-                body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
-        ).hasStatus(NOT_FOUND);
-
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("PLAN_404_SESSIONAL_PLAN_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Sessional plan not found.");
-        then(totalQuantityModifier).should().updateDailyAmount(command);
-    }
 
     @Test
     void 일일_계획량_수정_시_세션_총량이_없으면_404를_응답한다() {
@@ -422,47 +382,6 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityModifier).should(never()).delayDailyAmountTo(any(DailyAmountDelayCommand.class));
     }
 
-    @Test
-    void 일일_딜레이_옮길_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        Long receivingDailyQuantityId = 50L;
-        int dailyAmountToDelay = 10;
-        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
-        DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                receivingDailyQuantityId,
-                dailyAmountToDelay
-        );
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
-                .given(totalQuantityModifier)
-                .delayDailyAmountTo(command);
-
-        MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY_DELAYS,
-                body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
-        ).hasStatus(NOT_FOUND);
-
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("PLAN_404_SESSIONAL_PLAN_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Sessional plan not found.");
-        then(totalQuantityModifier).should().delayDailyAmountTo(command);
-    }
 
     @Test
     void 일일_딜레이_옮길_시_세션_총량이_없으면_404를_응답한다() {
@@ -768,45 +687,6 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
     }
 
-    @Test
-    void 일일_계획_달성량_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyCompletedAmount = 50;
-        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
-        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyCompletedAmount
-        );
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
-                .given(totalQuantityModifier)
-                .updateDailyCompletedAmount(command);
-
-        MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_COMPLETED_QUANTITIES,
-                body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
-        ).hasStatus(NOT_FOUND);
-
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("PLAN_404_SESSIONAL_PLAN_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Sessional plan not found.");
-        then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
-    }
 
     @Test
     void 일일_계획_달성량_수정_시_세션_총량이_없으면_404를_응답한다() {

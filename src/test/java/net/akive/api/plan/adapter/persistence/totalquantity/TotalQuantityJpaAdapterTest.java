@@ -22,8 +22,9 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         TotalQuantity savedTotalQuantity = totalQuantityRepository.save(createTotalQuantity(savedSessionalPlan));
         flushAndClear();
 
-        TotalQuantity foundTotalQuantity = totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(
+        TotalQuantity foundTotalQuantity = totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
                 savedSessionalPlan.getSessionalPlanId(),
+                savedSessionalPlan.getUser().getUserId(),
                 savedTotalQuantity.getTotalQuantityId()
         ).orElseThrow();
 
@@ -63,8 +64,9 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         flushAndClear();
 
-        TotalQuantity foundTotalQuantity = totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(
+        TotalQuantity foundTotalQuantity = totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
                 savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
+                savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
                 savedTotalQuantity.getTotalQuantityId()
         ).orElseThrow();
 
@@ -113,17 +115,23 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
     void 세션_총량을_삭제하면_주간_계획량과_일일_계획량도_모두_삭제된다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
+        Long userId = savedTotalQuantity.getSessionalPlan().getUser().getUserId();
         Long totalQuantityId = savedTotalQuantity.getTotalQuantityId();
         flushAndClear();
 
         assertThat(countWeeklyQuantitiesByTotalQuantityId(totalQuantityId)).isPositive();
         assertThat(countDailyQuantitiesByTotalQuantityId(totalQuantityId)).isPositive();
 
-        totalQuantityRepository.deleteByTotalQuantityIdAndSessionalPlanId(totalQuantityId, sessionalPlanId);
+        totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        );
         flushAndClear();
 
-        assertThat(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(
+        assertThat(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
                 sessionalPlanId,
+                userId,
                 totalQuantityId
         )).isEmpty();
         assertThat(totalQuantityRepository.countBySessionalPlanId(sessionalPlanId)).isZero();
@@ -134,20 +142,25 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 세션_총량이_없으면_삭제에_실패하고_예외를_던진다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
+        Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
+        Long userId = savedTotalQuantity.getSessionalPlan().getUser().getUserId();
+        Long totalQuantityId = savedTotalQuantity.getTotalQuantityId();
         flushAndClear();
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> totalQuantityRepository.deleteByTotalQuantityIdAndSessionalPlanId(
-                        Long.MAX_VALUE,
-                        savedTotalQuantity.getSessionalPlan().getSessionalPlanId()
+                .isThrownBy(() -> totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                        sessionalPlanId,
+                        userId,
+                        Long.MAX_VALUE
                 ))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> totalQuantityRepository.deleteByTotalQuantityIdAndSessionalPlanId(
-                        savedTotalQuantity.getTotalQuantityId(),
-                        Long.MAX_VALUE
+                .isThrownBy(() -> totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                        sessionalPlanId,
+                        Long.MAX_VALUE,
+                        totalQuantityId
                 ))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);

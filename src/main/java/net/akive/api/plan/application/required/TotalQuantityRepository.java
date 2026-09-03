@@ -11,8 +11,9 @@ public interface TotalQuantityRepository {
 
     List<TotalQuantity> findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(Long sessionalPlanId);
 
-    Optional<TotalQuantity> findBySessionalPlanIdAndTotalQuantityId(
+    Optional<TotalQuantity> findBySessionalPlanIdAndUserIdAndTotalQuantityId(
             Long sessionalPlanId,
+            Long userId,
             Long totalQuantityId
     );
 
@@ -26,7 +27,11 @@ public interface TotalQuantityRepository {
             Long totalQuantityId
     );
 
-    void deleteByTotalQuantityIdAndSessionalPlanId(Long totalQuantityId, Long sessionalPlanId);
+    void deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+            Long sessionalPlanId,
+            Long userId,
+            Long totalQuantityId
+    );
 
     long countBySessionalPlanId(Long sessionalPlanId);
 }

@@ -175,30 +175,6 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityFinder).should().find(query);
     }
 
-    @Test
-    void 세션_총량_조회_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        SessionalPlanTotalQuantityFindQuery query = new SessionalPlanTotalQuantityFindQuery(
-                sessionalPlanId,
-                userId,
-                totalQuantityId
-        );
-        given(totalQuantityFinder.find(query))
-                .willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
-
-        MvcTestResultAssert result = get(
-                userId,
-                TOTAL_QUANTITY,
-                sessionalPlanId,
-                totalQuantityId
-        ).hasStatus(NOT_FOUND);
-
-        assertSessionalPlanNotFoundResponse(result);
-
-        then(totalQuantityFinder).should().find(query);
-    }
 
     @Test
     void 세션_총량_조회_시_세션_총량이_없으면_404를_응답한다() {
@@ -291,29 +267,6 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityModifier).should().update(command);
     }
 
-    @Test
-    void 세션_총량_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        TotalQuantityUpdateRequest request = updateRequest();
-        TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
-                .given(totalQuantityModifier)
-                .update(command);
-
-        MvcTestResultAssert result = putJson(
-                userId,
-                TOTAL_QUANTITY,
-                toJson(request),
-                sessionalPlanId,
-                totalQuantityId
-        ).hasStatus(NOT_FOUND);
-
-        assertSessionalPlanNotFoundResponse(result);
-
-        then(totalQuantityModifier).should().update(command);
-    }
 
     @Test
     void 세션_총량_수정_시_세션_총량이_없으면_404를_응답한다() {
@@ -380,31 +333,6 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 .delete(new TotalQuantityDeleteCommand(sessionalPlanId, userId, totalQuantityId));
     }
 
-    @Test
-    void 세션_총량_삭제_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        TotalQuantityDeleteCommand command = new TotalQuantityDeleteCommand(
-                sessionalPlanId,
-                userId,
-                totalQuantityId
-        );
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
-                .given(totalQuantityModifier)
-                .delete(command);
-
-        MvcTestResultAssert result = delete(
-                userId,
-                TOTAL_QUANTITY,
-                sessionalPlanId,
-                totalQuantityId
-        ).hasStatus(NOT_FOUND);
-
-        assertSessionalPlanNotFoundResponse(result);
-
-        then(totalQuantityModifier).should().delete(command);
-    }
 
     @Test
     void 세션_총량_삭제_시_세션_총량이_없으면_404를_응답한다() {

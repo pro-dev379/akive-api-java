@@ -2,7 +2,6 @@ package net.akive.api.plan.application.service.totalquantity;
 
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.SessionalPlanTotalQuantityFindQuery;
-import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
@@ -16,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedSessionalPlan;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedTotalQuantity;
@@ -25,13 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class TotalQuantityQueryServiceTest {
-
-    @Mock
-    SessionalPlanRepository sessionalPlanRepository;
 
     @Mock
     TotalQuantityRepository totalQuantityRepository;
@@ -53,10 +47,11 @@ class TotalQuantityQueryServiceTest {
                 totalQuantityId
         );
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.of(sessionalPlan));
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         TotalQuantityProgress totalQuantityProgress = totalQuantityQueryService.find(query);
 
@@ -67,9 +62,8 @@ class TotalQuantityQueryServiceTest {
                 .extracting(weeklyQuantity -> weeklyQuantity.sessionWeek().weekNum())
                 .containsExactly(1, 2, 3);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
     }
 
     @Test
@@ -83,17 +77,13 @@ class TotalQuantityQueryServiceTest {
                 totalQuantityId
         );
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.empty());
-
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityQueryService.find(query))
                 .extracting(NotFoundException::getError)
-                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should(never())
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
     }
 
     @Test
@@ -101,26 +91,24 @@ class TotalQuantityQueryServiceTest {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         SessionalPlanTotalQuantityFindQuery query = new SessionalPlanTotalQuantityFindQuery(
                 sessionalPlanId,
                 userId,
                 totalQuantityId
         );
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.of(sessionalPlan));
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.empty());
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityQueryService.find(query))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
     }
 }

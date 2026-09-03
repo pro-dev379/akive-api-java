@@ -8,8 +8,9 @@ import java.util.Optional;
 
 public interface WeeklyQuantityRepository {
 
-    List<WeeklyPlanData> findAllWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
+    List<WeeklyPlanData> findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
             Long sessionalPlanId,
+            Long userId,
             WeekPeriod weekPeriod
     );
 

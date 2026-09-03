@@ -56,8 +56,9 @@ class WeeklyPlanQueryServiceTest {
 
         given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(sessionalPlan.getSessionPeriod()));
-        given(weeklyQuantityRepository.findAllWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
+        given(weeklyQuantityRepository.findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
                 sessionalPlanId,
+                userId,
                 sessionWeek.weekPeriod()
         )).willReturn(List.of(weeklyPlanData));
 
@@ -76,7 +77,11 @@ class WeeklyPlanQueryServiceTest {
         then(sessionalPlanRepository).should()
                 .findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(weeklyQuantityRepository).should()
-                .findAllWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(sessionalPlanId, sessionWeek.weekPeriod());
+                .findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
+                        sessionalPlanId,
+                        userId,
+                        sessionWeek.weekPeriod()
+                );
     }
 
     @Test

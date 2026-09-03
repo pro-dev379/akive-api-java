@@ -162,38 +162,6 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 .updateWeeklyQuantityAmount(any(WeeklyQuantityAmountUpdateCommand.class));
     }
 
-    @Test
-    void 주간_계획량_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        String body = weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, null);
-        WeeklyQuantityAmountUpdateCommand command = WeeklyQuantityAmountUpdateCommand.of(
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                TOTAL_AMOUNT,
-                null
-        );
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
-                .given(totalQuantityModifier)
-                .updateWeeklyQuantityAmount(command);
-
-        MvcTestResultAssert result = patchJson(
-                userId,
-                WEEKLY_QUANTITY,
-                body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId
-        ).hasStatus(NOT_FOUND);
-
-        assertSessionalPlanNotFoundResponse(result);
-
-        then(totalQuantityModifier).should().updateWeeklyQuantityAmount(command);
-    }
 
     @Test
     void 주간_계획량_수정_시_세션_총량이_없으면_404를_응답한다() {
@@ -430,40 +398,6 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityModifier).should(never()).delayWeeklyAmountTo(any(WeeklyAmountDelayCommand.class));
     }
 
-    @Test
-    void 주간_딜레이_이동_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long receivingWeeklyQuantityId = 40L;
-        int weeklyAmountToDelay = 10;
-        String body = weeklyQuantityDelayRequestJson(receivingWeeklyQuantityId, weeklyAmountToDelay);
-        WeeklyAmountDelayCommand command = WeeklyAmountDelayCommand.of(
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                receivingWeeklyQuantityId,
-                weeklyAmountToDelay
-        );
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
-                .given(totalQuantityModifier)
-                .delayWeeklyAmountTo(command);
-
-        MvcTestResultAssert result = patchJson(
-                userId,
-                WEEKLY_QUANTITY_DELAYS,
-                body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId
-        ).hasStatus(NOT_FOUND);
-
-        assertSessionalPlanNotFoundResponse(result);
-
-        then(totalQuantityModifier).should().delayWeeklyAmountTo(command);
-    }
 
     @Test
     void 주간_딜레이_이동_시_세션_총량이_없으면_404를_응답한다() {
@@ -687,15 +621,6 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 totalQuantity.getTotalQuantityAmount().quantityUnit(),
                 weeklyQuantity
         );
-    }
-
-    private static void assertSessionalPlanNotFoundResponse(MvcTestResultAssert result) {
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("PLAN_404_SESSIONAL_PLAN_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Sessional plan not found.");
     }
 
     private static void assertTotalQuantityNotFoundResponse(MvcTestResultAssert result) {

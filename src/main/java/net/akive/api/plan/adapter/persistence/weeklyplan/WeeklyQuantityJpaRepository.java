@@ -36,11 +36,13 @@ public interface WeeklyQuantityJpaRepository extends JpaRepository<WeeklyQuantit
         join fetch tq.sessionalPlan sp
         join fetch wq.dailyQuantities dq
         where sp.sessionalPlanId = :sessionalPlanId
+            and sp.user.userId = :userId
             and wq.weekPeriod = :weekPeriod
         order by tq.totalQuantityId asc, dq.date asc
     """)
-    List<WeeklyQuantityEntity> findWeeklyQuantitiesBySessionalPlanIdAndWeekPeriod(
+    List<WeeklyQuantityEntity> findWeeklyQuantitiesBySessionalPlanIdAndUserIdAndWeekPeriod(
             Long sessionalPlanId,
+            Long userId,
             WeekPeriodEntity weekPeriod
     );
 }

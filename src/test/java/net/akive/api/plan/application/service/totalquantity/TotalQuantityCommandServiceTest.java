@@ -3,7 +3,6 @@ package net.akive.api.plan.application.service.totalquantity;
 import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.*;
-import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.DailyQuantity;
 import net.akive.api.plan.domain.model.SessionalPlan;
@@ -35,9 +34,6 @@ import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class TotalQuantityCommandServiceTest {
-
-    @Mock
-    SessionalPlanRepository sessionalPlanRepository;
 
     @Mock
     TotalQuantityRepository totalQuantityRepository;
@@ -72,10 +68,13 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityAmount
         );
 
-        given(totalQuantityDomainService.create(sessionalPlanId, userId, subject, totalQuantityAmount))
-                .willReturn(totalQuantity);
-        given(totalQuantityRepository.save(totalQuantity))
-                .willReturn(savedTotalQuantity);
+        given(totalQuantityDomainService.create(
+                sessionalPlanId,
+                userId,
+                subject,
+                totalQuantityAmount
+        )).willReturn(totalQuantity);
+        given(totalQuantityRepository.save(totalQuantity)).willReturn(savedTotalQuantity);
 
         Long result = totalQuantityCommandService.create(command);
 
@@ -199,15 +198,10 @@ class TotalQuantityCommandServiceTest {
                 userId,
                 totalQuantityId
         );
-
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-
         totalQuantityCommandService.delete(command);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .deleteByTotalQuantityIdAndSessionalPlanId(totalQuantityId, sessionalPlanId);
+                .deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
     }
 
     @Test
@@ -221,17 +215,17 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(false);
+        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+                .given(totalQuantityRepository)
+                .deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
 
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delete(command))
                 .extracting(NotFoundException::getError)
-                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should(never())
-                .deleteByTotalQuantityIdAndSessionalPlanId(totalQuantityId, sessionalPlanId);
+        then(totalQuantityRepository).should()
+                .deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
     }
 
     @Test
@@ -252,10 +246,11 @@ class TotalQuantityCommandServiceTest {
                 targetWeeklyQuantityAmount
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         totalQuantityCommandService.updateWeeklyQuantityAmount(command);
 
@@ -267,9 +262,8 @@ class TotalQuantityCommandServiceTest {
                 .value())
                 .isEqualTo("첫 주 조정");
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should().save(totalQuantity);
     }
 
@@ -287,18 +281,13 @@ class TotalQuantityCommandServiceTest {
                 userId,
                 targetWeeklyQuantityAmount
         );
-
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(false);
-
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateWeeklyQuantityAmount(command))
                 .extracting(NotFoundException::getError)
-                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should(never())
-                .findBySessionalPlanIdAndTotalQuantityId(any(), any());
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -317,19 +306,19 @@ class TotalQuantityCommandServiceTest {
                 targetWeeklyQuantityAmount
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.empty());
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateWeeklyQuantityAmount(command))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -351,19 +340,19 @@ class TotalQuantityCommandServiceTest {
                 targetWeeklyQuantityAmount
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateWeeklyQuantityAmount(command))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -386,17 +375,18 @@ class TotalQuantityCommandServiceTest {
                 new QuantityAmount(10)
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         totalQuantityCommandService.delayWeeklyAmountTo(command);
 
         assertWeeklyQuantityAmounts(totalQuantity, 20, 40, 40);
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should().save(totalQuantity);
     }
 
@@ -413,18 +403,13 @@ class TotalQuantityCommandServiceTest {
                 3L,
                 10
         );
-
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(false);
-
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayWeeklyAmountTo(command))
                 .extracting(NotFoundException::getError)
-                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should(never())
-                .findBySessionalPlanIdAndTotalQuantityId(any(), any());
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -442,19 +427,19 @@ class TotalQuantityCommandServiceTest {
                 10
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.empty());
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayWeeklyAmountTo(command))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -478,19 +463,19 @@ class TotalQuantityCommandServiceTest {
                 80
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayWeeklyAmountTo(command))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -515,19 +500,20 @@ class TotalQuantityCommandServiceTest {
                 new QuantityAmount(10)
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         totalQuantityCommandService.delayDailyAmountTo(command);
 
         WeeklyQuantity weeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
         assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().getFirst(), 30);
         assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().get(1), 70);
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should().save(totalQuantity);
     }
 
@@ -545,18 +531,13 @@ class TotalQuantityCommandServiceTest {
                 2L,
                 10
         );
-
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(false);
-
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayDailyAmountTo(command))
                 .extracting(NotFoundException::getError)
-                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should(never())
-                .findBySessionalPlanIdAndTotalQuantityId(any(), any());
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -575,19 +556,19 @@ class TotalQuantityCommandServiceTest {
                 10
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.empty());
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayDailyAmountTo(command))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -618,19 +599,19 @@ class TotalQuantityCommandServiceTest {
                 40
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayDailyAmountTo(command))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -655,10 +636,11 @@ class TotalQuantityCommandServiceTest {
                 targetDailyMemo
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         totalQuantityCommandService.updateDailyAmount(command);
 
@@ -670,9 +652,9 @@ class TotalQuantityCommandServiceTest {
                 .getDailyQuantityAmount()
                 .quantityMemo())
                 .isEqualTo(targetDailyMemo);
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should().save(totalQuantity);
     }
 
@@ -690,18 +672,13 @@ class TotalQuantityCommandServiceTest {
                 20,
                 "첫날 조정"
         );
-
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(false);
-
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyAmount(command))
                 .extracting(NotFoundException::getError)
-                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should(never())
-                .findBySessionalPlanIdAndTotalQuantityId(any(), any());
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -720,19 +697,19 @@ class TotalQuantityCommandServiceTest {
                 "첫날 조정"
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.empty());
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyAmount(command))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -756,19 +733,19 @@ class TotalQuantityCommandServiceTest {
                 "첫날 조정"
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyAmount(command))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_AMOUNT_INCREASE_NOT_ALLOWED);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -797,18 +774,19 @@ class TotalQuantityCommandServiceTest {
                 30
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         totalQuantityCommandService.updateDailyCompletedAmount(command);
 
         WeeklyQuantity weeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
         assertDailyQuantityAmount(weeklyQuantity.getDailyQuantities().getFirst(), 40, 30, 10);
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should().save(totalQuantity);
     }
 
@@ -825,18 +803,13 @@ class TotalQuantityCommandServiceTest {
                 userId,
                 30
         );
-
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(false);
-
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
                 .extracting(NotFoundException::getError)
-                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should(never())
-                .findBySessionalPlanIdAndTotalQuantityId(any(), any());
+        then(totalQuantityRepository).should()
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -854,19 +827,19 @@ class TotalQuantityCommandServiceTest {
                 30
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.empty());
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
                 .extracting(NotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 
@@ -895,19 +868,19 @@ class TotalQuantityCommandServiceTest {
                 50
         );
 
-        given(sessionalPlanRepository.existsBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(true);
-        given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
-                .willReturn(Optional.of(totalQuantity));
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                sessionalPlanId,
+                userId,
+                totalQuantityId
+        )).willReturn(Optional.of(totalQuantity));
 
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
                 .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
 
-        then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
         then(totalQuantityRepository).should(never()).save(any());
     }
 

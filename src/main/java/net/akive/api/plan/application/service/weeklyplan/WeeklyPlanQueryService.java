@@ -32,8 +32,9 @@ class WeeklyPlanQueryService implements WeeklyPlanFinder {
         SessionWeek sessionWeek = getSessionWeekOrThrow(sessionPeriod, query.weekNum());
 
         List<WeeklyPlan.WeeklyPlanItem> weeklyPlanItems =
-                weeklyQuantityRepository.findAllWeeklyPlanDataBySessionalPlanIdAndWeekPeriod(
+                weeklyQuantityRepository.findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
                         query.sessionalPlanId(),
+                        query.userId(),
                         sessionWeek.weekPeriod()
                 )
                         .stream()

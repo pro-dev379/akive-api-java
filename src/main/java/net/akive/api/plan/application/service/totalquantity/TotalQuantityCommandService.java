@@ -7,13 +7,11 @@ import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityCreator;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
 import net.akive.api.plan.application.provided.totalquantity.dto.*;
-import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.TotalQuantity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 
 @Service
@@ -21,7 +19,6 @@ import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTI
 @RequiredArgsConstructor
 public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQuantityModifier {
 
-    private final SessionalPlanRepository sessionalPlanRepository;
     private final TotalQuantityRepository totalQuantityRepository;
     private final TotalQuantityDomainService totalQuantityDomainService;
 
@@ -56,22 +53,21 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void delete(TotalQuantityDeleteCommand command) throws NotFoundException {
-        validateSessionalPlan(command.sessionalPlanId(), command.userId());
-
-        totalQuantityRepository.deleteByTotalQuantityIdAndSessionalPlanId(
-                command.totalQuantityId(),
-                command.sessionalPlanId()
+        totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                command.sessionalPlanId(),
+                command.userId(),
+                command.totalQuantityId()
         );
     }
 
     @Override
     public void updateWeeklyQuantityAmount(WeeklyQuantityAmountUpdateCommand command)
             throws BadRequestException, NotFoundException {
-        validateSessionalPlan(command.sessionalPlanId(), command.userId());
-
-        TotalQuantity totalQuantity = totalQuantityRepository
-                .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
-                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+        TotalQuantity totalQuantity = findTotalQuantityOrThrow(
+                command.sessionalPlanId(),
+                command.userId(),
+                command.totalQuantityId()
+        );
 
         totalQuantity.updateWeeklyQuantityAmount(command.weeklyQuantityId(), command.targetWeeklyQuantityAmount());
 
@@ -81,11 +77,11 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
     @Override
     public void delayWeeklyAmountTo(WeeklyAmountDelayCommand command)
             throws BadRequestException, NotFoundException {
-        validateSessionalPlan(command.sessionalPlanId(), command.userId());
-
-        TotalQuantity totalQuantity = totalQuantityRepository
-                .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
-                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+        TotalQuantity totalQuantity = findTotalQuantityOrThrow(
+                command.sessionalPlanId(),
+                command.userId(),
+                command.totalQuantityId()
+        );
 
         totalQuantity.delayWeeklyAmountTo(
                 command.weeklyQuantityId(),
@@ -99,11 +95,11 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
     @Override
     public void updateDailyAmount(DailyAmountUpdateCommand command)
             throws BadRequestException, NotFoundException {
-        validateSessionalPlan(command.sessionalPlanId(), command.userId());
-
-        TotalQuantity totalQuantity = totalQuantityRepository
-                .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
-                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+        TotalQuantity totalQuantity = findTotalQuantityOrThrow(
+                command.sessionalPlanId(),
+                command.userId(),
+                command.totalQuantityId()
+        );
 
         totalQuantity.updateDailyAmount(
                 command.weeklyQuantityId(),
@@ -118,11 +114,11 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
     @Override
     public void updateDailyCompletedAmount(DailyCompletedAmountUpdateCommand command)
             throws BadRequestException, NotFoundException {
-        validateSessionalPlan(command.sessionalPlanId(), command.userId());
-
-        TotalQuantity totalQuantity = totalQuantityRepository
-                .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
-                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+        TotalQuantity totalQuantity = findTotalQuantityOrThrow(
+                command.sessionalPlanId(),
+                command.userId(),
+                command.totalQuantityId()
+        );
 
         totalQuantity.updateDailyCompletedAmount(
                 command.weeklyQuantityId(),
@@ -135,11 +131,11 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void delayDailyAmountTo(DailyAmountDelayCommand command) throws BadRequestException, NotFoundException {
-        validateSessionalPlan(command.sessionalPlanId(), command.userId());
-
-        TotalQuantity totalQuantity = totalQuantityRepository
-                .findBySessionalPlanIdAndTotalQuantityId(command.sessionalPlanId(), command.totalQuantityId())
-                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+        TotalQuantity totalQuantity = findTotalQuantityOrThrow(
+                command.sessionalPlanId(),
+                command.userId(),
+                command.totalQuantityId()
+        );
 
         totalQuantity.delayDailyAmountTo(
                 command.weeklyQuantityId(),
@@ -151,12 +147,9 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
         totalQuantityRepository.save(totalQuantity);
     }
 
-    private void validateSessionalPlan(Long sessionalPlanId, Long userId) {
-        boolean hasSessionalPlan = sessionalPlanRepository
-                .existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-
-        if (!hasSessionalPlan) {
-            throw new NotFoundException(SESSIONAL_PLAN_NOT_FOUND);
-        }
+    private TotalQuantity findTotalQuantityOrThrow(Long sessionalPlanId, Long userId, Long totalQuantityId) {
+        return totalQuantityRepository
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId)
+                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
     }
 }

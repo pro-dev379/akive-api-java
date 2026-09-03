@@ -41,10 +41,8 @@ class TotalQuantityDomainService {
             Subject targetSubject,
             TotalQuantityAmount targetTotalQuantityAmount
     ) {
-        findSessionalPlanOrThrow(sessionalPlanId, userId);
-
         TotalQuantity totalQuantity = totalQuantityRepository
-                .findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId)
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId)
                 .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
         totalQuantityValidationService.validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
