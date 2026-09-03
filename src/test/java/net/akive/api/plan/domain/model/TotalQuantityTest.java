@@ -203,9 +203,9 @@ class TotalQuantityTest {
     @Test
     void 세션_총량을_줄이면_앞_주차부터_계획량을_줄인다() {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
-        TotalQuantityAmount newTotalQuantityAmount = TotalQuantityAmount.of(50, QUANTITY_UNIT);
+        TotalQuantityAmount targetTotalQuantityAmount = TotalQuantityAmount.of(50, QUANTITY_UNIT);
 
-        totalQuantity.update(createSubject(), newTotalQuantityAmount);
+        totalQuantity.update(createSubject(), targetTotalQuantityAmount);
 
         assertWeeklyQuantityAmounts(totalQuantity, 0, 20, 30);
         assertDailyQuantityAmount(

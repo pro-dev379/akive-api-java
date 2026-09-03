@@ -41,7 +41,7 @@ public class TotalQuantity {
             TotalQuantityAmount totalQuantityAmount,
             List<WeeklyQuantity> weeklyQuantities
     ) {
-        validateTotalQuantityAmountMatchesWeeklyAmounts(totalQuantityAmount, weeklyQuantities);
+        validateTotalAmountMatchesWeeklyAmounts(totalQuantityAmount, weeklyQuantities);
 
         return TotalQuantity.builder()
                 .totalQuantityId(requirePositive(totalQuantityId))
@@ -58,6 +58,8 @@ public class TotalQuantity {
             TotalQuantityAmount totalQuantityAmount
     ) {
         List<WeeklyQuantity> weeklyQuantities = createWeeklyQuantities(sessionalPlan, totalQuantityAmount);
+
+        validateTotalAmountMatchesWeeklyAmounts(totalQuantityAmount, weeklyQuantities);
 
         return TotalQuantity.builder()
                 .sessionalPlan(requireNonNull(sessionalPlan))
@@ -200,16 +202,14 @@ public class TotalQuantity {
         return weeklyQuantities;
     }
 
-    private static void validateTotalQuantityAmountMatchesWeeklyAmounts(
+    private static void validateTotalAmountMatchesWeeklyAmounts(
             TotalQuantityAmount totalQuantityAmount,
             List<WeeklyQuantity> weeklyQuantities
     ) {
         requireNotEmpty(weeklyQuantities);
         requireNonNull(totalQuantityAmount);
 
-        QuantityAmount summedWeeklyAmount = weeklyQuantities.stream()
-                .map(weeklyQuantity -> weeklyQuantity.getWeeklyQuantityAmount().quantityAmount())
-                .reduce(QuantityAmount.ZERO, QuantityAmount::add);
+        QuantityAmount summedWeeklyAmount = sumWeeklyAmounts(weeklyQuantities);
 
         if (!totalQuantityAmount.quantityAmount().equals(summedWeeklyAmount)) {
             throw new BadRequestException(TOTAL_AMOUNT_MISMATCH);
@@ -223,6 +223,12 @@ public class TotalQuantity {
         if (targetTotalQuantityAmount.quantityAmount().isLessThan(getCompletedAmount())) {
             throw new BadRequestException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
+    }
+
+    private static QuantityAmount sumWeeklyAmounts(List<WeeklyQuantity> weeklyQuantities) {
+        return weeklyQuantities.stream()
+                .map(weeklyQuantity -> weeklyQuantity.getWeeklyQuantityAmount().quantityAmount())
+                .reduce(QuantityAmount.ZERO, QuantityAmount::add);
     }
 
     private void adjustWeeklyQuantitiesTo(QuantityAmount targetTotalAmount) {
