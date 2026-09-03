@@ -1,7 +1,6 @@
 package net.akive.api.plan.domain.model;
 
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.domain.value.*;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.ConflictError.*;
 import static net.akive.api.common.exception.business.NotFoundError.DAILY_QUANTITY_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanAssertions.assertWeeklyQuantityAmounts;
@@ -229,9 +227,9 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedAmount(100, 30);
         TotalQuantityAmount newTotalQuantityAmount = TotalQuantityAmount.of(20, QUANTITY_UNIT);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantity.update(createSubject(), newTotalQuantityAmount))
-                .extracting(ConflictException::getError)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
     }
 
@@ -298,9 +296,9 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedFirstWeek(100, 30);
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantity.updateWeeklyQuantityAmount(1L, reducedWeeklyQuantityAmount))
-                .extracting(ConflictException::getError)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
     }
 
@@ -534,9 +532,9 @@ class TotalQuantityTest {
     void 일일_계획량을_달성량보다_적게_수정할_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantity.updateDailyAmount(1L, 1L, new QuantityAmount(5), null))
-                .extracting(ConflictException::getError)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
     }
 
@@ -598,9 +596,9 @@ class TotalQuantityTest {
     void 일일_계획_달성량_증가분이_딜레이량보다_많으면_수정할_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantity.updateDailyCompletedAmount(1L, 1L, new QuantityAmount(50)))
-                .extracting(ConflictException::getError)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
     }
 

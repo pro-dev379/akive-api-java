@@ -12,15 +12,14 @@ public interface TotalQuantityModifier {
     void delete(TotalQuantityDeleteCommand command) throws NotFoundException;
 
     void updateWeeklyQuantityAmount(WeeklyQuantityAmountUpdateCommand command)
-            throws BadRequestException, ConflictException, NotFoundException;
+            throws BadRequestException, NotFoundException;
 
     void delayWeeklyAmountTo(WeeklyAmountDelayCommand command) throws BadRequestException, NotFoundException;
 
-    void updateDailyAmount(DailyAmountUpdateCommand command)
-            throws BadRequestException, ConflictException, NotFoundException;
+    void updateDailyAmount(DailyAmountUpdateCommand command) throws BadRequestException, NotFoundException;
 
     void updateDailyCompletedAmount(DailyCompletedAmountUpdateCommand command)
-            throws ConflictException, NotFoundException;
+            throws BadRequestException, NotFoundException;
 
     void delayDailyAmountTo(DailyAmountDelayCommand command) throws BadRequestException, NotFoundException;
 }

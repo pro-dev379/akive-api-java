@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.plan.domain.value.*;
 
 import java.time.LocalDate;
@@ -16,7 +15,6 @@ import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
 import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -159,7 +157,7 @@ public class DailyQuantity {
         }
 
         if (targetDailyAmount.isLessThan(getCompletedAmount())) {
-            throw new ConflictException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+            throw new BadRequestException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
     }
 

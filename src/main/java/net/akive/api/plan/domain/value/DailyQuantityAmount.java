@@ -1,11 +1,9 @@
 package net.akive.api.plan.domain.value;
 
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_MISMATCH;
-import static net.akive.api.common.exception.business.ConflictError.*;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 
 public record DailyQuantityAmount(
         QuantityAmount quantityAmount,
@@ -67,7 +65,7 @@ public record DailyQuantityAmount(
         QuantityAmount remainingAmount = this.quantityAmount.subtract(amountToReduce);
 
         if (remainingAmount.isLessThan(this.completedQuantityAmount)) {
-            throw new ConflictException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+            throw new BadRequestException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
 
         return new DailyQuantityAmount(
@@ -82,7 +80,7 @@ public record DailyQuantityAmount(
         QuantityAmount remainingAmount = this.quantityAmount.subtract(amountToReduce);
 
         if (remainingAmount.isLessThan(this.completedQuantityAmount)) {
-            throw new ConflictException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+            throw new BadRequestException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
 
         return new DailyQuantityAmount(
@@ -95,7 +93,7 @@ public record DailyQuantityAmount(
 
     public DailyQuantityAmount completeBy(QuantityAmount amountToComplete) {
         if (amountToComplete.isGreaterThan(this.delayedQuantityAmount)) {
-            throw new ConflictException(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
+            throw new BadRequestException(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
         }
 
         return new DailyQuantityAmount(
@@ -108,7 +106,7 @@ public record DailyQuantityAmount(
 
     public DailyQuantityAmount cancelCompletionBy(QuantityAmount amountToCancelCompletion) {
         if (amountToCancelCompletion.isGreaterThan(this.completedQuantityAmount)) {
-            throw new ConflictException(DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT);
+            throw new BadRequestException(DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT);
         }
 
         return new DailyQuantityAmount(

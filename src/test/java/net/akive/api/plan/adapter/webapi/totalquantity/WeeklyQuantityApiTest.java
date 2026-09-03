@@ -1,10 +1,9 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
-import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyPlanItemFindQuery;
 import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyAmountDelayCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyPlanItemFindQuery;
 import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityAmountUpdateCommand;
 import net.akive.api.plan.application.result.WeeklyPlan;
 import net.akive.api.plan.domain.model.SessionalPlan;
@@ -19,15 +18,8 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.ConflictError.WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_ITEM_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.NotFoundError.*;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.WEEKLY_QUANTITY;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.WEEKLY_QUANTITY_DELAYS;
 import static net.akive.api.plan.domain.PlanFixture.*;
@@ -351,7 +343,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 주간_계획량_수정_시_주간_계획_달성량보다_적게_수정하면_409를_응답한다() {
+    void 주간_계획량_수정_시_주간_계획_달성량보다_적게_수정하면_400을_응답한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
@@ -365,7 +357,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 TOTAL_AMOUNT,
                 null
         );
-        willThrow(new ConflictException(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
+        willThrow(new BadRequestException(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
                 .given(totalQuantityModifier)
                 .updateWeeklyQuantityAmount(command);
 
@@ -376,11 +368,11 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
                 sessionalPlanId,
                 totalQuantityId,
                 weeklyQuantityId
-        ).hasStatus(CONFLICT);
+        ).hasStatus(BAD_REQUEST);
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_409_WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
+                .isEqualTo("PLAN_400_WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Weekly amount cannot be less than completed amount.");

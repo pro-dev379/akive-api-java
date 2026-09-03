@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.domain.value.*;
 
@@ -17,7 +16,6 @@ import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.ConflictError.TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
 import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
 
 @Getter
@@ -223,7 +221,7 @@ public class TotalQuantity {
         requireNonNull(targetTotalQuantityAmount);
 
         if (targetTotalQuantityAmount.quantityAmount().isLessThan(getCompletedAmount())) {
-            throw new ConflictException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+            throw new BadRequestException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
     }
 

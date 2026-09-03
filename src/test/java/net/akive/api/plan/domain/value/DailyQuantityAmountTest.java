@@ -1,13 +1,9 @@
 package net.akive.api.plan.domain.value;
 
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_MISMATCH;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -71,9 +67,9 @@ class DailyQuantityAmountTest {
     void 일일_계획량을_달성량보다_적게_감소시킬_수_없다() {
         DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(100, 30, 70);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> dailyQuantityAmount.reduceBy(new QuantityAmount(80)))
-                .extracting(ConflictException::getError)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
     }
 
@@ -115,9 +111,9 @@ class DailyQuantityAmountTest {
     void 일일_계획_달성량_증가분은_딜레이량보다_많을_수_없다() {
         DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(100, 30, 70);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> dailyQuantityAmount.completeBy(new QuantityAmount(80)))
-                .extracting(ConflictException::getError)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
     }
 
@@ -150,9 +146,9 @@ class DailyQuantityAmountTest {
     void 일일_계획_달성량을_실제_달성량보다_많이_취소할_수_없다() {
         DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(100, 30, 70);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> dailyQuantityAmount.cancelCompletionBy(new QuantityAmount(40)))
-                .extracting(ConflictException::getError)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT);
     }
 }

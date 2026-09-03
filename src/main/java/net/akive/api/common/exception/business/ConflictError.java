@@ -17,26 +17,6 @@ public enum ConflictError implements Error {
 
     SESSION_NAME_ALREADY_EXISTS(PLAN, "Session name already exists."),
     SUBJECT_NAME_ALREADY_EXISTS(PLAN, "Subject name already exists."),
-    TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT(
-            PLAN,
-            "Total amount cannot be less than completed amount."
-    ),
-    WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT(
-            PLAN,
-            "Weekly amount cannot be less than completed amount."
-    ),
-    DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT(
-            PLAN,
-            "Daily amount cannot be less than completed amount."
-    ),
-    DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT(
-            PLAN,
-            "Daily amount to complete cannot exceed delayed amount."
-    ),
-    DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT(
-            PLAN,
-            "Daily amount to cancel completion cannot exceed completed amount."
-    ),
 
     EMAIL_ALREADY_VERIFIED(EMAIL_VERIFICATION, "Email is already verified."),
     ;

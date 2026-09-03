@@ -1,12 +1,16 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
+import net.akive.api.common.exception.business.BadRequestException;
 import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.adapter.webapi.common.dto.request.SubjectRequest;
 import net.akive.api.plan.adapter.webapi.common.dto.request.TotalQuantityAmountRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityCreateRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityUpdateRequest;
-import net.akive.api.plan.application.provided.totalquantity.dto.*;
+import net.akive.api.plan.application.provided.totalquantity.dto.SessionalPlanTotalQuantityFindQuery;
+import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityCreateCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityUpdateCommand;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
@@ -19,8 +23,10 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.ConflictError.*;
-import static net.akive.api.common.exception.business.NotFoundError.*;
+import static net.akive.api.common.exception.business.BadRequestError.TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
+import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.TOTAL_QUANTITIES;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.TOTAL_QUANTITY;
 import static net.akive.api.plan.domain.PlanFixture.*;
@@ -257,6 +263,35 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 세션_총량_수정_시_계획_달성량보다_적게_수정하면_400을_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
+        willThrow(new BadRequestException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
+                .given(totalQuantityModifier)
+                .update(command);
+
+        MvcTestResultAssert result = putJson(
+                userId,
+                TOTAL_QUANTITY,
+                toJson(request),
+                sessionalPlanId,
+                totalQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_400_TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Total amount cannot be less than completed amount.");
+
+        then(totalQuantityModifier).should().update(command);
+    }
+
+    @Test
     void 세션_총량_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
@@ -324,35 +359,6 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         ).hasStatus(CONFLICT);
 
         assertSubjectNameAlreadyExistsResponse(result);
-
-        then(totalQuantityModifier).should().update(command);
-    }
-
-    @Test
-    void 세션_총량_수정_시_계획_달성량보다_적게_수정하면_409를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        TotalQuantityUpdateRequest request = updateRequest();
-        TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
-        willThrow(new ConflictException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
-                .given(totalQuantityModifier)
-                .update(command);
-
-        MvcTestResultAssert result = putJson(
-                userId,
-                TOTAL_QUANTITY,
-                toJson(request),
-                sessionalPlanId,
-                totalQuantityId
-        ).hasStatus(CONFLICT);
-
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("PLAN_409_TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Total amount cannot be less than completed amount.");
 
         then(totalQuantityModifier).should().update(command);
     }

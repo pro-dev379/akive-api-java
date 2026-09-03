@@ -66,7 +66,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void updateWeeklyQuantityAmount(WeeklyQuantityAmountUpdateCommand command)
-            throws BadRequestException, ConflictException, NotFoundException {
+            throws BadRequestException, NotFoundException {
         validateSessionalPlan(command.sessionalPlanId(), command.userId());
 
         TotalQuantity totalQuantity = totalQuantityRepository
@@ -98,7 +98,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void updateDailyAmount(DailyAmountUpdateCommand command)
-            throws BadRequestException, ConflictException, NotFoundException {
+            throws BadRequestException, NotFoundException {
         validateSessionalPlan(command.sessionalPlanId(), command.userId());
 
         TotalQuantity totalQuantity = totalQuantityRepository
@@ -117,7 +117,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void updateDailyCompletedAmount(DailyCompletedAmountUpdateCommand command)
-            throws ConflictException, NotFoundException {
+            throws BadRequestException, NotFoundException {
         validateSessionalPlan(command.sessionalPlanId(), command.userId());
 
         TotalQuantity totalQuantity = totalQuantityRepository

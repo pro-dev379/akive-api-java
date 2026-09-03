@@ -1,7 +1,6 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountDelayCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountUpdateCommand;
@@ -14,16 +13,9 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_INCREASE_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_DELAY_RECEIVER_SAME_AS_SOURCE;
-import static net.akive.api.common.exception.business.BadRequestError.LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static net.akive.api.common.exception.business.NotFoundError.*;
-import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_COMPLETED_QUANTITIES;
-import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_QUANTITY;
-import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_QUANTITY_DELAYS;
+import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.*;
 import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENGTH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -335,7 +327,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 일일_계획량_수정_시_일일_계획_달성량보다_적게_수정하면_409를_응답한다() {
+    void 일일_계획량_수정_시_일일_계획_달성량보다_적게_수정하면_400을_응답한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
         Long totalQuantityId = 20L;
@@ -352,7 +344,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 targetDailyAmount,
                 null
         );
-        willThrow(new ConflictException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
+        willThrow(new BadRequestException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
                 .given(totalQuantityModifier)
                 .updateDailyAmount(command);
 
@@ -364,11 +356,11 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 totalQuantityId,
                 weeklyQuantityId,
                 dailyQuantityId
-        ).hasStatus(CONFLICT);
+        ).hasStatus(BAD_REQUEST);
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_409_DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
+                .isEqualTo("PLAN_400_DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily amount cannot be less than completed amount.");
@@ -737,6 +729,46 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 일일_계획_달성량_수정_시_달성량_증가분이_딜레이량보다_많으면_400을_응답한다() {
+        Long userId = 1L;
+        Long sessionalPlanId = 10L;
+        Long totalQuantityId = 20L;
+        Long weeklyQuantityId = 30L;
+        Long dailyQuantityId = 40L;
+        int targetDailyCompletedAmount = 50;
+        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
+                dailyQuantityId,
+                weeklyQuantityId,
+                totalQuantityId,
+                sessionalPlanId,
+                userId,
+                targetDailyCompletedAmount
+        );
+        willThrow(new BadRequestException(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT))
+                .given(totalQuantityModifier)
+                .updateDailyCompletedAmount(command);
+
+        MvcTestResultAssert result = patchJson(
+                userId,
+                DAILY_COMPLETED_QUANTITIES,
+                body,
+                sessionalPlanId,
+                totalQuantityId,
+                weeklyQuantityId,
+                dailyQuantityId
+        ).hasStatus(BAD_REQUEST);
+
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo("PLAN_400_DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT");
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo("Daily amount to complete cannot exceed delayed amount.");
+        then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
+    }
+
+    @Test
     void 일일_계획_달성량_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
         Long userId = 1L;
         Long sessionalPlanId = 10L;
@@ -893,46 +925,6 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily quantity not found");
-        then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
-    }
-
-    @Test
-    void 일일_계획_달성량_수정_시_달성량_증가분이_딜레이량보다_많으면_409를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyCompletedAmount = 50;
-        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
-        DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyCompletedAmount
-        );
-        willThrow(new ConflictException(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT))
-                .given(totalQuantityModifier)
-                .updateDailyCompletedAmount(command);
-
-        MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_COMPLETED_QUANTITIES,
-                body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
-        ).hasStatus(CONFLICT);
-
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("PLAN_409_DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Daily amount to complete cannot exceed delayed amount.");
         then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
     }
 

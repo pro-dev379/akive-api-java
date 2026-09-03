@@ -34,9 +34,17 @@ public enum BadRequestError implements Error {
     IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED(PLAN, "Too many in-progress sessional plans."),
     TOTAL_QUANTITY_LIMIT_EXCEEDED(PLAN, "Total quantity limit exceeded."),
     TOTAL_AMOUNT_MISMATCH(PLAN, "Total amount mismatch."),
+    TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT(
+            PLAN,
+            "Total amount cannot be less than completed amount."
+    ),
     WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION(PLAN, "Weekly quantity period is outside session period."),
     WEEKLY_AMOUNT_EXCEEDS_TOTAL_AMOUNT(PLAN, "Weekly amount exceeds total amount."),
     WEEKLY_AMOUNT_MISMATCH(PLAN, "Weekly amount mismatch."),
+    WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT(
+            PLAN,
+            "Weekly amount cannot be less than completed amount."
+    ),
     LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED(PLAN, "Last weekly quantity cannot be reduced."),
     WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED(PLAN, "Weekly amount cannot be increased here."),
     WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE(
@@ -53,6 +61,18 @@ public enum BadRequestError implements Error {
     DAILY_QUANTITY_DATE_OUT_OF_WEEK(PLAN, "Daily quantity date is outside week period."),
     DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT(PLAN, "Daily amount exceeds weekly amount."),
     DAILY_AMOUNT_MISMATCH(PLAN, "Daily amount mismatch."),
+    DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT(
+            PLAN,
+            "Daily amount cannot be less than completed amount."
+    ),
+    DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT(
+            PLAN,
+            "Daily amount to complete cannot exceed delayed amount."
+    ),
+    DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT(
+            PLAN,
+            "Daily amount to cancel completion cannot exceed completed amount."
+    ),
     DAILY_DELAY_RECEIVER_SAME_AS_SOURCE(
             PLAN,
             "Daily quantity receiving the delay must be different from source daily quantity."

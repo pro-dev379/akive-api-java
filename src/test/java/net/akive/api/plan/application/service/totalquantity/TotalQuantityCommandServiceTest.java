@@ -1,29 +1,15 @@
 package net.akive.api.plan.application.service.totalquantity;
 
 import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
 import net.akive.api.common.exception.business.NotFoundException;
-import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountDelayCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.DailyCompletedAmountUpdateCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountUpdateCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityCreateCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityDeleteCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.TotalQuantityUpdateCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyAmountDelayCommand;
-import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyQuantityAmountUpdateCommand;
+import net.akive.api.plan.application.provided.totalquantity.dto.*;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.DailyQuantity;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
 import net.akive.api.plan.domain.model.WeeklyQuantity;
-import net.akive.api.plan.domain.value.DailyQuantityAmount;
-import net.akive.api.plan.domain.value.QuantityAmount;
-import net.akive.api.plan.domain.value.QuantityMemo;
-import net.akive.api.plan.domain.value.Subject;
-import net.akive.api.plan.domain.value.TotalQuantityAmount;
-import net.akive.api.plan.domain.value.WeekPeriod;
-import net.akive.api.plan.domain.value.WeeklyQuantityAmount;
+import net.akive.api.plan.domain.value.*;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,12 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_AMOUNT_INCREASE_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT;
-import static net.akive.api.common.exception.business.BadRequestError.LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
+import static net.akive.api.common.exception.business.BadRequestError.*;
 import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanAssertions.assertWeeklyQuantityAmounts;
@@ -182,7 +163,7 @@ class TotalQuantityCommandServiceTest {
                 targetSubject,
                 targetTotalQuantityAmount
         );
-        ConflictException exception = new ConflictException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+        BadRequestException exception = new BadRequestException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
 
         willThrow(exception)
                 .given(totalQuantityDomainService)
@@ -194,7 +175,7 @@ class TotalQuantityCommandServiceTest {
                         targetTotalQuantityAmount
                 );
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityCommandService.update(command))
                 .isSameAs(exception);
 
@@ -919,9 +900,9 @@ class TotalQuantityCommandServiceTest {
         given(totalQuantityRepository.findBySessionalPlanIdAndTotalQuantityId(sessionalPlanId, totalQuantityId))
                 .willReturn(Optional.of(totalQuantity));
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
-                .extracting(ConflictException::getError)
+                .extracting(BadRequestException::getError)
                 .isEqualTo(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
 
         then(sessionalPlanRepository).should().existsBySessionalPlanIdAndUserId(sessionalPlanId, userId);
