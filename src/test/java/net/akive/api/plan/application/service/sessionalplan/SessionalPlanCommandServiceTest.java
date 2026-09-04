@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.service.sessionalplan;
 
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanCreateCommand;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDeleteCommand;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanUpdateCommand;
@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,9 +90,9 @@ class SessionalPlanCommandServiceTest {
 
         given(userFinder.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> sessionalPlanCommandService.create(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
         then(userFinder).should().findByUserIdAndLeaveFalse(userId);
@@ -151,9 +151,9 @@ class SessionalPlanCommandServiceTest {
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> sessionalPlanCommandService.update(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);

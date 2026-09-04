@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.service.totalquantity;
 
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.SessionalPlanTotalQuantityFindQuery;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedSessionalPlan;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedTotalQuantity;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
@@ -77,9 +77,9 @@ class TotalQuantityQueryServiceTest {
                 totalQuantityId
         );
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityQueryService.find(query))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -103,9 +103,9 @@ class TotalQuantityQueryServiceTest {
                 totalQuantityId
         )).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityQueryService.find(query))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()

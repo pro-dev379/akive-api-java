@@ -1,7 +1,7 @@
 package net.akive.api.common.domain;
 
-import net.akive.api.common.exception.business.BadRequestError;
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationError;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -27,11 +27,11 @@ class EmailTest {
     @MethodSource("invalidEmailValues")
     void 이메일_값이_유효하지_않으면_생성이_거부된다(
             String email,
-            BadRequestError expectedError
+            BusinessRuleViolationError expectedError
     ) {
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> new Email(email))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(expectedError);
     }
 

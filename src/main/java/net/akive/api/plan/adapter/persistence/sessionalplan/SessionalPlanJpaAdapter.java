@@ -1,7 +1,7 @@
 package net.akive.api.plan.adapter.persistence.sessionalplan;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.persistence.entity.SessionPeriodEntity;
 import net.akive.api.plan.adapter.persistence.entity.SessionalPlanEntity;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Repository
@@ -78,7 +78,7 @@ class SessionalPlanJpaAdapter implements SessionalPlanRepository {
     public void deleteBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId) {
         SessionalPlanEntity sessionalPlanEntity = sessionalPlanJpaRepository
                 .findBySessionalPlanIdAndUser_UserId(sessionalPlanId, userId)
-                .orElseThrow(() -> new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
         sessionalPlanJpaRepository.delete(sessionalPlanEntity);
     }

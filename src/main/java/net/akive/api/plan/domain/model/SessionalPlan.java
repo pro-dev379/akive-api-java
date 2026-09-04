@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 
@@ -14,7 +14,7 @@ import java.util.Objects;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_SESSION_PERIOD;
 import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 
 @Getter
@@ -80,7 +80,7 @@ public class SessionalPlan {
 
         if (sessionPeriod.startOn().isBefore(requestedAt.toLocalDate()) ||
                 !sessionPeriod.endOn().isAfter(requestedAt.toLocalDate())) {
-            throw new BadRequestException(INVALID_SESSION_PERIOD);
+            throw new BusinessRuleViolationException(INVALID_SESSION_PERIOD);
         }
     }
 

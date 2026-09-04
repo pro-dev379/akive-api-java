@@ -1,6 +1,6 @@
 package net.akive.api.plan.adapter.persistence.sessionalplan;
 
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
 import net.akive.api.plan.domain.value.SessionPeriod;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.createSessionalPlan;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -125,12 +125,12 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         SessionalPlan savedSessionalPlan = saveSessionalPlan();
         flushAndClear();
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> sessionalPlanRepository.deleteBySessionalPlanIdAndUserId(
                         Long.MAX_VALUE,
                         savedSessionalPlan.getUser().getUserId()
                 ))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
     }
 

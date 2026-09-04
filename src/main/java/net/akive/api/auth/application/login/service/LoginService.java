@@ -8,7 +8,7 @@ import net.akive.api.auth.application.token.provided.TokenIssuer;
 import net.akive.api.auth.application.token.provided.dto.TokenIssueCommand;
 import net.akive.api.auth.domain.login.LegacyUserPassword;
 import net.akive.api.auth.domain.token.IssuedToken;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.User;
@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
 
 @Service
 @RequiredArgsConstructor
@@ -32,9 +32,9 @@ class LoginService implements LoginProcessor {
 
     @Override
     @Transactional
-    public IssuedToken loginByEmail(LoginByEmailCommand command) throws UnauthorizedException {
+    public IssuedToken loginByEmail(LoginByEmailCommand command) throws AuthenticationException {
         User user = userFinder.findByEmailAndLeaveFalse(command.email())
-                .orElseThrow(() -> new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
+                .orElseThrow(() -> new AuthenticationException(INVALID_EMAIL_OR_PASSWORD));
 
         if (authenticateAndCheckLegacyPasswordUsed(user, command.password())) {
             migratePassword(user, command.password());
@@ -61,17 +61,17 @@ class LoginService implements LoginProcessor {
 
     private void validatePassword(String rawPassword, String passwordHash) {
         if (!passwordEncoder.matches(rawPassword, passwordHash)) {
-            throw new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD);
+            throw new AuthenticationException(INVALID_EMAIL_OR_PASSWORD);
         }
     }
 
     private void validateLegacyPassword(String rawPassword, User user) {
         LegacyUserPassword legacyUserPassword = legacyUserPasswordRepository
                 .findByUserId(user.getUserId())
-                .orElseThrow(() -> new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD));
+                .orElseThrow(() -> new AuthenticationException(INVALID_EMAIL_OR_PASSWORD));
 
         if (!legacyPasswordVerifier.matches(rawPassword, legacyUserPassword.passwordHash())) {
-            throw new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD);
+            throw new AuthenticationException(INVALID_EMAIL_OR_PASSWORD);
         }
     }
 

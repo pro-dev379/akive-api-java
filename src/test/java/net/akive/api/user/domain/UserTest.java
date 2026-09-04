@@ -1,9 +1,9 @@
 package net.akive.api.user.domain;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BadRequestError.BLANK_VALUE;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.BLANK_VALUE;
 import static net.akive.api.user.domain.RoleType.MEMBER;
 import static net.akive.api.user.domain.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,9 +72,9 @@ class UserTest {
     void 공백_패스워드_해시로는_변경할_수_없다() {
         User user = createUser();
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> user.updatePasswordHash("   "))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 

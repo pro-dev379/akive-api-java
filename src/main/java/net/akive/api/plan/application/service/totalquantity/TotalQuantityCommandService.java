@@ -1,9 +1,9 @@
 package net.akive.api.plan.application.service.totalquantity;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityCreator;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
 import net.akive.api.plan.application.provided.totalquantity.dto.*;
@@ -12,7 +12,7 @@ import net.akive.api.plan.domain.model.TotalQuantity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 
 @Service
 @Transactional
@@ -24,7 +24,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public Long create(TotalQuantityCreateCommand command)
-            throws BadRequestException, ConflictException, NotFoundException {
+            throws BusinessRuleViolationException, ResourceConflictException, ResourceNotFoundException {
         TotalQuantity totalQuantity = totalQuantityDomainService.create(
                 command.sessionalPlanId(),
                 command.userId(),
@@ -39,7 +39,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void update(TotalQuantityUpdateCommand command)
-            throws BadRequestException, ConflictException, NotFoundException {
+            throws BusinessRuleViolationException, ResourceConflictException, ResourceNotFoundException {
         TotalQuantity updatedTotalQuantity = totalQuantityDomainService.update(
                 command.totalQuantityId(),
                 command.sessionalPlanId(),
@@ -52,7 +52,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
     }
 
     @Override
-    public void delete(TotalQuantityDeleteCommand command) throws NotFoundException {
+    public void delete(TotalQuantityDeleteCommand command) throws ResourceNotFoundException {
         totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
                 command.sessionalPlanId(),
                 command.userId(),
@@ -62,7 +62,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void updateWeeklyQuantityAmount(WeeklyQuantityAmountUpdateCommand command)
-            throws BadRequestException, NotFoundException {
+            throws BusinessRuleViolationException, ResourceNotFoundException {
         TotalQuantity totalQuantity = findTotalQuantityOrThrow(
                 command.sessionalPlanId(),
                 command.userId(),
@@ -76,7 +76,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void delayWeeklyAmountTo(WeeklyAmountDelayCommand command)
-            throws BadRequestException, NotFoundException {
+            throws BusinessRuleViolationException, ResourceNotFoundException {
         TotalQuantity totalQuantity = findTotalQuantityOrThrow(
                 command.sessionalPlanId(),
                 command.userId(),
@@ -94,7 +94,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void updateDailyAmount(DailyAmountUpdateCommand command)
-            throws BadRequestException, NotFoundException {
+            throws BusinessRuleViolationException, ResourceNotFoundException {
         TotalQuantity totalQuantity = findTotalQuantityOrThrow(
                 command.sessionalPlanId(),
                 command.userId(),
@@ -113,7 +113,7 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void updateDailyCompletedAmount(DailyCompletedAmountUpdateCommand command)
-            throws BadRequestException, NotFoundException {
+            throws BusinessRuleViolationException, ResourceNotFoundException {
         TotalQuantity totalQuantity = findTotalQuantityOrThrow(
                 command.sessionalPlanId(),
                 command.userId(),
@@ -130,7 +130,8 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
     }
 
     @Override
-    public void delayDailyAmountTo(DailyAmountDelayCommand command) throws BadRequestException, NotFoundException {
+    public void delayDailyAmountTo(DailyAmountDelayCommand command)
+            throws BusinessRuleViolationException, ResourceNotFoundException {
         TotalQuantity totalQuantity = findTotalQuantityOrThrow(
                 command.sessionalPlanId(),
                 command.userId(),
@@ -150,6 +151,6 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
     private TotalQuantity findTotalQuantityOrThrow(Long sessionalPlanId, Long userId, Long totalQuantityId) {
         return totalQuantityRepository
                 .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId)
-                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND));
     }
 }

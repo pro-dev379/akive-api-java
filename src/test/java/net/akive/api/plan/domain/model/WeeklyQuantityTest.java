@@ -1,6 +1,6 @@
 package net.akive.api.plan.domain.model;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.plan.domain.value.DailyQuantityAmount;
 import net.akive.api.plan.domain.value.WeekPeriod;
 import net.akive.api.plan.domain.value.WeeklyQuantityAmount;
@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.common.exception.business.BadRequestError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
-import static net.akive.api.common.exception.business.BadRequestError.WEEKLY_AMOUNT_MISMATCH;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_QUANTITY_DATE_OUT_OF_WEEK;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.WEEKLY_AMOUNT_MISMATCH;
 import static net.akive.api.plan.domain.PlanFixture.createSessionalPlan;
 import static net.akive.api.plan.domain.PlanFixture.createSubject;
 import static net.akive.api.plan.domain.PlanFixture.createTotalQuantityAmount;
@@ -63,14 +63,14 @@ class WeeklyQuantityTest {
                 )
         );
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> WeeklyQuantity.reconstruct(
                         1L,
                         weekPeriod,
                         weeklyQuantityAmount,
                         dailyQuantities
                 ))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(WEEKLY_AMOUNT_MISMATCH);
     }
 
@@ -89,14 +89,14 @@ class WeeklyQuantityTest {
                 )
         );
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> WeeklyQuantity.reconstruct(
                         1L,
                         weekPeriod,
                         weeklyQuantityAmount,
                         dailyQuantities
                 ))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
     }
 

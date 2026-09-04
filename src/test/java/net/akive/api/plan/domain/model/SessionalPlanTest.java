@@ -1,6 +1,6 @@
 package net.akive.api.plan.domain.model;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -100,9 +100,9 @@ class SessionalPlanTest {
                 REQUESTED_AT.toLocalDate().plusDays(1)
         );
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> SessionalPlan.create(user, SESSION_NAME, sessionPeriod, REQUESTED_AT))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 
@@ -115,9 +115,9 @@ class SessionalPlanTest {
         );
         LocalDateTime requestedAt = REQUESTED_AT.plusDays(1);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> SessionalPlan.create(user, SESSION_NAME, sessionPeriod, requestedAt))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
 
@@ -129,9 +129,9 @@ class SessionalPlanTest {
                 LocalDate.of(2026, 1, 31)
         );
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> SessionalPlan.create(user, "   ", sessionPeriod, REQUESTED_AT))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 
@@ -144,9 +144,9 @@ class SessionalPlanTest {
         );
         String tooLongSessionName = "a".repeat(SESSION_NAME_MAX_LENGTH + 1);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> SessionalPlan.create(user, tooLongSessionName, sessionPeriod, REQUESTED_AT))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 

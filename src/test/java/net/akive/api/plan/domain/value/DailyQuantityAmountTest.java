@@ -1,9 +1,9 @@
 package net.akive.api.plan.domain.value;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -33,9 +33,9 @@ class DailyQuantityAmountTest {
 
     @Test
     void 계획_달성량과_딜레이량의_합이_계획량과_다르면_예외를_던진다() {
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> DailyQuantityAmount.of(100, 30, 60))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_AMOUNT_MISMATCH);
     }
 
@@ -67,9 +67,9 @@ class DailyQuantityAmountTest {
     void 일일_계획량을_달성량보다_적게_감소시킬_수_없다() {
         DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(100, 30, 70);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> dailyQuantityAmount.reduceBy(new QuantityAmount(80)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
     }
 
@@ -111,9 +111,9 @@ class DailyQuantityAmountTest {
     void 일일_계획_달성량_증가분은_딜레이량보다_많을_수_없다() {
         DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(100, 30, 70);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> dailyQuantityAmount.completeBy(new QuantityAmount(80)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
     }
 
@@ -146,9 +146,9 @@ class DailyQuantityAmountTest {
     void 일일_계획_달성량을_실제_달성량보다_많이_취소할_수_없다() {
         DailyQuantityAmount dailyQuantityAmount = DailyQuantityAmount.of(100, 30, 70);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> dailyQuantityAmount.cancelCompletionBy(new QuantityAmount(40)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_AMOUNT_TO_CANCEL_COMPLETION_EXCEEDS_COMPLETED_AMOUNT);
     }
 }

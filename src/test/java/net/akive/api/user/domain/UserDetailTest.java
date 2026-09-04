@@ -1,9 +1,9 @@
 package net.akive.api.user.domain;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.user.domain.UserPolicy.AIM_MAX_LENGTH;
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,22 +53,22 @@ class UserDetailTest {
     void 닉네임이_최대_글자_수를_초과하면_생성에_실패한다() {
         String nickname = "a".repeat(NICKNAME_MAX_LENGTH + 1);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> UserDetail.of(nickname, IMG_URL, AIM))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
     @Test
     void 닉네임이_없으면_생성에_실패한다() {
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> UserDetail.of(null, IMG_URL, AIM))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> UserDetail.of("   ", IMG_URL, AIM))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 
@@ -85,9 +85,9 @@ class UserDetailTest {
     void 목표가_최대_글자_수를_초과하면_생성에_실패한다() {
         String aim = "a".repeat(AIM_MAX_LENGTH + 1);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> UserDetail.of(NICKNAME, IMG_URL, aim))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 }

@@ -1,6 +1,6 @@
 package net.akive.api.plan.domain.value;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
-import static net.akive.api.common.exception.business.BadRequestError.INVALID_SESSION_PERIOD;
-import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_MAX_MONTHS_EXCEEDED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_SESSION_PERIOD;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.SESSION_PERIOD_MAX_MONTHS_EXCEEDED;
 import static net.akive.api.plan.domain.policy.PlanPolicy.DAYS_PER_WEEK;
 import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_PERIOD_MAX_MONTHS;
 
@@ -22,11 +22,11 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
         requireNonNull(endOn);
 
         if (!startOn.isBefore(endOn)) {
-            throw new BadRequestException(INVALID_SESSION_PERIOD);
+            throw new BusinessRuleViolationException(INVALID_SESSION_PERIOD);
         }
 
         if (endOn.isAfter(startOn.plusMonths(SESSION_PERIOD_MAX_MONTHS))) {
-            throw new BadRequestException(SESSION_PERIOD_MAX_MONTHS_EXCEEDED);
+            throw new BusinessRuleViolationException(SESSION_PERIOD_MAX_MONTHS_EXCEEDED);
         }
     }
 

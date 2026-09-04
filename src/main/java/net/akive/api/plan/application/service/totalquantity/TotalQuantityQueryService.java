@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.totalquantity;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityFinder;
 import net.akive.api.plan.application.provided.totalquantity.dto.SessionalPlanTotalQuantityFindQuery;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,7 +23,7 @@ class TotalQuantityQueryService implements TotalQuantityFinder {
     private final TotalQuantityRepository totalQuantityRepository;
 
     @Override
-    public TotalQuantityProgress find(SessionalPlanTotalQuantityFindQuery query) throws NotFoundException {
+    public TotalQuantityProgress find(SessionalPlanTotalQuantityFindQuery query) throws ResourceNotFoundException {
         TotalQuantity totalQuantity = findTotalQuantityOrThrow(
                 query.sessionalPlanId(),
                 query.userId(),
@@ -41,6 +41,6 @@ class TotalQuantityQueryService implements TotalQuantityFinder {
     ) {
         return totalQuantityRepository
                 .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId)
-                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND));
     }
 }

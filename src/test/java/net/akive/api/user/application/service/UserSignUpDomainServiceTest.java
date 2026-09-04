@@ -1,8 +1,8 @@
 package net.akive.api.user.application.service;
 
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.user.application.provided.UserValidator;
 import net.akive.api.user.application.required.NicknameGenerator;
 import net.akive.api.user.application.required.UserEmailVerificationChecker;
@@ -18,9 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static net.akive.api.common.domain.EmailFixture.createEmail;
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
-import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.ConflictError.NICKNAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.user.domain.RoleType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -90,13 +90,13 @@ class UserSignUpDomainServiceTest {
 
     @Test
     void 이메일이_중복되면_회원_가입에_실패한다() {
-        willThrow(new ConflictException(EMAIL_ALREADY_EXISTS))
+        willThrow(new ResourceConflictException(EMAIL_ALREADY_EXISTS))
                 .given(userValidator)
                 .validateEmailNotDuplicate(EMAIL);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> userSignUpDomainService.signUpMemberByEmail(EMAIL, PASSWORD, NICKNAME))
-                .extracting(ConflictException::getError)
+                .extracting(ResourceConflictException::getError)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
 
         then(emailVerificationChecker).shouldHaveNoInteractions();
@@ -105,13 +105,13 @@ class UserSignUpDomainServiceTest {
 
     @Test
     void 이메일_인증이_완료되지_않으면_회원_가입에_실패한다() {
-        willThrow(new BadRequestException(EMAIL_NOT_VERIFIED))
+        willThrow(new BusinessRuleViolationException(EMAIL_NOT_VERIFIED))
                 .given(emailVerificationChecker)
                 .ensureEmailVerifiedForSignUp(EMAIL);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> userSignUpDomainService.signUpMemberByEmail(EMAIL, PASSWORD, NICKNAME))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMAIL_NOT_VERIFIED);
 
         then(userValidator).should().validateEmailNotDuplicate(EMAIL);
@@ -121,13 +121,13 @@ class UserSignUpDomainServiceTest {
 
     @Test
     void 회원_입력_닉네임이_중복되면_회원_가입에_실패한다() {
-        willThrow(new ConflictException(NICKNAME_ALREADY_EXISTS))
+        willThrow(new ResourceConflictException(NICKNAME_ALREADY_EXISTS))
                 .given(userValidator)
                 .validateNicknameNotDuplicate(NICKNAME);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> userSignUpDomainService.signUpMemberByEmail(EMAIL, PASSWORD, NICKNAME))
-                .extracting(ConflictException::getError)
+                .extracting(ResourceConflictException::getError)
                 .isEqualTo(NICKNAME_ALREADY_EXISTS);
 
         then(userValidator).should().validateEmailNotDuplicate(EMAIL);

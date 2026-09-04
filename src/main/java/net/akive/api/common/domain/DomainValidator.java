@@ -1,12 +1,12 @@
 package net.akive.api.common.domain;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 
 public final class DomainValidator {
 
@@ -15,7 +15,7 @@ public final class DomainValidator {
 
     public static <T> T requireNonNull(T value) {
         if (value == null) {
-            throw new BadRequestException(REQUIRED_VALUE_MISSING);
+            throw new BusinessRuleViolationException(REQUIRED_VALUE_MISSING);
         }
 
         return value;
@@ -26,7 +26,7 @@ public final class DomainValidator {
 
         String trimmedValue = value.trim();
         if (trimmedValue.isEmpty()) {
-            throw new BadRequestException(BLANK_VALUE);
+            throw new BusinessRuleViolationException(BLANK_VALUE);
         }
 
         return trimmedValue;
@@ -36,7 +36,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value.isEmpty()) {
-            throw new BadRequestException(EMPTY_COLLECTION);
+            throw new BusinessRuleViolationException(EMPTY_COLLECTION);
         }
 
         return value;
@@ -46,7 +46,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value.length() > maxLength) {
-            throw new BadRequestException(MAX_LENGTH_EXCEEDED);
+            throw new BusinessRuleViolationException(MAX_LENGTH_EXCEEDED);
         }
 
         return value;
@@ -56,7 +56,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value.length() < minLength) {
-            throw new BadRequestException(MIN_LENGTH_NOT_MET);
+            throw new BusinessRuleViolationException(MIN_LENGTH_NOT_MET);
         }
 
         return value;
@@ -68,7 +68,7 @@ public final class DomainValidator {
         }
 
         if (value.length() > maxLength) {
-            throw new BadRequestException(MAX_LENGTH_EXCEEDED);
+            throw new BusinessRuleViolationException(MAX_LENGTH_EXCEEDED);
         }
 
         return value;
@@ -79,7 +79,7 @@ public final class DomainValidator {
         requireNonNull(pattern);
 
         if (!pattern.matcher(value).matches()) {
-            throw new BadRequestException(INVALID_FORMAT);
+            throw new BusinessRuleViolationException(INVALID_FORMAT);
         }
 
         return value;
@@ -89,7 +89,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value <= 0) {
-            throw new BadRequestException(VALUE_NOT_POSITIVE);
+            throw new BusinessRuleViolationException(VALUE_NOT_POSITIVE);
         }
 
         return value;
@@ -99,7 +99,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value <= 0) {
-            throw new BadRequestException(VALUE_NOT_POSITIVE);
+            throw new BusinessRuleViolationException(VALUE_NOT_POSITIVE);
         }
 
         return value;
@@ -109,7 +109,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value < 0) {
-            throw new BadRequestException(VALUE_NEGATIVE);
+            throw new BusinessRuleViolationException(VALUE_NEGATIVE);
         }
 
         return value;
@@ -119,7 +119,7 @@ public final class DomainValidator {
         requireNonNull(value);
 
         if (value < 0) {
-            throw new BadRequestException(VALUE_NEGATIVE);
+            throw new BusinessRuleViolationException(VALUE_NEGATIVE);
         }
 
         return value;
@@ -130,7 +130,7 @@ public final class DomainValidator {
         requireNonNull(endOn);
 
         if (startOn.isAfter(endOn)) {
-            throw new BadRequestException(INVALID_DATE_RANGE);
+            throw new BusinessRuleViolationException(INVALID_DATE_RANGE);
         }
     }
 }

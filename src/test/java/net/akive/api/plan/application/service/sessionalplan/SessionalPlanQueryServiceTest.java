@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.service.sessionalplan;
 
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanFindQuery;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedSessionalPlan;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedTotalQuantity;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
@@ -92,9 +92,9 @@ class SessionalPlanQueryServiceTest {
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> sessionalPlanQueryService.find(query))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);

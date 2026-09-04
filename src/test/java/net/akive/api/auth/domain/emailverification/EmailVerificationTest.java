@@ -1,10 +1,10 @@
 package net.akive.api.auth.domain.emailverification;
 
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.TooManyRequestsException;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.RateLimitExceededException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -14,11 +14,11 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPolic
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.common.domain.EmailFixture.createEmail;
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_CODE_MISMATCH;
-import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_VERIFIED;
-import static net.akive.api.common.exception.business.TooManyRequestsError.EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED;
-import static net.akive.api.common.exception.business.TooManyRequestsError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
-import static net.akive.api.common.exception.business.UnauthorizedError.EMAIL_VERIFICATION_CODE_EXPIRED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_VERIFICATION_CODE_MISMATCH;
+import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_VERIFIED;
+import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
+import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -67,12 +67,12 @@ class EmailVerificationTest {
     void 갱신_가능시간_이전에_갱신하면_갱신이_거부된다() {
         EmailVerification emailVerification = createEmailVerification();
 
-        assertThatExceptionOfType(TooManyRequestsException.class)
+        assertThatExceptionOfType(RateLimitExceededException.class)
                 .isThrownBy(() -> emailVerification.renew(
                         VERIFICATION_CODE,
                         REQUESTED_AT.plusSeconds(10)
                 ))
-                .extracting(TooManyRequestsException::getError)
+                .extracting(RateLimitExceededException::getError)
                 .isEqualTo(EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT);
     }
 
@@ -84,12 +84,12 @@ class EmailVerificationTest {
         emailVerification.renew(new EmailVerificationCode("222222"), REQUESTED_AT.plusMinutes(2));
         emailVerification.renew(new EmailVerificationCode("333333"), REQUESTED_AT.plusMinutes(3));
 
-        assertThatExceptionOfType(TooManyRequestsException.class)
+        assertThatExceptionOfType(RateLimitExceededException.class)
                 .isThrownBy(() -> emailVerification.renew(
                         new EmailVerificationCode("444444"),
                         REQUESTED_AT.plusMinutes(4)
                 ))
-                .extracting(TooManyRequestsException::getError)
+                .extracting(RateLimitExceededException::getError)
                 .isEqualTo(EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED);
     }
 
@@ -117,12 +117,12 @@ class EmailVerificationTest {
 
         emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plusMinutes(1));
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> emailVerification.verify(
                         VERIFICATION_CODE,
                         REQUESTED_AT.plusMinutes(2)
                 ))
-                .extracting(ConflictException::getError)
+                .extracting(ResourceConflictException::getError)
                 .isEqualTo(EMAIL_ALREADY_VERIFIED);
     }
 
@@ -130,12 +130,12 @@ class EmailVerificationTest {
     void 일치하지_않는_인증번호를_입력하면_인증에_실패한다() {
         EmailVerification emailVerification = createEmailVerification();
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> emailVerification.verify(
                         new EmailVerificationCode("000000"),
                         REQUESTED_AT.plusMinutes(1)
                 ))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMAIL_VERIFICATION_CODE_MISMATCH);
     }
 
@@ -143,12 +143,12 @@ class EmailVerificationTest {
     void 만료된_인증번호를_입력하면_인증에_실패한다() {
         EmailVerification emailVerification = createEmailVerification();
 
-        assertThatExceptionOfType(UnauthorizedException.class)
+        assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> emailVerification.verify(
                         VERIFICATION_CODE,
                         REQUESTED_AT.plus(VERIFICATION_CODE_EXPIRATION_DURATION).plusSeconds(1)
                 ))
-                .extracting(UnauthorizedException::getError)
+                .extracting(AuthenticationException::getError)
                 .isEqualTo(EMAIL_VERIFICATION_CODE_EXPIRED);
     }
 }

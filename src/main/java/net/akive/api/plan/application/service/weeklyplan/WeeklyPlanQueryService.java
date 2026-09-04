@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.weeklyplan;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.weeklyplan.WeeklyPlanFinder;
 import net.akive.api.plan.application.provided.weeklyplan.dto.WeeklyPlanFindQuery;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEKLY_PLAN_NOT_FOUND;
 
 @Service
 @Transactional(readOnly = true)
@@ -27,7 +27,7 @@ class WeeklyPlanQueryService implements WeeklyPlanFinder {
     private final WeeklyQuantityRepository weeklyQuantityRepository;
 
     @Override
-    public WeeklyPlan find(WeeklyPlanFindQuery query) throws NotFoundException {
+    public WeeklyPlan find(WeeklyPlanFindQuery query) throws ResourceNotFoundException {
         SessionPeriod sessionPeriod = findSessionPeriodOrThrow(query.sessionalPlanId(), query.userId());
         SessionWeek sessionWeek = getSessionWeekOrThrow(sessionPeriod, query.weekNum());
 
@@ -56,15 +56,15 @@ class WeeklyPlanQueryService implements WeeklyPlanFinder {
 
     private SessionPeriod findSessionPeriodOrThrow(Long sessionalPlanId, Long userId) {
         return sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId)
-                .orElseThrow(() -> new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
     }
 
     private SessionWeek getSessionWeekOrThrow(SessionPeriod sessionPeriod, Integer weekNum) {
         if (weekNum == null) {
-            throw new NotFoundException(WEEKLY_PLAN_NOT_FOUND);
+            throw new ResourceNotFoundException(WEEKLY_PLAN_NOT_FOUND);
         }
 
         return sessionPeriod.findSessionWeek(weekNum)
-                .orElseThrow(() -> new NotFoundException(WEEKLY_PLAN_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(WEEKLY_PLAN_NOT_FOUND));
     }
 }

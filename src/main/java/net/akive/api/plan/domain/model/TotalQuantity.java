@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.domain.value.*;
 
 import java.util.ArrayList;
@@ -15,8 +15,8 @@ import java.util.Objects;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -107,7 +107,7 @@ public class TotalQuantity {
         requireNonNull(weeklyAmountToDelay);
 
         if (weeklyQuantityId.equals(receivingWeeklyQuantityId)) {
-            throw new BadRequestException(WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE);
+            throw new BusinessRuleViolationException(WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE);
         }
 
         WeeklyQuantity weeklyQuantity =
@@ -159,7 +159,7 @@ public class TotalQuantity {
         requireNonNull(dailyAmountToDelay);
 
         if (dailyQuantityId.equals(receivingDailyQuantityId)) {
-            throw new BadRequestException(DAILY_DELAY_RECEIVER_SAME_AS_SOURCE);
+            throw new BusinessRuleViolationException(DAILY_DELAY_RECEIVER_SAME_AS_SOURCE);
         }
 
         WeeklyQuantity weeklyQuantity = this.weeklyQuantities.get(findWeeklyQuantityIndex(weeklyQuantityId));
@@ -212,7 +212,7 @@ public class TotalQuantity {
         QuantityAmount summedWeeklyAmount = sumWeeklyAmounts(weeklyQuantities);
 
         if (!totalQuantityAmount.quantityAmount().equals(summedWeeklyAmount)) {
-            throw new BadRequestException(TOTAL_AMOUNT_MISMATCH);
+            throw new BusinessRuleViolationException(TOTAL_AMOUNT_MISMATCH);
         }
     }
 
@@ -221,7 +221,7 @@ public class TotalQuantity {
         requireNonNull(targetTotalQuantityAmount);
 
         if (targetTotalQuantityAmount.quantityAmount().isLessThan(getCompletedAmount())) {
-            throw new BadRequestException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+            throw new BusinessRuleViolationException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
     }
 
@@ -282,7 +282,7 @@ public class TotalQuantity {
             }
         }
 
-        throw new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND);
+        throw new ResourceNotFoundException(WEEKLY_QUANTITY_NOT_FOUND);
     }
 
     private void validateNotLastWeekReduction(
@@ -290,7 +290,7 @@ public class TotalQuantity {
             QuantityAmount weeklyAmountToReduce
     ) {
         if (!weeklyAmountToReduce.isZero() && isLastWeek(weeklyQuantityIndex)) {
-            throw new BadRequestException(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED);
+            throw new BusinessRuleViolationException(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED);
         }
     }
 

@@ -1,6 +1,6 @@
 package net.akive.api.mentoring.application.service;
 
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.mentoring.domain.MentoringProfile;
 import net.akive.api.user.application.provided.UserFinder;
@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.domain.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -63,9 +63,9 @@ class MentoringProfileServiceTest {
         Long userId = 999L;
         given(userFinder.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> mentoringProfileService.create(userId))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
         then(mentoringProfileRepository).should(never()).save(any());

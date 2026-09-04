@@ -6,10 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.TooManyRequestsException;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.RateLimitExceededException;
+import net.akive.api.common.exception.business.AuthenticationException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -18,11 +18,11 @@ import java.util.Objects;
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_CODE_MISMATCH;
-import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_VERIFIED;
-import static net.akive.api.common.exception.business.TooManyRequestsError.EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED;
-import static net.akive.api.common.exception.business.TooManyRequestsError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
-import static net.akive.api.common.exception.business.UnauthorizedError.EMAIL_VERIFICATION_CODE_EXPIRED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_VERIFICATION_CODE_MISMATCH;
+import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_VERIFIED;
+import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
+import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -83,15 +83,15 @@ public class EmailVerification {
         requireNonNull(requestedAt);
 
         if (this.isVerified) {
-            throw new ConflictException(EMAIL_ALREADY_VERIFIED);
+            throw new ResourceConflictException(EMAIL_ALREADY_VERIFIED);
         }
 
         if (this.expiresAt.isBefore(requestedAt)) {
-            throw new UnauthorizedException(EMAIL_VERIFICATION_CODE_EXPIRED);
+            throw new AuthenticationException(EMAIL_VERIFICATION_CODE_EXPIRED);
         }
 
         if (!Objects.equals(this.verificationCode, validatedInputVerificationCode)) {
-            throw new BadRequestException(EMAIL_VERIFICATION_CODE_MISMATCH);
+            throw new BusinessRuleViolationException(EMAIL_VERIFICATION_CODE_MISMATCH);
         }
 
         this.isVerified = true;
@@ -99,11 +99,11 @@ public class EmailVerification {
 
     private void validateRenewable(LocalDateTime requestedAt) {
         if (this.renewalCount >= EMAIL_VERIFICATION_RENEWAL_MAX_COUNT) {
-            throw new TooManyRequestsException(EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED);
+            throw new RateLimitExceededException(EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED);
         }
 
         if (isRenewalRequestedTooFrequently(requestedAt)) {
-            throw new TooManyRequestsException(EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT);
+            throw new RateLimitExceededException(EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT);
         }
     }
 

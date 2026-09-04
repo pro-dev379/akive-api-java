@@ -1,0 +1,12 @@
+package net.akive.api.common.exception;
+
+public enum ApplicationErrorType {
+    BUSINESS_RULE_VIOLATION,
+    RESOURCE_NOT_FOUND,
+    RESOURCE_CONFLICT,
+    AUTHENTICATION_ERROR,
+    RATE_LIMIT_EXCEEDED,
+    UNEXPECTED_SERVER_ERROR,
+    METHOD_NOT_ALLOWED,
+    UNSUPPORTED_MEDIA_TYPE
+}

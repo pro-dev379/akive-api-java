@@ -1,8 +1,8 @@
 package net.akive.api.plan.adapter.webapi.sessionalplan;
 
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.webapi.common.dto.request.SessionPeriodRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanCreateRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanUpdateRequest;
@@ -26,9 +26,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.BadRequestError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
-import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.SESSIONAL_PLAN;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.SESSIONAL_PLANS;
 import static net.akive.api.plan.domain.PlanFixture.*;
@@ -90,7 +90,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         Long userId = 1L;
         SessionalPlanCreateRequest request = createRequest();
         SessionalPlanCreateCommand command = request.to(userId);
-        willThrow(new ConflictException(SESSION_NAME_ALREADY_EXISTS))
+        willThrow(new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS))
                 .given(sessionalPlanCreator)
                 .create(command);
 
@@ -99,7 +99,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_409_SESSION_NAME_ALREADY_EXISTS");
+                .isEqualTo("SESSION_NAME_ALREADY_EXISTS");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Session name already exists.");
@@ -112,7 +112,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         Long userId = 1L;
         SessionalPlanCreateRequest request = createRequest();
         SessionalPlanCreateCommand command = request.to(userId);
-        willThrow(new BadRequestException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED))
+        willThrow(new BusinessRuleViolationException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED))
                 .given(sessionalPlanCreator)
                 .create(command);
 
@@ -121,7 +121,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED");
+                .isEqualTo("IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Too many in-progress sessional plans.");
@@ -199,7 +199,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 999L;
         SessionalPlanFindQuery query = new SessionalPlanFindQuery(userId, sessionalPlanId);
         given(sessionalPlanFinder.find(query))
-                .willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
+                .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
         MvcTestResultAssert result = get(userId, SESSIONAL_PLAN, sessionalPlanId)
                 .hasStatus(NOT_FOUND);
@@ -260,7 +260,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 999L;
         SessionalPlanUpdateRequest request = createUpdateRequest();
         SessionalPlanUpdateCommand command = request.to(sessionalPlanId, userId);
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(sessionalPlanCreator)
                 .update(command);
 
@@ -292,7 +292,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         Long userId = 1L;
         Long sessionalPlanId = 999L;
         SessionalPlanDeleteCommand command = new SessionalPlanDeleteCommand(userId, sessionalPlanId);
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(sessionalPlanCreator)
                 .delete(command);
 
@@ -403,7 +403,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     private static void assertSessionalPlanNotFoundResponse(MvcTestResultAssert result) {
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_SESSIONAL_PLAN_NOT_FOUND");
+                .isEqualTo("SESSIONAL_PLAN_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Sessional plan not found.");

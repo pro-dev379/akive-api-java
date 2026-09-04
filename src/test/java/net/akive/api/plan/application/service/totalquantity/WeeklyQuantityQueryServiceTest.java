@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.service.totalquantity;
 
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyPlanItemFindQuery;
 import net.akive.api.plan.application.required.WeeklyQuantityRepository;
 import net.akive.api.plan.application.required.data.WeeklyPlanData;
@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_ITEM_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEKLY_PLAN_ITEM_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedSessionalPlan;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedTotalQuantity;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
@@ -99,9 +99,9 @@ class WeeklyQuantityQueryServiceTest {
                 ))
                 .willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> weeklyQuantityQueryService.findWeeklyPlanItem(query))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(WEEKLY_PLAN_ITEM_NOT_FOUND);
 
         then(weeklyQuantityRepository).should()

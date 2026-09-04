@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.totalquantity;
 
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,8 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.common.exception.business.BadRequestError.TOTAL_QUANTITY_LIMIT_EXCEEDED;
-import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.TOTAL_QUANTITY_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.ResourceConflictError.SUBJECT_NAME_ALREADY_EXISTS;
 import static net.akive.api.plan.domain.PlanFixture.SUBJECT_NAME;
 import static net.akive.api.plan.domain.policy.PlanPolicy.TOTAL_QUANTITY_MAX_COUNT;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -48,12 +48,12 @@ class TotalQuantityValidationServiceTest {
         given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(sessionalPlanId, SUBJECT_NAME))
                 .willReturn(true);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> totalQuantityValidationService.validateCreatable(
                         sessionalPlanId,
                         SUBJECT_NAME
                 ))
-                .extracting(ConflictException::getError)
+                .extracting(ResourceConflictException::getError)
                 .isEqualTo(SUBJECT_NAME_ALREADY_EXISTS);
 
         then(totalQuantityRepository).should()
@@ -69,12 +69,12 @@ class TotalQuantityValidationServiceTest {
         given(totalQuantityRepository.countBySessionalPlanId(sessionalPlanId))
                 .willReturn(TOTAL_QUANTITY_MAX_COUNT);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantityValidationService.validateCreatable(
                         sessionalPlanId,
                         SUBJECT_NAME
                 ))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(TOTAL_QUANTITY_LIMIT_EXCEEDED);
 
         then(totalQuantityRepository).should()
@@ -111,13 +111,13 @@ class TotalQuantityValidationServiceTest {
                 totalQuantityId
         )).willReturn(true);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> totalQuantityValidationService.validateUpdatable(
                         totalQuantityId,
                         sessionalPlanId,
                         SUBJECT_NAME
                 ))
-                .extracting(ConflictException::getError)
+                .extracting(ResourceConflictException::getError)
                 .isEqualTo(SUBJECT_NAME_ALREADY_EXISTS);
 
         then(totalQuantityRepository).should().existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(

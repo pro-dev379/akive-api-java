@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.service.sessionalplan;
 
-import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.value.SessionPeriod;
@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
-import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,13 +54,13 @@ class SessionalPlanDomainServiceTest {
     void 세셔널_플랜_생성_검증에_실패하면_예외를_던진다() {
         User user = createPersistedUser(1L);
         SessionPeriod sessionPeriod = createSessionPeriod();
-        ConflictException exception = new ConflictException(SESSION_NAME_ALREADY_EXISTS);
+        ResourceConflictException exception = new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS);
         given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
         willThrow(exception)
                 .given(sessionalPlanValidationService)
                 .validateCreatable(user.getUserId(), SESSION_NAME, REQUESTED_AT.toLocalDate());
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> sessionalPlanDomainService.create(user, SESSION_NAME, sessionPeriod))
                 .isSameAs(exception);
 
@@ -94,12 +94,12 @@ class SessionalPlanDomainServiceTest {
         User user = createPersistedUser(1L);
         SessionalPlan currentSessionalPlan = createSessionalPlan(user);
         SessionPeriod sessionPeriod = createSessionPeriod();
-        ConflictException exception = new ConflictException(SESSION_NAME_ALREADY_EXISTS);
+        ResourceConflictException exception = new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS);
         willThrow(exception)
                 .given(sessionalPlanValidationService)
                 .validateUpdatable(currentSessionalPlan, targetSessionName, sessionPeriod);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> sessionalPlanDomainService.update(
                         currentSessionalPlan,
                         targetSessionName,

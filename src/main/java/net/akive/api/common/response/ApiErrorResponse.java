@@ -1,7 +1,7 @@
 package net.akive.api.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import net.akive.api.common.exception.Error;
+import net.akive.api.common.exception.ApplicationError;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 @JsonInclude(NON_EMPTY)
 public record ApiErrorResponse(String code, String message, List<FieldErrorDetail> errors) {
 
-    public static ApiErrorResponse of(Error error) {
+    public static ApiErrorResponse of(ApplicationError error) {
         return new ApiErrorResponse(
                 error.getCode(),
                 error.getMessage(),
@@ -18,7 +18,7 @@ public record ApiErrorResponse(String code, String message, List<FieldErrorDetai
         );
     }
 
-    public static ApiErrorResponse of(Error error, List<FieldErrorDetail> errors) {
+    public static ApiErrorResponse of(ApplicationError error, List<FieldErrorDetail> errors) {
         return new ApiErrorResponse(
                 error.getCode(),
                 error.getMessage(),

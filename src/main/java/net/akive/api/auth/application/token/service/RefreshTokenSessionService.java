@@ -7,7 +7,7 @@ import net.akive.api.auth.application.token.required.RefreshTokenStore;
 import net.akive.api.auth.domain.token.RefreshToken;
 import net.akive.api.auth.domain.token.RefreshTokenPayload;
 import net.akive.api.common.domain.ClientInstanceId;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
 
 @Service
 @Transactional
@@ -45,7 +45,7 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
     public Optional<RefreshToken> rotateIfRequired(
             RefreshTokenPayload payload,
             RefreshToken currentRefreshToken
-    ) throws UnauthorizedException {
+    ) throws AuthenticationException {
         validateCurrent(payload.userId(), payload.clientInstanceId(), currentRefreshToken);
 
         if (!refreshTokenRotationPolicy.requiresRotation(payload.expiresAt())) {
@@ -67,7 +67,7 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
         );
 
         if (!rotated) {
-            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
+            throw new AuthenticationException(INVALID_REFRESH_TOKEN);
         }
 
         return Optional.of(newRefreshToken);
@@ -81,10 +81,10 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
     private void validateCurrent(Long userId, ClientInstanceId clientInstanceId, RefreshToken refreshToken) {
         RefreshToken savedRefreshToken = refreshTokenStore
                 .findByUserIdAndClientInstantId(userId, clientInstanceId)
-                .orElseThrow(() -> new UnauthorizedException(INVALID_REFRESH_TOKEN));
+                .orElseThrow(() -> new AuthenticationException(INVALID_REFRESH_TOKEN));
 
         if (!savedRefreshToken.equals(refreshToken)) {
-            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
+            throw new AuthenticationException(INVALID_REFRESH_TOKEN);
         }
     }
 }

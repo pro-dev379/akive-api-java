@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.totalquantity;
 
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.*;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.DailyQuantity;
@@ -20,9 +20,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanAssertions.assertWeeklyQuantityAmounts;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
@@ -96,12 +96,12 @@ class TotalQuantityCommandServiceTest {
                 subject,
                 totalQuantityAmount
         );
-        NotFoundException exception = new NotFoundException(SESSIONAL_PLAN_NOT_FOUND);
+        ResourceNotFoundException exception = new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND);
 
         given(totalQuantityDomainService.create(sessionalPlanId, userId, subject, totalQuantityAmount))
                 .willThrow(exception);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.create(command))
                 .isSameAs(exception);
 
@@ -162,7 +162,8 @@ class TotalQuantityCommandServiceTest {
                 targetSubject,
                 targetTotalQuantityAmount
         );
-        BadRequestException exception = new BadRequestException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+        BusinessRuleViolationException exception =
+                new BusinessRuleViolationException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
 
         willThrow(exception)
                 .given(totalQuantityDomainService)
@@ -174,7 +175,7 @@ class TotalQuantityCommandServiceTest {
                         targetTotalQuantityAmount
                 );
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantityCommandService.update(command))
                 .isSameAs(exception);
 
@@ -215,13 +216,13 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         );
 
-        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityRepository)
                 .deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delete(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -281,9 +282,9 @@ class TotalQuantityCommandServiceTest {
                 userId,
                 targetWeeklyQuantityAmount
         );
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateWeeklyQuantityAmount(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -312,9 +313,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateWeeklyQuantityAmount(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -346,9 +347,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.of(totalQuantity));
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateWeeklyQuantityAmount(command))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED);
 
         then(totalQuantityRepository).should()
@@ -403,9 +404,9 @@ class TotalQuantityCommandServiceTest {
                 3L,
                 10
         );
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayWeeklyAmountTo(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -433,9 +434,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayWeeklyAmountTo(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -469,9 +470,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.of(totalQuantity));
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayWeeklyAmountTo(command))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
 
         then(totalQuantityRepository).should()
@@ -531,9 +532,9 @@ class TotalQuantityCommandServiceTest {
                 2L,
                 10
         );
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayDailyAmountTo(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -562,9 +563,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayDailyAmountTo(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -605,9 +606,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.of(totalQuantity));
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delayDailyAmountTo(command))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT);
 
         then(totalQuantityRepository).should()
@@ -672,9 +673,9 @@ class TotalQuantityCommandServiceTest {
                 20,
                 "첫날 조정"
         );
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyAmount(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -703,9 +704,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyAmount(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -739,9 +740,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.of(totalQuantity));
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyAmount(command))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_AMOUNT_INCREASE_NOT_ALLOWED);
 
         then(totalQuantityRepository).should()
@@ -803,9 +804,9 @@ class TotalQuantityCommandServiceTest {
                 userId,
                 30
         );
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -833,9 +834,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -874,9 +875,9 @@ class TotalQuantityCommandServiceTest {
                 totalQuantityId
         )).willReturn(Optional.of(totalQuantity));
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantityCommandService.updateDailyCompletedAmount(command))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
 
         then(totalQuantityRepository).should()

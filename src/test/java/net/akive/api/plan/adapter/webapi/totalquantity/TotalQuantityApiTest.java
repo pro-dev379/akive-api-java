@@ -1,8 +1,8 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.webapi.common.dto.request.SubjectRequest;
 import net.akive.api.plan.adapter.webapi.common.dto.request.TotalQuantityAmountRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityCreateRequest;
@@ -23,10 +23,10 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.BadRequestError.TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
-import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT;
+import static net.akive.api.common.exception.business.ResourceConflictError.SUBJECT_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.TOTAL_QUANTITIES;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.TOTAL_QUANTITY;
 import static net.akive.api.plan.domain.PlanFixture.*;
@@ -90,7 +90,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 10L;
         TotalQuantityCreateRequest request = createRequest();
         TotalQuantityCreateCommand command = request.to(userId, sessionalPlanId);
-        willThrow(new NotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(totalQuantityCreator)
                 .create(command);
 
@@ -112,7 +112,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         Long sessionalPlanId = 10L;
         TotalQuantityCreateRequest request = createRequest();
         TotalQuantityCreateCommand command = request.to(userId, sessionalPlanId);
-        willThrow(new ConflictException(SUBJECT_NAME_ALREADY_EXISTS))
+        willThrow(new ResourceConflictException(SUBJECT_NAME_ALREADY_EXISTS))
                 .given(totalQuantityCreator)
                 .create(command);
 
@@ -187,7 +187,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 totalQuantityId
         );
         given(totalQuantityFinder.find(query))
-                .willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+                .willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
         MvcTestResultAssert result = get(
                 userId,
@@ -245,7 +245,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         Long totalQuantityId = 20L;
         TotalQuantityUpdateRequest request = updateRequest();
         TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
-        willThrow(new BadRequestException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
+        willThrow(new BusinessRuleViolationException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
                 .given(totalQuantityModifier)
                 .update(command);
 
@@ -259,7 +259,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
+                .isEqualTo("TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Total amount cannot be less than completed amount.");
@@ -275,7 +275,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         Long totalQuantityId = 20L;
         TotalQuantityUpdateRequest request = updateRequest();
         TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
-        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .update(command);
 
@@ -299,7 +299,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         Long totalQuantityId = 20L;
         TotalQuantityUpdateRequest request = updateRequest();
         TotalQuantityUpdateCommand command = request.to(userId, sessionalPlanId, totalQuantityId);
-        willThrow(new ConflictException(SUBJECT_NAME_ALREADY_EXISTS))
+        willThrow(new ResourceConflictException(SUBJECT_NAME_ALREADY_EXISTS))
                 .given(totalQuantityModifier)
                 .update(command);
 
@@ -344,7 +344,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
                 userId,
                 totalQuantityId
         );
-        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .delete(command);
 
@@ -446,7 +446,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     private static void assertSessionalPlanNotFoundResponse(MvcTestResultAssert result) {
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_SESSIONAL_PLAN_NOT_FOUND");
+                .isEqualTo("SESSIONAL_PLAN_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Sessional plan not found.");
@@ -455,7 +455,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     private static void assertTotalQuantityNotFoundResponse(MvcTestResultAssert result) {
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_TOTAL_QUANTITY_NOT_FOUND");
+                .isEqualTo("TOTAL_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Total quantity not found.");
@@ -464,7 +464,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     private static void assertSubjectNameAlreadyExistsResponse(MvcTestResultAssert result) {
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_409_SUBJECT_NAME_ALREADY_EXISTS");
+                .isEqualTo("SUBJECT_NAME_ALREADY_EXISTS");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Subject name already exists.");

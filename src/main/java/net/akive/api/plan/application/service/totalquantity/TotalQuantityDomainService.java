@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.totalquantity;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.SessionalPlan;
@@ -10,8 +10,8 @@ import net.akive.api.plan.domain.value.Subject;
 import net.akive.api.plan.domain.value.TotalQuantityAmount;
 import org.springframework.stereotype.Component;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 
 @Component
 @RequiredArgsConstructor
@@ -43,7 +43,7 @@ class TotalQuantityDomainService {
     ) {
         TotalQuantity totalQuantity = totalQuantityRepository
                 .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId)
-                .orElseThrow(() -> new NotFoundException(TOTAL_QUANTITY_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND));
 
         totalQuantityValidationService.validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
 
@@ -55,6 +55,6 @@ class TotalQuantityDomainService {
     private SessionalPlan findSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {
         return sessionalPlanRepository
                 .findBySessionalPlanIdAndUserId(sessionalPlanId, userId)
-                .orElseThrow(() -> new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
     }
 }

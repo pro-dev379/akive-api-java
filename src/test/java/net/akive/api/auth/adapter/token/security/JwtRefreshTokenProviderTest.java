@@ -2,7 +2,7 @@ package net.akive.api.auth.adapter.token.security;
 
 import net.akive.api.auth.domain.token.RefreshToken;
 import net.akive.api.auth.domain.token.RefreshTokenPayload;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +16,8 @@ import java.util.List;
 
 import static net.akive.api.auth.adapter.token.security.JwtProviderFixture.*;
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
-import static net.akive.api.common.exception.business.UnauthorizedError.REFRESH_TOKEN_EXPIRED;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.AuthenticationError.REFRESH_TOKEN_EXPIRED;
 import static net.akive.api.user.domain.RoleType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -100,9 +100,9 @@ class JwtRefreshTokenProviderTest {
         given(refreshTokenJwtDecoder.decode(refreshToken.value()))
                 .willThrow(new BadJwtException("Signed JWT rejected: Invalid signature"));
 
-        assertThatExceptionOfType(UnauthorizedException.class)
+        assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> jwtRefreshTokenProvider.parse(refreshToken))
-                .extracting(UnauthorizedException::getError)
+                .extracting(AuthenticationException::getError)
                 .isEqualTo(INVALID_REFRESH_TOKEN);
     }
 
@@ -118,9 +118,9 @@ class JwtRefreshTokenProviderTest {
         given(refreshTokenJwtDecoder.decode(refreshToken.value()))
                 .willThrow(new JwtValidationException("Jwt expired", List.of(expiredError)));
 
-        assertThatExceptionOfType(UnauthorizedException.class)
+        assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> jwtRefreshTokenProvider.parse(refreshToken))
-                .extracting(UnauthorizedException::getError)
+                .extracting(AuthenticationException::getError)
                 .isEqualTo(REFRESH_TOKEN_EXPIRED);
     }
 }

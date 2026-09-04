@@ -1,8 +1,8 @@
 package net.akive.api.user.application.service;
 
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
@@ -14,9 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static net.akive.api.common.domain.EmailFixture.createEmail;
-import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.ConflictError.NICKNAME_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.domain.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -48,9 +48,9 @@ class UserValidationServiceTest {
     void 이메일에_해당하는_탈퇴하지_않은_회원이_없으면_회원_존재_검증에_실패한다() {
         given(userRepository.findByEmailAndLeaveFalse(EMAIL)).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> userValidationService.validateUserExistsByEmail(EMAIL))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
         then(userRepository).should().findByEmailAndLeaveFalse(EMAIL);
@@ -70,9 +70,9 @@ class UserValidationServiceTest {
         User user = createUser();
         given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> userValidationService.validateEmailNotDuplicate(EMAIL))
-                .extracting(ConflictException::getError)
+                .extracting(ResourceConflictException::getError)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
 
         then(userRepository).should().findByEmail(EMAIL);
@@ -92,9 +92,9 @@ class UserValidationServiceTest {
         User user = createUser();
         given(userRepository.findByNickname(NICKNAME)).willReturn(Optional.of(user));
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> userValidationService.validateNicknameNotDuplicate(NICKNAME))
-                .extracting(ConflictException::getError)
+                .extracting(ResourceConflictException::getError)
                 .isEqualTo(NICKNAME_ALREADY_EXISTS);
 
         then(userRepository).should().findByNickname(NICKNAME);

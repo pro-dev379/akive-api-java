@@ -1,6 +1,6 @@
 package net.akive.api.plan.adapter.persistence.totalquantity;
 
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
 import net.akive.api.support.RepositoryTestSupport;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.createTotalQuantity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -147,22 +147,22 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         Long totalQuantityId = savedTotalQuantity.getTotalQuantityId();
         flushAndClear();
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
                         sessionalPlanId,
                         userId,
                         Long.MAX_VALUE
                 ))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
                         sessionalPlanId,
                         Long.MAX_VALUE,
                         totalQuantityId
                 ))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
     }
 

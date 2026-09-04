@@ -6,7 +6,7 @@ import net.akive.api.auth.application.token.required.RefreshTokenParser;
 import net.akive.api.auth.domain.token.RefreshToken;
 import net.akive.api.auth.domain.token.RefreshTokenPayload;
 import net.akive.api.common.domain.ClientInstanceId;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
-import static net.akive.api.common.exception.business.UnauthorizedError.REFRESH_TOKEN_EXPIRED;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.AuthenticationError.REFRESH_TOKEN_EXPIRED;
 import static org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256;
 
 @Component
@@ -48,7 +48,7 @@ class JwtRefreshTokenProvider implements RefreshTokenCreator, RefreshTokenParser
     }
 
     @Override
-    public RefreshTokenPayload parse(RefreshToken refreshToken) throws UnauthorizedException {
+    public RefreshTokenPayload parse(RefreshToken refreshToken) throws AuthenticationException {
         Jwt jwt = decode(refreshToken);
 
         return createPayload(jwt);
@@ -59,12 +59,12 @@ class JwtRefreshTokenProvider implements RefreshTokenCreator, RefreshTokenParser
             return refreshTokenJwtDecoder.decode(refreshToken.value());
         } catch (JwtValidationException e) {
             if (containsExpiredTokenError(e)) {
-                throw new UnauthorizedException(REFRESH_TOKEN_EXPIRED);
+                throw new AuthenticationException(REFRESH_TOKEN_EXPIRED);
             }
 
-            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
+            throw new AuthenticationException(INVALID_REFRESH_TOKEN);
         } catch (JwtException e) {
-            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
+            throw new AuthenticationException(INVALID_REFRESH_TOKEN);
         }
     }
 
@@ -85,7 +85,7 @@ class JwtRefreshTokenProvider implements RefreshTokenCreator, RefreshTokenParser
                     jwt.getExpiresAt()
             );
         } catch (RuntimeException e) {
-            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
+            throw new AuthenticationException(INVALID_REFRESH_TOKEN);
         }
     }
 

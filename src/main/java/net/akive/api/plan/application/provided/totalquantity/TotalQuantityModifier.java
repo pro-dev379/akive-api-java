@@ -1,25 +1,29 @@
 package net.akive.api.plan.application.provided.totalquantity;
 
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.*;
 
 public interface TotalQuantityModifier {
 
-    void update(TotalQuantityUpdateCommand command) throws BadRequestException, ConflictException, NotFoundException;
+    void update(TotalQuantityUpdateCommand command)
+            throws BusinessRuleViolationException, ResourceConflictException, ResourceNotFoundException;
 
-    void delete(TotalQuantityDeleteCommand command) throws NotFoundException;
+    void delete(TotalQuantityDeleteCommand command) throws ResourceNotFoundException;
 
     void updateWeeklyQuantityAmount(WeeklyQuantityAmountUpdateCommand command)
-            throws BadRequestException, NotFoundException;
+            throws BusinessRuleViolationException, ResourceNotFoundException;
 
-    void delayWeeklyAmountTo(WeeklyAmountDelayCommand command) throws BadRequestException, NotFoundException;
+    void delayWeeklyAmountTo(WeeklyAmountDelayCommand command)
+            throws BusinessRuleViolationException, ResourceNotFoundException;
 
-    void updateDailyAmount(DailyAmountUpdateCommand command) throws BadRequestException, NotFoundException;
+    void updateDailyAmount(DailyAmountUpdateCommand command)
+            throws BusinessRuleViolationException, ResourceNotFoundException;
 
     void updateDailyCompletedAmount(DailyCompletedAmountUpdateCommand command)
-            throws BadRequestException, NotFoundException;
+            throws BusinessRuleViolationException, ResourceNotFoundException;
 
-    void delayDailyAmountTo(DailyAmountDelayCommand command) throws BadRequestException, NotFoundException;
+    void delayDailyAmountTo(DailyAmountDelayCommand command)
+            throws BusinessRuleViolationException, ResourceNotFoundException;
 }

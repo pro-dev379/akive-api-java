@@ -5,7 +5,7 @@ import net.akive.api.auth.application.token.required.RefreshTokenStore;
 import net.akive.api.auth.domain.token.RefreshToken;
 import net.akive.api.auth.domain.token.RefreshTokenPayload;
 import net.akive.api.common.domain.ClientInstanceId;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.core.config.security.JwtProperties;
 import net.akive.api.user.domain.RoleType;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import java.util.Optional;
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.auth.domain.token.RefreshTokenPayloadFixture.createRefreshTokenPayload;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
 import static net.akive.api.user.domain.RoleType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -157,9 +157,9 @@ class RefreshTokenSessionServiceTest {
         given(refreshTokenStore.findByUserIdAndClientInstantId(userId, clientInstanceId))
                 .willReturn(Optional.empty());
 
-        assertThatExceptionOfType(UnauthorizedException.class)
+        assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> refreshTokenSessionService.rotateIfRequired(payload, currentRefreshToken))
-                .extracting(UnauthorizedException::getError)
+                .extracting(AuthenticationException::getError)
                 .isEqualTo(INVALID_REFRESH_TOKEN);
 
         then(refreshTokenRotationPolicy).shouldHaveNoInteractions();
@@ -182,9 +182,9 @@ class RefreshTokenSessionServiceTest {
         given(refreshTokenStore.findByUserIdAndClientInstantId(userId, clientInstanceId))
                 .willReturn(Optional.of(savedRefreshToken));
 
-        assertThatExceptionOfType(UnauthorizedException.class)
+        assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> refreshTokenSessionService.rotateIfRequired(payload, currentRefreshToken))
-                .extracting(UnauthorizedException::getError)
+                .extracting(AuthenticationException::getError)
                 .isEqualTo(INVALID_REFRESH_TOKEN);
 
         then(refreshTokenRotationPolicy).shouldHaveNoInteractions();
@@ -220,9 +220,9 @@ class RefreshTokenSessionServiceTest {
                 refreshTokenExpiration
         )).willReturn(false);
 
-        assertThatExceptionOfType(UnauthorizedException.class)
+        assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> refreshTokenSessionService.rotateIfRequired(payload, currentRefreshToken))
-                .extracting(UnauthorizedException::getError)
+                .extracting(AuthenticationException::getError)
                 .isEqualTo(INVALID_REFRESH_TOKEN);
     }
 

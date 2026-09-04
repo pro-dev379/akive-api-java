@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.sessionalplan;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanFindQuery;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,7 +32,7 @@ class SessionalPlanQueryService implements SessionalPlanFinder {
     }
 
     @Override
-    public SessionalPlanDetail find(SessionalPlanFindQuery query) throws NotFoundException {
+    public SessionalPlanDetail find(SessionalPlanFindQuery query) throws ResourceNotFoundException {
         SessionalPlan sessionalPlan = findSessionalPlanOrThrow(query.sessionalPlanId(), query.userId());
         List<SessionWeek> sessionWeeks = sessionalPlan.getSessionPeriod().splitIntoWeeks();
 
@@ -50,6 +50,6 @@ class SessionalPlanQueryService implements SessionalPlanFinder {
     private SessionalPlan findSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {
         return sessionalPlanRepository
                 .findBySessionalPlanIdAndUserId(sessionalPlanId, userId)
-                .orElseThrow(() -> new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
     }
 }

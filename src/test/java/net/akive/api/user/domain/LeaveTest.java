@@ -1,9 +1,9 @@
 package net.akive.api.user.domain;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.user.domain.UserPolicy.LEAVE_REASON_MAX_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -46,14 +46,14 @@ class LeaveTest {
 
     @Test
     void 탈퇴_상태에서_탈퇴_사유가_없으면_생성에_실패한다() {
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> Leave.completed(null))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> Leave.completed("   "))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
 
@@ -61,17 +61,17 @@ class LeaveTest {
     void 탈퇴_사유가_최대_글자_수를_초과하면_생성에_실패한다() {
         String reason = "a".repeat(LEAVE_REASON_MAX_LENGTH + 1);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> Leave.completed(reason))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
     @Test
     void 탈퇴하지_않은_상태에서_탈퇴_사유가_있으면_생성에_실패한다() {
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> new Leave(false, REASON))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_INPUT_VALUE);
     }
 }

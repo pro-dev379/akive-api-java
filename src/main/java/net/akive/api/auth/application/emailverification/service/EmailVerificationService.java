@@ -10,11 +10,11 @@ import net.akive.api.auth.application.emailverification.provided.dto.EmailVerifi
 import net.akive.api.auth.application.emailverification.required.EmailVerificationSender;
 import net.akive.api.auth.application.emailverification.required.EmailVerificationStore;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.NotFoundException;
-import net.akive.api.common.exception.business.TooManyRequestsException;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.exception.business.RateLimitExceededException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +36,7 @@ class EmailVerificationService implements
 
     @Override
     public EmailVerification issue(EmailVerificationIssueCommand command)
-            throws ConflictException, NotFoundException, TooManyRequestsException {
+            throws ResourceConflictException, ResourceNotFoundException, RateLimitExceededException {
         EmailVerification emailVerification = emailVerificationDomainService.issue(
                 command.email(),
                 command.verificationPurpose()
@@ -50,7 +50,10 @@ class EmailVerificationService implements
 
     @Override
     public void verify(EmailVerificationCodeVerifyCommand command)
-            throws BadRequestException, NotFoundException, UnauthorizedException, ConflictException {
+            throws BusinessRuleViolationException,
+            ResourceNotFoundException,
+            AuthenticationException,
+            ResourceConflictException {
         EmailVerification emailVerification = emailVerificationDomainService.verify(
                 command.email(),
                 command.verificationPurpose(),
@@ -62,7 +65,7 @@ class EmailVerificationService implements
 
     @Override
     @Transactional(readOnly = true)
-    public void ensureEmailVerified(EmailVerificationEnsureCommand command) throws BadRequestException {
+    public void ensureEmailVerified(EmailVerificationEnsureCommand command) throws BusinessRuleViolationException {
         emailVerificationDomainService.checkVerified(command.email(), command.verificationPurpose());
     }
 }

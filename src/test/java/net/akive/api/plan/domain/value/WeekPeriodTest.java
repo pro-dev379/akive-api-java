@@ -1,6 +1,6 @@
 package net.akive.api.plan.domain.value;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.time.DayOfWeek.*;
-import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -42,9 +42,9 @@ class WeekPeriodTest {
     @ParameterizedTest
     @MethodSource("provideNullDateWeekPeriods")
     void 시작일이나_종료일이_null이면_생성할_수_없다(LocalDate startOn, LocalDate endOn) {
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> new WeekPeriod(startOn, endOn))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
     }
 
@@ -53,9 +53,9 @@ class WeekPeriodTest {
         LocalDate startOn = LocalDate.of(2026, 1, 12);
         LocalDate endOn = LocalDate.of(2026, 1, 11);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> new WeekPeriod(startOn, endOn))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_DATE_RANGE);
     }
 
@@ -64,9 +64,9 @@ class WeekPeriodTest {
         LocalDate startOn = LocalDate.of(2026, 1, 1);
         LocalDate endOn = LocalDate.of(2026, 1, 8);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> new WeekPeriod(startOn, endOn))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_WEEK_PERIOD);
     }
 

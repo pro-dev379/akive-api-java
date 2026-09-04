@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.plan.domain.value.*;
 
 import java.time.LocalDate;
@@ -14,7 +14,7 @@ import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
-import static net.akive.api.common.exception.business.BadRequestError.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -114,7 +114,7 @@ public class DailyQuantity {
 
     void delayTo(DailyQuantity receivingDailyQuantity, QuantityAmount dailyAmountToDelay) {
         if (dailyAmountToDelay.isGreaterThan(getDailyQuantityAmount().delayedQuantityAmount())) {
-            throw new BadRequestException(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT);
+            throw new BusinessRuleViolationException(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT);
         }
 
         this.reduceBy(dailyAmountToDelay);
@@ -143,21 +143,21 @@ public class DailyQuantity {
         requireNonNull(dailyQuantityAmount);
 
         if (date.isBefore(weekPeriod.startOn()) || date.isAfter(weekPeriod.endOn())) {
-            throw new BadRequestException(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
+            throw new BusinessRuleViolationException(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
         }
 
         if (weeklyQuantityAmount.quantityAmount().isLessThan(dailyQuantityAmount.quantityAmount())) {
-            throw new BadRequestException(DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT);
+            throw new BusinessRuleViolationException(DAILY_AMOUNT_EXCEEDS_WEEKLY_AMOUNT);
         }
     }
 
     private void validateReducible(QuantityAmount targetDailyAmount) {
         if (targetDailyAmount.isGreaterThan(this.dailyQuantityAmount.quantityAmount())) {
-            throw new BadRequestException(DAILY_AMOUNT_INCREASE_NOT_ALLOWED);
+            throw new BusinessRuleViolationException(DAILY_AMOUNT_INCREASE_NOT_ALLOWED);
         }
 
         if (targetDailyAmount.isLessThan(getCompletedAmount())) {
-            throw new BadRequestException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+            throw new BusinessRuleViolationException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
     }
 

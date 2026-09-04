@@ -1,9 +1,9 @@
 package net.akive.api.plan.domain.value;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BadRequestError.VALUE_NEGATIVE;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.VALUE_NEGATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -57,9 +57,9 @@ class WeeklyQuantityAmountTest {
     void 주간_계획량은_현재_계획량보다_많이_감소시킬_수_없다() {
         WeeklyQuantityAmount weeklyQuantityAmount = WeeklyQuantityAmount.of(100);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> weeklyQuantityAmount.reduceBy(new QuantityAmount(101)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(VALUE_NEGATIVE);
     }
 }

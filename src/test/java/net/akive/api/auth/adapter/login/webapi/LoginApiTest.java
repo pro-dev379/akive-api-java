@@ -3,7 +3,7 @@ package net.akive.api.auth.adapter.login.webapi;
 import net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequest;
 import net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand;
 import net.akive.api.auth.domain.token.IssuedToken;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.support.PublicApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 import static net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequestFixture.createLoginByEmailRequest;
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -74,7 +74,7 @@ class LoginApiTest extends PublicApiTestSupport {
                 request.password()
         );
 
-        willThrow(new UnauthorizedException(INVALID_EMAIL_OR_PASSWORD))
+        willThrow(new AuthenticationException(INVALID_EMAIL_OR_PASSWORD))
                 .given(loginProcessor)
                 .loginByEmail(command);
 

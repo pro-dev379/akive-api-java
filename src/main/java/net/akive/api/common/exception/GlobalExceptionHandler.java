@@ -21,10 +21,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static net.akive.api.common.exception.business.BadRequestError.INVALID_INPUT_VALUE;
-import static net.akive.api.common.exception.business.NotFoundError.RESOURCE_NOT_FOUND;
-import static net.akive.api.common.exception.internal.InternalServerError.INTERNAL_SERVER_ERROR;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.ENDPOINT_NOT_FOUND;
+import static net.akive.api.common.exception.internal.UnexpectedServerError.INTERNAL_SERVER_ERROR;
 import static net.akive.api.common.exception.web.HttpRequestError.METHOD_NOT_ALLOWED;
+import static net.akive.api.common.exception.ApplicationErrorHttpStatusMapper.toHttpStatus;
 
 @Slf4j
 @RestControllerAdvice
@@ -32,14 +33,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     ResponseEntity<ApiErrorResponse> handleBusinessException(HttpServletRequest request, BusinessException e) {
-        Error error = e.getError();
+        ApplicationError error = e.getError();
         logWarn(request, "[BusinessException]", e, "code=" + error.getCode() + ", detail=" + e.getDetail());
 
         return createErrorResponse(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ApiErrorResponse> handleValidationException(HttpServletRequest request, MethodArgumentNotValidException e) {
+    ResponseEntity<ApiErrorResponse> handleValidationException(
+            HttpServletRequest request,
+            MethodArgumentNotValidException e
+    ) {
         List<FieldErrorDetail> fieldErrors = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -74,7 +78,7 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiErrorResponse> handleNoResourceFoundException(HttpServletRequest request) {
         logWarn(request, "[NoResourceFoundException]", null, null);
 
-        return createErrorResponse(RESOURCE_NOT_FOUND);
+        return createErrorResponse(ENDPOINT_NOT_FOUND);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -119,7 +123,10 @@ public class GlobalExceptionHandler {
             return List.of();
         }
 
-        return List.of(new FieldErrorDetail(resolveFieldName(invalidFormatException), resolveInvalidFormatMessage(invalidFormatException)));
+        return List.of(new FieldErrorDetail(
+                        resolveFieldName(invalidFormatException),
+                        resolveInvalidFormatMessage(invalidFormatException)
+                ));
     }
 
     private List<FieldErrorDetail> resolveMissingRequestValueFieldErrors(MissingRequestValueException e) {
@@ -201,15 +208,18 @@ public class GlobalExceptionHandler {
         log.info("{} uri={}, method={}, {}", tag, request.getRequestURI(), request.getMethod(), extraMessage);
     }
 
-    private ResponseEntity<ApiErrorResponse> createErrorResponse(Error error) {
+    private ResponseEntity<ApiErrorResponse> createErrorResponse(ApplicationError error) {
         return ResponseEntity
-                .status(error.getStatus())
+                .status(toHttpStatus(error))
                 .body(ApiErrorResponse.of(error));
     }
 
-    private ResponseEntity<ApiErrorResponse> createErrorResponse(Error error, List<FieldErrorDetail> fieldErrorDetails) {
+    private ResponseEntity<ApiErrorResponse> createErrorResponse(
+            ApplicationError error,
+            List<FieldErrorDetail> fieldErrorDetails
+    ) {
         return ResponseEntity
-                .status(error.getStatus())
+                .status(toHttpStatus(error))
                 .body(ApiErrorResponse.of(error, fieldErrorDetails));
     }
 }

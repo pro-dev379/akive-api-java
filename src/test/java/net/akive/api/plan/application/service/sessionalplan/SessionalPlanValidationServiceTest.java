@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.sessionalplan;
 
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.SessionalPlan;
@@ -14,9 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
-import static net.akive.api.common.exception.business.BadRequestError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
-import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
 import static net.akive.api.plan.domain.PlanFixture.SESSION_NAME;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedSessionalPlan;
 import static net.akive.api.plan.domain.policy.PlanPolicy.IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT;
@@ -60,13 +60,13 @@ class SessionalPlanValidationServiceTest {
         given(sessionalPlanRepository.existsByUserIdAndSessionName(userId, SESSION_NAME))
                 .willReturn(true);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> sessionalPlanValidationService.validateCreatable(
                         userId,
                         SESSION_NAME,
                         requestedAt
                 ))
-                .extracting(ConflictException::getError)
+                .extracting(ResourceConflictException::getError)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(sessionalPlanRepository).should().existsByUserIdAndSessionName(userId, SESSION_NAME);
@@ -82,13 +82,13 @@ class SessionalPlanValidationServiceTest {
         given(sessionalPlanRepository.countInProgressByUserId(userId, requestedAt))
                 .willReturn(IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> sessionalPlanValidationService.validateCreatable(
                         userId,
                         SESSION_NAME,
                         requestedAt
                 ))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
 
         then(sessionalPlanRepository).should().existsByUserIdAndSessionName(userId, SESSION_NAME);
@@ -148,13 +148,13 @@ class SessionalPlanValidationServiceTest {
                 currentSessionalPlan.getSessionalPlanId()
         )).willReturn(true);
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> sessionalPlanValidationService.validateUpdatable(
                         currentSessionalPlan,
                         SESSION_NAME,
                         sessionPeriod
                 ))
-                .extracting(ConflictException::getError)
+                .extracting(ResourceConflictException::getError)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(sessionalPlanRepository).should().existsByUserIdAndSessionNameAndSessionalPlanIdNot(
@@ -178,13 +178,13 @@ class SessionalPlanValidationServiceTest {
         given(totalQuantityRepository.existsBySessionalPlanId(currentSessionalPlan.getSessionalPlanId()))
                 .willReturn(true);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> sessionalPlanValidationService.validateUpdatable(
                         currentSessionalPlan,
                         SESSION_NAME,
                         newSessionPeriod
                 ))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(SESSION_PERIOD_CHANGE_NOT_ALLOWED);
 
         then(sessionalPlanRepository).should().existsByUserIdAndSessionNameAndSessionalPlanIdNot(

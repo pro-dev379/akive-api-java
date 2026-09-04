@@ -1,8 +1,8 @@
 package net.akive.api.user.application.service;
 
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import net.akive.api.user.application.required.GoalRepository;
@@ -20,8 +20,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.util.Optional;
 
 import static net.akive.api.common.domain.EmailFixture.createEmail;
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
-import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
 import static net.akive.api.user.domain.UserFixture.createUser;
 import static net.akive.api.user.domain.UserPolicy.*;
@@ -91,13 +91,13 @@ class UserAccountServiceTest {
     void 회원_가입_도메인_처리에_실패하면_회원과_기본_데이터를_생성하지_않고_웰컴_메일_전송_이벤트도_발행하지_않는다() {
         UserSignUpByEmailCommand command = createUserSignUpByEmailCommand();
 
-        willThrow(new BadRequestException(EMAIL_NOT_VERIFIED))
+        willThrow(new BusinessRuleViolationException(EMAIL_NOT_VERIFIED))
                 .given(userSignUpDomainService)
                 .signUpMemberByEmail(command.email(), command.password(), command.nickname());
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> userAccountService.signUpMemberByEmail(command))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMAIL_NOT_VERIFIED);
 
         then(userRepository).should(never()).save(any(User.class));
@@ -124,9 +124,9 @@ class UserAccountServiceTest {
         Long userId = 1L;
         given(userRepository.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> userAccountService.updatePassword(userId, PASSWORD_HASH))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
         then(userRepository).should().findByUserIdAndLeaveFalse(userId);

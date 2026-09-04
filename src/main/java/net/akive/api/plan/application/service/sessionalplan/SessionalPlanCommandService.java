@@ -1,9 +1,9 @@
 package net.akive.api.plan.application.service.sessionalplan;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreator;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanCreateCommand;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDeleteCommand;
@@ -15,8 +15,8 @@ import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 
 @Service
 @Transactional
@@ -30,9 +30,9 @@ class SessionalPlanCommandService implements SessionalPlanCreator {
 
     @Override
     public Long create(SessionalPlanCreateCommand command)
-            throws BadRequestException, ConflictException, NotFoundException {
+            throws BusinessRuleViolationException, ResourceConflictException, ResourceNotFoundException {
         User user = userFinder.findByUserIdAndLeaveFalse(command.userId())
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
 
         SessionalPlan sessionalPlan = sessionalPlanDomainService.create(
                 user,
@@ -46,13 +46,13 @@ class SessionalPlanCommandService implements SessionalPlanCreator {
     }
 
     @Override
-    public void delete(SessionalPlanDeleteCommand command) throws NotFoundException {
+    public void delete(SessionalPlanDeleteCommand command) throws ResourceNotFoundException {
         sessionalPlanRepository.deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
     }
 
     @Override
     public void update(SessionalPlanUpdateCommand command)
-            throws BadRequestException, ConflictException, NotFoundException {
+            throws BusinessRuleViolationException, ResourceConflictException, ResourceNotFoundException {
         SessionalPlan sessionalPlan = findSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
 
         sessionalPlanDomainService.update(sessionalPlan, command.targetSessionName(), command.targetSessionPeriod());
@@ -63,6 +63,6 @@ class SessionalPlanCommandService implements SessionalPlanCreator {
     private SessionalPlan findSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {
         return sessionalPlanRepository
                 .findBySessionalPlanIdAndUserId(sessionalPlanId, userId)
-                .orElseThrow(() -> new NotFoundException(SESSIONAL_PLAN_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
     }
 }

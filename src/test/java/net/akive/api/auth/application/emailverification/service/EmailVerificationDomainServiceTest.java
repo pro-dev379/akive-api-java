@@ -4,8 +4,8 @@ import net.akive.api.auth.application.emailverification.required.EmailVerificati
 import net.akive.api.auth.application.emailverification.required.EmailVerificationStore;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,9 +21,9 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationFixtu
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.common.domain.EmailFixture.createEmail;
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_NOT_VERIFIED;
-import static net.akive.api.common.exception.business.NotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -95,7 +95,7 @@ class EmailVerificationDomainServiceTest {
     @Test
     void 인증번호_발급이_허용되지_않으면_후속_처리를_하지_않는다() {
         Email email = createEmail();
-        NotFoundException exception = new NotFoundException(USER_NOT_FOUND);
+        ResourceNotFoundException exception = new ResourceNotFoundException(USER_NOT_FOUND);
 
         willThrow(exception).given(emailVerificationValidationService).validateIssuable(email, SIGN_UP);
 
@@ -131,9 +131,9 @@ class EmailVerificationDomainServiceTest {
         given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
                 .willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> emailVerificationDomainService.verify(email, SIGN_UP, VERIFICATION_CODE))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(EMAIL_VERIFICATION_NOT_FOUND);
     }
 
@@ -158,9 +158,9 @@ class EmailVerificationDomainServiceTest {
         given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
                 .willReturn(Optional.empty());
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> emailVerificationDomainService.checkVerified(email, SIGN_UP))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMAIL_NOT_VERIFIED);
     }
 
@@ -172,9 +172,9 @@ class EmailVerificationDomainServiceTest {
         given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> emailVerificationDomainService.checkVerified(email, SIGN_UP))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMAIL_NOT_VERIFIED);
     }
 }

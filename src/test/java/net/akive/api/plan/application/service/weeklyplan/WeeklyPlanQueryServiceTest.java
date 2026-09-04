@@ -1,6 +1,6 @@
 package net.akive.api.plan.application.service.weeklyplan;
 
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.weeklyplan.dto.WeeklyPlanFindQuery;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.WeeklyQuantityRepository;
@@ -19,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEKLY_PLAN_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedSessionalPlan;
 import static net.akive.api.plan.domain.PlanFixture.createPersistedTotalQuantity;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
@@ -94,9 +94,9 @@ class WeeklyPlanQueryServiceTest {
         given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> weeklyPlanQueryService.find(query))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(sessionalPlanRepository).should()
@@ -116,9 +116,9 @@ class WeeklyPlanQueryServiceTest {
         given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(sessionalPlan.getSessionPeriod()));
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> weeklyPlanQueryService.find(query))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(WEEKLY_PLAN_NOT_FOUND);
 
         then(sessionalPlanRepository).should()

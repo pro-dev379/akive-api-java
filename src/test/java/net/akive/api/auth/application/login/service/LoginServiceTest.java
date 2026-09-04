@@ -8,7 +8,7 @@ import net.akive.api.auth.domain.login.LegacyUserPassword;
 import net.akive.api.auth.domain.token.IssuedToken;
 import net.akive.api.common.domain.ClientInstanceId;
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.User;
@@ -26,7 +26,7 @@ import static net.akive.api.auth.domain.login.LegacyUserPasswordFixture.createLe
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
 import static net.akive.api.common.domain.EmailFixture.createEmail;
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
 import static net.akive.api.user.domain.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -119,9 +119,9 @@ class LoginServiceTest {
 
         given(userFinder.findByEmailAndLeaveFalse(command.email())).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(UnauthorizedException.class)
+        assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> loginService.loginByEmail(command))
-                .extracting(UnauthorizedException::getError)
+                .extracting(AuthenticationException::getError)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(tokenIssuer).shouldHaveNoInteractions();
@@ -138,9 +138,9 @@ class LoginServiceTest {
         given(userFinder.findByEmailAndLeaveFalse(command.email())).willReturn(Optional.of(user));
         given(passwordEncoder.matches(command.password(), user.getPasswordHash())).willReturn(false);
 
-        assertThatExceptionOfType(UnauthorizedException.class)
+        assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> loginService.loginByEmail(command))
-                .extracting(UnauthorizedException::getError)
+                .extracting(AuthenticationException::getError)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(tokenIssuer).shouldHaveNoInteractions();
@@ -160,9 +160,9 @@ class LoginServiceTest {
         given(legacyPasswordVerifier.matches(command.password(), legacyUserPassword.passwordHash()))
                 .willReturn(false);
 
-        assertThatExceptionOfType(UnauthorizedException.class)
+        assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> loginService.loginByEmail(command))
-                .extracting(UnauthorizedException::getError)
+                .extracting(AuthenticationException::getError)
                 .isEqualTo(INVALID_EMAIL_OR_PASSWORD);
 
         then(tokenIssuer).shouldHaveNoInteractions();

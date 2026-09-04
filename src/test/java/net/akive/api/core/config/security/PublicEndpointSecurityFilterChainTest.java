@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.UUID;
 
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_ACCESS_TOKEN;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_ACCESS_TOKEN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;

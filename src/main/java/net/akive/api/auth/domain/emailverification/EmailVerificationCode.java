@@ -1,10 +1,10 @@
 package net.akive.api.auth.domain.emailverification;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_PATTERN;
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_INVALID_CODE_FORMAT;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_VERIFICATION_INVALID_CODE_FORMAT;
 
 public record EmailVerificationCode(String value) {
 
@@ -12,7 +12,7 @@ public record EmailVerificationCode(String value) {
         value = requireNotBlank(value);
 
         if (!VERIFICATION_CODE_PATTERN.matcher(value).matches()) {
-            throw new BadRequestException(EMAIL_VERIFICATION_INVALID_CODE_FORMAT);
+            throw new BusinessRuleViolationException(EMAIL_VERIFICATION_INVALID_CODE_FORMAT);
         }
     }
 

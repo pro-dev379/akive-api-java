@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationChecker;
 import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationEnsureCommand;
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.user.application.required.UserEmailVerificationChecker;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +18,12 @@ class UserEmailVerificationCheckerAdapter implements UserEmailVerificationChecke
     private final EmailVerificationChecker emailVerificationChecker;
 
     @Override
-    public void ensureEmailVerifiedForSignUp(Email email) throws BadRequestException {
+    public void ensureEmailVerifiedForSignUp(Email email) throws BusinessRuleViolationException {
         emailVerificationChecker.ensureEmailVerified(new EmailVerificationEnsureCommand(email, SIGN_UP));
     }
 
     @Override
-    public void ensureEmailVerifiedForPasswordReset(Email email) throws BadRequestException {
+    public void ensureEmailVerifiedForPasswordReset(Email email) throws BusinessRuleViolationException {
         emailVerificationChecker.ensureEmailVerified(new EmailVerificationEnsureCommand(email, PASSWORD_RESET));
     }
 }

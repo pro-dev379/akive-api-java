@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.domain.value.*;
 
 import java.time.LocalDate;
@@ -16,8 +16,8 @@ import java.util.Objects;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.NotFoundError.DAILY_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.DAILY_QUANTITY_NOT_FOUND;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -228,11 +228,11 @@ public class WeeklyQuantity {
 
         if (weekPeriod.startOn().isBefore(sessionPeriod.startOn()) ||
                 weekPeriod.endOn().isAfter(sessionPeriod.endOn())) {
-            throw new BadRequestException(WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION);
+            throw new BusinessRuleViolationException(WEEKLY_QUANTITY_PERIOD_OUT_OF_SESSION);
         }
 
         if (totalQuantityAmount.quantityAmount().isLessThan(weeklyQuantityAmount.quantityAmount())) {
-            throw new BadRequestException(WEEKLY_AMOUNT_EXCEEDS_TOTAL_AMOUNT);
+            throw new BusinessRuleViolationException(WEEKLY_AMOUNT_EXCEEDS_TOTAL_AMOUNT);
         }
     }
 
@@ -247,7 +247,7 @@ public class WeeklyQuantity {
             LocalDate date = dailyQuantity.getDate();
 
             if (date.isBefore(weekPeriod.startOn()) || date.isAfter(weekPeriod.endOn())) {
-                throw new BadRequestException(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
+                throw new BusinessRuleViolationException(DAILY_QUANTITY_DATE_OUT_OF_WEEK);
             }
         });
     }
@@ -262,17 +262,17 @@ public class WeeklyQuantity {
         QuantityAmount summedDailyAmount = sumDailyAmounts(dailyQuantities);
 
         if (!weeklyQuantityAmount.quantityAmount().equals(summedDailyAmount)) {
-            throw new BadRequestException(WEEKLY_AMOUNT_MISMATCH);
+            throw new BusinessRuleViolationException(WEEKLY_AMOUNT_MISMATCH);
         }
     }
 
     private void validateReducible(QuantityAmount targetWeeklyAmount) {
         if (targetWeeklyAmount.isGreaterThan(this.weeklyQuantityAmount.quantityAmount())) {
-            throw new BadRequestException(WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED);
+            throw new BusinessRuleViolationException(WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED);
         }
 
         if (targetWeeklyAmount.isLessThan(getCompletedAmount())) {
-            throw new BadRequestException(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
+            throw new BusinessRuleViolationException(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         }
     }
 
@@ -280,13 +280,13 @@ public class WeeklyQuantity {
         QuantityAmount delayedWeeklyAmount = getDelayedAmount();
 
         if (delayedWeeklyAmount.isLessThan(weeklyAmountToDelay)) {
-            throw new BadRequestException(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
+            throw new BusinessRuleViolationException(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
         }
     }
 
     private void validateNotLastDayReduction(QuantityAmount dailyAmountToReduce, int dailyQuantityIndex) {
         if (!dailyAmountToReduce.isZero() && isLastDay(dailyQuantityIndex)) {
-            throw new BadRequestException(LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED);
+            throw new BusinessRuleViolationException(LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED);
         }
     }
 
@@ -309,7 +309,7 @@ public class WeeklyQuantity {
             }
         }
 
-        throw new NotFoundException(DAILY_QUANTITY_NOT_FOUND);
+        throw new ResourceNotFoundException(DAILY_QUANTITY_NOT_FOUND);
     }
 
     private void carryOverReductionAmountToNextDay(

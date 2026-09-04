@@ -2,7 +2,7 @@ package net.akive.api.auth.adapter.token.webapi;
 
 import net.akive.api.auth.application.token.provided.dto.TokenReissueCommand;
 import net.akive.api.auth.domain.token.ReissuedToken;
-import net.akive.api.common.exception.business.UnauthorizedException;
+import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.support.PublicApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
@@ -10,8 +10,8 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import static net.akive.api.auth.application.token.provided.dto.TokenReissueCommandFixture.createTokenReissueCommand;
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.REFRESH_TOKEN_VALUE;
 import static net.akive.api.auth.domain.token.ReissuedTokenFixture.*;
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_REFRESH_TOKEN;
-import static net.akive.api.common.exception.business.UnauthorizedError.REFRESH_TOKEN_EXPIRED;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.exception.business.AuthenticationError.REFRESH_TOKEN_EXPIRED;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
@@ -54,7 +54,7 @@ class TokenApiTest extends PublicApiTestSupport {
     void 리프레시_토큰이_유효하지_않으면_401을_응답한다() {
         TokenReissueCommand command = createTokenReissueCommand();
 
-        willThrow(new UnauthorizedException(INVALID_REFRESH_TOKEN))
+        willThrow(new AuthenticationException(INVALID_REFRESH_TOKEN))
                 .given(tokenIssuer)
                 .reissue(command);
 
@@ -67,7 +67,7 @@ class TokenApiTest extends PublicApiTestSupport {
     void 리프레시_토큰이_만료되면_401을_응답한다() {
         TokenReissueCommand command = createTokenReissueCommand();
 
-        willThrow(new UnauthorizedException(REFRESH_TOKEN_EXPIRED))
+        willThrow(new AuthenticationException(REFRESH_TOKEN_EXPIRED))
                 .given(tokenIssuer)
                 .reissue(command);
 

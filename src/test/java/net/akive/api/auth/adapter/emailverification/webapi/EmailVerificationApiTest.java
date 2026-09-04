@@ -18,13 +18,13 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationFixtu
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.PASSWORD_RESET;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.common.exception.business.BadRequestError.EMAIL_VERIFICATION_CODE_MISMATCH;
-import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_VERIFIED;
-import static net.akive.api.common.exception.business.NotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.USER_NOT_FOUND;
-import static net.akive.api.common.exception.business.TooManyRequestsError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
-import static net.akive.api.common.exception.business.UnauthorizedError.EMAIL_VERIFICATION_CODE_EXPIRED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_VERIFICATION_CODE_MISMATCH;
+import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_VERIFIED;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
+import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -78,7 +78,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     @Test
     void 인증번호_갱신_가능_시간_이전이면_429를_응답한다() throws Exception {
         EmailVerificationCodeIssueRequest request = createIssueRequest();
-        willThrow(new TooManyRequestsException(EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT))
+        willThrow(new RateLimitExceededException(EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT))
                 .given(emailVerificationCodeIssuer)
                 .issue(request.toCommand());
 
@@ -86,7 +86,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("EMAIL_VERIFICATION_429_EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT");
+                .isEqualTo("EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Email verification renewal is too frequent.");
@@ -95,7 +95,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     @Test
     void 인증번호_발급_요청_시_패스워드를_리셋할_회원이_없으면_404를_응답한다() throws Exception {
         EmailVerificationCodeIssueRequest request = createIssueRequest(PASSWORD_RESET);
-        willThrow(new NotFoundException(USER_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(USER_NOT_FOUND))
                 .given(emailVerificationCodeIssuer)
                 .issue(request.toCommand());
 
@@ -105,7 +105,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     @Test
     void 인증번호_발급_요청_시_회원가입_이메일이_중복되면_409를_응답한다() throws Exception {
         EmailVerificationCodeIssueRequest request = createIssueRequest();
-        willThrow(new ConflictException(EMAIL_ALREADY_EXISTS))
+        willThrow(new ResourceConflictException(EMAIL_ALREADY_EXISTS))
                 .given(emailVerificationCodeIssuer)
                 .issue(request.toCommand());
 
@@ -148,7 +148,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     @Test
     void 인증번호_검증_요청_시_인증번호가_일치하지_않으면_400을_응답한다() throws Exception {
         EmailVerificationCodeVerifyRequest request = createVerifyRequest("000000");
-        willThrow(new BadRequestException(EMAIL_VERIFICATION_CODE_MISMATCH))
+        willThrow(new BusinessRuleViolationException(EMAIL_VERIFICATION_CODE_MISMATCH))
                 .given(emailVerificationCodeVerifier)
                 .verify(request.toCommand());
 
@@ -157,7 +157,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("EMAIL_VERIFICATION_400_EMAIL_VERIFICATION_CODE_MISMATCH");
+                .isEqualTo("EMAIL_VERIFICATION_CODE_MISMATCH");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Email verification code mismatch.");
@@ -166,7 +166,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     @Test
     void 인증번호_검증_요청_시_인증정보가_없으면_404를_응답한다() throws Exception {
         EmailVerificationCodeVerifyRequest request = createVerifyRequest();
-        willThrow(new NotFoundException(EMAIL_VERIFICATION_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(EMAIL_VERIFICATION_NOT_FOUND))
                 .given(emailVerificationCodeVerifier)
                 .verify(request.toCommand());
 
@@ -175,7 +175,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("EMAIL_VERIFICATION_404_EMAIL_VERIFICATION_NOT_FOUND");
+                .isEqualTo("EMAIL_VERIFICATION_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Email verification not found.");
@@ -184,7 +184,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     @Test
     void 인증번호_검증_요청_시_인증번호가_만료되면_401을_응답한다() throws Exception {
         EmailVerificationCodeVerifyRequest request = createVerifyRequest();
-        willThrow(new UnauthorizedException(EMAIL_VERIFICATION_CODE_EXPIRED))
+        willThrow(new AuthenticationException(EMAIL_VERIFICATION_CODE_EXPIRED))
                 .given(emailVerificationCodeVerifier)
                 .verify(request.toCommand());
 
@@ -193,7 +193,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("EMAIL_VERIFICATION_401_EMAIL_VERIFICATION_CODE_EXPIRED");
+                .isEqualTo("EMAIL_VERIFICATION_CODE_EXPIRED");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Email verification code expired.");
@@ -202,7 +202,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     @Test
     void 인증번호_검증_요청_시_이미_인증된_경우_409를_응답한다() throws Exception {
         EmailVerificationCodeVerifyRequest request = createVerifyRequest();
-        willThrow(new ConflictException(EMAIL_ALREADY_VERIFIED))
+        willThrow(new ResourceConflictException(EMAIL_ALREADY_VERIFIED))
                 .given(emailVerificationCodeVerifier)
                 .verify(request.toCommand());
 
@@ -211,7 +211,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("EMAIL_VERIFICATION_409_EMAIL_ALREADY_VERIFIED");
+                .isEqualTo("EMAIL_ALREADY_VERIFIED");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Email is already verified.");

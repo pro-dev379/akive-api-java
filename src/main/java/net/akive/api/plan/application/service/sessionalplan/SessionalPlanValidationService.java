@@ -1,8 +1,8 @@
 package net.akive.api.plan.application.service.sessionalplan;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.SessionalPlan;
@@ -13,9 +13,9 @@ import java.time.LocalDate;
 
 import static net.akive.api.common.domain.DomainValidator.requireMaxLength;
 import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
-import static net.akive.api.common.exception.business.BadRequestError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
-import static net.akive.api.common.exception.business.BadRequestError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
-import static net.akive.api.common.exception.business.ConflictError.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
 import static net.akive.api.plan.domain.policy.PlanPolicy.IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT;
 import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 
@@ -58,7 +58,7 @@ class SessionalPlanValidationService {
         boolean isDuplicated = sessionalPlanRepository.existsByUserIdAndSessionName(userId, sessionName);
 
         if (isDuplicated) {
-            throw new ConflictException(SESSION_NAME_ALREADY_EXISTS);
+            throw new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS);
         }
     }
 
@@ -74,7 +74,7 @@ class SessionalPlanValidationService {
         );
 
         if (isDuplicated) {
-            throw new ConflictException(SESSION_NAME_ALREADY_EXISTS);
+            throw new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS);
         }
     }
 
@@ -82,7 +82,7 @@ class SessionalPlanValidationService {
         long inProgressSessionalPlanCount = sessionalPlanRepository.countInProgressByUserId(userId, requestedAt);
 
         if (inProgressSessionalPlanCount >= IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT) {
-            throw new BadRequestException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
+            throw new BusinessRuleViolationException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
         }
     }
 
@@ -100,7 +100,7 @@ class SessionalPlanValidationService {
         );
 
         if (hasTotalQuantity) {
-            throw new BadRequestException(SESSION_PERIOD_CHANGE_NOT_ALLOWED);
+            throw new BusinessRuleViolationException(SESSION_PERIOD_CHANGE_NOT_ALLOWED);
         }
     }
 }

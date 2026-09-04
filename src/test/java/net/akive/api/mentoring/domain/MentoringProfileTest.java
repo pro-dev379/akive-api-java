@@ -1,9 +1,9 @@
 package net.akive.api.mentoring.domain;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BadRequestError.MAX_LENGTH_EXCEEDED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.mentoring.domain.MentoringFixture.createMentoringProfile;
 import static net.akive.api.mentoring.domain.MentoringFixture.createMentoringProfileWithDetail;
 import static net.akive.api.mentoring.domain.MentoringPolicy.GOAL_MAX_LENGTH;
@@ -66,9 +66,9 @@ class MentoringProfileTest {
                 "효과적인 조언"
         );
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> mentoringProfile.update(updateInfo))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 }

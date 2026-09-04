@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.totalquantity;
 
-import net.akive.api.common.exception.business.ConflictException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.SessionalPlan;
@@ -17,9 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.ConflictError.SUBJECT_NAME_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.NotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceConflictError.SUBJECT_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static net.akive.api.user.domain.UserFixture.createPersistedUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -116,14 +116,14 @@ class TotalQuantityDomainServiceTest {
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityDomainService.create(
                         sessionalPlanId,
                         userId,
                         subject,
                         totalQuantityAmount
                 ))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
@@ -138,7 +138,7 @@ class TotalQuantityDomainServiceTest {
         Subject targetSubject = createSubject();
         TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityDomainService.update(
                         totalQuantityId,
                         sessionalPlanId,
@@ -146,7 +146,7 @@ class TotalQuantityDomainServiceTest {
                         targetSubject,
                         targetTotalQuantityAmount
                 ))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -169,7 +169,7 @@ class TotalQuantityDomainServiceTest {
                 totalQuantityId
         )).willReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityDomainService.update(
                         totalQuantityId,
                         sessionalPlanId,
@@ -177,7 +177,7 @@ class TotalQuantityDomainServiceTest {
                         targetSubject,
                         targetTotalQuantityAmount
                 ))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
@@ -194,7 +194,7 @@ class TotalQuantityDomainServiceTest {
         SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
         Subject subject = createSubject();
         TotalQuantityAmount totalQuantityAmount = createTotalQuantityAmount();
-        ConflictException exception = new ConflictException(SUBJECT_NAME_ALREADY_EXISTS);
+        ResourceConflictException exception = new ResourceConflictException(SUBJECT_NAME_ALREADY_EXISTS);
 
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
                 .willReturn(Optional.of(sessionalPlan));
@@ -202,7 +202,7 @@ class TotalQuantityDomainServiceTest {
                 .given(totalQuantityValidationService)
                 .validateCreatable(sessionalPlanId, subject.name());
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> totalQuantityDomainService.create(
                         sessionalPlanId,
                         userId,
@@ -225,7 +225,7 @@ class TotalQuantityDomainServiceTest {
         TotalQuantity totalQuantity = createPersistedTotalQuantity(totalQuantityId, sessionalPlan);
         Subject targetSubject = createSubject();
         TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
-        ConflictException exception = new ConflictException(SUBJECT_NAME_ALREADY_EXISTS);
+        ResourceConflictException exception = new ResourceConflictException(SUBJECT_NAME_ALREADY_EXISTS);
 
         given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
                 sessionalPlanId,
@@ -236,7 +236,7 @@ class TotalQuantityDomainServiceTest {
                 .given(totalQuantityValidationService)
                 .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
 
-        assertThatExceptionOfType(ConflictException.class)
+        assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> totalQuantityDomainService.update(
                         totalQuantityId,
                         sessionalPlanId,

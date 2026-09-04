@@ -1,7 +1,7 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountDelayCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountUpdateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyCompletedAmountUpdateCommand;
@@ -13,8 +13,8 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.NotFoundError.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.*;
 import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENGTH;
 import static org.mockito.ArgumentMatchers.any;
@@ -99,7 +99,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 targetDailyAmount,
                 null
         );
-        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .updateDailyAmount(command);
 
@@ -115,7 +115,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_TOTAL_QUANTITY_NOT_FOUND");
+                .isEqualTo("TOTAL_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Total quantity not found.");
@@ -140,7 +140,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 targetDailyAmount,
                 null
         );
-        willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .updateDailyAmount(command);
 
@@ -156,7 +156,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_WEEKLY_QUANTITY_NOT_FOUND");
+                .isEqualTo("WEEKLY_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Weekly quantity not found.");
@@ -181,7 +181,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 targetDailyAmount,
                 null
         );
-        willThrow(new NotFoundException(DAILY_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(DAILY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .updateDailyAmount(command);
 
@@ -197,7 +197,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_DAILY_QUANTITY_NOT_FOUND");
+                .isEqualTo("DAILY_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily quantity not found");
@@ -222,7 +222,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 targetDailyAmount,
                 null
         );
-        willThrow(new BadRequestException(DAILY_AMOUNT_INCREASE_NOT_ALLOWED))
+        willThrow(new BusinessRuleViolationException(DAILY_AMOUNT_INCREASE_NOT_ALLOWED))
                 .given(totalQuantityModifier)
                 .updateDailyAmount(command);
 
@@ -238,7 +238,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_DAILY_AMOUNT_INCREASE_NOT_ALLOWED");
+                .isEqualTo("DAILY_AMOUNT_INCREASE_NOT_ALLOWED");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily amount cannot be increased here.");
@@ -263,7 +263,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 targetDailyAmount,
                 null
         );
-        willThrow(new BadRequestException(LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED))
+        willThrow(new BusinessRuleViolationException(LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED))
                 .given(totalQuantityModifier)
                 .updateDailyAmount(command);
 
@@ -279,7 +279,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED");
+                .isEqualTo("LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Last daily amount cannot be reduced.");
@@ -304,7 +304,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 targetDailyAmount,
                 null
         );
-        willThrow(new BadRequestException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
+        willThrow(new BusinessRuleViolationException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
                 .given(totalQuantityModifier)
                 .updateDailyAmount(command);
 
@@ -320,7 +320,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
+                .isEqualTo("DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily amount cannot be less than completed amount.");
@@ -402,7 +402,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 receivingDailyQuantityId,
                 dailyAmountToDelay
         );
-        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
@@ -418,7 +418,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_TOTAL_QUANTITY_NOT_FOUND");
+                .isEqualTo("TOTAL_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Total quantity not found.");
@@ -444,7 +444,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 receivingDailyQuantityId,
                 dailyAmountToDelay
         );
-        willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
@@ -460,7 +460,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_WEEKLY_QUANTITY_NOT_FOUND");
+                .isEqualTo("WEEKLY_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Weekly quantity not found.");
@@ -486,7 +486,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 receivingDailyQuantityId,
                 dailyAmountToDelay
         );
-        willThrow(new NotFoundException(DAILY_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(DAILY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
@@ -502,7 +502,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_DAILY_QUANTITY_NOT_FOUND");
+                .isEqualTo("DAILY_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily quantity not found");
@@ -528,7 +528,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 receivingDailyQuantityId,
                 dailyAmountToDelay
         );
-        willThrow(new BadRequestException(DAILY_DELAY_RECEIVER_SAME_AS_SOURCE))
+        willThrow(new BusinessRuleViolationException(DAILY_DELAY_RECEIVER_SAME_AS_SOURCE))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
@@ -544,7 +544,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_DAILY_DELAY_RECEIVER_SAME_AS_SOURCE");
+                .isEqualTo("DAILY_DELAY_RECEIVER_SAME_AS_SOURCE");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily quantity receiving the delay must be different from source daily quantity.");
@@ -570,7 +570,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 receivingDailyQuantityId,
                 dailyAmountToDelay
         );
-        willThrow(new BadRequestException(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT))
+        willThrow(new BusinessRuleViolationException(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
@@ -586,7 +586,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT");
+                .isEqualTo("DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily delay amount exceeds current daily delayed amount.");
@@ -664,7 +664,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 userId,
                 targetDailyCompletedAmount
         );
-        willThrow(new BadRequestException(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT))
+        willThrow(new BusinessRuleViolationException(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT))
                 .given(totalQuantityModifier)
                 .updateDailyCompletedAmount(command);
 
@@ -680,7 +680,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_400_DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT");
+                .isEqualTo("DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily amount to complete cannot exceed delayed amount.");
@@ -705,7 +705,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 userId,
                 targetDailyCompletedAmount
         );
-        willThrow(new NotFoundException(TOTAL_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .updateDailyCompletedAmount(command);
 
@@ -721,7 +721,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_TOTAL_QUANTITY_NOT_FOUND");
+                .isEqualTo("TOTAL_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Total quantity not found.");
@@ -745,7 +745,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 userId,
                 targetDailyCompletedAmount
         );
-        willThrow(new NotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .updateDailyCompletedAmount(command);
 
@@ -761,7 +761,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_WEEKLY_QUANTITY_NOT_FOUND");
+                .isEqualTo("WEEKLY_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Weekly quantity not found.");
@@ -785,7 +785,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 userId,
                 targetDailyCompletedAmount
         );
-        willThrow(new NotFoundException(DAILY_QUANTITY_NOT_FOUND))
+        willThrow(new ResourceNotFoundException(DAILY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .updateDailyCompletedAmount(command);
 
@@ -801,7 +801,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("PLAN_404_DAILY_QUANTITY_NOT_FOUND");
+                .isEqualTo("DAILY_QUANTITY_NOT_FOUND");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Daily quantity not found");

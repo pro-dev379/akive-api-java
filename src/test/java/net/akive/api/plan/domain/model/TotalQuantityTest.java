@@ -1,16 +1,16 @@
 package net.akive.api.plan.domain.model;
 
-import net.akive.api.common.exception.business.BadRequestException;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.domain.value.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.common.exception.business.BadRequestError.*;
-import static net.akive.api.common.exception.business.NotFoundError.DAILY_QUANTITY_NOT_FOUND;
-import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.DAILY_QUANTITY_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEKLY_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.PlanAssertions.assertWeeklyQuantityAmounts;
 import static net.akive.api.plan.domain.PlanFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,7 +74,7 @@ class TotalQuantityTest {
                 )
         );
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> TotalQuantity.reconstruct(
                         1L,
                         createSessionalPlan(),
@@ -82,7 +82,7 @@ class TotalQuantityTest {
                         totalQuantityAmount,
                         weeklyQuantities
                 ))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(TOTAL_AMOUNT_MISMATCH);
     }
 
@@ -227,9 +227,9 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedAmount(100, 30);
         TotalQuantityAmount newTotalQuantityAmount = TotalQuantityAmount.of(20, QUANTITY_UNIT);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.update(createSubject(), newTotalQuantityAmount))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
     }
 
@@ -274,9 +274,9 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.updateWeeklyQuantityAmount(3L, reducedWeeklyQuantityAmount))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(LAST_WEEKLY_QUANTITY_REDUCTION_NOT_ALLOWED);
     }
 
@@ -285,9 +285,9 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
         WeeklyQuantityAmount increasedWeeklyQuantityAmount = WeeklyQuantityAmount.of(40);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.updateWeeklyQuantityAmount(1L, increasedWeeklyQuantityAmount))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(WEEKLY_AMOUNT_INCREASE_NOT_ALLOWED);
     }
 
@@ -296,9 +296,9 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedFirstWeek(100, 30);
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.updateWeeklyQuantityAmount(1L, reducedWeeklyQuantityAmount))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(WEEKLY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
     }
 
@@ -307,9 +307,9 @@ class TotalQuantityTest {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
         WeeklyQuantityAmount reducedWeeklyQuantityAmount = WeeklyQuantityAmount.of(20);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantity.updateWeeklyQuantityAmount(999L, reducedWeeklyQuantityAmount))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
     }
 
@@ -394,9 +394,9 @@ class TotalQuantityTest {
     void 현재_딜레이보다_많은_수량을_다른_주로_옮길_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedFirstWeek(100, 30);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.delayWeeklyAmountTo(1L, 2L, new QuantityAmount(80)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(WEEKLY_DELAY_AMOUNT_EXCEEDS_CURRENT_WEEKLY_DELAYED_AMOUNT);
     }
 
@@ -404,9 +404,9 @@ class TotalQuantityTest {
     void 같은_주에_딜레이를_옮길_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.delayWeeklyAmountTo(1L, 1L, new QuantityAmount(10)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(WEEKLY_DELAY_RECEIVER_SAME_AS_SOURCE);
     }
 
@@ -414,14 +414,14 @@ class TotalQuantityTest {
     void 주간_계획량이_존재하지_않으면_딜레이를_옮길_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithWeeklyAmounts(30, 40, 30);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantity.delayWeeklyAmountTo(999L, 2L, new QuantityAmount(10)))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantity.delayWeeklyAmountTo(1L, 999L, new QuantityAmount(10)))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(WEEKLY_QUANTITY_NOT_FOUND);
     }
 
@@ -441,9 +441,9 @@ class TotalQuantityTest {
     void 현재_일일_딜레이보다_많은_수량을_다른_날로_옮길_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.delayDailyAmountTo(1L, 1L, 2L, new QuantityAmount(40)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT);
     }
 
@@ -451,9 +451,9 @@ class TotalQuantityTest {
     void 같은_날로_딜레이를_옮길_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(40, 60);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.delayDailyAmountTo(1L, 1L, 1L, new QuantityAmount(10)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_DELAY_RECEIVER_SAME_AS_SOURCE);
     }
 
@@ -461,14 +461,14 @@ class TotalQuantityTest {
     void 존재하지_않는_일일_계획량으로_딜레이를_옮길_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(40, 60);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantity.delayDailyAmountTo(1L, 999L, 2L, new QuantityAmount(10)))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(DAILY_QUANTITY_NOT_FOUND);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantity.delayDailyAmountTo(1L, 1L, 999L, new QuantityAmount(10)))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(DAILY_QUANTITY_NOT_FOUND);
     }
 
@@ -512,9 +512,9 @@ class TotalQuantityTest {
     void 마지막_일일_계획량은_줄일_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(40, 60);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.updateDailyAmount(1L, 2L, new QuantityAmount(50), null))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED);
     }
 
@@ -522,9 +522,9 @@ class TotalQuantityTest {
     void 일일_계획량을_늘릴_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(40, 60);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.updateDailyAmount(1L, 1L, new QuantityAmount(50), null))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_AMOUNT_INCREASE_NOT_ALLOWED);
     }
 
@@ -532,9 +532,9 @@ class TotalQuantityTest {
     void 일일_계획량을_달성량보다_적게_수정할_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.updateDailyAmount(1L, 1L, new QuantityAmount(5), null))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
     }
 
@@ -542,9 +542,9 @@ class TotalQuantityTest {
     void 존재하지_않는_일일_계획량은_수정할_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithDailyAmounts(40, 60);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantity.updateDailyAmount(1L, 999L, new QuantityAmount(20), null))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(DAILY_QUANTITY_NOT_FOUND);
     }
 
@@ -596,9 +596,9 @@ class TotalQuantityTest {
     void 일일_계획_달성량_증가분이_딜레이량보다_많으면_수정할_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantity.updateDailyCompletedAmount(1L, 1L, new QuantityAmount(50)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
     }
 
@@ -606,9 +606,9 @@ class TotalQuantityTest {
     void 존재하지_않는_일일_계획량은_완료량을_수정할_수_없다() {
         TotalQuantity totalQuantity = createTotalQuantityWithCompletedDailyAmount(40, 10, 60);
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantity.updateDailyCompletedAmount(1L, 999L, new QuantityAmount(20)))
-                .extracting(NotFoundException::getError)
+                .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(DAILY_QUANTITY_NOT_FOUND);
     }
 

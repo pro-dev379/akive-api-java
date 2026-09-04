@@ -1,7 +1,7 @@
 package net.akive.api.email.domain;
 
-import net.akive.api.common.exception.business.BadRequestError;
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationError;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -10,8 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.BadRequestError.EMPTY_COLLECTION;
-import static net.akive.api.common.exception.business.BadRequestError.REQUIRED_VALUE_MISSING;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMPTY_COLLECTION;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.REQUIRED_VALUE_MISSING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -40,11 +40,11 @@ class EmailMessageTest {
             List<String> to,
             String subject,
             String content,
-            BadRequestError expectedError
+            BusinessRuleViolationError expectedError
     ) {
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> new EmailMessage(from, to, subject, content))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(expectedError);
     }
 

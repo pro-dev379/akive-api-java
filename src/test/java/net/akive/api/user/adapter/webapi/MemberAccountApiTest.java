@@ -1,6 +1,6 @@
 package net.akive.api.user.adapter.webapi;
 
-import net.akive.api.common.exception.business.ConflictException;
+import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.support.PublicApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserSignUpByEmailRequest;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
@@ -11,8 +11,8 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.ConflictError.EMAIL_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.ConflictError.NICKNAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
@@ -56,7 +56,7 @@ class MemberAccountApiTest extends PublicApiTestSupport {
                 request.password(),
                 request.nickname()
         );
-        willThrow(new ConflictException(EMAIL_ALREADY_EXISTS))
+        willThrow(new ResourceConflictException(EMAIL_ALREADY_EXISTS))
                 .given(userAccountManager)
                 .signUpMemberByEmail(command);
 
@@ -64,7 +64,7 @@ class MemberAccountApiTest extends PublicApiTestSupport {
 
         result.bodyJson()
                 .extractingPath("$.code")
-                .isEqualTo("USER_409_EMAIL_ALREADY_EXISTS");
+                .isEqualTo("EMAIL_ALREADY_EXISTS");
         result.bodyJson()
                 .extractingPath("$.message")
                 .isEqualTo("Email already exists.");
@@ -78,7 +78,7 @@ class MemberAccountApiTest extends PublicApiTestSupport {
                 request.password(),
                 request.nickname()
         );
-        willThrow(new ConflictException(NICKNAME_ALREADY_EXISTS))
+        willThrow(new ResourceConflictException(NICKNAME_ALREADY_EXISTS))
                 .given(userAccountManager)
                 .signUpMemberByEmail(command);
 

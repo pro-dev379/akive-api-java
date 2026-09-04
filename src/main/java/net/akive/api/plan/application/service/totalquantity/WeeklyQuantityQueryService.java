@@ -1,7 +1,7 @@
 package net.akive.api.plan.application.service.totalquantity;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.NotFoundException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.totalquantity.WeeklyQuantityFinder;
 import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyPlanItemFindQuery;
 import net.akive.api.plan.application.required.WeeklyQuantityRepository;
@@ -10,7 +10,7 @@ import net.akive.api.plan.application.result.WeeklyPlan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static net.akive.api.common.exception.business.NotFoundError.WEEKLY_PLAN_ITEM_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEKLY_PLAN_ITEM_NOT_FOUND;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,7 +20,8 @@ public class WeeklyQuantityQueryService implements WeeklyQuantityFinder {
     private final WeeklyQuantityRepository weeklyQuantityRepository;
 
     @Override
-    public WeeklyPlan.WeeklyPlanItem findWeeklyPlanItem(WeeklyPlanItemFindQuery query) throws NotFoundException {
+    public WeeklyPlan.WeeklyPlanItem findWeeklyPlanItem(WeeklyPlanItemFindQuery query)
+            throws ResourceNotFoundException {
         return weeklyQuantityRepository
                 .findWeeklyPlanDataBySessionalPlanIdAndUserIdAndTotalQuantityIdAndWeeklyQuantityId(
                         query.sessionalPlanId(),
@@ -29,7 +30,7 @@ public class WeeklyQuantityQueryService implements WeeklyQuantityFinder {
                         query.weeklyQuantityId()
                 )
                 .map(this::toWeeklyPlanItem)
-                .orElseThrow(() -> new NotFoundException(WEEKLY_PLAN_ITEM_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(WEEKLY_PLAN_ITEM_NOT_FOUND));
     }
 
     private WeeklyPlan.WeeklyPlanItem toWeeklyPlanItem(WeeklyPlanData weeklyPlanData) {

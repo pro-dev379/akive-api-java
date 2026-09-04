@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.UnauthorizedError;
+import net.akive.api.common.exception.business.AuthenticationError;
 import net.akive.api.common.response.ApiErrorResponse;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -15,8 +15,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import static net.akive.api.common.exception.business.UnauthorizedError.ACCESS_TOKEN_EXPIRED;
-import static net.akive.api.common.exception.business.UnauthorizedError.INVALID_ACCESS_TOKEN;
+import static net.akive.api.common.exception.business.AuthenticationError.ACCESS_TOKEN_EXPIRED;
+import static net.akive.api.common.exception.business.AuthenticationError.INVALID_ACCESS_TOKEN;
+import static net.akive.api.common.exception.ApplicationErrorHttpStatusMapper.toHttpStatus;
 
 @Component
 @RequiredArgsConstructor
@@ -30,16 +31,16 @@ public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
-        UnauthorizedError errorCode = resolveUnauthorizedErrorCode(authException);
+        AuthenticationError errorCode = resolveUnauthorizedErrorCode(authException);
 
-        response.setStatus(errorCode.getStatus().value());
+        response.setStatus(toHttpStatus(errorCode).value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         objectMapper.writeValue(response.getWriter(), ApiErrorResponse.of(errorCode));
     }
 
-    private UnauthorizedError resolveUnauthorizedErrorCode(AuthenticationException authException) {
+    private AuthenticationError resolveUnauthorizedErrorCode(AuthenticationException authException) {
         if (containsExpiredMessage(authException)) {
             return ACCESS_TOKEN_EXPIRED;
         }

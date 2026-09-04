@@ -1,9 +1,9 @@
 package net.akive.api.plan.domain.value;
 
-import net.akive.api.common.exception.business.BadRequestException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BadRequestError.VALUE_NEGATIVE;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.VALUE_NEGATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -25,9 +25,9 @@ class QuantityAmountTest {
 
     @Test
     void 계획량은_음수일_수_없다() {
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> new QuantityAmount(-1))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(VALUE_NEGATIVE);
     }
 
@@ -53,9 +53,9 @@ class QuantityAmountTest {
     void 뺄셈_결과가_음수이면_예외를_던진다() {
         QuantityAmount quantityAmount = new QuantityAmount(10);
 
-        assertThatExceptionOfType(BadRequestException.class)
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> quantityAmount.subtract(new QuantityAmount(15)))
-                .extracting(BadRequestException::getError)
+                .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(VALUE_NEGATIVE);
     }
 
