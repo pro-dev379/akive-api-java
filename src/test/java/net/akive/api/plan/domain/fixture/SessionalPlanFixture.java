@@ -61,7 +61,12 @@ public class SessionalPlanFixture {
     }
 
     public static SessionalPlan createReconstructedSessionalPlan(Long sessionalPlanId) {
-        return createReconstructedSessionalPlan(sessionalPlanId, createReconstructedUser(), SESSION_NAME, SESSION_PERIOD);
+        return createReconstructedSessionalPlan(
+                sessionalPlanId,
+                createReconstructedUser(),
+                SESSION_NAME,
+                SESSION_PERIOD
+        );
     }
 
     public static SessionalPlan createReconstructedSessionalPlan(Long sessionalPlanId, User user) {

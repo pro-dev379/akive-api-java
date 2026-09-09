@@ -44,7 +44,10 @@ class SessionalPlanQueryServiceTest {
 
     @Test
     void 회원_식별자로_세셔널_플랜_목록을_조회한다() {
-        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, createReconstructedUser(USER_ID));
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(
+                SESSIONAL_PLAN_ID,
+                createReconstructedUser(USER_ID)
+        );
         given(sessionalPlanRepository.findAllByUserIdOrderBySessionalPlanIdDesc(USER_ID))
                 .willReturn(List.of(sessionalPlan));
 

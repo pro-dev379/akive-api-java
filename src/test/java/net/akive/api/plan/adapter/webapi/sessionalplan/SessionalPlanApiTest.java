@@ -130,7 +130,10 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세셔널_플랜_목록을_조회한다() {
-        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, createReconstructedUser(USER_ID));
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(
+                SESSIONAL_PLAN_ID,
+                createReconstructedUser(USER_ID)
+        );
         given(sessionalPlanFinder.findAll(USER_ID)).willReturn(List.of(sessionalPlan));
 
         MvcTestResultAssert result = get(PlanApiPath.SESSIONAL_PLANS, USER_ID).hasStatusOk();

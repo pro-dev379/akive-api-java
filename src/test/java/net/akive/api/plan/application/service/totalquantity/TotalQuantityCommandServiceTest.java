@@ -155,8 +155,11 @@ class TotalQuantityCommandServiceTest {
         TotalQuantityDeleteCommand command = createTotalQuantityDeleteCommand(FIRST_TOTAL_QUANTITY_ID);
         totalQuantityCommandService.delete(command);
 
-        then(totalQuantityRepository).should()
-                .deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(SESSIONAL_PLAN_ID, USER_ID, FIRST_TOTAL_QUANTITY_ID);
+        then(totalQuantityRepository).should().deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                FIRST_TOTAL_QUANTITY_ID
+        );
     }
 
     @Test
