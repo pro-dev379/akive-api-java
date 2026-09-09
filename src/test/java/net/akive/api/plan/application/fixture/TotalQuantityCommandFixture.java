@@ -9,7 +9,7 @@ import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_P
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
 import static net.akive.api.plan.domain.fixture.WeeklyQuantityFixture.FIRST_WEEKLY_QUANTITY_ID;
 import static net.akive.api.plan.domain.fixture.WeeklyQuantityFixture.SECOND_WEEKLY_QUANTITY_ID;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class TotalQuantityCommandFixture {
 

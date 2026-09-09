@@ -21,8 +21,8 @@ import java.util.Optional;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserSignUpByEmailCommand;
-import static net.akive.api.user.domain.UserFixture.*;
 import static net.akive.api.user.domain.UserPolicy.*;
+import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -102,25 +102,25 @@ class UserAccountServiceTest {
     void 패스워드를_변경한다() {
         User user = createReconstructedUser(USER_ID, null);
 
-        given(userRepository.findByUserIdAndLeaveFalse(USER_ID)).willReturn(Optional.of(user));
+        given(userRepository.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.of(user));
 
         userAccountService.updatePassword(USER_ID, PASSWORD_HASH);
 
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
-        then(userRepository).should().findByUserIdAndLeaveFalse(USER_ID);
+        then(userRepository).should().findByUserIdAndNotWithdrawn(USER_ID);
         then(userRepository).should().save(user);
     }
 
     @Test
     void 패스워드를_변경할_회원이_없으면_실패한다() {
-        given(userRepository.findByUserIdAndLeaveFalse(USER_ID)).willReturn(Optional.empty());
+        given(userRepository.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> userAccountService.updatePassword(USER_ID, PASSWORD_HASH))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
-        then(userRepository).should().findByUserIdAndLeaveFalse(USER_ID);
+        then(userRepository).should().findByUserIdAndNotWithdrawn(USER_ID);
         then(userRepository).should(never()).save(any(User.class));
     }
 }

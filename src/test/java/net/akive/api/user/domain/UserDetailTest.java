@@ -4,9 +4,9 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
-import static net.akive.api.user.domain.UserDetailFixture.*;
 import static net.akive.api.user.domain.UserPolicy.AIM_MAX_LENGTH;
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

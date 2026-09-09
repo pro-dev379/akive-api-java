@@ -23,7 +23,7 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpo
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.user.domain.UserFixture.EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 

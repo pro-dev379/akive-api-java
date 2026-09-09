@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_SUBJECT_NAME;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.createTotalQuantity;
-import static net.akive.api.user.domain.UserFixture.createUser;
+import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 
 @Transactional
 public abstract class RepositoryTestSupport extends IntegrationTestSupport {

@@ -22,7 +22,7 @@ class UserValidationService implements UserValidator {
 
     @Override
     public void validateUserExistsByEmail(Email email) throws ResourceNotFoundException {
-        userRepository.findByEmailAndLeaveFalse(email)
+        userRepository.findByEmailAndNotWithdrawn(email)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
     }
 

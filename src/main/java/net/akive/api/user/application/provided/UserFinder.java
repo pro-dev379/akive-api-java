@@ -7,7 +7,9 @@ import java.util.Optional;
 
 public interface UserFinder {
 
-    Optional<User> findByUserIdAndLeaveFalse(Long userId);
+    Optional<User> findByUserIdAndNotWithdrawn(Long userId);
 
-    Optional<User> findByEmailAndLeaveFalse(Email email);
+    User findOrThrowByUserIdAndNotWithdrawn(Long userId);
+
+    Optional<User> findByEmailAndNotWithdrawn(Email email);
 }

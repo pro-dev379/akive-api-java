@@ -23,7 +23,7 @@ import static net.akive.api.auth.application.login.fixture.LoginCommandFixture.c
 import static net.akive.api.auth.domain.login.LegacyUserPasswordFixture.createLegacyUserPassword;
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
-import static net.akive.api.user.domain.UserFixture.*;
+import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,7 +64,7 @@ class LoginServiceTest {
         IssuedToken issuedToken = createIssuedToken();
         TokenIssueCommand tokenIssueCommand = createTokenIssueCommand(command, user);
 
-        given(userFinder.findByEmailAndLeaveFalse(command.email())).willReturn(Optional.of(user));
+        given(userFinder.findByEmailAndNotWithdrawn(command.email())).willReturn(Optional.of(user));
         given(passwordEncoder.matches(command.password(), user.getPasswordHash())).willReturn(true);
         given(tokenIssuer.issue(tokenIssueCommand)).willReturn(issuedToken);
 
@@ -72,7 +72,7 @@ class LoginServiceTest {
 
         assertThat(result).isSameAs(issuedToken);
 
-        then(userFinder).should().findByEmailAndLeaveFalse(command.email());
+        then(userFinder).should().findByEmailAndNotWithdrawn(command.email());
         then(passwordEncoder).should().matches(command.password(), user.getPasswordHash());
         then(tokenIssuer).should().issue(tokenIssueCommand);
         then(legacyUserPasswordRepository).shouldHaveNoInteractions();
@@ -87,7 +87,7 @@ class LoginServiceTest {
         IssuedToken issuedToken = createIssuedToken();
         TokenIssueCommand tokenIssueCommand = createTokenIssueCommand(command, user);
 
-        given(userFinder.findByEmailAndLeaveFalse(command.email())).willReturn(Optional.of(user));
+        given(userFinder.findByEmailAndNotWithdrawn(command.email())).willReturn(Optional.of(user));
         given(legacyUserPasswordRepository.findByUserId(user.getUserId()))
                 .willReturn(Optional.of(legacyUserPassword));
         given(legacyPasswordVerifier.matches(command.password(), legacyUserPassword.passwordHash()))
@@ -111,7 +111,7 @@ class LoginServiceTest {
     void 이메일이_존재하지_않으면_이메일_로그인에_실패한다() {
         LoginByEmailCommand command = createLoginByEmailCommand();
 
-        given(userFinder.findByEmailAndLeaveFalse(command.email())).willReturn(Optional.empty());
+        given(userFinder.findByEmailAndNotWithdrawn(command.email())).willReturn(Optional.empty());
 
         assertThatExceptionOfType(AuthenticationException.class)
                 .isThrownBy(() -> loginService.loginByEmail(command))
@@ -129,7 +129,7 @@ class LoginServiceTest {
         LoginByEmailCommand command = createLoginByEmailCommand();
         User user = createUser(USER_ID, PASSWORD_HASH);
 
-        given(userFinder.findByEmailAndLeaveFalse(command.email())).willReturn(Optional.of(user));
+        given(userFinder.findByEmailAndNotWithdrawn(command.email())).willReturn(Optional.of(user));
         given(passwordEncoder.matches(command.password(), user.getPasswordHash())).willReturn(false);
 
         assertThatExceptionOfType(AuthenticationException.class)
@@ -148,7 +148,7 @@ class LoginServiceTest {
         User user = createUser(USER_ID, null);
         LegacyUserPassword legacyUserPassword = createLegacyUserPassword(user);
 
-        given(userFinder.findByEmailAndLeaveFalse(command.email())).willReturn(Optional.of(user));
+        given(userFinder.findByEmailAndNotWithdrawn(command.email())).willReturn(Optional.of(user));
         given(legacyUserPasswordRepository.findByUserId(user.getUserId()))
                 .willReturn(Optional.of(legacyUserPassword));
         given(legacyPasswordVerifier.matches(command.password(), legacyUserPassword.passwordHash()))

@@ -1,6 +1,6 @@
 package net.akive.api.mentoring.domain;
 
-import static net.akive.api.user.domain.UserFixture.createUser;
+import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 
 public class MentoringFixture {
 

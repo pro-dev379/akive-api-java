@@ -15,9 +15,9 @@ import java.util.Optional;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
-import static net.akive.api.user.domain.UserFixture.EMAIL;
-import static net.akive.api.user.domain.UserFixture.createUser;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -34,23 +34,23 @@ class UserValidationServiceTest {
     @Test
     void 이메일로_회원_존재_검증에_성공한다() {
         User user = createUser();
-        given(userRepository.findByEmailAndLeaveFalse(EMAIL)).willReturn(Optional.of(user));
+        given(userRepository.findByEmailAndNotWithdrawn(EMAIL)).willReturn(Optional.of(user));
 
         userValidationService.validateUserExistsByEmail(EMAIL);
 
-        then(userRepository).should().findByEmailAndLeaveFalse(EMAIL);
+        then(userRepository).should().findByEmailAndNotWithdrawn(EMAIL);
     }
 
     @Test
     void 이메일에_해당하는_탈퇴하지_않은_회원이_없으면_회원_존재_검증에_실패한다() {
-        given(userRepository.findByEmailAndLeaveFalse(EMAIL)).willReturn(Optional.empty());
+        given(userRepository.findByEmailAndNotWithdrawn(EMAIL)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> userValidationService.validateUserExistsByEmail(EMAIL))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
-        then(userRepository).should().findByEmailAndLeaveFalse(EMAIL);
+        then(userRepository).should().findByEmailAndNotWithdrawn(EMAIL);
     }
 
     @Test

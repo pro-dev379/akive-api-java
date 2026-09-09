@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
-import static net.akive.api.user.domain.UserFixture.createReconstructedUser;
+import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.*;

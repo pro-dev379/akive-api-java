@@ -13,7 +13,7 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpo
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.user.domain.UserFixture.EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;

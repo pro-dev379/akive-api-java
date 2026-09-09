@@ -4,6 +4,7 @@ import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.support.PublicApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserSignUpByEmailRequest;
 import net.akive.api.user.application.provided.UserAccountManager;
+import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,22 +19,25 @@ import java.util.stream.Stream;
 import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
-import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
-import static net.akive.api.user.domain.UserFixture.PASSWORD;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.fixture.UserFixture.PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.springframework.http.HttpStatus.*;
 
-@WebMvcTest(MemberAccountApi.class)
+@WebMvcTest(MemberAccountPublicApi.class)
 @AutoConfigureMockMvc(addFilters = false)
-class MemberAccountApiTest extends PublicApiTestSupport {
+class MemberAccountPublicApiTest extends PublicApiTestSupport {
 
     private static final String SIGN_UP_MEMBER_BY_EMAIL_URL = "/members/email";
 
     @MockitoBean
     UserAccountManager userAccountManager;
+
+    @MockitoBean
+    UserFinder userFinder;
 
     @Test
     void 이메일로_멤버_가입을_요청하면_201을_응답한다() throws Exception {

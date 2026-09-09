@@ -8,9 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
-import static net.akive.api.user.domain.UserFixture.EMAIL;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)

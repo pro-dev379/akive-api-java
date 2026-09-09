@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.domain.Email;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -31,7 +32,7 @@ public class User {
 
     private UserDetail userDetail;
 
-    private Leave leave;
+    private Withdrawal withdrawal;
 
     public static User reconstruct(
             Long userId,
@@ -40,7 +41,7 @@ public class User {
             LoginType loginType,
             String passwordHash,
             UserDetail userDetail,
-            Leave leave
+            Withdrawal withdrawal
     ) {
         return User.builder()
                 .userId(userId)
@@ -49,7 +50,7 @@ public class User {
                 .loginType(requireNonNull(loginType))
                 .passwordHash(validatePasswordHash(passwordHash))
                 .userDetail(requireNonNull(userDetail))
-                .leave(requireNonNull(leave))
+                .withdrawal(requireNonNull(withdrawal))
                 .build();
     }
 
@@ -60,7 +61,7 @@ public class User {
                 .loginType(EMAIL)
                 .passwordHash(validateRequiredPasswordHash(passwordHash))
                 .userDetail(UserDetail.initial(nickname))
-                .leave(Leave.none())
+                .withdrawal(Withdrawal.none())
                 .build();
     }
 
@@ -76,8 +77,8 @@ public class User {
         this.userDetail = UserDetail.of(nickname, imgUrl, aim);
     }
 
-    public void completeLeave(String reason) {
-        this.leave = Leave.completed(reason);
+    public void withdraw(LocalDateTime withdrawnAt, String reason) {
+        this.withdrawal = Withdrawal.completedWith(withdrawnAt, reason);
     }
 
     private static String validatePasswordHash(String passwordHash) {

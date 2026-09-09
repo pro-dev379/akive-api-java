@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.BLANK_VALUE;
 import static net.akive.api.user.domain.RoleType.MEMBER;
-import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
-import static net.akive.api.user.domain.UserDetailFixture.createUserDetail;
-import static net.akive.api.user.domain.UserFixture.*;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.createUserDetail;
+import static net.akive.api.user.domain.fixture.UserFixture.*;
+import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWAL_REASON;
+import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWN_AT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -16,9 +18,9 @@ class UserTest {
     @Test
     void 저장된_회원_정보를_복원한다() {
         UserDetail userDetail = createUserDetail();
-        Leave leave = Leave.none();
+        Withdrawal withdrawal = Withdrawal.none();
 
-        User user = User.reconstruct(USER_ID, EMAIL, ROLE_TYPE, LOGIN_TYPE, PASSWORD_HASH, userDetail, leave);
+        User user = User.reconstruct(USER_ID, EMAIL, ROLE_TYPE, LOGIN_TYPE, PASSWORD_HASH, userDetail, withdrawal);
 
         assertThat(user.getUserId()).isEqualTo(USER_ID);
         assertThat(user.getEmail()).isEqualTo(EMAIL);
@@ -26,7 +28,7 @@ class UserTest {
         assertThat(user.getLoginType()).isEqualTo(LOGIN_TYPE);
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
         assertThat(user.getUserDetail()).isEqualTo(userDetail);
-        assertThat(user.getLeave()).isEqualTo(leave);
+        assertThat(user.getWithdrawal()).isEqualTo(withdrawal);
     }
 
     @Test
@@ -40,8 +42,8 @@ class UserTest {
         assertThat(user.getUserDetail().nickname()).isEqualTo(NICKNAME);
         assertThat(user.getUserDetail().imgUrl()).isNull();
         assertThat(user.getUserDetail().aim()).isNull();
-        assertThat(user.getLeave().isLeave()).isFalse();
-        assertThat(user.getLeave().reason()).isNull();
+        assertThat(user.getWithdrawal().withdrawnAt()).isNull();
+        assertThat(user.getWithdrawal().withdrawalReason()).isNull();
     }
 
     @Test
@@ -57,7 +59,7 @@ class UserTest {
                 LOGIN_TYPE,
                 null,
                 createUserDetail(),
-                Leave.none()
+                Withdrawal.none()
         );
 
         assertThat(anotherUser.hasPassword()).isFalse();
@@ -97,10 +99,10 @@ class UserTest {
     void 탈퇴를_완료한다() {
         User user = createUser();
 
-        user.completeLeave("탈퇴 사유");
+        user.withdraw(WITHDRAWN_AT, WITHDRAWAL_REASON);
 
-        assertThat(user.getLeave().isLeave()).isTrue();
-        assertThat(user.getLeave().reason()).isEqualTo("탈퇴 사유");
+        assertThat(user.getWithdrawal().withdrawnAt()).isEqualTo(WITHDRAWN_AT);
+        assertThat(user.getWithdrawal().withdrawalReason()).isEqualTo(WITHDRAWAL_REASON);
     }
 
     @Test

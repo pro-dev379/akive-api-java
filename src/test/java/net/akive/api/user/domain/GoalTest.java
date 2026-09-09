@@ -2,9 +2,9 @@ package net.akive.api.user.domain;
 
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.user.domain.GoalFixture.*;
-import static net.akive.api.user.domain.UserFixture.createUser;
 import static net.akive.api.user.domain.UserPolicy.*;
+import static net.akive.api.user.domain.fixture.GoalFixture.*;
+import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GoalTest {

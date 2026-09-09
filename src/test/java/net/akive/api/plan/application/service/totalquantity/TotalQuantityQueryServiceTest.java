@@ -20,8 +20,8 @@ import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_P
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createReconstructedSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.createReconstructedTotalQuantity;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
-import static net.akive.api.user.domain.UserFixture.createReconstructedUser;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;

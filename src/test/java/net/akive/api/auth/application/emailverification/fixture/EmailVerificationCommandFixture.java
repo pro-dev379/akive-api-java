@@ -6,7 +6,7 @@ import net.akive.api.auth.application.emailverification.provided.dto.EmailVerifi
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.VERIFICATION_CODE;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.user.domain.UserFixture.EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
 
 public class EmailVerificationCommandFixture {
 

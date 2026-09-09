@@ -7,7 +7,7 @@ import net.akive.api.user.domain.User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static net.akive.api.user.domain.UserFixture.createReconstructedUser;
+import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 
 public class SessionalPlanFixture {
 

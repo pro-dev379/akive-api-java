@@ -32,8 +32,8 @@ import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createRecon
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.*;
 import static net.akive.api.plan.domain.fixture.WeeklyQuantityFixture.*;
 import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENGTH;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
-import static net.akive.api.user.domain.UserFixture.createReconstructedUser;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;

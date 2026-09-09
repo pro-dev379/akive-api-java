@@ -7,9 +7,9 @@ import java.util.Optional;
 
 public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
 
-    Optional<UserEntity> findByUserIdAndLeave_IsLeaveFalse(Long userId);
+    Optional<UserEntity> findByUserIdAndWithdrawal_WithdrawnAtIsNull(Long userId);
 
-    Optional<UserEntity> findByEmailAndLeave_IsLeaveFalse(String email);
+    Optional<UserEntity> findByEmailAndWithdrawal_WithdrawnAtIsNull(String email);
 
     Optional<UserEntity> findByEmail(String email);
 

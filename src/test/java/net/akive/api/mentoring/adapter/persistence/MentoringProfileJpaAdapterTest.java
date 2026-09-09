@@ -6,7 +6,7 @@ import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.user.domain.UserFixture.createUser;
+import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MentoringProfileJpaAdapterTest extends RepositoryTestSupport {

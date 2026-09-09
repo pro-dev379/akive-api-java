@@ -23,7 +23,7 @@ import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedTok
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.REFRESH_TOKEN_VALUE;
 import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
-import static net.akive.api.user.domain.UserFixture.PASSWORD;
+import static net.akive.api.user.domain.fixture.UserFixture.PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
 import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
-import static net.akive.api.user.domain.UserFixture.createReconstructedUser;
+import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

@@ -54,7 +54,7 @@ public class UserAccountService implements UserAccountManager {
     @Transactional
     public void updatePassword(Long userId, String passwordHash)
             throws BusinessRuleViolationException, ResourceNotFoundException {
-        User user = userRepository.findByUserIdAndLeaveFalse(userId)
+        User user = userRepository.findByUserIdAndNotWithdrawn(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
 
         user.updatePasswordHash(passwordHash);

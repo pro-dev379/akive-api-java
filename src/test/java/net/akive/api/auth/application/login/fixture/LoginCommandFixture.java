@@ -5,8 +5,8 @@ import net.akive.api.common.domain.ClientInstanceId;
 import net.akive.api.common.domain.Email;
 
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
-import static net.akive.api.user.domain.UserFixture.EMAIL;
-import static net.akive.api.user.domain.UserFixture.PASSWORD_HASH;
+import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.PASSWORD_HASH;
 
 public class LoginCommandFixture {
 

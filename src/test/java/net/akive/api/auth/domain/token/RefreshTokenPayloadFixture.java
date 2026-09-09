@@ -8,7 +8,7 @@ import java.time.Instant;
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.EXPIRE_AT;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
 import static net.akive.api.user.domain.RoleType.MEMBER;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class RefreshTokenPayloadFixture {
 

@@ -21,8 +21,8 @@ import static net.akive.api.auth.domain.token.AccessTokenFixture.createAccessTok
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.auth.domain.token.RefreshTokenPayloadFixture.createRefreshTokenPayload;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
-import static net.akive.api.user.domain.UserFixture.ROLE_TYPE;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.ROLE_TYPE;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;

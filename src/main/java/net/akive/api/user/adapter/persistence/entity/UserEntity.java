@@ -9,6 +9,7 @@ import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.user.domain.LoginType;
 import net.akive.api.user.domain.RoleType;
 import net.akive.api.user.domain.User;
+import net.akive.api.user.domain.Withdrawal;
 
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -51,7 +52,7 @@ public class UserEntity extends BaseTimeEntity {
     private UserDetailEntity userDetail;
 
     @Embedded
-    private LeaveEntity leave;
+    private WithdrawalEntity withdrawal;
 
     public static UserEntity from(User user) {
         return new UserEntity(
@@ -61,7 +62,7 @@ public class UserEntity extends BaseTimeEntity {
                 user.getLoginType(),
                 user.getPasswordHash(),
                 UserDetailEntity.from(user.getUserDetail()),
-                LeaveEntity.from(user.getLeave())
+                WithdrawalEntity.from(user.getWithdrawal())
         );
     }
 
@@ -73,7 +74,7 @@ public class UserEntity extends BaseTimeEntity {
                 this.loginType,
                 this.passwordHash,
                 this.userDetail.to(),
-                this.leave.to()
+                this.withdrawal == null ? Withdrawal.none() : this.withdrawal.to()
         );
     }
 }

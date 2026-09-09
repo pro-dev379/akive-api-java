@@ -1,4 +1,6 @@
-package net.akive.api.user.domain;
+package net.akive.api.user.domain.fixture;
+
+import net.akive.api.user.domain.UserDetail;
 
 public class UserDetailFixture {
 

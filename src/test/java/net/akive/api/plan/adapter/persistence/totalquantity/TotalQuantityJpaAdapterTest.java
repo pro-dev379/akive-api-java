@@ -10,7 +10,7 @@ import java.util.List;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.*;
-import static net.akive.api.user.domain.UserFixture.UNKNOWN_USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

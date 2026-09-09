@@ -20,8 +20,8 @@ import static net.akive.api.auth.domain.token.RefreshTokenFixture.REFRESH_TOKEN_
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
 import static net.akive.api.common.exception.business.AuthenticationError.REFRESH_TOKEN_EXPIRED;
-import static net.akive.api.user.domain.UserFixture.ROLE_TYPE;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.ROLE_TYPE;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;

@@ -16,13 +16,13 @@ class UserJpaAdapter implements UserRepository {
     private final UserJpaRepository userJpaRepository;
 
     @Override
-    public Optional<User> findByUserIdAndLeaveFalse(Long userId) {
-        return userJpaRepository.findByUserIdAndLeave_IsLeaveFalse(userId).map(UserEntity::to);
+    public Optional<User> findByUserIdAndNotWithdrawn(Long userId) {
+        return userJpaRepository.findByUserIdAndWithdrawal_WithdrawnAtIsNull(userId).map(UserEntity::to);
     }
 
     @Override
-    public Optional<User> findByEmailAndLeaveFalse(Email email) {
-        return userJpaRepository.findByEmailAndLeave_IsLeaveFalse(email.value()).map(UserEntity::to);
+    public Optional<User> findByEmailAndNotWithdrawn(Email email) {
+        return userJpaRepository.findByEmailAndWithdrawal_WithdrawnAtIsNull(email.value()).map(UserEntity::to);
     }
 
     @Override

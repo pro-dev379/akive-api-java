@@ -12,7 +12,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/members")
 @RequiredArgsConstructor
-public class MemberAccountApi {
+public class MemberAccountPublicApi {
 
     private final UserAccountManager userAccountManager;
 

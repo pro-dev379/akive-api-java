@@ -19,7 +19,7 @@ public final class UserPolicy {
     public static final String PASSWORD_PATTERN_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d]).*$";
     public static final Pattern PASSWORD_PATTERN = Pattern.compile(PASSWORD_PATTERN_REGEX);
 
-    public static final int LEAVE_REASON_MAX_LENGTH = 300;
+    public static final int WITHDRAWAL_REASON_MAX_LENGTH = 300;
 
     public static final LocalTime DEFAULT_GOAL_ATTEND_ON = LocalTime.of(20, 0);
     public static final long DEFAULT_GOAL_REST_10_MIN_SEC = 120L;

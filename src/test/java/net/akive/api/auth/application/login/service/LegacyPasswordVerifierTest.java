@@ -4,7 +4,7 @@ import net.akive.api.auth.domain.login.LegacyPasswordHash;
 import org.junit.jupiter.api.Test;
 
 import static net.akive.api.auth.domain.login.LegacyUserPasswordFixture.createLegacyPasswordHash;
-import static net.akive.api.user.domain.UserFixture.PASSWORD;
+import static net.akive.api.user.domain.fixture.UserFixture.PASSWORD;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LegacyPasswordVerifierTest {

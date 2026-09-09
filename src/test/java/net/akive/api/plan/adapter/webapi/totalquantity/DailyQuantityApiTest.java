@@ -24,7 +24,7 @@ import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_P
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
 import static net.akive.api.plan.domain.fixture.WeeklyQuantityFixture.FIRST_WEEKLY_QUANTITY_ID;
 import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENGTH;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;

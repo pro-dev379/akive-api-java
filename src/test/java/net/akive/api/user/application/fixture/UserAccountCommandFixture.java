@@ -2,9 +2,9 @@ package net.akive.api.user.application.fixture;
 
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 
-import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
-import static net.akive.api.user.domain.UserFixture.EMAIL;
-import static net.akive.api.user.domain.UserFixture.PASSWORD;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.PASSWORD;
 
 public class UserAccountCommandFixture {
 

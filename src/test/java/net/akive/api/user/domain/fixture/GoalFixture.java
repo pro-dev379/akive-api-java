@@ -1,7 +1,9 @@
-package net.akive.api.user.domain;
+package net.akive.api.user.domain.fixture;
 
-import static net.akive.api.user.domain.UserFixture.createUser;
+import net.akive.api.user.domain.Goal;
+
 import static net.akive.api.user.domain.UserPolicy.*;
+import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 
 public class GoalFixture {
 

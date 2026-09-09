@@ -13,5 +13,4 @@ public interface UserAccountManager {
 
     void updatePassword(Long userId, String passwordHash)
             throws BusinessRuleViolationException, ResourceNotFoundException;
-
 }

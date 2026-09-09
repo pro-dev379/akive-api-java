@@ -20,7 +20,7 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPolic
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_VERIFIED;
-import static net.akive.api.user.domain.UserFixture.EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

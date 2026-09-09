@@ -4,8 +4,8 @@ import net.akive.api.common.domain.ClientInstanceId;
 import net.akive.api.user.domain.RoleType;
 
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
-import static net.akive.api.user.domain.UserFixture.ROLE_TYPE;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.ROLE_TYPE;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class TokenIssueCommandFixture {
 

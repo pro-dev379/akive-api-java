@@ -6,7 +6,7 @@ import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanUp
 import net.akive.api.plan.domain.value.SessionPeriod;
 
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
-import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class SessionalPlanCommandFixture {
 

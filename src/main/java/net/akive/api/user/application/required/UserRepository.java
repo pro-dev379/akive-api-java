@@ -7,9 +7,9 @@ import java.util.Optional;
 
 public interface UserRepository {
 
-    Optional<User> findByUserIdAndLeaveFalse(Long userId);
+    Optional<User> findByUserIdAndNotWithdrawn(Long userId);
 
-    Optional<User> findByEmailAndLeaveFalse(Email email);
+    Optional<User> findByEmailAndNotWithdrawn(Email email);
 
     Optional<User> findByEmail(Email email);
 

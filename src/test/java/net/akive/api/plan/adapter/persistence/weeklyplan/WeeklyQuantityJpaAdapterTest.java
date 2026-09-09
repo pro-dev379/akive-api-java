@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static net.akive.api.user.domain.UserFixture.UNKNOWN_USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {

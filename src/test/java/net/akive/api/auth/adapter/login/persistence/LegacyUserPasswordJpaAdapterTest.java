@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static net.akive.api.auth.domain.login.LegacyUserPasswordFixture.createLegacyUserPassword;
-import static net.akive.api.user.domain.UserFixture.UNKNOWN_USER_ID;
-import static net.akive.api.user.domain.UserFixture.createUser;
+import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {

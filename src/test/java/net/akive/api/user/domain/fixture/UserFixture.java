@@ -1,9 +1,10 @@
-package net.akive.api.user.domain;
+package net.akive.api.user.domain.fixture;
 
 import net.akive.api.common.domain.Email;
+import net.akive.api.user.domain.*;
 
 import static net.akive.api.common.domain.EmailFixture.createEmail;
-import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 
 public class UserFixture {
 
@@ -17,10 +18,14 @@ public class UserFixture {
     public static final String PASSWORD_HASH = "password-hash";
 
     public static User createUser() {
-        return User.signUpByEmail(EMAIL, ROLE_TYPE, PASSWORD_HASH, NICKNAME);
+        return createUser(EMAIL, NICKNAME);
     }
 
     public static User createUser(Email email, String nickname) {
+        return createUser(email, nickname, Withdrawal.none());
+    }
+
+    public static User createUser(Email email, String nickname, Withdrawal withdrawal) {
         return User.reconstruct(
                 null,
                 email,
@@ -28,7 +33,7 @@ public class UserFixture {
                 LOGIN_TYPE,
                 PASSWORD_HASH,
                 UserDetail.initial(nickname),
-                Leave.none()
+                withdrawal
         );
     }
 
@@ -56,7 +61,7 @@ public class UserFixture {
                 LOGIN_TYPE,
                 passwordHash,
                 UserDetail.initial(NICKNAME),
-                Leave.none()
+                Withdrawal.none()
         );
     }
 }
