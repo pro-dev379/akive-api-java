@@ -9,9 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Map;
-
+import static net.akive.api.email.application.fixture.EmailSendCommandFixture.RENDERED_CONTENT;
+import static net.akive.api.email.application.fixture.EmailSendCommandFixture.createEmailSendCommand;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -30,15 +29,9 @@ class EmailSendServiceTest {
 
     @Test
     void 이메일을_발송한다() {
-        EmailSendCommand command = new EmailSendCommand(
-                "from@test.com",
-                List.of("to@test.com"),
-                "subject",
-                "email/hello.html",
-                Map.of("text", "hello")
-        );
-        String content = "<h1>hello</h1>";
-        given(emailTemplateRenderer.render(command.templatePath(), command.variables())).willReturn(content);
+        EmailSendCommand command = createEmailSendCommand();
+        given(emailTemplateRenderer.render(command.templatePath(), command.variables()))
+                .willReturn(RENDERED_CONTENT);
 
         emailSendService.send(command);
 
@@ -47,7 +40,7 @@ class EmailSendServiceTest {
                 emailMessage.from().equals(command.from())
                         && emailMessage.to().equals(command.to())
                         && emailMessage.subject().equals(command.subject())
-                        && emailMessage.content().equals(content)
+                        && emailMessage.content().equals(RENDERED_CONTENT)
         ));
     }
 }

@@ -1,6 +1,5 @@
 package net.akive.api.user.adapter.persistence;
 
-import jakarta.persistence.EntityManager;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.adapter.persistence.entity.GoalEntity;
 import net.akive.api.user.domain.Goal;
@@ -17,9 +16,6 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
     @Autowired
     GoalJpaRepository goalJpaRepository;
 
-    @Autowired
-    EntityManager entityManager;
-
     @Test
     void 회원의_기본_목표를_저장한다() {
         User savedUser = userRepository.save(createUser());
@@ -27,8 +23,7 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
 
         Goal savedGoal = goalRepository.save(goal);
 
-        entityManager.flush();
-        entityManager.clear();
+        flushAndClear();
 
         GoalEntity foundGoalEntity = goalJpaRepository.findById(savedGoal.getGoalId()).orElseThrow();
         Goal foundGoal = foundGoalEntity.to();

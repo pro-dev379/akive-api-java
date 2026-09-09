@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.util.Optional;
 
-import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.*;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.PASSWORD_RESET;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
@@ -33,13 +33,12 @@ class EmailVerificationRedisAdapterTest extends RedisTestSupport {
                 .satisfies(found -> {
                     assertThat(found.getEmail()).isEqualTo(emailVerification.getEmail());
                     assertThat(found.getVerificationPurpose()).isEqualTo(emailVerification.getVerificationPurpose());
-                    assertThat(found.getVerificationCode()).isEqualTo(VERIFICATION_CODE);
+                    assertThat(found.getVerificationCode()).isEqualTo(emailVerification.getVerificationCode());
                     assertThat(found.getRenewalCount()).isZero();
                     assertThat(found.isVerified()).isFalse();
-                    assertThat(found.getExpiresAt())
-                            .isEqualTo(REQUESTED_AT.plus(VERIFICATION_CODE_EXPIRATION_DURATION));
-                    assertThat(found.getLastSentAt()).isEqualTo(REQUESTED_AT);
-                    assertThat(found.getCreatedAt()).isEqualTo(REQUESTED_AT);
+                    assertThat(found.getExpiresAt()).isEqualTo(emailVerification.getExpiresAt());
+                    assertThat(found.getLastSentAt()).isEqualTo(emailVerification.getLastSentAt());
+                    assertThat(found.getCreatedAt()).isEqualTo(emailVerification.getCreatedAt());
                 });
     }
 

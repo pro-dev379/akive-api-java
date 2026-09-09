@@ -7,7 +7,6 @@ import net.akive.api.auth.application.token.required.AccessTokenCreator;
 import net.akive.api.auth.application.token.required.RefreshTokenParser;
 import net.akive.api.auth.domain.token.*;
 import net.akive.api.common.domain.ClientInstanceId;
-import net.akive.api.user.domain.RoleType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +21,8 @@ import static net.akive.api.auth.domain.token.AccessTokenFixture.createAccessTok
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.auth.domain.token.RefreshTokenPayloadFixture.createRefreshTokenPayload;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
-import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserFixture.ROLE_TYPE;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -44,40 +44,36 @@ class TokenIssueServiceTest {
 
     @Test
     void 액세스_토큰과_리프레시_토큰을_발급한다() {
-        Long userId = 1L;
         ClientInstanceId clientInstanceId = createClientInstanceId();
-        RoleType roleType = MEMBER;
-        TokenIssueCommand command = createTokenIssueCommand(userId, clientInstanceId, roleType);
+        TokenIssueCommand command = createTokenIssueCommand(USER_ID, clientInstanceId, ROLE_TYPE);
 
         AccessToken accessToken = createAccessToken();
         RefreshToken refreshToken = createRefreshToken();
 
-        given(accessTokenCreator.create(userId, roleType)).willReturn(accessToken);
-        given(refreshTokenSessionManager.start(userId, clientInstanceId, roleType)).willReturn(refreshToken);
+        given(accessTokenCreator.create(USER_ID, ROLE_TYPE)).willReturn(accessToken);
+        given(refreshTokenSessionManager.start(USER_ID, clientInstanceId, ROLE_TYPE)).willReturn(refreshToken);
 
         IssuedToken result = tokenIssueService.issue(command);
 
         assertThat(result.accessToken()).isEqualTo(accessToken);
         assertThat(result.refreshToken()).isEqualTo(refreshToken);
 
-        then(accessTokenCreator).should().create(userId, roleType);
-        then(refreshTokenSessionManager).should().start(userId, clientInstanceId, roleType);
+        then(accessTokenCreator).should().create(USER_ID, ROLE_TYPE);
+        then(refreshTokenSessionManager).should().start(USER_ID, clientInstanceId, ROLE_TYPE);
     }
 
     @Test
     void 토큰_재발급_시_액세스_토큰과_교체된_리프레시_토큰을_반환한다() {
-        Long userId = 1L;
         ClientInstanceId clientInstanceId = createClientInstanceId();
-        RoleType roleType = MEMBER;
         RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
         TokenReissueCommand command = createTokenReissueCommand(currentRefreshToken);
 
-        RefreshTokenPayload payload = createRefreshTokenPayload(userId, clientInstanceId, roleType);
+        RefreshTokenPayload payload = createRefreshTokenPayload(USER_ID, clientInstanceId, ROLE_TYPE);
         AccessToken newAccessToken = createAccessToken("new-access-token");
         RefreshToken rotatedRefreshToken = createRefreshToken("rotated-refresh-token");
 
         given(refreshTokenParser.parse(currentRefreshToken)).willReturn(payload);
-        given(accessTokenCreator.create(userId, roleType)).willReturn(newAccessToken);
+        given(accessTokenCreator.create(USER_ID, ROLE_TYPE)).willReturn(newAccessToken);
         given(refreshTokenSessionManager.rotateIfRequired(payload, currentRefreshToken))
                 .willReturn(Optional.of(rotatedRefreshToken));
 
@@ -87,23 +83,21 @@ class TokenIssueServiceTest {
         assertThat(result.rotatedRefreshToken()).isEqualTo(rotatedRefreshToken);
 
         then(refreshTokenParser).should().parse(currentRefreshToken);
-        then(accessTokenCreator).should().create(userId, roleType);
+        then(accessTokenCreator).should().create(USER_ID, ROLE_TYPE);
         then(refreshTokenSessionManager).should().rotateIfRequired(payload, currentRefreshToken);
     }
 
     @Test
     void 토큰_재발급_시_리프레시_토큰_교체가_필요하지_않으면_액세스_토큰만_반환한다() {
-        Long userId = 1L;
         ClientInstanceId clientInstanceId = createClientInstanceId();
-        RoleType roleType = MEMBER;
         RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
         TokenReissueCommand command = createTokenReissueCommand(currentRefreshToken);
 
-        RefreshTokenPayload payload = createRefreshTokenPayload(userId, clientInstanceId, roleType);
+        RefreshTokenPayload payload = createRefreshTokenPayload(USER_ID, clientInstanceId, ROLE_TYPE);
         AccessToken newAccessToken = createAccessToken("new-access-token");
 
         given(refreshTokenParser.parse(currentRefreshToken)).willReturn(payload);
-        given(accessTokenCreator.create(userId, roleType)).willReturn(newAccessToken);
+        given(accessTokenCreator.create(USER_ID, ROLE_TYPE)).willReturn(newAccessToken);
         given(refreshTokenSessionManager.rotateIfRequired(payload, currentRefreshToken))
                 .willReturn(Optional.empty());
 
@@ -113,7 +107,7 @@ class TokenIssueServiceTest {
         assertThat(result.rotatedRefreshToken()).isNull();
 
         then(refreshTokenParser).should().parse(currentRefreshToken);
-        then(accessTokenCreator).should().create(userId, roleType);
+        then(accessTokenCreator).should().create(USER_ID, ROLE_TYPE);
         then(refreshTokenSessionManager).should().rotateIfRequired(payload, currentRefreshToken);
     }
 }

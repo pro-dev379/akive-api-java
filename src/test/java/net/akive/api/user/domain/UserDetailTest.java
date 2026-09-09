@@ -4,16 +4,13 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
+import static net.akive.api.user.domain.UserDetailFixture.*;
 import static net.akive.api.user.domain.UserPolicy.AIM_MAX_LENGTH;
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class UserDetailTest {
-
-    private static final String NICKNAME = "akive";
-    private static final String IMG_URL = "https://example.com/image.png";
-    private static final String AIM = "목표";
 
     @Test
     void 초기_회원_상세_정보를_생성한다() {

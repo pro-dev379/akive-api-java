@@ -4,7 +4,6 @@ import net.akive.api.user.domain.User;
 
 public class LegacyUserPasswordFixture {
 
-    public static final String RAW_PASSWORD = "password123!";
     public static final String LEGACY_PASSWORD_HASH =
             "zEkAbzXJyNtGVAJo/EfF1VesO+2IkCGA2datZo2Qk6qzA9VDMDInxZNwPzmkY0Kl1eoSp57EYGuNiiTgjG3qjA==";
     public static final String LEGACY_PASSWORD_SALT = "legacy-password-salt";

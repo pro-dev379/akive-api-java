@@ -3,23 +3,30 @@ package net.akive.api.plan.adapter.webapi.sessionalplan;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.plan.adapter.webapi.common.PlanApiPath;
 import net.akive.api.plan.adapter.webapi.common.dto.request.SessionPeriodRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanCreateRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanUpdateRequest;
+import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreator;
+import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanCreateCommand;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDeleteCommand;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanFindQuery;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanUpdateCommand;
 import net.akive.api.plan.application.result.SessionalPlanDetail;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
+import net.akive.api.plan.application.result.WeeklyQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
-import net.akive.api.plan.domain.value.SessionPeriod;
+import net.akive.api.plan.domain.value.SessionWeek;
+import net.akive.api.plan.domain.value.TotalQuantityAmount;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.time.LocalDate;
@@ -29,34 +36,42 @@ import java.util.stream.Stream;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.SESSIONAL_PLAN;
-import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.SESSIONAL_PLANS;
-import static net.akive.api.plan.domain.PlanFixture.*;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.createReconstructedTotalQuantity;
 import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
-import static net.akive.api.user.domain.UserFixture.createPersistedUser;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.UserFixture.createReconstructedUser;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
 import static org.springframework.http.HttpStatus.*;
 
+@WebMvcTest(SessionalPlanApi.class)
 class SessionalPlanApiTest extends PrivateApiTestSupport {
+
+    @MockitoBean
+    SessionalPlanCreator sessionalPlanCreator;
+
+    @MockitoBean
+    SessionalPlanFinder sessionalPlanFinder;
 
     @Test
     void 세셔널_플랜을_생성한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
         SessionalPlanCreateCommand command = SessionalPlanCreateCommand.of(
-                userId,
+                USER_ID,
                 SESSION_NAME,
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 12)
         );
-        given(sessionalPlanCreator.create(command)).willReturn(sessionalPlanId);
+        given(sessionalPlanCreator.create(command)).willReturn(SESSIONAL_PLAN_ID);
 
-        MvcTestResultAssert result = postJson(userId, SESSIONAL_PLANS, toJson(createRequest()))
+        MvcTestResultAssert result = postJson(PlanApiPath.SESSIONAL_PLANS, USER_ID, toJson(createRequest()))
                 .hasStatus(CREATED);
 
-        result.bodyJson().extractingPath("$.sessionalPlanId").isEqualTo(10);
+        result.bodyJson()
+                .extractingPath("$.sessionalPlanId")
+                .isEqualTo(SESSIONAL_PLAN_ID.intValue());
 
         then(sessionalPlanCreator).should().create(command);
     }
@@ -66,98 +81,71 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     void 세셔널_플랜_생성_요청값이_올바르지_않으면_400을_응답한다(
             SessionalPlanCreateRequest request
     ) {
-        Long userId = 1L;
 
-        postJson(userId, SESSIONAL_PLANS, toJson(request))
-                .hasStatus(BAD_REQUEST);
+        postJson(PlanApiPath.SESSIONAL_PLANS, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).create(any(SessionalPlanCreateCommand.class));
     }
 
     @Test
     void 세셔널_플랜_생성_요청의_날짜_형식이_올바르지_않으면_400을_응답한다() {
-        Long userId = 1L;
         String body = createInvalidDateFormatRequestJson();
 
-        postJson(userId, SESSIONAL_PLANS, body)
-                .hasStatus(BAD_REQUEST);
+        postJson(PlanApiPath.SESSIONAL_PLANS, USER_ID, body).hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).create(any(SessionalPlanCreateCommand.class));
     }
 
     @Test
     void 세셔널_플랜_생성_요청_시_세셔널_플랜명이_중복되면_409를_응답한다() {
-        Long userId = 1L;
         SessionalPlanCreateRequest request = createRequest();
-        SessionalPlanCreateCommand command = request.to(userId);
+        SessionalPlanCreateCommand command = request.to(USER_ID);
         willThrow(new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS))
                 .given(sessionalPlanCreator)
                 .create(command);
 
-        MvcTestResultAssert result = postJson(userId, SESSIONAL_PLANS, toJson(request))
-                .hasStatus(CONFLICT);
+        MvcTestResultAssert result =
+                postJson(PlanApiPath.SESSIONAL_PLANS, USER_ID, toJson(request)).hasStatus(CONFLICT);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("SESSION_NAME_ALREADY_EXISTS");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Session name already exists.");
+        assertErrorResponse(result, SESSION_NAME_ALREADY_EXISTS);
 
         then(sessionalPlanCreator).should().create(command);
     }
 
     @Test
     void 진행_중인_세셔널_플랜_개수_제한을_초과하면_400을_응답한다() {
-        Long userId = 1L;
         SessionalPlanCreateRequest request = createRequest();
-        SessionalPlanCreateCommand command = request.to(userId);
+        SessionalPlanCreateCommand command = request.to(USER_ID);
         willThrow(new BusinessRuleViolationException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED))
                 .given(sessionalPlanCreator)
                 .create(command);
 
-        MvcTestResultAssert result = postJson(userId, SESSIONAL_PLANS, toJson(request))
-                .hasStatus(BAD_REQUEST);
+        MvcTestResultAssert result =
+                postJson(PlanApiPath.SESSIONAL_PLANS, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Too many in-progress sessional plans.");
+        assertErrorResponse(result, IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
 
         then(sessionalPlanCreator).should().create(command);
     }
 
     @Test
     void 세셔널_플랜_목록을_조회한다() {
-        Long userId = 1L;
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(10L, createPersistedUser(userId));
-        given(sessionalPlanFinder.findAll(userId)).willReturn(List.of(sessionalPlan));
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, createReconstructedUser(USER_ID));
+        given(sessionalPlanFinder.findAll(USER_ID)).willReturn(List.of(sessionalPlan));
 
-        MvcTestResultAssert result = get(userId, SESSIONAL_PLANS)
-                .hasStatusOk();
+        MvcTestResultAssert result = get(PlanApiPath.SESSIONAL_PLANS, USER_ID).hasStatusOk();
 
-        result.bodyJson().extractingPath("$.sessionalPlans[0].sessionalPlanId")
-                .isEqualTo(10);
-        result.bodyJson().extractingPath("$.sessionalPlans[0].sessionName")
-                .isEqualTo(SESSION_NAME);
-        result.bodyJson().extractingPath("$.sessionalPlans[0].sessionPeriod.startOn")
-                .isEqualTo("2026-01-01");
-        result.bodyJson().extractingPath("$.sessionalPlans[0].sessionPeriod.endOn")
-                .isEqualTo("2026-01-12");
+        assertSessionalPlanSummaryResponse(result, sessionalPlan);
 
-        then(sessionalPlanFinder).should().findAll(userId);
+        then(sessionalPlanFinder).should().findAll(USER_ID);
     }
 
     @Test
     void 세셔널_플랜_상세를_조회한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
-        TotalQuantity totalQuantity = createPersistedTotalQuantity(20L, sessionalPlan);
-        SessionalPlanFindQuery query = new SessionalPlanFindQuery(userId, sessionalPlanId);
+        User user = createReconstructedUser(USER_ID);
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, user);
+        TotalQuantity totalQuantity = createReconstructedTotalQuantity(FIRST_TOTAL_QUANTITY_ID, sessionalPlan);
+        SessionalPlanFindQuery query = new SessionalPlanFindQuery(USER_ID, SESSIONAL_PLAN_ID);
         SessionalPlanDetail detail = new SessionalPlanDetail(
                 sessionalPlan,
                 List.of(TotalQuantityProgress.of(
@@ -167,42 +155,20 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         );
         given(sessionalPlanFinder.find(query)).willReturn(detail);
 
-        MvcTestResultAssert result = get(userId, SESSIONAL_PLAN, sessionalPlanId)
-                .hasStatusOk();
+        MvcTestResultAssert result = get(PlanApiPath.SESSIONAL_PLAN, USER_ID, SESSIONAL_PLAN_ID).hasStatusOk();
 
-        result.bodyJson().extractingPath("$.sessionalPlanId").isEqualTo(10);
-        result.bodyJson().extractingPath("$.sessionName").isEqualTo(SESSION_NAME);
-        result.bodyJson().extractingPath("$.sessionPeriod.startOn").isEqualTo("2026-01-01");
-        result.bodyJson().extractingPath("$.sessionPeriod.endOn").isEqualTo("2026-01-12");
-        result.bodyJson().extractingPath("$.sessionWeeks[0].weekNum").isEqualTo(1);
-        result.bodyJson().extractingPath("$.sessionWeeks[0].startOn").isEqualTo("2026-01-01");
-        result.bodyJson().extractingPath("$.sessionWeeks[0].endOn").isEqualTo("2026-01-04");
-        result.bodyJson().extractingPath("$.totalQuantities[0].totalQuantityId").isEqualTo(20);
-        result.bodyJson().extractingPath("$.totalQuantities[0].subject.name").isEqualTo(SUBJECT_NAME);
-        result.bodyJson().extractingPath("$.totalQuantities[0].subject.category").isEqualTo(SUBJECT_CATEGORY);
-        result.bodyJson()
-                .extractingPath("$.totalQuantities[0].totalQuantityAmount.quantityAmount")
-                .isEqualTo(TOTAL_AMOUNT);
-        result.bodyJson()
-                .extractingPath("$.totalQuantities[0].totalQuantityAmount.quantityUnit")
-                .isEqualTo(QUANTITY_UNIT);
-        result.bodyJson()
-                .extractingPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityId")
-                .isEqualTo(1);
+        assertSessionalPlanDetailResponse(result, detail);
 
         then(sessionalPlanFinder).should().find(query);
     }
 
     @Test
     void 세셔널_플랜_조회_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 999L;
-        SessionalPlanFindQuery query = new SessionalPlanFindQuery(userId, sessionalPlanId);
+        SessionalPlanFindQuery query = new SessionalPlanFindQuery(USER_ID, SESSIONAL_PLAN_ID);
         given(sessionalPlanFinder.find(query))
                 .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
-        MvcTestResultAssert result = get(userId, SESSIONAL_PLAN, sessionalPlanId)
-                .hasStatus(NOT_FOUND);
+        MvcTestResultAssert result = get(PlanApiPath.SESSIONAL_PLAN, USER_ID, SESSIONAL_PLAN_ID).hasStatus(NOT_FOUND);
 
         assertSessionalPlanNotFoundResponse(result);
 
@@ -211,64 +177,51 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세셔널_플랜을_수정한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
         SessionalPlanUpdateCommand command = SessionalPlanUpdateCommand.of(
-                sessionalPlanId,
-                userId,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
                 SESSION_NAME,
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 12)
         );
         String body = toJson(createUpdateRequest());
 
-        putJson(userId, SESSIONAL_PLAN, body, sessionalPlanId)
-                .hasStatus(NO_CONTENT);
+        putJson(PlanApiPath.SESSIONAL_PLAN, USER_ID, body, SESSIONAL_PLAN_ID).hasStatus(NO_CONTENT);
 
         then(sessionalPlanCreator).should().update(command);
     }
 
     @ParameterizedTest
     @MethodSource("invalidUpdateRequests")
-    void 세셔널_플랜_수정_요청값이_올바르지_않으면_400을_응답한다(
-            SessionalPlanUpdateRequest request
-    ) {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
+    void 세셔널_플랜_수정_요청값이_올바르지_않으면_400을_응답한다(SessionalPlanUpdateRequest request) {
 
-        putJson(userId, SESSIONAL_PLAN, toJson(request), sessionalPlanId)
-                .hasStatus(BAD_REQUEST);
+        putJson(PlanApiPath.SESSIONAL_PLAN, USER_ID, toJson(request), SESSIONAL_PLAN_ID).hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).update(any(SessionalPlanUpdateCommand.class));
     }
 
     @Test
     void 세셔널_플랜_수정_요청의_날짜_형식이_올바르지_않으면_400을_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
         String body = updateInvalidDateFormatRequestJson();
 
-        putJson(userId, SESSIONAL_PLAN, body, sessionalPlanId)
-                .hasStatus(BAD_REQUEST);
+        putJson(PlanApiPath.SESSIONAL_PLAN, USER_ID, body, SESSIONAL_PLAN_ID).hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).update(any(SessionalPlanUpdateCommand.class));
     }
 
     @Test
     void 세셔널_플랜_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 999L;
         SessionalPlanUpdateRequest request = createUpdateRequest();
-        SessionalPlanUpdateCommand command = request.to(sessionalPlanId, userId);
+        SessionalPlanUpdateCommand command = request.to(SESSIONAL_PLAN_ID, USER_ID);
         willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(sessionalPlanCreator)
                 .update(command);
 
         MvcTestResultAssert result = putJson(
-                userId,
-                SESSIONAL_PLAN,
+                PlanApiPath.SESSIONAL_PLAN,
+                USER_ID,
                 toJson(request),
-                sessionalPlanId
+                SESSIONAL_PLAN_ID
         ).hasStatus(NOT_FOUND);
 
         assertSessionalPlanNotFoundResponse(result);
@@ -278,25 +231,19 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세셔널_플랜을_삭제한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
+        delete(PlanApiPath.SESSIONAL_PLAN, USER_ID, SESSIONAL_PLAN_ID).hasStatus(NO_CONTENT);
 
-        delete(userId, SESSIONAL_PLAN, sessionalPlanId)
-                .hasStatus(NO_CONTENT);
-
-        then(sessionalPlanCreator).should().delete(new SessionalPlanDeleteCommand(userId, sessionalPlanId));
+        then(sessionalPlanCreator).should().delete(new SessionalPlanDeleteCommand(USER_ID, SESSIONAL_PLAN_ID));
     }
 
     @Test
     void 세셔널_플랜_삭제_시_세셔널_플랜이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 999L;
-        SessionalPlanDeleteCommand command = new SessionalPlanDeleteCommand(userId, sessionalPlanId);
+        SessionalPlanDeleteCommand command = new SessionalPlanDeleteCommand(USER_ID, SESSIONAL_PLAN_ID);
         willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(sessionalPlanCreator)
                 .delete(command);
 
-        MvcTestResultAssert result = delete(userId, SESSIONAL_PLAN, sessionalPlanId)
+        MvcTestResultAssert result = delete(PlanApiPath.SESSIONAL_PLAN, USER_ID, SESSIONAL_PLAN_ID)
                 .hasStatus(NOT_FOUND);
 
         assertSessionalPlanNotFoundResponse(result);
@@ -371,9 +318,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     }
 
     private static SessionPeriodRequest createSessionPeriodRequest() {
-        SessionPeriod sessionPeriod = createSessionPeriod();
-
-        return new SessionPeriodRequest(sessionPeriod.startOn(), sessionPeriod.endOn());
+        return new SessionPeriodRequest(SESSION_PERIOD.startOn(), SESSION_PERIOD.endOn());
     }
 
     private static String createInvalidDateFormatRequestJson() {
@@ -400,13 +345,67 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
                 """.formatted(SESSION_NAME);
     }
 
-    private static void assertSessionalPlanNotFoundResponse(MvcTestResultAssert result) {
+    private void assertSessionalPlanNotFoundResponse(MvcTestResultAssert result) {
+        assertErrorResponse(result, SESSIONAL_PLAN_NOT_FOUND);
+    }
+
+    private void assertSessionalPlanSummaryResponse(MvcTestResultAssert result, SessionalPlan sessionalPlan) {
         result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("SESSIONAL_PLAN_NOT_FOUND");
+                .extractingPath("$.sessionalPlans[0].sessionalPlanId")
+                .isEqualTo(sessionalPlan.getSessionalPlanId().intValue());
         result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Sessional plan not found.");
+                .extractingPath("$.sessionalPlans[0].sessionName")
+                .isEqualTo(sessionalPlan.getSessionName());
+        result.bodyJson()
+                .extractingPath("$.sessionalPlans[0].sessionPeriod.startOn")
+                .isEqualTo(sessionalPlan.getSessionPeriod().startOn().toString());
+        result.bodyJson()
+                .extractingPath("$.sessionalPlans[0].sessionPeriod.endOn")
+                .isEqualTo(sessionalPlan.getSessionPeriod().endOn().toString());
+    }
+
+    private void assertSessionalPlanDetailResponse(MvcTestResultAssert result, SessionalPlanDetail detail) {
+        SessionalPlan sessionalPlan = detail.sessionalPlan();
+        SessionWeek firstSessionWeek = sessionalPlan.getSessionPeriod().splitIntoWeeks().getFirst();
+        TotalQuantityProgress totalQuantity = detail.totalQuantities().getFirst();
+        TotalQuantityAmount totalQuantityAmount = totalQuantity.totalQuantityAmount();
+        WeeklyQuantityProgress weeklyQuantity = totalQuantity.weeklyQuantities().getFirst();
+
+        result.bodyJson()
+                .extractingPath("$.sessionalPlanId")
+                .isEqualTo(sessionalPlan.getSessionalPlanId().intValue());
+        result.bodyJson().extractingPath("$.sessionName").isEqualTo(sessionalPlan.getSessionName());
+        result.bodyJson()
+                .extractingPath("$.sessionPeriod.startOn")
+                .isEqualTo(sessionalPlan.getSessionPeriod().startOn().toString());
+        result.bodyJson()
+                .extractingPath("$.sessionPeriod.endOn")
+                .isEqualTo(sessionalPlan.getSessionPeriod().endOn().toString());
+        result.bodyJson().extractingPath("$.sessionWeeks[0].weekNum").isEqualTo(firstSessionWeek.weekNum());
+        result.bodyJson()
+                .extractingPath("$.sessionWeeks[0].startOn")
+                .isEqualTo(firstSessionWeek.weekPeriod().startOn().toString());
+        result.bodyJson()
+                .extractingPath("$.sessionWeeks[0].endOn")
+                .isEqualTo(firstSessionWeek.weekPeriod().endOn().toString());
+        result.bodyJson()
+                .extractingPath("$.totalQuantities[0].totalQuantityId")
+                .isEqualTo(totalQuantity.totalQuantityId().intValue());
+        result.bodyJson()
+                .extractingPath("$.totalQuantities[0].subject.name")
+                .isEqualTo(totalQuantity.subject().name());
+        result.bodyJson()
+                .extractingPath("$.totalQuantities[0].subject.category")
+                .isEqualTo(totalQuantity.subject().category());
+        result.bodyJson()
+                .extractingPath("$.totalQuantities[0].totalQuantityAmount.quantityAmount")
+                .isEqualTo(totalQuantityAmount.quantityAmount().value());
+        result.bodyJson()
+                .extractingPath("$.totalQuantities[0].totalQuantityAmount.quantityUnit")
+                .isEqualTo(totalQuantityAmount.quantityUnit().value());
+        result.bodyJson()
+                .extractingPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityId")
+                .isEqualTo(weeklyQuantity.weeklyQuantityId().intValue());
     }
 
     private record SessionalPlanRequestValue(

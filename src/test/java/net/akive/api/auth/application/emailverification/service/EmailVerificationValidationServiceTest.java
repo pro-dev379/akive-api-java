@@ -1,6 +1,5 @@
 package net.akive.api.auth.application.emailverification.service;
 
-import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.application.provided.UserValidator;
@@ -12,9 +11,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.PASSWORD_RESET;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.user.domain.UserFixture.EMAIL;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -32,49 +31,43 @@ class EmailVerificationValidationServiceTest {
 
     @Test
     void 회원가입을_위한_이메일_인증번호_발급_가능_여부를_검증한다() {
-        Email email = createEmail();
+        emailVerificationValidationService.validateIssuable(EMAIL, SIGN_UP);
 
-        emailVerificationValidationService.validateIssuable(email, SIGN_UP);
-
-        then(userValidator).should().validateEmailNotDuplicate(email);
+        then(userValidator).should().validateEmailNotDuplicate(EMAIL);
         then(userValidator).should(never()).validateUserExistsByEmail(any());
     }
 
     @Test
     void 회원가입을_위한_인증_요청_시_이미_가입된_이메일이면_예외를_던진다() {
-        Email email = createEmail();
         ResourceConflictException exception = new ResourceConflictException(EMAIL_ALREADY_EXISTS);
 
-        willThrow(exception).given(userValidator).validateEmailNotDuplicate(email);
+        willThrow(exception).given(userValidator).validateEmailNotDuplicate(EMAIL);
 
-        assertThatThrownBy(() -> emailVerificationValidationService.validateIssuable(email, SIGN_UP))
+        assertThatThrownBy(() -> emailVerificationValidationService.validateIssuable(EMAIL, SIGN_UP))
                 .isSameAs(exception);
 
-        then(userValidator).should().validateEmailNotDuplicate(email);
+        then(userValidator).should().validateEmailNotDuplicate(EMAIL);
         then(userValidator).should(never()).validateUserExistsByEmail(any());
     }
 
     @Test
     void 패스워드_리셋을_위한_이메일_인증번호_발급_가능_여부를_검증한다() {
-        Email email = createEmail();
+        emailVerificationValidationService.validateIssuable(EMAIL, PASSWORD_RESET);
 
-        emailVerificationValidationService.validateIssuable(email, PASSWORD_RESET);
-
-        then(userValidator).should().validateUserExistsByEmail(email);
+        then(userValidator).should().validateUserExistsByEmail(EMAIL);
         then(userValidator).should(never()).validateEmailNotDuplicate(any());
     }
 
     @Test
     void 패스워드_리셋을_위한_이메일_인증_요청_시_회원이_없으면_예외를_던진다() {
-        Email email = createEmail();
         ResourceNotFoundException exception = new ResourceNotFoundException(USER_NOT_FOUND);
 
-        willThrow(exception).given(userValidator).validateUserExistsByEmail(email);
+        willThrow(exception).given(userValidator).validateUserExistsByEmail(EMAIL);
 
-        assertThatThrownBy(() -> emailVerificationValidationService.validateIssuable(email, PASSWORD_RESET))
+        assertThatThrownBy(() -> emailVerificationValidationService.validateIssuable(EMAIL, PASSWORD_RESET))
                 .isSameAs(exception);
 
-        then(userValidator).should().validateUserExistsByEmail(email);
+        then(userValidator).should().validateUserExistsByEmail(EMAIL);
         then(userValidator).should(never()).validateEmailNotDuplicate(any());
     }
 }

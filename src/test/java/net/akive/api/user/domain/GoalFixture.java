@@ -5,7 +5,10 @@ import static net.akive.api.user.domain.UserPolicy.*;
 
 public class GoalFixture {
 
-    public static Goal createPersistedGoal(Long goalId) {
+    public static Long GOAL_ID = 1L;
+    public static Long ANOTHER_GOAL_ID = 2L;
+
+    public static Goal createReconstructedGoal(Long goalId) {
         return Goal.reconstruct(
                 goalId,
                 createUser(),

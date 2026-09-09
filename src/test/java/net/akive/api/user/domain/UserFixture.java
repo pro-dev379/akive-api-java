@@ -3,14 +3,18 @@ package net.akive.api.user.domain;
 import net.akive.api.common.domain.Email;
 
 import static net.akive.api.common.domain.EmailFixture.createEmail;
+import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
 
 public class UserFixture {
 
-    static final Email EMAIL = createEmail();
-    static final RoleType ROLE_TYPE = RoleType.MEMBER;
-    static final LoginType LOGIN_TYPE = LoginType.EMAIL;
-    static final String NICKNAME = "member@abcdefg1234";
-    static final String PASSWORD_HASH = "password-hash";
+    public static final Long USER_ID = 1L;
+    public static final Long ANOTHER_USER_ID = 2L;
+    public static final Long UNKNOWN_USER_ID = Long.MAX_VALUE;
+    public static final Email EMAIL = createEmail();
+    public static final RoleType ROLE_TYPE = RoleType.MEMBER;
+    public static final LoginType LOGIN_TYPE = LoginType.EMAIL;
+    public static final String PASSWORD = "password123!";
+    public static final String PASSWORD_HASH = "password-hash";
 
     public static User createUser() {
         return User.signUpByEmail(EMAIL, ROLE_TYPE, PASSWORD_HASH, NICKNAME);
@@ -29,18 +33,22 @@ public class UserFixture {
     }
 
     public static User createUser(Long userId) {
-        return createPersistedUser(userId);
+        return createReconstructedUser(userId);
     }
 
     public static User createUser(Long userId, String passwordHash) {
-        return createPersistedUser(userId, passwordHash);
+        return createReconstructedUser(userId, passwordHash);
     }
 
-    public static User createPersistedUser(Long userId) {
-        return createPersistedUser(userId, PASSWORD_HASH);
+    public static User createReconstructedUser() {
+        return createReconstructedUser(USER_ID);
     }
 
-    public static User createPersistedUser(Long userId, String passwordHash) {
+    public static User createReconstructedUser(Long userId) {
+        return createReconstructedUser(userId, PASSWORD_HASH);
+    }
+
+    public static User createReconstructedUser(Long userId, String passwordHash) {
         return User.reconstruct(
                 userId,
                 EMAIL,

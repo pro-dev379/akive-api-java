@@ -1,6 +1,5 @@
 package net.akive.api.user.application.service;
 
-import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.application.required.UserRepository;
@@ -13,10 +12,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.UserFixture.EMAIL;
 import static net.akive.api.user.domain.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -24,9 +24,6 @@ import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 class UserValidationServiceTest {
-
-    private static final Email EMAIL = createEmail();
-    private static final String NICKNAME = "akive";
 
     @Mock
     UserRepository userRepository;

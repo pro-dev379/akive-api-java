@@ -2,51 +2,69 @@ package net.akive.api.auth.adapter.emailverification.webapi;
 
 import net.akive.api.auth.adapter.emailverification.webapi.dto.request.EmailVerificationCodeIssueRequest;
 import net.akive.api.auth.adapter.emailverification.webapi.dto.request.EmailVerificationCodeVerifyRequest;
+import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeIssuer;
+import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeVerifier;
 import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationCodeVerifyCommand;
 import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationIssueCommand;
-import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
 import net.akive.api.common.exception.business.*;
 import net.akive.api.support.PublicApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.EMAIL_ADDRESS;
+import static net.akive.api.auth.adapter.emailverification.webapi.dto.request.EmailVerificationCodeIssueRequestFixture.createIssueRequest;
+import static net.akive.api.auth.adapter.emailverification.webapi.dto.request.EmailVerificationCodeVerifyRequestFixture.createVerifyRequest;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.VERIFICATION_CODE;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL;
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.PASSWORD_RESET;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
+import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
+import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_VERIFICATION_CODE_MISMATCH;
+import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
-import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
 import static org.springframework.http.HttpStatus.*;
 
+@WebMvcTest(EmailVerificationApi.class)
+@AutoConfigureMockMvc(addFilters = false)
 class EmailVerificationApiTest extends PublicApiTestSupport {
 
-    private static final String VERIFICATION_CODE = "123456";
     private static final String VERIFICATION_CODE_ISSUE_URL = "/verifications/emails/codes";
     private static final String VERIFICATION_CODE_VERIFY_URL = "/verifications/emails";
 
+    @MockitoBean
+    EmailVerificationCodeIssuer emailVerificationCodeIssuer;
+
+    @MockitoBean
+    EmailVerificationCodeVerifier emailVerificationCodeVerifier;
+
     @Test
     void 인증번호를_발급한다() throws Exception {
-        EmailVerificationCodeIssueRequest request = createIssueRequest();
+        EmailVerificationCodeIssueRequest request = createIssueRequest(EMAIL_ADDRESS);
         given(emailVerificationCodeIssuer.issue(request.toCommand())).willReturn(createEmailVerification());
 
         MvcTestResultAssert result = postJson(VERIFICATION_CODE_ISSUE_URL, request).hasStatusOk();
 
         result.bodyJson().extractingPath("$.email").isEqualTo(EMAIL_ADDRESS);
         result.bodyJson().hasPath("$.expiresAt");
-        result.bodyJson().extractingPath("$.expirationSeconds").isEqualTo(300);
-        result.bodyJson().extractingPath("$.renewalIntervalSeconds").isEqualTo(30);
+        result.bodyJson().extractingPath("$.expirationSeconds")
+                .isEqualTo((int) VERIFICATION_CODE_EXPIRATION_DURATION.toSeconds());
+        result.bodyJson().extractingPath("$.renewalIntervalSeconds")
+                .isEqualTo((int) EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL.toSeconds());
 
         then(emailVerificationCodeIssuer).should().issue(request.toCommand());
     }
@@ -60,7 +78,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     }
 
     @Test
-    void 인증번호_발급_요청_시_인증목적_형식이_올바르지_않으면_400을_응답한다() throws Exception {
+    void 인증번호_발급_요청_시_인증목적_형식이_올바르지_않으면_400을_응답한다() {
         postJson(
                 VERIFICATION_CODE_ISSUE_URL,
                 """
@@ -84,12 +102,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
 
         MvcTestResultAssert result = postJson(VERIFICATION_CODE_ISSUE_URL, request).hasStatus(TOO_MANY_REQUESTS);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Email verification renewal is too frequent.");
+        assertErrorResponse(result, EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT);
     }
 
     @Test
@@ -99,7 +112,9 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
                 .given(emailVerificationCodeIssuer)
                 .issue(request.toCommand());
 
-        postJson(VERIFICATION_CODE_ISSUE_URL, request).hasStatus(NOT_FOUND);
+        MvcTestResultAssert result = postJson(VERIFICATION_CODE_ISSUE_URL, request).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, USER_NOT_FOUND);
     }
 
     @Test
@@ -109,7 +124,9 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
                 .given(emailVerificationCodeIssuer)
                 .issue(request.toCommand());
 
-        postJson(VERIFICATION_CODE_ISSUE_URL, request).hasStatus(CONFLICT);
+        MvcTestResultAssert result = postJson(VERIFICATION_CODE_ISSUE_URL, request).hasStatus(CONFLICT);
+
+        assertErrorResponse(result, EMAIL_ALREADY_EXISTS);
     }
 
     @Test
@@ -155,12 +172,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
         MvcTestResultAssert result = postJson(VERIFICATION_CODE_VERIFY_URL, request)
                 .hasStatus(BAD_REQUEST);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("EMAIL_VERIFICATION_CODE_MISMATCH");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Email verification code mismatch.");
+        assertErrorResponse(result, EMAIL_VERIFICATION_CODE_MISMATCH);
     }
 
     @Test
@@ -173,12 +185,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
         MvcTestResultAssert result = postJson(VERIFICATION_CODE_VERIFY_URL, request)
                 .hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("EMAIL_VERIFICATION_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Email verification not found.");
+        assertErrorResponse(result, EMAIL_VERIFICATION_NOT_FOUND);
     }
 
     @Test
@@ -191,12 +198,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
         MvcTestResultAssert result = postJson(VERIFICATION_CODE_VERIFY_URL, request)
                 .hasStatus(UNAUTHORIZED);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("EMAIL_VERIFICATION_CODE_EXPIRED");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Email verification code expired.");
+        assertErrorResponse(result, EMAIL_VERIFICATION_CODE_EXPIRED);
     }
 
     @Test
@@ -209,12 +211,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
         MvcTestResultAssert result = postJson(VERIFICATION_CODE_VERIFY_URL, request)
                 .hasStatus(CONFLICT);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("EMAIL_ALREADY_VERIFIED");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Email is already verified.");
+        assertErrorResponse(result, EMAIL_ALREADY_VERIFIED);
     }
 
     private static Stream<EmailVerificationCodeIssueRequest> invalidIssueRequests() {
@@ -227,42 +224,11 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
 
     private static Stream<EmailVerificationCodeVerifyRequest> invalidVerifyRequests() {
         return Stream.of(
-                createVerifyRequest("", SIGN_UP, VERIFICATION_CODE),
-                createVerifyRequest("invalid-email", SIGN_UP, VERIFICATION_CODE),
+                createVerifyRequest("", SIGN_UP, VERIFICATION_CODE.value()),
+                createVerifyRequest("invalid-email", SIGN_UP, VERIFICATION_CODE.value()),
                 createVerifyRequest(EMAIL_ADDRESS, SIGN_UP, ""),
                 createVerifyRequest(EMAIL_ADDRESS, SIGN_UP, "12345"),
-                createVerifyRequest(EMAIL_ADDRESS, null, VERIFICATION_CODE)
+                createVerifyRequest(EMAIL_ADDRESS, null, VERIFICATION_CODE.value())
         );
-    }
-
-    private static EmailVerificationCodeIssueRequest createIssueRequest() {
-        return createIssueRequest(EMAIL_ADDRESS, SIGN_UP);
-    }
-
-    private static EmailVerificationCodeIssueRequest createIssueRequest(EmailVerificationPurpose purpose) {
-        return createIssueRequest(EMAIL_ADDRESS, purpose);
-    }
-
-    private static EmailVerificationCodeIssueRequest createIssueRequest(
-            String email,
-            EmailVerificationPurpose purpose
-    ) {
-        return new EmailVerificationCodeIssueRequest(email, purpose);
-    }
-
-    private static EmailVerificationCodeVerifyRequest createVerifyRequest() {
-        return createVerifyRequest(EMAIL_ADDRESS, SIGN_UP, VERIFICATION_CODE);
-    }
-
-    private static EmailVerificationCodeVerifyRequest createVerifyRequest(String verificationCode) {
-        return createVerifyRequest(EMAIL_ADDRESS, SIGN_UP, verificationCode);
-    }
-
-    private static EmailVerificationCodeVerifyRequest createVerifyRequest(
-            String email,
-            EmailVerificationPurpose purpose,
-            String verificationCode
-    ) {
-        return new EmailVerificationCodeVerifyRequest(email, purpose, verificationCode);
     }
 }

@@ -6,10 +6,7 @@ import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.WeeklyQuantityRepository;
 import net.akive.api.plan.application.required.data.WeeklyPlanData;
 import net.akive.api.plan.application.result.WeeklyPlan;
-import net.akive.api.plan.domain.model.SessionalPlan;
-import net.akive.api.plan.domain.model.TotalQuantity;
 import net.akive.api.plan.domain.value.SessionWeek;
-import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,9 +18,9 @@ import java.util.Optional;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEKLY_PLAN_NOT_FOUND;
-import static net.akive.api.plan.domain.PlanFixture.createPersistedSessionalPlan;
-import static net.akive.api.plan.domain.PlanFixture.createPersistedTotalQuantity;
-import static net.akive.api.user.domain.UserFixture.createPersistedUser;
+import static net.akive.api.plan.application.fixture.PlanDataFixture.createWeeklyPlanData;
+import static net.akive.api.plan.application.fixture.PlanQueryFixture.createWeeklyPlanFindQuery;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -43,22 +40,17 @@ class WeeklyPlanQueryServiceTest {
 
     @Test
     void 위클리_플랜을_조회한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        int weekNum = 1;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
-        SessionWeek sessionWeek = sessionalPlan.getSessionPeriod().findSessionWeek(weekNum).orElseThrow();
-        TotalQuantity totalQuantity = createPersistedTotalQuantity(totalQuantityId, sessionalPlan);
-        WeeklyPlanData weeklyPlanData = createWeeklyPlanData(sessionalPlanId, totalQuantity);
-        WeeklyPlanFindQuery query = new WeeklyPlanFindQuery(sessionalPlanId, userId, weekNum);
+        WeeklyPlanFindQuery query = createWeeklyPlanFindQuery(FIRST_WEEK_NUM);
+        SessionWeek sessionWeek = SESSION_PERIOD.findSessionWeek(query.weekNum()).orElseThrow();
+        WeeklyPlanData weeklyPlanData = createWeeklyPlanData(query.sessionalPlanId());
 
-        given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.of(sessionalPlan.getSessionPeriod()));
+        given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(
+                query.sessionalPlanId(),
+                query.userId()
+        )).willReturn(Optional.of(SESSION_PERIOD));
         given(weeklyQuantityRepository.findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
-                sessionalPlanId,
-                userId,
+                query.sessionalPlanId(),
+                query.userId(),
                 sessionWeek.weekPeriod()
         )).willReturn(List.of(weeklyPlanData));
 
@@ -75,24 +67,23 @@ class WeeklyPlanQueryServiceTest {
         assertThat(weeklyPlan.planDates()).hasSize(4);
 
         then(sessionalPlanRepository).should()
-                .findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+                .findSessionPeriodBySessionalPlanIdAndUserId(query.sessionalPlanId(), query.userId());
         then(weeklyQuantityRepository).should()
                 .findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
-                        sessionalPlanId,
-                        userId,
+                        query.sessionalPlanId(),
+                        query.userId(),
                         sessionWeek.weekPeriod()
                 );
     }
 
     @Test
     void 세셔널_플랜이_없으면_위클리_플랜_조회에_실패하고_예외를_던진다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        int weekNum = 1;
-        WeeklyPlanFindQuery query = new WeeklyPlanFindQuery(sessionalPlanId, userId, weekNum);
+        WeeklyPlanFindQuery query = createWeeklyPlanFindQuery(FIRST_WEEK_NUM);
 
-        given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.empty());
+        given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(
+                query.sessionalPlanId(),
+                query.userId()
+        )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> weeklyPlanQueryService.find(query))
@@ -100,21 +91,18 @@ class WeeklyPlanQueryServiceTest {
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(sessionalPlanRepository).should()
-                .findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+                .findSessionPeriodBySessionalPlanIdAndUserId(query.sessionalPlanId(), query.userId());
         then(weeklyQuantityRepository).shouldHaveNoInteractions();
     }
 
     @Test
     void 주차가_세션_기간을_벗어나면_위클리_플랜_조회에_실패하고_예외를_던진다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        int weekNum = 999;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
-        WeeklyPlanFindQuery query = new WeeklyPlanFindQuery(sessionalPlanId, userId, weekNum);
+        WeeklyPlanFindQuery query = createWeeklyPlanFindQuery(UNKNOWN_WEEK_NUM);
 
-        given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId))
-                .willReturn(Optional.of(sessionalPlan.getSessionPeriod()));
+        given(sessionalPlanRepository.findSessionPeriodBySessionalPlanIdAndUserId(
+                query.sessionalPlanId(),
+                query.userId()
+        )).willReturn(Optional.of(SESSION_PERIOD));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> weeklyPlanQueryService.find(query))
@@ -122,17 +110,7 @@ class WeeklyPlanQueryServiceTest {
                 .isEqualTo(WEEKLY_PLAN_NOT_FOUND);
 
         then(sessionalPlanRepository).should()
-                .findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+                .findSessionPeriodBySessionalPlanIdAndUserId(query.sessionalPlanId(), query.userId());
         then(weeklyQuantityRepository).shouldHaveNoInteractions();
-    }
-
-    private WeeklyPlanData createWeeklyPlanData(Long sessionalPlanId, TotalQuantity totalQuantity) {
-        return new WeeklyPlanData(
-                sessionalPlanId,
-                totalQuantity.getTotalQuantityId(),
-                totalQuantity.getSubject(),
-                totalQuantity.getTotalQuantityAmount().quantityUnit(),
-                totalQuantity.getWeeklyQuantities().getFirst()
-        );
     }
 }

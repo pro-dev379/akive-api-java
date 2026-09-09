@@ -3,28 +3,37 @@ package net.akive.api.user.adapter.webapi;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.support.PublicApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserSignUpByEmailRequest;
+import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
+import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
+import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.UserFixture.PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.springframework.http.HttpStatus.*;
 
+@WebMvcTest(MemberAccountApi.class)
+@AutoConfigureMockMvc(addFilters = false)
 class MemberAccountApiTest extends PublicApiTestSupport {
 
     private static final String SIGN_UP_MEMBER_BY_EMAIL_URL = "/members/email";
-    private static final String EMAIL = "user@test.com";
-    private static final String PASSWORD = "password123!";
-    private static final String NICKNAME = "akive";
+
+    @MockitoBean
+    UserAccountManager userAccountManager;
 
     @Test
     void 이메일로_멤버_가입을_요청하면_201을_응답한다() throws Exception {
@@ -62,12 +71,7 @@ class MemberAccountApiTest extends PublicApiTestSupport {
 
         MvcTestResultAssert result = postJson(SIGN_UP_MEMBER_BY_EMAIL_URL, request).hasStatus(CONFLICT);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("EMAIL_ALREADY_EXISTS");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Email already exists.");
+        assertErrorResponse(result, EMAIL_ALREADY_EXISTS);
     }
 
     @Test
@@ -82,7 +86,9 @@ class MemberAccountApiTest extends PublicApiTestSupport {
                 .given(userAccountManager)
                 .signUpMemberByEmail(command);
 
-        postJson(SIGN_UP_MEMBER_BY_EMAIL_URL, request).hasStatus(CONFLICT);
+        MvcTestResultAssert result = postJson(SIGN_UP_MEMBER_BY_EMAIL_URL, request).hasStatus(CONFLICT);
+
+        assertErrorResponse(result, NICKNAME_ALREADY_EXISTS);
     }
 
     private static Stream<UserSignUpByEmailRequest> invalidRequests() {
@@ -93,17 +99,17 @@ class MemberAccountApiTest extends PublicApiTestSupport {
                 createRequest("invalid-email", PASSWORD, NICKNAME),
                 createRequest("test@", PASSWORD, NICKNAME),
                 createRequest("@test.com", PASSWORD, NICKNAME),
-                createRequest(EMAIL, null, NICKNAME),
-                createRequest(EMAIL, "", NICKNAME),
-                createRequest(EMAIL, " ", NICKNAME),
-                createRequest(EMAIL, "short1!", NICKNAME),
-                createRequest(EMAIL, "password", NICKNAME),
-                createRequest(EMAIL, PASSWORD, "123456789012345678901")
+                createRequest(EMAIL_ADDRESS, null, NICKNAME),
+                createRequest(EMAIL_ADDRESS, "", NICKNAME),
+                createRequest(EMAIL_ADDRESS, " ", NICKNAME),
+                createRequest(EMAIL_ADDRESS, "short1!", NICKNAME),
+                createRequest(EMAIL_ADDRESS, "password", NICKNAME),
+                createRequest(EMAIL_ADDRESS, PASSWORD, "123456789012345678901")
         );
     }
 
     private static UserSignUpByEmailRequest createRequest() {
-        return createRequest(EMAIL, PASSWORD, NICKNAME);
+        return createRequest(EMAIL_ADDRESS, PASSWORD, NICKNAME);
     }
 
     private static UserSignUpByEmailRequest createRequest(String email, String password, String nickname) {

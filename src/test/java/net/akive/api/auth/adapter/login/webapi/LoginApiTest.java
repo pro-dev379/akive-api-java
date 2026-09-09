@@ -1,6 +1,7 @@
 package net.akive.api.auth.adapter.login.webapi;
 
 import net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequest;
+import net.akive.api.auth.application.login.provided.LoginProcessor;
 import net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand;
 import net.akive.api.auth.domain.token.IssuedToken;
 import net.akive.api.common.exception.business.AuthenticationException;
@@ -8,24 +9,34 @@ import net.akive.api.support.PublicApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequestFixture.createLoginByEmailRequest;
+import static net.akive.api.auth.domain.token.AccessTokenFixture.ACCESS_TOKEN_VALUE;
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
+import static net.akive.api.auth.domain.token.RefreshTokenFixture.REFRESH_TOKEN_VALUE;
+import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.user.domain.UserFixture.PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
+@WebMvcTest(LoginApi.class)
+@AutoConfigureMockMvc(addFilters = false)
 class LoginApiTest extends PublicApiTestSupport {
 
     private static final String LOGIN_BY_EMAIL_URL = "/login/email";
+
+    @MockitoBean
+    LoginProcessor loginProcessor;
 
     @Test
     void 이메일과_패스워드로_로그인하면_토큰을_응답한다() {
@@ -36,14 +47,14 @@ class LoginApiTest extends PublicApiTestSupport {
                 request.email(),
                 request.password()
         );
-        IssuedToken issuedToken = createIssuedToken("access-token", "refresh-token");
+        IssuedToken issuedToken = createIssuedToken(ACCESS_TOKEN_VALUE, REFRESH_TOKEN_VALUE);
 
         given(loginProcessor.loginByEmail(command)).willReturn(issuedToken);
 
         MvcTestResultAssert result = postLoginByEmail(clientInstanceId.toString(), request).hasStatus(OK);
 
-        result.bodyJson().extractingPath("$.accessToken").isEqualTo("access-token");
-        result.bodyJson().extractingPath("$.refreshToken").isEqualTo("refresh-token");
+        result.bodyJson().extractingPath("$.accessToken").isEqualTo(ACCESS_TOKEN_VALUE);
+        result.bodyJson().extractingPath("$.refreshToken").isEqualTo(REFRESH_TOKEN_VALUE);
 
         then(loginProcessor).should().loginByEmail(command);
     }
@@ -78,7 +89,9 @@ class LoginApiTest extends PublicApiTestSupport {
                 .given(loginProcessor)
                 .loginByEmail(command);
 
-        postLoginByEmail(clientInstanceId.toString(), request).hasStatus(UNAUTHORIZED);
+        MvcTestResultAssert result = postLoginByEmail(clientInstanceId.toString(), request).hasStatus(UNAUTHORIZED);
+
+        assertErrorResponse(result, INVALID_EMAIL_OR_PASSWORD);
 
         then(loginProcessor).should().loginByEmail(command);
     }
@@ -96,25 +109,17 @@ class LoginApiTest extends PublicApiTestSupport {
         return requestBuilder.assertThat();
     }
 
-    private String toJson(Object body) {
-        try {
-            return objectMapper.writeValueAsString(body);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to serialize request body.", e);
-        }
-    }
-
     private static Stream<LoginByEmailRequest> invalidRequests() {
         return Stream.of(
-                createLoginByEmailRequest(null, "password123!"),
-                createLoginByEmailRequest("", "password123!"),
-                createLoginByEmailRequest(" ", "password123!"),
-                createLoginByEmailRequest("invalid-email", "password123!"),
-                createLoginByEmailRequest("test@", "password123!"),
-                createLoginByEmailRequest("@test.com", "password123!"),
-                createLoginByEmailRequest("test@test.com", null),
-                createLoginByEmailRequest("test@test.com", ""),
-                createLoginByEmailRequest("test@test.com", " ")
+                createLoginByEmailRequest(null, PASSWORD),
+                createLoginByEmailRequest("", PASSWORD),
+                createLoginByEmailRequest(" ", PASSWORD),
+                createLoginByEmailRequest("invalid-email", PASSWORD),
+                createLoginByEmailRequest("test@", PASSWORD),
+                createLoginByEmailRequest("@test.com", PASSWORD),
+                createLoginByEmailRequest(EMAIL_ADDRESS, null),
+                createLoginByEmailRequest(EMAIL_ADDRESS, ""),
+                createLoginByEmailRequest(EMAIL_ADDRESS, " ")
         );
     }
 

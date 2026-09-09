@@ -20,8 +20,12 @@ import java.util.Optional;
 import static net.akive.api.common.exception.business.ResourceConflictError.SUBJECT_NAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
-import static net.akive.api.plan.domain.PlanFixture.*;
-import static net.akive.api.user.domain.UserFixture.createPersistedUser;
+import static net.akive.api.plan.domain.assertion.TotalQuantityAssert.assertThatTotalQuantity;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_PLAN_ID;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createReconstructedSessionalPlan;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.*;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.*;
@@ -44,19 +48,17 @@ class TotalQuantityDomainServiceTest {
 
     @Test
     void 세션_총량을_생성한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
+        User user = createReconstructedUser(USER_ID);
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, user);
         Subject subject = createSubject();
         TotalQuantityAmount totalQuantityAmount = createTotalQuantityAmount();
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID))
                 .willReturn(Optional.of(sessionalPlan));
 
         TotalQuantity totalQuantity = totalQuantityDomainService.create(
-                sessionalPlanId,
-                userId,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
                 subject,
                 totalQuantityAmount
         );
@@ -64,191 +66,145 @@ class TotalQuantityDomainServiceTest {
         assertThat(totalQuantity.getSessionalPlan()).isEqualTo(sessionalPlan);
         assertThat(totalQuantity.getSubject()).isEqualTo(subject);
         assertThat(totalQuantity.getTotalQuantityAmount()).isEqualTo(totalQuantityAmount);
-        assertThat(totalQuantity.getWeeklyQuantities())
-                .hasSize(sessionalPlan.getSessionPeriod().splitIntoWeeks().size());
+        assertThatTotalQuantity(totalQuantity).hasWeeklyAmounts(TOTAL_AMOUNT, 0, 0);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityValidationService).should().validateCreatable(sessionalPlanId, subject.name());
+        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID);
+        then(totalQuantityValidationService).should().validateCreatable(SESSIONAL_PLAN_ID, subject.name());
     }
 
     @Test
     void 세션_총량을_수정한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
-        TotalQuantity totalQuantity = createPersistedTotalQuantity(totalQuantityId, sessionalPlan);
-        Subject targetSubject = new Subject("영어", "공부");
-        TotalQuantityAmount targetTotalQuantityAmount = TotalQuantityAmount.of(130, "페이지", "문법");
+        User user = createReconstructedUser(USER_ID);
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, user);
+        TotalQuantity totalQuantity = createReconstructedTotalQuantity(FIRST_TOTAL_QUANTITY_ID, sessionalPlan);
 
         given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                sessionalPlanId,
-                userId,
-                totalQuantityId
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                FIRST_TOTAL_QUANTITY_ID
         )).willReturn(Optional.of(totalQuantity));
 
         TotalQuantity updatedTotalQuantity = totalQuantityDomainService.update(
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetSubject,
-                targetTotalQuantityAmount
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_SUBJECT,
+                TARGET_TOTAL_QUANTITY_AMOUNT
         );
 
-        assertThat(updatedTotalQuantity.getTotalQuantityId()).isEqualTo(totalQuantityId);
-        assertThat(updatedTotalQuantity.getSubject()).isEqualTo(targetSubject);
-        assertThat(updatedTotalQuantity.getTotalQuantityAmount()).isEqualTo(targetTotalQuantityAmount);
+        assertThat(updatedTotalQuantity.getTotalQuantityId()).isEqualTo(FIRST_TOTAL_QUANTITY_ID);
+        assertThat(updatedTotalQuantity.getSubject()).isEqualTo(TARGET_SUBJECT);
+        assertThat(updatedTotalQuantity.getTotalQuantityAmount()).isEqualTo(TARGET_TOTAL_QUANTITY_AMOUNT);
 
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(SESSIONAL_PLAN_ID, USER_ID, FIRST_TOTAL_QUANTITY_ID);
         then(totalQuantityValidationService).should()
-                .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
+                .validateUpdatable(FIRST_TOTAL_QUANTITY_ID, SESSIONAL_PLAN_ID, TARGET_SUBJECT.name());
     }
 
     @Test
     void 세셔널_플랜이_없으면_세션_총량을_생성할_수_없다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
         Subject subject = createSubject();
         TotalQuantityAmount totalQuantityAmount = createTotalQuantityAmount();
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID))
                 .willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityDomainService.create(
-                        sessionalPlanId,
-                        userId,
+                        SESSIONAL_PLAN_ID,
+                        USER_ID,
                         subject,
                         totalQuantityAmount
                 ))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityValidationService).should(never()).validateCreatable(sessionalPlanId, subject.name());
-    }
-
-    @Test
-    void 세셔널_플랜이_없으면_세션_총량을_수정할_수_없다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Subject targetSubject = createSubject();
-        TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
-
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> totalQuantityDomainService.update(
-                        totalQuantityId,
-                        sessionalPlanId,
-                        userId,
-                        targetSubject,
-                        targetTotalQuantityAmount
-                ))
-                .extracting(ResourceNotFoundException::getError)
-                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
-
-        then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
-        then(totalQuantityValidationService).should(never())
-                .validateUpdatable(any(), any(), any());
+        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID);
+        then(totalQuantityValidationService).should(never()).validateCreatable(SESSIONAL_PLAN_ID, subject.name());
     }
 
     @Test
     void 세션_총량이_없으면_세션_총량을_수정할_수_없다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Subject targetSubject = createSubject();
-        TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
-
         given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                sessionalPlanId,
-                userId,
-                totalQuantityId
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                FIRST_TOTAL_QUANTITY_ID
         )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityDomainService.update(
-                        totalQuantityId,
-                        sessionalPlanId,
-                        userId,
-                        targetSubject,
-                        targetTotalQuantityAmount
+                        FIRST_TOTAL_QUANTITY_ID,
+                        SESSIONAL_PLAN_ID,
+                        USER_ID,
+                        TARGET_SUBJECT,
+                        TARGET_TOTAL_QUANTITY_AMOUNT
                 ))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(SESSIONAL_PLAN_ID, USER_ID, FIRST_TOTAL_QUANTITY_ID);
         then(totalQuantityValidationService).should(never())
                 .validateUpdatable(any(), any(), any());
     }
 
     @Test
     void 생성_가능_검증에_실패하면_세션_총량을_생성할_수_없다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
+        User user = createReconstructedUser(USER_ID);
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, user);
         Subject subject = createSubject();
         TotalQuantityAmount totalQuantityAmount = createTotalQuantityAmount();
         ResourceConflictException exception = new ResourceConflictException(SUBJECT_NAME_ALREADY_EXISTS);
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID))
                 .willReturn(Optional.of(sessionalPlan));
         willThrow(exception)
                 .given(totalQuantityValidationService)
-                .validateCreatable(sessionalPlanId, subject.name());
+                .validateCreatable(SESSIONAL_PLAN_ID, subject.name());
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> totalQuantityDomainService.create(
-                        sessionalPlanId,
-                        userId,
+                        SESSIONAL_PLAN_ID,
+                        USER_ID,
                         subject,
                         totalQuantityAmount
                 ))
                 .isSameAs(exception);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityValidationService).should().validateCreatable(sessionalPlanId, subject.name());
+        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID);
+        then(totalQuantityValidationService).should().validateCreatable(SESSIONAL_PLAN_ID, subject.name());
     }
 
     @Test
     void 수정_가능_검증에_실패하면_세션_총량을_수정할_수_없다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
-        TotalQuantity totalQuantity = createPersistedTotalQuantity(totalQuantityId, sessionalPlan);
-        Subject targetSubject = createSubject();
-        TotalQuantityAmount targetTotalQuantityAmount = createTotalQuantityAmount();
+        User user = createReconstructedUser(USER_ID);
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, user);
+        TotalQuantity totalQuantity = createReconstructedTotalQuantity(FIRST_TOTAL_QUANTITY_ID, sessionalPlan);
         ResourceConflictException exception = new ResourceConflictException(SUBJECT_NAME_ALREADY_EXISTS);
 
         given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                sessionalPlanId,
-                userId,
-                totalQuantityId
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                FIRST_TOTAL_QUANTITY_ID
         )).willReturn(Optional.of(totalQuantity));
         willThrow(exception)
                 .given(totalQuantityValidationService)
-                .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
+                .validateUpdatable(FIRST_TOTAL_QUANTITY_ID, SESSIONAL_PLAN_ID, TARGET_SUBJECT.name());
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> totalQuantityDomainService.update(
-                        totalQuantityId,
-                        sessionalPlanId,
-                        userId,
-                        targetSubject,
-                        targetTotalQuantityAmount
+                        FIRST_TOTAL_QUANTITY_ID,
+                        SESSIONAL_PLAN_ID,
+                        USER_ID,
+                        TARGET_SUBJECT,
+                        TARGET_TOTAL_QUANTITY_AMOUNT
                 ))
                 .isSameAs(exception);
 
         then(totalQuantityRepository).should()
-                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(sessionalPlanId, userId, totalQuantityId);
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(SESSIONAL_PLAN_ID, USER_ID, FIRST_TOTAL_QUANTITY_ID);
         then(totalQuantityValidationService).should()
-                .validateUpdatable(totalQuantityId, sessionalPlanId, targetSubject.name());
+                .validateUpdatable(FIRST_TOTAL_QUANTITY_ID, SESSIONAL_PLAN_ID, TARGET_SUBJECT.name());
     }
 }

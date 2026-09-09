@@ -1,6 +1,7 @@
 package net.akive.api.auth.adapter.token.security;
 
 import net.akive.api.auth.domain.token.AccessToken;
+import net.akive.api.common.time.FixedCurrentTimeProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,8 +13,11 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
-import static net.akive.api.auth.adapter.token.security.JwtProviderFixture.*;
+import static net.akive.api.auth.adapter.token.fixture.JwtProviderFixture.*;
+import static net.akive.api.auth.domain.token.AccessTokenFixture.ACCESS_TOKEN_VALUE;
 import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserFixture.ROLE_TYPE;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -32,23 +36,22 @@ class JwtAccessTokenProviderTest {
         jwtAccessTokenProvider = new JwtAccessTokenProvider(
                 accessTokenJwtEncoder,
                 jwtProperties(),
-                fixedCurrentTimeProvider()
+                new FixedCurrentTimeProvider(NOW)
         );
     }
 
     @Test
     void 액세스_토큰을_생성한다() {
-        String tokenValue = "access-token";
-        Jwt jwt = Jwt.withTokenValue(tokenValue)
+        Jwt jwt = Jwt.withTokenValue(ACCESS_TOKEN_VALUE)
                 .header("alg", "HS256")
                 .subject(String.valueOf(USER_ID))
                 .build();
 
         given(accessTokenJwtEncoder.encode(any(JwtEncoderParameters.class))).willReturn(jwt);
 
-        AccessToken accessToken = jwtAccessTokenProvider.create(USER_ID, MEMBER);
+        AccessToken accessToken = jwtAccessTokenProvider.create(USER_ID, ROLE_TYPE);
 
-        assertThat(accessToken).isEqualTo(new AccessToken(tokenValue));
+        assertThat(accessToken).isEqualTo(new AccessToken(ACCESS_TOKEN_VALUE));
 
         ArgumentCaptor<JwtEncoderParameters> captor = ArgumentCaptor.forClass(JwtEncoderParameters.class);
         then(accessTokenJwtEncoder).should().encode(captor.capture());

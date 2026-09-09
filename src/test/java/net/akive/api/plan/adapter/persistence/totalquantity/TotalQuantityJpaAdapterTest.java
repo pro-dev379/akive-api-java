@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
-import static net.akive.api.plan.domain.PlanFixture.createTotalQuantity;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.*;
+import static net.akive.api.user.domain.UserFixture.UNKNOWN_USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -19,7 +20,12 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
     void 세션_총량을_저장한다() {
         SessionalPlan savedSessionalPlan = saveSessionalPlan();
 
-        TotalQuantity savedTotalQuantity = totalQuantityRepository.save(createTotalQuantity(savedSessionalPlan));
+        TotalQuantity totalQuantity = TotalQuantity.create(
+                savedSessionalPlan,
+                createSubject(FIRST_SUBJECT_NAME),
+                createTotalQuantityAmount(TOTAL_AMOUNT)
+        );
+        TotalQuantity savedTotalQuantity = totalQuantityRepository.save(totalQuantity);
         flushAndClear();
 
         TotalQuantity foundTotalQuantity = totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
@@ -31,8 +37,8 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundTotalQuantity.getTotalQuantityId()).isEqualTo(savedTotalQuantity.getTotalQuantityId());
         assertThat(foundTotalQuantity.getSessionalPlan().getSessionalPlanId())
                 .isEqualTo(savedSessionalPlan.getSessionalPlanId());
-        assertThat(foundTotalQuantity.getSubject().name()).isEqualTo("수학");
-        assertThat(foundTotalQuantity.getTotalQuantityAmount().quantityAmount().value()).isEqualTo(100);
+        assertThat(foundTotalQuantity.getSubject().name()).isEqualTo(FIRST_SUBJECT_NAME);
+        assertThat(foundTotalQuantity.getTotalQuantityAmount().quantityAmount().value()).isEqualTo(TOTAL_AMOUNT);
         assertThat(foundTotalQuantity.getWeeklyQuantities())
                 .hasSize(savedSessionalPlan.getSessionPeriod().splitIntoWeeks().size());
     }
@@ -41,10 +47,10 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
     void 세셔널_플랜_식별자로_세션_총량을_식별자_오름차순으로_조회한다() {
         SessionalPlan savedSessionalPlan = saveSessionalPlan();
         TotalQuantity firstTotalQuantity = totalQuantityRepository.save(
-                createTotalQuantity(savedSessionalPlan, "수학")
+                createTotalQuantity(savedSessionalPlan, FIRST_SUBJECT_NAME)
         );
         TotalQuantity secondTotalQuantity = totalQuantityRepository.save(
-                createTotalQuantity(savedSessionalPlan, "영어")
+                createTotalQuantity(savedSessionalPlan, SECOND_SUBJECT_NAME)
         );
         flushAndClear();
 
@@ -78,35 +84,36 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 세셔널_플랜_식별자로_세션_총량_존재_여부와_개수를_조회한다() {
-        TotalQuantity savedTotalQuantity = saveTotalQuantity();
-        Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
+        TotalQuantity savedTotalQuantity = saveTotalQuantity(FIRST_SUBJECT_NAME);
         flushAndClear();
 
-        assertThat(totalQuantityRepository.existsBySessionalPlanId(sessionalPlanId)).isTrue();
-        assertThat(totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(sessionalPlanId, "수학")).isTrue();
-        assertThat(totalQuantityRepository.countBySessionalPlanId(sessionalPlanId)).isEqualTo(1);
+        assertThat(totalQuantityRepository.existsBySessionalPlanId(
+                savedTotalQuantity.getSessionalPlan().getSessionalPlanId())
+        ).isTrue();
+        assertThat(totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(
+                savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
+                FIRST_SUBJECT_NAME
+        )).isTrue();
+        assertThat(totalQuantityRepository.countBySessionalPlanId(
+                savedTotalQuantity.getSessionalPlan().getSessionalPlanId())
+        ).isEqualTo(1);
     }
 
     @Test
     void 자기_자신을_제외하고_같은_과목명의_세션_총량이_있는지_조회한다() {
         SessionalPlan savedSessionalPlan = saveSessionalPlan();
-        TotalQuantity firstTotalQuantity = totalQuantityRepository.save(
-                createTotalQuantity(savedSessionalPlan, "수학")
-        );
-        TotalQuantity secondTotalQuantity = totalQuantityRepository.save(
-                createTotalQuantity(savedSessionalPlan, "영어")
-        );
-        Long sessionalPlanId = savedSessionalPlan.getSessionalPlanId();
+        TotalQuantity firstTotalQuantity = saveTotalQuantity(savedSessionalPlan, FIRST_SUBJECT_NAME);
+        TotalQuantity secondTotalQuantity = saveTotalQuantity(savedSessionalPlan, SECOND_SUBJECT_NAME);
         flushAndClear();
 
         assertThat(totalQuantityRepository.existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
-                sessionalPlanId,
-                "수학",
+                savedSessionalPlan.getSessionalPlanId(),
+                FIRST_SUBJECT_NAME,
                 firstTotalQuantity.getTotalQuantityId()
         )).isFalse();
         assertThat(totalQuantityRepository.existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
-                sessionalPlanId,
-                "수학",
+                savedSessionalPlan.getSessionalPlanId(),
+                FIRST_SUBJECT_NAME,
                 secondTotalQuantity.getTotalQuantityId()
         )).isTrue();
     }
@@ -114,53 +121,49 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 세션_총량을_삭제하면_주간_계획량과_일일_계획량도_모두_삭제된다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
-        Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
-        Long userId = savedTotalQuantity.getSessionalPlan().getUser().getUserId();
-        Long totalQuantityId = savedTotalQuantity.getTotalQuantityId();
         flushAndClear();
 
-        assertThat(countWeeklyQuantitiesByTotalQuantityId(totalQuantityId)).isPositive();
-        assertThat(countDailyQuantitiesByTotalQuantityId(totalQuantityId)).isPositive();
+        assertThat(countWeeklyQuantitiesByTotalQuantityId(savedTotalQuantity.getTotalQuantityId())).isPositive();
+        assertThat(countDailyQuantitiesByTotalQuantityId(savedTotalQuantity.getTotalQuantityId())).isPositive();
 
         totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                sessionalPlanId,
-                userId,
-                totalQuantityId
+                savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
+                savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
+                savedTotalQuantity.getTotalQuantityId()
         );
         flushAndClear();
 
         assertThat(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                sessionalPlanId,
-                userId,
-                totalQuantityId
+                savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
+                savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
+                savedTotalQuantity.getTotalQuantityId()
         )).isEmpty();
-        assertThat(totalQuantityRepository.countBySessionalPlanId(sessionalPlanId)).isZero();
-        assertThat(countWeeklyQuantitiesByTotalQuantityId(totalQuantityId)).isZero();
-        assertThat(countDailyQuantitiesByTotalQuantityId(totalQuantityId)).isZero();
+        assertThat(totalQuantityRepository.countBySessionalPlanId(
+                savedTotalQuantity.getSessionalPlan().getSessionalPlanId())
+        ).isZero();
+        assertThat(countWeeklyQuantitiesByTotalQuantityId(savedTotalQuantity.getTotalQuantityId())).isZero();
+        assertThat(countDailyQuantitiesByTotalQuantityId(savedTotalQuantity.getTotalQuantityId())).isZero();
     }
 
     @Test
     void 세션_총량이_없으면_삭제에_실패하고_예외를_던진다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
-        Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
-        Long userId = savedTotalQuantity.getSessionalPlan().getUser().getUserId();
-        Long totalQuantityId = savedTotalQuantity.getTotalQuantityId();
         flushAndClear();
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                        sessionalPlanId,
-                        userId,
-                        Long.MAX_VALUE
+                        savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
+                        savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
+                        UNKNOWN_TOTAL_QUANTITY_ID
                 ))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                        sessionalPlanId,
-                        Long.MAX_VALUE,
-                        totalQuantityId
+                        savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
+                        UNKNOWN_USER_ID,
+                        savedTotalQuantity.getTotalQuantityId()
                 ))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);

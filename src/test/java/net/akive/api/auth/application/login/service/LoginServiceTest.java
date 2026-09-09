@@ -6,8 +6,6 @@ import net.akive.api.auth.application.token.provided.TokenIssuer;
 import net.akive.api.auth.application.token.provided.dto.TokenIssueCommand;
 import net.akive.api.auth.domain.login.LegacyUserPassword;
 import net.akive.api.auth.domain.token.IssuedToken;
-import net.akive.api.common.domain.ClientInstanceId;
-import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
@@ -21,13 +19,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static net.akive.api.auth.domain.login.LegacyUserPasswordFixture.RAW_PASSWORD;
+import static net.akive.api.auth.application.login.fixture.LoginCommandFixture.createLoginByEmailCommand;
 import static net.akive.api.auth.domain.login.LegacyUserPasswordFixture.createLegacyUserPassword;
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
-import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
-import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
-import static net.akive.api.user.domain.UserFixture.createUser;
+import static net.akive.api.user.domain.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,8 +34,6 @@ import static org.mockito.Mockito.never;
 @ExtendWith(MockitoExtension.class)
 class LoginServiceTest {
 
-    private static final Long USER_ID = 1L;
-    private static final String PASSWORD_HASH = "password-hash";
     private static final String MIGRATED_PASSWORD_HASH = "migrated-password-hash";
 
     @Mock
@@ -88,7 +82,7 @@ class LoginServiceTest {
     @Test
     void 레거시_패스워드로_이메일_로그인_하면_패스워드를_마이그레이션_하고_토큰을_발급한다() {
         LoginByEmailCommand command = createLoginByEmailCommand();
-        User user = createUserWithoutPasswordHash(USER_ID);
+        User user = createUser(USER_ID, null);
         LegacyUserPassword legacyUserPassword = createLegacyUserPassword(user);
         IssuedToken issuedToken = createIssuedToken();
         TokenIssueCommand tokenIssueCommand = createTokenIssueCommand(command, user);
@@ -151,7 +145,7 @@ class LoginServiceTest {
     @Test
     void 레거시_패스워드가_일치하지_않으면_이메일_로그인에_실패한다() {
         LoginByEmailCommand command = createLoginByEmailCommand();
-        User user = createUserWithoutPasswordHash(USER_ID);
+        User user = createUser(USER_ID, null);
         LegacyUserPassword legacyUserPassword = createLegacyUserPassword(user);
 
         given(userFinder.findByEmailAndLeaveFalse(command.email())).willReturn(Optional.of(user));
@@ -169,17 +163,6 @@ class LoginServiceTest {
         then(passwordEncoder).should(never()).encode(any());
         then(userAccountManager).shouldHaveNoInteractions();
         then(legacyUserPasswordRepository).should(never()).deleteByUserId(any());
-    }
-
-    private LoginByEmailCommand createLoginByEmailCommand() {
-        ClientInstanceId clientInstanceId = createClientInstanceId();
-        Email email = createEmail();
-
-        return new LoginByEmailCommand(clientInstanceId, email, RAW_PASSWORD);
-    }
-
-    private User createUserWithoutPasswordHash(Long userId) {
-        return createUser(userId, null);
     }
 
     private TokenIssueCommand createTokenIssueCommand(LoginByEmailCommand command, User user) {

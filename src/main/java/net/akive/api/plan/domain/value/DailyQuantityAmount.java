@@ -44,12 +44,7 @@ public record DailyQuantityAmount(
             int completedQuantityAmount,
             int delayedQuantityAmount
     ) {
-        return new DailyQuantityAmount(
-                new QuantityAmount(quantityAmount),
-                new QuantityAmount(completedQuantityAmount),
-                new QuantityAmount(delayedQuantityAmount),
-                QuantityMemo.NONE
-        );
+        return of(quantityAmount, completedQuantityAmount, delayedQuantityAmount, null);
     }
 
     public DailyQuantityAmount increaseBy(QuantityAmount amountToIncrease) {

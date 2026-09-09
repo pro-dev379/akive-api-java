@@ -12,14 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.SESSION_PERIOD_CHANGE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.domain.PlanFixture.SESSION_NAME;
-import static net.akive.api.plan.domain.PlanFixture.createPersistedSessionalPlan;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
 import static net.akive.api.plan.domain.policy.PlanPolicy.IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -39,77 +37,74 @@ class SessionalPlanValidationServiceTest {
 
     @Test
     void 세셔널_플랜을_생성할_수_있는지_검증한다() {
-        Long userId = 1L;
-        LocalDate requestedAt = LocalDate.of(2025, 12, 31);
-        String requestedSessionName = "  " + SESSION_NAME + "  ";
-        given(sessionalPlanRepository.existsByUserIdAndSessionName(userId, SESSION_NAME))
+        given(sessionalPlanRepository.existsByUserIdAndSessionName(USER_ID, SESSION_NAME))
                 .willReturn(false);
-        given(sessionalPlanRepository.countInProgressByUserId(userId, requestedAt))
+        given(sessionalPlanRepository.countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate()))
                 .willReturn(IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT - 1);
 
-        sessionalPlanValidationService.validateCreatable(userId, requestedSessionName, requestedAt);
+        sessionalPlanValidationService.validateCreatable(
+                USER_ID,
+                "  " + SESSION_NAME + "  ",
+                REQUESTED_AT.toLocalDate()
+        );
 
-        then(sessionalPlanRepository).should().existsByUserIdAndSessionName(userId, SESSION_NAME);
-        then(sessionalPlanRepository).should().countInProgressByUserId(userId, requestedAt);
+        then(sessionalPlanRepository).should().existsByUserIdAndSessionName(USER_ID, SESSION_NAME);
+        then(sessionalPlanRepository).should().countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate());
     }
 
     @Test
     void 같은_이름의_세셔널_플랜이_있으면_생성할_수_없다() {
-        Long userId = 1L;
-        LocalDate requestedAt = LocalDate.of(2025, 12, 31);
-        given(sessionalPlanRepository.existsByUserIdAndSessionName(userId, SESSION_NAME))
+        given(sessionalPlanRepository.existsByUserIdAndSessionName(USER_ID, SESSION_NAME))
                 .willReturn(true);
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> sessionalPlanValidationService.validateCreatable(
-                        userId,
+                        USER_ID,
                         SESSION_NAME,
-                        requestedAt
+                        REQUESTED_AT.toLocalDate()
                 ))
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
-        then(sessionalPlanRepository).should().existsByUserIdAndSessionName(userId, SESSION_NAME);
-        then(sessionalPlanRepository).should(never()).countInProgressByUserId(userId, requestedAt);
+        then(sessionalPlanRepository).should().existsByUserIdAndSessionName(USER_ID, SESSION_NAME);
+        then(sessionalPlanRepository).should(never()).countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate());
     }
 
     @Test
     void 진행_중인_세셔널_플랜_수가_최대치에_도달하면_생성할_수_없다() {
-        Long userId = 1L;
-        LocalDate requestedAt = LocalDate.of(2025, 12, 31);
-        given(sessionalPlanRepository.existsByUserIdAndSessionName(userId, SESSION_NAME))
+        given(sessionalPlanRepository.existsByUserIdAndSessionName(USER_ID, SESSION_NAME))
                 .willReturn(false);
-        given(sessionalPlanRepository.countInProgressByUserId(userId, requestedAt))
+        given(sessionalPlanRepository.countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate()))
                 .willReturn(IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> sessionalPlanValidationService.validateCreatable(
-                        userId,
+                        USER_ID,
                         SESSION_NAME,
-                        requestedAt
+                        REQUESTED_AT.toLocalDate()
                 ))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
 
-        then(sessionalPlanRepository).should().existsByUserIdAndSessionName(userId, SESSION_NAME);
-        then(sessionalPlanRepository).should().countInProgressByUserId(userId, requestedAt);
+        then(sessionalPlanRepository).should().existsByUserIdAndSessionName(USER_ID, SESSION_NAME);
+        then(sessionalPlanRepository).should().countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate());
     }
 
     @Test
     void 세셔널_플랜을_수정할_수_있는지_검증한다() {
-        SessionalPlan currentSessionalPlan = createPersistedSessionalPlan();
-        SessionPeriod sessionPeriod = currentSessionalPlan.getSessionPeriod();
+        SessionalPlan currentSessionalPlan = createReconstructedSessionalPlan();
+
         given(sessionalPlanRepository.existsByUserIdAndSessionNameAndSessionalPlanIdNot(
                 currentSessionalPlan.getUser().getUserId(),
-                SESSION_NAME,
+                TARGET_SESSION_NAME,
                 currentSessionalPlan.getSessionalPlanId()
         )).willReturn(false);
 
-        sessionalPlanValidationService.validateUpdatable(currentSessionalPlan, SESSION_NAME, sessionPeriod);
+        sessionalPlanValidationService.validateUpdatable(currentSessionalPlan, TARGET_SESSION_NAME, SESSION_PERIOD);
 
         then(sessionalPlanRepository).should().existsByUserIdAndSessionNameAndSessionalPlanIdNot(
                 currentSessionalPlan.getUser().getUserId(),
-                SESSION_NAME,
+                TARGET_SESSION_NAME,
                 currentSessionalPlan.getSessionalPlanId()
         );
         then(totalQuantityRepository).should(never())
@@ -118,8 +113,8 @@ class SessionalPlanValidationServiceTest {
 
     @Test
     void 세셔널_플랜_기간이_변경되어도_세션_총량이_없으면_수정할_수_있다() {
-        SessionalPlan currentSessionalPlan = createPersistedSessionalPlan();
-        SessionPeriod newSessionPeriod = createChangedSessionPeriod();
+        SessionalPlan currentSessionalPlan = createReconstructedSessionalPlan();
+
         given(sessionalPlanRepository.existsByUserIdAndSessionNameAndSessionalPlanIdNot(
                 currentSessionalPlan.getUser().getUserId(),
                 SESSION_NAME,
@@ -128,7 +123,7 @@ class SessionalPlanValidationServiceTest {
         given(totalQuantityRepository.existsBySessionalPlanId(currentSessionalPlan.getSessionalPlanId()))
                 .willReturn(false);
 
-        sessionalPlanValidationService.validateUpdatable(currentSessionalPlan, SESSION_NAME, newSessionPeriod);
+        sessionalPlanValidationService.validateUpdatable(currentSessionalPlan, SESSION_NAME, CHANGED_SESSION_PERIOD);
 
         then(sessionalPlanRepository).should().existsByUserIdAndSessionNameAndSessionalPlanIdNot(
                 currentSessionalPlan.getUser().getUserId(),
@@ -140,7 +135,7 @@ class SessionalPlanValidationServiceTest {
 
     @Test
     void 같은_이름의_다른_세셔널_플랜이_있으면_수정할_수_없다() {
-        SessionalPlan currentSessionalPlan = createPersistedSessionalPlan();
+        SessionalPlan currentSessionalPlan = createReconstructedSessionalPlan();
         SessionPeriod sessionPeriod = currentSessionalPlan.getSessionPeriod();
         given(sessionalPlanRepository.existsByUserIdAndSessionNameAndSessionalPlanIdNot(
                 currentSessionalPlan.getUser().getUserId(),
@@ -168,8 +163,8 @@ class SessionalPlanValidationServiceTest {
 
     @Test
     void 세션_총량이_있으면_세셔널_플랜_기간을_변경할_수_없다() {
-        SessionalPlan currentSessionalPlan = createPersistedSessionalPlan();
-        SessionPeriod newSessionPeriod = createChangedSessionPeriod();
+        SessionalPlan currentSessionalPlan = createReconstructedSessionalPlan();
+
         given(sessionalPlanRepository.existsByUserIdAndSessionNameAndSessionalPlanIdNot(
                 currentSessionalPlan.getUser().getUserId(),
                 SESSION_NAME,
@@ -182,7 +177,7 @@ class SessionalPlanValidationServiceTest {
                 .isThrownBy(() -> sessionalPlanValidationService.validateUpdatable(
                         currentSessionalPlan,
                         SESSION_NAME,
-                        newSessionPeriod
+                        CHANGED_SESSION_PERIOD
                 ))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(SESSION_PERIOD_CHANGE_NOT_ALLOWED);
@@ -193,12 +188,5 @@ class SessionalPlanValidationServiceTest {
                 currentSessionalPlan.getSessionalPlanId()
         );
         then(totalQuantityRepository).should().existsBySessionalPlanId(currentSessionalPlan.getSessionalPlanId());
-    }
-
-    private SessionPeriod createChangedSessionPeriod() {
-        return new SessionPeriod(
-                LocalDate.of(2026, 1, 1),
-                LocalDate.of(2026, 1, 13)
-        );
     }
 }

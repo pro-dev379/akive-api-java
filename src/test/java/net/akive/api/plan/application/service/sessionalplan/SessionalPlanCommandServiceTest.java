@@ -6,7 +6,6 @@ import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDe
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanUpdateCommand;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.domain.model.SessionalPlan;
-import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
@@ -19,13 +18,13 @@ import java.util.Optional;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.plan.domain.PlanFixture.*;
-import static net.akive.api.user.domain.UserFixture.createPersistedUser;
+import static net.akive.api.plan.application.fixture.SessionalPlanCommandFixture.*;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
+import static net.akive.api.user.domain.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,110 +44,72 @@ class SessionalPlanCommandServiceTest {
 
     @Test
     void 세셔널_플랜을_생성한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        User user = createPersistedUser(userId);
-        SessionPeriod sessionPeriod = createSessionPeriod();
+        User user = createReconstructedUser(USER_ID);
         SessionalPlan sessionalPlan = createSessionalPlan(user);
-        SessionalPlan savedSessionalPlan = SessionalPlan.reconstruct(
-                sessionalPlanId,
-                user,
-                SESSION_NAME,
-                sessionPeriod
-        );
-        SessionalPlanCreateCommand command = new SessionalPlanCreateCommand(
-                userId,
-                SESSION_NAME,
-                sessionPeriod
-        );
+        SessionalPlan savedSessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, sessionalPlan);
+        SessionalPlanCreateCommand command = createSessionalPlanCreateCommand();
 
-        given(userFinder.findByUserIdAndLeaveFalse(userId))
+        given(userFinder.findByUserIdAndLeaveFalse(command.userId()))
                 .willReturn(Optional.of(user));
-        given(sessionalPlanDomainService.create(user, SESSION_NAME, sessionPeriod))
+        given(sessionalPlanDomainService.create(user, command.sessionName(), command.sessionPeriod()))
                 .willReturn(sessionalPlan);
         given(sessionalPlanRepository.save(sessionalPlan))
                 .willReturn(savedSessionalPlan);
 
         Long result = sessionalPlanCommandService.create(command);
 
-        assertThat(result).isEqualTo(sessionalPlanId);
+        assertThat(result).isEqualTo(SESSIONAL_PLAN_ID);
 
-        then(userFinder).should().findByUserIdAndLeaveFalse(userId);
-        then(sessionalPlanDomainService).should().create(user, SESSION_NAME, sessionPeriod);
+        then(userFinder).should().findByUserIdAndLeaveFalse(command.userId());
+        then(sessionalPlanDomainService).should().create(user, command.sessionName(), command.sessionPeriod());
         then(sessionalPlanRepository).should().save(sessionalPlan);
     }
 
     @Test
     void 회원이_없으면_세셔널_플랜_생성에_실패하고_예외를_던진다() {
-        Long userId = 1L;
-        SessionPeriod sessionPeriod = createSessionPeriod();
-        SessionalPlanCreateCommand command = new SessionalPlanCreateCommand(
-                userId,
-                SESSION_NAME,
-                sessionPeriod
-        );
-
-        given(userFinder.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.empty());
+        SessionalPlanCreateCommand command = createSessionalPlanCreateCommand(UNKNOWN_USER_ID);
+        given(userFinder.findByUserIdAndLeaveFalse(command.userId())).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> sessionalPlanCommandService.create(command))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
-        then(userFinder).should().findByUserIdAndLeaveFalse(userId);
+        then(userFinder).should().findByUserIdAndLeaveFalse(command.userId());
         then(sessionalPlanDomainService).should(never()).create(any(), any(), any());
         then(sessionalPlanRepository).should(never()).save(any());
     }
 
     @Test
     void 세셔널_플랜을_수정한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        String targetSessionName = "2026 2월 학습";
-        User user = createPersistedUser(userId);
-        SessionPeriod sessionPeriod = createSessionPeriod();
-        SessionalPlan currentSessionalPlan = SessionalPlan.reconstruct(
-                sessionalPlanId,
-                user,
-                SESSION_NAME,
-                sessionPeriod
-        );
-        SessionalPlan updatedSessionalPlan = SessionalPlan.reconstruct(
-                sessionalPlanId,
-                user,
-                targetSessionName,
-                sessionPeriod
-        );
-        SessionalPlanUpdateCommand command = new SessionalPlanUpdateCommand(
-                sessionalPlanId,
-                userId,
-                targetSessionName,
-                sessionPeriod
-        );
+        SessionalPlan currentSessionalPlan = createReconstructedSessionalPlan();
+        SessionalPlanUpdateCommand command =
+                createSessionalPlanUpdateCommand(TARGET_SESSION_NAME, TARGET_SESSION_PERIOD);
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId()))
                 .willReturn(Optional.of(currentSessionalPlan));
 
         sessionalPlanCommandService.update(command);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(sessionalPlanDomainService).should().update(currentSessionalPlan, targetSessionName, sessionPeriod);
-        then(sessionalPlanRepository).should().save(updatedSessionalPlan);
+        then(sessionalPlanRepository).should()
+                .findBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+        then(sessionalPlanDomainService).should().update(
+                currentSessionalPlan,
+                command.targetSessionName(),
+                command.targetSessionPeriod()
+        );
+        then(sessionalPlanRepository).should().save(currentSessionalPlan);
     }
 
     @Test
     void 세셔널_플랜이_없으면_수정에_실패하고_예외를_던진다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        SessionPeriod sessionPeriod = createSessionPeriod();
-        SessionalPlanUpdateCommand command = new SessionalPlanUpdateCommand(
-                sessionalPlanId,
-                userId,
+        SessionalPlanUpdateCommand command = createSessionalPlanUpdateCommand(
+                UNKNOWN_SESSIONAL_PLAN_ID,
                 SESSION_NAME,
-                sessionPeriod
+                SESSION_PERIOD
         );
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId()))
                 .willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -156,19 +117,35 @@ class SessionalPlanCommandServiceTest {
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(sessionalPlanRepository).should()
+                .findBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
         then(sessionalPlanDomainService).should(never()).update(any(), any(), any());
         then(sessionalPlanRepository).should(never()).save(any());
     }
 
     @Test
     void 세셔널_플랜을_삭제한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        SessionalPlanDeleteCommand command = new SessionalPlanDeleteCommand(userId, sessionalPlanId);
+        SessionalPlanDeleteCommand command = createSessionalPlanDeleteCommand(SESSIONAL_PLAN_ID);
 
         sessionalPlanCommandService.delete(command);
 
-        then(sessionalPlanRepository).should().deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(sessionalPlanRepository).should()
+                .deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+    }
+
+    @Test
+    void 세셔널_플랜이_없으면_삭제에_실패하고_예외를_던진다() {
+        SessionalPlanDeleteCommand command = createSessionalPlanDeleteCommand(UNKNOWN_SESSIONAL_PLAN_ID);
+        ResourceNotFoundException exception = new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND);
+        willThrow(exception)
+                .given(sessionalPlanRepository)
+                .deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> sessionalPlanCommandService.delete(command))
+                .isSameAs(exception);
+
+        then(sessionalPlanRepository).should()
+                .deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
     }
 }

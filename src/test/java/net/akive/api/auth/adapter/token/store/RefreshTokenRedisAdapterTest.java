@@ -10,12 +10,12 @@ import java.util.Optional;
 
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 class RefreshTokenRedisAdapterTest extends RedisTestSupport {
 
-    private static final Long USER_ID = 1L;
     private static final Duration TTL = Duration.ofDays(14);
     private static final Duration SHORT_TTL = Duration.ofMillis(300);
 

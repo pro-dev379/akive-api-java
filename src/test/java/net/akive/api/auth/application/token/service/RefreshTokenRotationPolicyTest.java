@@ -10,13 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
+import static net.akive.api.auth.adapter.token.fixture.JwtProviderFixture.NOW;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class RefreshTokenRotationPolicyTest {
-
-    final Instant NOW = Instant.parse("2026-08-15T12:00:00Z");
 
     @Mock
     CurrentTimeProvider currentTimeProvider;

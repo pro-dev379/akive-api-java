@@ -36,5 +36,4 @@ class DailyPlanJpaAdapterTest extends RepositoryTestSupport {
                 .quantityAmount()
                 .value()).isEqualTo(100);
     }
-
 }

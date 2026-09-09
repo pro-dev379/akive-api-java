@@ -14,14 +14,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
+import static net.akive.api.email.domain.EmailMessageFixture.FROM;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 class EmailVerificationSenderAdapterTest {
-
-    private static final String FROM = "from@test.com";
 
     @Mock
     EmailSender emailSender;

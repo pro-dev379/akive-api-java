@@ -7,7 +7,6 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationPolic
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 class SecureRandomEmailVerificationCodeGeneratorTest {
 
     SecureRandomEmailVerificationCodeGenerator generator = new SecureRandomEmailVerificationCodeGenerator();

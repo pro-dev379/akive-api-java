@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static net.akive.api.auth.domain.login.LegacyUserPasswordFixture.createLegacyUserPassword;
+import static net.akive.api.user.domain.UserFixture.UNKNOWN_USER_ID;
 import static net.akive.api.user.domain.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,17 +20,20 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
         User savedUser = userRepository.save(createUser());
         LegacyUserPassword legacyUserPassword = createLegacyUserPassword(savedUser);
         legacyUserPasswordJpaRepository.save(LegacyUserPasswordEntity.from(legacyUserPassword));
+        flushAndClear();
 
-        Optional<LegacyUserPassword> found = legacyUserPasswordRepository.findByUserId(savedUser.getUserId());
+        Optional<LegacyUserPassword> foundLegacyUserPassword =
+                legacyUserPasswordRepository.findByUserId(savedUser.getUserId());
 
-        assertThat(found).contains(legacyUserPassword);
+        assertThat(foundLegacyUserPassword).contains(legacyUserPassword);
     }
 
     @Test
     void 레거시_패스워드가_없으면_빈_값을_반환한다() {
-        Optional<LegacyUserPassword> found = legacyUserPasswordRepository.findByUserId(999L);
+        Optional<LegacyUserPassword> foundLegacyUserPassword =
+                legacyUserPasswordRepository.findByUserId(UNKNOWN_USER_ID);
 
-        assertThat(found).isEmpty();
+        assertThat(foundLegacyUserPassword).isEmpty();
     }
 
     @Test
@@ -37,10 +41,13 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
         User savedUser = userRepository.save(createUser());
         LegacyUserPassword legacyUserPassword = createLegacyUserPassword(savedUser);
         legacyUserPasswordJpaRepository.save(LegacyUserPasswordEntity.from(legacyUserPassword));
+        flushAndClear();
 
         legacyUserPasswordRepository.deleteByUserId(savedUser.getUserId());
+        flushAndClear();
 
-        Optional<LegacyUserPassword> found = legacyUserPasswordRepository.findByUserId(savedUser.getUserId());
-        assertThat(found).isEmpty();
+        Optional<LegacyUserPassword> foundLegacyUserPassword =
+                legacyUserPasswordRepository.findByUserId(savedUser.getUserId());
+        assertThat(foundLegacyUserPassword).isEmpty();
     }
 }

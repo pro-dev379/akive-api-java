@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.user.domain.UserFixture.createUser;
+import static net.akive.api.user.domain.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,19 +37,18 @@ class MentoringProfileServiceTest {
 
     @Test
     void 멘토링_프로필을_생성한다() {
-        Long userId = 1L;
-        User user = createUser(userId);
+        User user = createUser(USER_ID);
         MentoringProfile savedMentoringProfile = MentoringProfile.create(user);
 
-        given(userFinder.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.of(user));
+        given(userFinder.findByUserIdAndLeaveFalse(USER_ID)).willReturn(Optional.of(user));
         given(mentoringProfileRepository.save(any(MentoringProfile.class)))
                 .willReturn(savedMentoringProfile);
 
-        MentoringProfile result = mentoringProfileService.create(userId);
+        MentoringProfile result = mentoringProfileService.create(USER_ID);
 
         assertThat(result).isSameAs(savedMentoringProfile);
 
-        then(userFinder).should().findByUserIdAndLeaveFalse(userId);
+        then(userFinder).should().findByUserIdAndLeaveFalse(USER_ID);
         then(mentoringProfileRepository)
                 .should()
                 .save(argThat(mentoringProfile ->
@@ -60,11 +59,10 @@ class MentoringProfileServiceTest {
 
     @Test
     void 회원이_존재하지_않으면_멘토링_프로필을_생성하지_않는다() {
-        Long userId = 999L;
-        given(userFinder.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.empty());
+        given(userFinder.findByUserIdAndLeaveFalse(UNKNOWN_USER_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> mentoringProfileService.create(userId))
+                .isThrownBy(() -> mentoringProfileService.create(UNKNOWN_USER_ID))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 

@@ -1,6 +1,5 @@
 package net.akive.api.user.application.service;
 
-import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.user.application.provided.UserValidator;
@@ -17,11 +16,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.*;
@@ -29,12 +29,6 @@ import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class UserSignUpDomainServiceTest {
-
-    private static final Email EMAIL = createEmail();
-    private static final String PASSWORD = "password123!";
-    private static final String PASSWORD_HASH = "password-hash";
-    private static final String NICKNAME = "akive";
-    private static final String GENERATED_NICKNAME = "member@abcdef1234";
 
     @Mock
     UserValidator userValidator;
@@ -55,7 +49,7 @@ class UserSignUpDomainServiceTest {
     void 회원_입력_닉네임으로_이메일_회원을_가입시킨다() {
         given(passwordEncoder.encode(PASSWORD)).willReturn(PASSWORD_HASH);
 
-        User user = userSignUpDomainService.signUpMemberByEmail(EMAIL, PASSWORD, "  akive  ");
+        User user = userSignUpDomainService.signUpMemberByEmail(EMAIL, PASSWORD, NICKNAME);
 
         assertThat(user.getEmail()).isEqualTo(EMAIL);
         assertThat(user.getRoleType()).isEqualTo(MEMBER);
@@ -72,7 +66,7 @@ class UserSignUpDomainServiceTest {
     @NullAndEmptySource
     @ValueSource(strings = {"  "})
     void 닉네임이_없으면_닉네임을_자동_생성해서_이메일_회원을_가입시킨다(String nickname) {
-        given(nicknameGenerator.generate(MEMBER)).willReturn(GENERATED_NICKNAME);
+        given(nicknameGenerator.generate(MEMBER)).willReturn(NICKNAME);
         given(passwordEncoder.encode(PASSWORD)).willReturn(PASSWORD_HASH);
 
         User user = userSignUpDomainService.signUpMemberByEmail(EMAIL, PASSWORD, nickname);
@@ -80,11 +74,11 @@ class UserSignUpDomainServiceTest {
         assertThat(user.getEmail()).isEqualTo(EMAIL);
         assertThat(user.getRoleType()).isEqualTo(MEMBER);
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
-        assertThat(user.getUserDetail().nickname()).isEqualTo(GENERATED_NICKNAME);
+        assertThat(user.getUserDetail().nickname()).isEqualTo(NICKNAME);
 
         then(userValidator).should().validateEmailNotDuplicate(EMAIL);
         then(emailVerificationChecker).should().ensureEmailVerifiedForSignUp(EMAIL);
-        then(userValidator).should(never()).validateNicknameNotDuplicate(GENERATED_NICKNAME);
+        then(userValidator).should(never()).validateNicknameNotDuplicate(NICKNAME);
         then(nicknameGenerator).should().generate(MEMBER);
     }
 

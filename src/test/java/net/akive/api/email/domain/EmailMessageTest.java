@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMPTY_COLLECTION;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.REQUIRED_VALUE_MISSING;
+import static net.akive.api.email.domain.EmailMessageFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -20,17 +21,12 @@ class EmailMessageTest {
 
     @Test
     void 이메일_메시지를_생성한다() {
-        EmailMessage emailMessage = new EmailMessage(
-                "from@test.com",
-                List.of("to@test.com"),
-                "subject",
-                "content"
-        );
+        EmailMessage emailMessage = createEmailMessage();
 
-        assertThat(emailMessage.from()).isEqualTo("from@test.com");
-        assertThat(emailMessage.to()).containsExactly("to@test.com");
-        assertThat(emailMessage.subject()).isEqualTo("subject");
-        assertThat(emailMessage.content()).isEqualTo("content");
+        assertThat(emailMessage.from()).isEqualTo(FROM);
+        assertThat(emailMessage.to()).isEqualTo(TO);
+        assertThat(emailMessage.subject()).isEqualTo(SUBJECT);
+        assertThat(emailMessage.content()).isEqualTo(CONTENT);
     }
 
     @ParameterizedTest
@@ -50,11 +46,11 @@ class EmailMessageTest {
 
     private static Stream<Arguments> invalidFields() {
         return Stream.of(
-                arguments(null, List.of("to@test.com"), "subject", "content", REQUIRED_VALUE_MISSING),
-                arguments("from@test.com", List.of(), "subject", "content", EMPTY_COLLECTION),
-                arguments("from@test.com", null, "subject", "content", REQUIRED_VALUE_MISSING),
-                arguments("from@test.com", List.of("to@test.com"), null, "content", REQUIRED_VALUE_MISSING),
-                arguments("from@test.com", List.of("to@test.com"), "subject", null, REQUIRED_VALUE_MISSING)
+                arguments(null, TO, SUBJECT, CONTENT, REQUIRED_VALUE_MISSING),
+                arguments(FROM, List.of(), SUBJECT, CONTENT, EMPTY_COLLECTION),
+                arguments(FROM, null, SUBJECT, CONTENT, REQUIRED_VALUE_MISSING),
+                arguments(FROM, TO, null, CONTENT, REQUIRED_VALUE_MISSING),
+                arguments(FROM, TO, SUBJECT, null, REQUIRED_VALUE_MISSING)
         );
     }
 }

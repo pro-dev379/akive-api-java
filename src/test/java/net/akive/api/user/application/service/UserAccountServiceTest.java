@@ -1,6 +1,5 @@
 package net.akive.api.user.application.service;
 
-import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.application.event.UserSignedUpEvent;
@@ -19,11 +18,10 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 
-import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.user.domain.UserFixture.createPersistedUser;
-import static net.akive.api.user.domain.UserFixture.createUser;
+import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserSignUpByEmailCommand;
+import static net.akive.api.user.domain.UserFixture.*;
 import static net.akive.api.user.domain.UserPolicy.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -33,11 +31,6 @@ import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class UserAccountServiceTest {
-
-    private static final Email EMAIL = createEmail();
-    private static final String PASSWORD = "password123!";
-    private static final String NICKNAME = "akive";
-    private static final String PASSWORD_HASH = "password-hash";
 
     @Mock
     UserRepository userRepository;
@@ -58,7 +51,7 @@ class UserAccountServiceTest {
     void 이메일로_회원을_가입시키고_기본_목표를_생성한_뒤_회원_가입_이벤트를_발행한다() {
         UserSignUpByEmailCommand command = createUserSignUpByEmailCommand();
         User user = createUser();
-        User savedUser = createPersistedUser(1L);
+        User savedUser = createReconstructedUser();
 
         given(userSignUpDomainService.signUpMemberByEmail(command.email(), command.password(), command.nickname()))
                 .willReturn(user);
@@ -107,33 +100,27 @@ class UserAccountServiceTest {
 
     @Test
     void 패스워드를_변경한다() {
-        Long userId = 1L;
-        User user = createPersistedUser(userId, null);
+        User user = createReconstructedUser(USER_ID, null);
 
-        given(userRepository.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.of(user));
+        given(userRepository.findByUserIdAndLeaveFalse(USER_ID)).willReturn(Optional.of(user));
 
-        userAccountService.updatePassword(userId, PASSWORD_HASH);
+        userAccountService.updatePassword(USER_ID, PASSWORD_HASH);
 
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
-        then(userRepository).should().findByUserIdAndLeaveFalse(userId);
+        then(userRepository).should().findByUserIdAndLeaveFalse(USER_ID);
         then(userRepository).should().save(user);
     }
 
     @Test
     void 패스워드를_변경할_회원이_없으면_실패한다() {
-        Long userId = 1L;
-        given(userRepository.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.empty());
+        given(userRepository.findByUserIdAndLeaveFalse(USER_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> userAccountService.updatePassword(userId, PASSWORD_HASH))
+                .isThrownBy(() -> userAccountService.updatePassword(USER_ID, PASSWORD_HASH))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
-        then(userRepository).should().findByUserIdAndLeaveFalse(userId);
+        then(userRepository).should().findByUserIdAndLeaveFalse(USER_ID);
         then(userRepository).should(never()).save(any(User.class));
-    }
-
-    private static UserSignUpByEmailCommand createUserSignUpByEmailCommand() {
-        return new UserSignUpByEmailCommand(EMAIL, PASSWORD, NICKNAME);
     }
 }

@@ -3,6 +3,7 @@ package net.akive.api.auth.adapter.token.security;
 import net.akive.api.auth.domain.token.RefreshToken;
 import net.akive.api.auth.domain.token.RefreshTokenPayload;
 import net.akive.api.common.exception.business.AuthenticationException;
+import net.akive.api.common.time.FixedCurrentTimeProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,11 +15,13 @@ import org.springframework.security.oauth2.jwt.*;
 
 import java.util.List;
 
-import static net.akive.api.auth.adapter.token.security.JwtProviderFixture.*;
+import static net.akive.api.auth.adapter.token.fixture.JwtProviderFixture.*;
+import static net.akive.api.auth.domain.token.RefreshTokenFixture.REFRESH_TOKEN_VALUE;
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
 import static net.akive.api.common.exception.business.AuthenticationError.REFRESH_TOKEN_EXPIRED;
-import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserFixture.ROLE_TYPE;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,23 +45,22 @@ class JwtRefreshTokenProviderTest {
                 refreshTokenJwtEncoder,
                 refreshTokenJwtDecoder,
                 jwtProperties(),
-                fixedCurrentTimeProvider()
+                new FixedCurrentTimeProvider(NOW)
         );
     }
 
     @Test
     void 리프레시_토큰을_생성한다() {
-        String tokenValue = "refresh-token";
-        Jwt jwt = Jwt.withTokenValue(tokenValue)
+        Jwt jwt = Jwt.withTokenValue(REFRESH_TOKEN_VALUE)
                 .header("alg", "HS256")
                 .subject(String.valueOf(USER_ID))
                 .build();
 
         given(refreshTokenJwtEncoder.encode(any(JwtEncoderParameters.class))).willReturn(jwt);
 
-        RefreshToken refreshToken = jwtRefreshTokenProvider.create(USER_ID, CLIENT_INSTANCE_ID, MEMBER);
+        RefreshToken refreshToken = jwtRefreshTokenProvider.create(USER_ID, CLIENT_INSTANCE_ID, ROLE_TYPE);
 
-        assertThat(refreshToken).isEqualTo(createRefreshToken(tokenValue));
+        assertThat(refreshToken).isEqualTo(new RefreshToken(REFRESH_TOKEN_VALUE));
 
         ArgumentCaptor<JwtEncoderParameters> captor = ArgumentCaptor.forClass(JwtEncoderParameters.class);
         then(refreshTokenJwtEncoder).should().encode(captor.capture());
@@ -69,17 +71,17 @@ class JwtRefreshTokenProviderTest {
         assertThat(claims.getIssuedAt()).isEqualTo(NOW);
         assertThat(claims.getExpiresAt()).isEqualTo(EXPIRES_AT);
         assertThat(claims.getClaimAsString("client")).isEqualTo(CLIENT_INSTANCE_ID.toString());
-        assertThat(claims.getClaimAsString("role")).isEqualTo(MEMBER.name());
+        assertThat(claims.getClaimAsString("role")).isEqualTo(ROLE_TYPE.name());
     }
 
     @Test
     void 리프레시_토큰을_파싱해_페이로드를_반환한다() {
-        RefreshToken refreshToken = createRefreshToken("refresh-token");
+        RefreshToken refreshToken = createRefreshToken();
         Jwt jwt = Jwt.withTokenValue(refreshToken.value())
                 .header("alg", "HS256")
                 .subject(String.valueOf(USER_ID))
                 .claim("client", CLIENT_INSTANCE_ID.toString())
-                .claim("role", MEMBER.name())
+                .claim("role", ROLE_TYPE.name())
                 .expiresAt(EXPIRES_AT)
                 .build();
 
@@ -89,7 +91,7 @@ class JwtRefreshTokenProviderTest {
 
         assertThat(payload.userId()).isEqualTo(USER_ID);
         assertThat(payload.clientInstanceId()).isEqualTo(CLIENT_INSTANCE_ID);
-        assertThat(payload.roleType()).isEqualTo(MEMBER);
+        assertThat(payload.roleType()).isEqualTo(ROLE_TYPE);
         assertThat(payload.expiresAt()).isEqualTo(EXPIRES_AT);
     }
 

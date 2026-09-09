@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static net.akive.api.user.domain.UserFixture.UNKNOWN_USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
@@ -19,8 +20,6 @@ class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 주간_계획량을_조회한다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
-        Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
-        Long userId = savedTotalQuantity.getSessionalPlan().getUser().getUserId();
         WeekPeriod weekPeriod = new WeekPeriod(
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 4)
@@ -29,15 +28,15 @@ class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
 
         List<WeeklyPlanData> weeklyPlanItems = weeklyQuantityRepository
                 .findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
-                        sessionalPlanId,
-                        userId,
+                        savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
+                        savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
                         weekPeriod
                 );
 
         assertThat(weeklyPlanItems).hasSize(1);
         WeeklyPlanData weeklyPlan = weeklyPlanItems.getFirst();
         assertThat(weeklyPlan.sessionalPlanId())
-                .isEqualTo(sessionalPlanId);
+                .isEqualTo(savedTotalQuantity.getSessionalPlan().getSessionalPlanId());
         assertThat(weeklyPlan.totalQuantityId()).isEqualTo(savedTotalQuantity.getTotalQuantityId());
         assertThat(weeklyPlan.subject()).isEqualTo(savedTotalQuantity.getSubject());
         assertThat(weeklyPlan.quantityUnit()).isEqualTo(savedTotalQuantity.getTotalQuantityAmount().quantityUnit());
@@ -55,7 +54,6 @@ class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 다른_사용자의_주간_계획량은_조회하지_않는다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
-        Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
         WeekPeriod weekPeriod = new WeekPeriod(
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 4)
@@ -64,8 +62,8 @@ class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
 
         List<WeeklyPlanData> weeklyPlanItems = weeklyQuantityRepository
                 .findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
-                        sessionalPlanId,
-                        Long.MAX_VALUE,
+                        savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
+                        UNKNOWN_USER_ID,
                         weekPeriod
                 );
 
@@ -75,28 +73,30 @@ class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 위클리_플랜_내_특정_주간_계획량을_조회한다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
-        Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
-        Long userId = savedTotalQuantity.getSessionalPlan().getUser().getUserId();
-        Long totalQuantityId = savedTotalQuantity.getTotalQuantityId();
         WeeklyQuantity savedWeeklyQuantity = savedTotalQuantity.getWeeklyQuantities().getFirst();
-        Long weeklyQuantityId = savedWeeklyQuantity.getWeeklyQuantityId();
         flushAndClear();
 
         Optional<WeeklyPlanData> weeklyPlan = weeklyQuantityRepository
                 .findWeeklyPlanDataBySessionalPlanIdAndUserIdAndTotalQuantityIdAndWeeklyQuantityId(
-                        sessionalPlanId,
-                        userId,
-                        totalQuantityId,
-                        weeklyQuantityId
+                        savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
+                        savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
+                        savedTotalQuantity.getTotalQuantityId(),
+                        savedWeeklyQuantity.getWeeklyQuantityId()
                 );
 
         assertThat(weeklyPlan).isPresent();
         WeeklyPlanData weeklyPlanData = weeklyPlan.get();
-        assertThat(weeklyPlanData.sessionalPlanId()).isEqualTo(sessionalPlanId);
-        assertThat(weeklyPlanData.totalQuantityId()).isEqualTo(totalQuantityId);
+        assertThat(weeklyPlanData.sessionalPlanId()).isEqualTo(
+                savedTotalQuantity.getSessionalPlan().getSessionalPlanId()
+        );
+        assertThat(weeklyPlanData.totalQuantityId()).isEqualTo(savedTotalQuantity.getTotalQuantityId());
         assertThat(weeklyPlanData.subject()).isEqualTo(savedTotalQuantity.getSubject());
-        assertThat(weeklyPlanData.quantityUnit()).isEqualTo(savedTotalQuantity.getTotalQuantityAmount().quantityUnit());
-        assertThat(weeklyPlanData.weeklyQuantity().getWeeklyQuantityId()).isEqualTo(weeklyQuantityId);
+        assertThat(weeklyPlanData.quantityUnit()).isEqualTo(
+                savedTotalQuantity.getTotalQuantityAmount().quantityUnit()
+        );
+        assertThat(weeklyPlanData.weeklyQuantity().getWeeklyQuantityId()).isEqualTo(
+                savedWeeklyQuantity.getWeeklyQuantityId()
+        );
         assertThat(weeklyPlanData.weeklyQuantity().getWeekPeriod()).isEqualTo(savedWeeklyQuantity.getWeekPeriod());
         assertThat(weeklyPlanData.weeklyQuantity().getDailyQuantities())
                 .extracting(DailyQuantity::getDate)

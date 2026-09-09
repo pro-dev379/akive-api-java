@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.auth.adapter.login.webapi.LoginApi;
 import net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequest;
 import net.akive.api.auth.application.login.provided.LoginProcessor;
+import net.akive.api.common.exception.ApplicationError;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.UUID;
 
+import static net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequestFixture.createLoginByEmailRequest;
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_ACCESS_TOKEN;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,10 +49,10 @@ class PublicEndpointSecurityFilterChainTest {
 
     @Test
     void 퍼블릭_엔드포인트는_Authorization_헤더가_있어도_액세스_토큰을_검증하지_않는다() throws JsonProcessingException {
-        LoginByEmailRequest request = new LoginByEmailRequest("test@test.com", "password");
+        LoginByEmailRequest request = createLoginByEmailRequest();
 
         given(loginProcessor.loginByEmail(any()))
-                .willReturn(createIssuedToken("access-token", "refresh-token"));
+                .willReturn(createIssuedToken());
 
         mvcTester.post()
                 .uri("/login/email")
@@ -75,7 +77,15 @@ class PublicEndpointSecurityFilterChainTest {
                 .assertThat()
                 .hasStatus(UNAUTHORIZED);
 
-        result.bodyJson().extractingPath("$.code").isEqualTo(INVALID_ACCESS_TOKEN.getCode());
-        result.bodyJson().extractingPath("$.message").isEqualTo(INVALID_ACCESS_TOKEN.getMessage());
+        assertErrorResponse(result, INVALID_ACCESS_TOKEN);
+    }
+
+    private void assertErrorResponse(MvcTestResultAssert result, ApplicationError error) {
+        result.bodyJson()
+                .extractingPath("$.code")
+                .isEqualTo(error.getCode());
+        result.bodyJson()
+                .extractingPath("$.message")
+                .isEqualTo(error.getMessage());
     }
 }

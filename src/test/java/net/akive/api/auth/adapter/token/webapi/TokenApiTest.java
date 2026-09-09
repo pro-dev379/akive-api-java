@@ -1,10 +1,14 @@
 package net.akive.api.auth.adapter.token.webapi;
 
+import net.akive.api.auth.application.token.provided.TokenIssuer;
 import net.akive.api.auth.application.token.provided.dto.TokenReissueCommand;
 import net.akive.api.auth.domain.token.ReissuedToken;
 import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.support.PublicApiTestSupport;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import static net.akive.api.auth.application.token.provided.dto.TokenReissueCommandFixture.createTokenReissueCommand;
@@ -16,7 +20,14 @@ import static org.mockito.BDDMockito.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
+@WebMvcTest(TokenApi.class)
+@AutoConfigureMockMvc(addFilters = false)
 class TokenApiTest extends PublicApiTestSupport {
+
+    private static final String TOKEN_REISSUE_URL = "/tokens";
+
+    @MockitoBean
+    TokenIssuer tokenIssuer;
 
     @Test
     void 리프레시_토큰으로_토큰을_재발급한다() {
@@ -26,7 +37,7 @@ class TokenApiTest extends PublicApiTestSupport {
         given(tokenIssuer.reissue(command)).willReturn(reissuedToken);
 
         MvcTestResultAssert result =
-                postTokenReissue("Bearer " + REFRESH_TOKEN_VALUE).hasStatus(OK);
+                postWithAuthorization(TOKEN_REISSUE_URL, "Bearer " + REFRESH_TOKEN_VALUE).hasStatus(OK);
 
         result.bodyJson().extractingPath("$.accessToken").isEqualTo(REISSUED_ACCESS_TOKEN_VALUE);
         result.bodyJson().extractingPath("$.refreshToken").isEqualTo(ROTATED_REFRESH_TOKEN_VALUE);
@@ -42,7 +53,7 @@ class TokenApiTest extends PublicApiTestSupport {
         given(tokenIssuer.reissue(command)).willReturn(reissuedToken);
 
         MvcTestResultAssert result =
-                postTokenReissue("Bearer " + REFRESH_TOKEN_VALUE).hasStatus(OK);
+                postWithAuthorization(TOKEN_REISSUE_URL, "Bearer " + REFRESH_TOKEN_VALUE).hasStatus(OK);
 
         result.bodyJson().extractingPath("$.accessToken").isEqualTo(REISSUED_ACCESS_TOKEN_VALUE);
         result.bodyText().doesNotContain("refreshToken");
@@ -58,7 +69,10 @@ class TokenApiTest extends PublicApiTestSupport {
                 .given(tokenIssuer)
                 .reissue(command);
 
-        postTokenReissue("Bearer " + REFRESH_TOKEN_VALUE).hasStatus(UNAUTHORIZED);
+        MvcTestResultAssert result =
+                postWithAuthorization(TOKEN_REISSUE_URL, "Bearer " + REFRESH_TOKEN_VALUE).hasStatus(UNAUTHORIZED);
+
+        assertErrorResponse(result, INVALID_REFRESH_TOKEN);
 
         then(tokenIssuer).should().reissue(command);
     }
@@ -71,15 +85,12 @@ class TokenApiTest extends PublicApiTestSupport {
                 .given(tokenIssuer)
                 .reissue(command);
 
-        postTokenReissue("Bearer " + REFRESH_TOKEN_VALUE).hasStatus(UNAUTHORIZED);
+        MvcTestResultAssert result =
+                postWithAuthorization(TOKEN_REISSUE_URL, "Bearer " + REFRESH_TOKEN_VALUE).hasStatus(UNAUTHORIZED);
+
+        assertErrorResponse(result, REFRESH_TOKEN_EXPIRED);
 
         then(tokenIssuer).should().reissue(command);
     }
 
-    private MvcTestResultAssert postTokenReissue(String authorizationHeader) {
-        return mvcTester.post()
-                .uri("/tokens")
-                .header("Authorization", authorizationHeader)
-                .assertThat();
-    }
 }

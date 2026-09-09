@@ -19,9 +19,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.domain.PlanFixture.createPersistedSessionalPlan;
-import static net.akive.api.plan.domain.PlanFixture.createPersistedTotalQuantity;
-import static net.akive.api.user.domain.UserFixture.createPersistedUser;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.createReconstructedTotalQuantity;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
+import static net.akive.api.user.domain.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -42,30 +44,27 @@ class SessionalPlanQueryServiceTest {
 
     @Test
     void 회원_식별자로_세셔널_플랜_목록을_조회한다() {
-        Long userId = 1L;
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(10L, createPersistedUser(userId));
-        given(sessionalPlanRepository.findAllByUserIdOrderBySessionalPlanIdDesc(userId))
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, createReconstructedUser(USER_ID));
+        given(sessionalPlanRepository.findAllByUserIdOrderBySessionalPlanIdDesc(USER_ID))
                 .willReturn(List.of(sessionalPlan));
 
-        List<SessionalPlan> sessionalPlans = sessionalPlanQueryService.findAll(userId);
+        List<SessionalPlan> sessionalPlans = sessionalPlanQueryService.findAll(USER_ID);
 
         assertThat(sessionalPlans).containsExactly(sessionalPlan);
 
-        then(sessionalPlanRepository).should().findAllByUserIdOrderBySessionalPlanIdDesc(userId);
+        then(sessionalPlanRepository).should().findAllByUserIdOrderBySessionalPlanIdDesc(USER_ID);
     }
 
     @Test
     void 세셔널_플랜_상세를_조회한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        User user = createPersistedUser(userId);
-        SessionalPlan sessionalPlan = createPersistedSessionalPlan(sessionalPlanId, user);
-        TotalQuantity totalQuantity = createPersistedTotalQuantity(20L, sessionalPlan);
-        SessionalPlanFindQuery query = new SessionalPlanFindQuery(userId, sessionalPlanId);
+        User user = createReconstructedUser(USER_ID);
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, user);
+        TotalQuantity totalQuantity = createReconstructedTotalQuantity(FIRST_TOTAL_QUANTITY_ID, sessionalPlan);
+        SessionalPlanFindQuery query = new SessionalPlanFindQuery(USER_ID, SESSIONAL_PLAN_ID);
 
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID))
                 .willReturn(Optional.of(sessionalPlan));
-        given(totalQuantityRepository.findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(sessionalPlanId))
+        given(totalQuantityRepository.findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(SESSIONAL_PLAN_ID))
                 .willReturn(List.of(totalQuantity));
 
         SessionalPlanDetail sessionalPlanDetail = sessionalPlanQueryService.find(query);
@@ -80,16 +79,14 @@ class SessionalPlanQueryServiceTest {
                 .extracting(weeklyQuantity -> weeklyQuantity.sessionWeek().weekNum())
                 .containsExactly(1, 2, 3);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
-        then(totalQuantityRepository).should().findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(sessionalPlanId);
+        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID);
+        then(totalQuantityRepository).should().findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(SESSIONAL_PLAN_ID);
     }
 
     @Test
     void 세셔널_플랜이_없으면_상세_조회에_실패하고_예외를_던진다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        SessionalPlanFindQuery query = new SessionalPlanFindQuery(userId, sessionalPlanId);
-        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId))
+        SessionalPlanFindQuery query = new SessionalPlanFindQuery(USER_ID, UNKNOWN_SESSIONAL_PLAN_ID);
+        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(UNKNOWN_SESSIONAL_PLAN_ID, USER_ID))
                 .willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -97,8 +94,8 @@ class SessionalPlanQueryServiceTest {
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
-        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(UNKNOWN_SESSIONAL_PLAN_ID, USER_ID);
         then(totalQuantityRepository).should(never())
-                .findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(sessionalPlanId);
+                .findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(UNKNOWN_SESSIONAL_PLAN_ID);
     }
 }

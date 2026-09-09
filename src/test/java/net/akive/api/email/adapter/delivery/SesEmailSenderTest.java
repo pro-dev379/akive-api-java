@@ -10,8 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 
-import java.util.List;
-
+import static net.akive.api.email.domain.EmailMessageFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
@@ -26,12 +25,7 @@ class SesEmailSenderTest {
 
     @Test
     void 이메일을_SES로_dispatch한다() {
-        EmailMessage emailMessage = new EmailMessage(
-                "from@test.com",
-                List.of("to@test.com"),
-                "subject",
-                "content"
-        );
+        EmailMessage emailMessage = new EmailMessage(FROM, TO, SUBJECT, CONTENT);
 
         sesEmailSender.dispatch(emailMessage);
 

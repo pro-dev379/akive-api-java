@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.BLANK_VALUE;
 import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.UserDetailFixture.createUserDetail;
 import static net.akive.api.user.domain.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -13,13 +15,12 @@ class UserTest {
 
     @Test
     void 저장된_회원_정보를_복원한다() {
-        Long userId = 1L;
-        UserDetail userDetail = UserDetail.of(NICKNAME, "https://example.com", "aim");
+        UserDetail userDetail = createUserDetail();
         Leave leave = Leave.none();
 
-        User user = User.reconstruct(userId, EMAIL, ROLE_TYPE, LOGIN_TYPE, PASSWORD_HASH, userDetail, leave);
+        User user = User.reconstruct(USER_ID, EMAIL, ROLE_TYPE, LOGIN_TYPE, PASSWORD_HASH, userDetail, leave);
 
-        assertThat(user.getUserId()).isEqualTo(userId);
+        assertThat(user.getUserId()).isEqualTo(USER_ID);
         assertThat(user.getEmail()).isEqualTo(EMAIL);
         assertThat(user.getRoleType()).isEqualTo(MEMBER);
         assertThat(user.getLoginType()).isEqualTo(LOGIN_TYPE);
@@ -49,12 +50,15 @@ class UserTest {
 
         assertThat(user.hasPassword()).isTrue();
 
-        Long userId = 1L;
-        UserDetail userDetail = UserDetail.of(NICKNAME, "https://example.com", "aim");
-        Leave leave = Leave.none();
-        String passwordHash = null;
-
-        User anotherUser = User.reconstruct(userId, EMAIL, ROLE_TYPE, LOGIN_TYPE, passwordHash, userDetail, leave);
+        User anotherUser = User.reconstruct(
+                USER_ID,
+                EMAIL,
+                ROLE_TYPE,
+                LOGIN_TYPE,
+                null,
+                createUserDetail(),
+                Leave.none()
+        );
 
         assertThat(anotherUser.hasPassword()).isFalse();
     }
@@ -101,8 +105,8 @@ class UserTest {
 
     @Test
     void 같은_식별자를_가진_회원은_같게_취급한다() {
-        User user = createPersistedUser(1L);
-        User sameUser = createPersistedUser(1L);
+        User user = createReconstructedUser(USER_ID);
+        User sameUser = createReconstructedUser(USER_ID);
 
         assertThat(user).isEqualTo(sameUser);
         assertThat(user.hashCode()).isEqualTo(sameUser.hashCode());
@@ -110,8 +114,8 @@ class UserTest {
 
     @Test
     void 식별자가_다른_회원은_다르게_취급한다() {
-        User user = createPersistedUser(1L);
-        User anotherUser = createPersistedUser(2L);
+        User user = createReconstructedUser(USER_ID);
+        User anotherUser = createReconstructedUser(ANOTHER_USER_ID);
 
         assertThat(user).isNotEqualTo(anotherUser);
     }

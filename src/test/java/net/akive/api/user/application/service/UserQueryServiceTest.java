@@ -1,6 +1,5 @@
 package net.akive.api.user.application.service;
 
-import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
@@ -11,8 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static net.akive.api.common.domain.EmailFixture.createEmail;
-import static net.akive.api.user.domain.UserFixture.createPersistedUser;
+import static net.akive.api.user.domain.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -28,27 +26,25 @@ class UserQueryServiceTest {
 
     @Test
     void 회원_식별자로_탈퇴하지_않은_회원을_조회한다() {
-        Long userId = 1L;
-        User user = createPersistedUser(userId);
-        given(userRepository.findByUserIdAndLeaveFalse(userId)).willReturn(Optional.of(user));
+        User user = createReconstructedUser();
+        given(userRepository.findByUserIdAndLeaveFalse(USER_ID)).willReturn(Optional.of(user));
 
-        Optional<User> found = userQueryService.findByUserIdAndLeaveFalse(userId);
+        Optional<User> found = userQueryService.findByUserIdAndLeaveFalse(USER_ID);
 
         assertThat(found).contains(user);
 
-        then(userRepository).should().findByUserIdAndLeaveFalse(userId);
+        then(userRepository).should().findByUserIdAndLeaveFalse(USER_ID);
     }
 
     @Test
     void 이메일로_탈퇴하지_않은_회원을_조회한다() {
-        Email email = createEmail();
-        User user = createPersistedUser(1L);
-        given(userRepository.findByEmailAndLeaveFalse(email)).willReturn(Optional.of(user));
+        User user = createReconstructedUser();
+        given(userRepository.findByEmailAndLeaveFalse(EMAIL)).willReturn(Optional.of(user));
 
-        Optional<User> found = userQueryService.findByEmailAndLeaveFalse(email);
+        Optional<User> found = userQueryService.findByEmailAndLeaveFalse(EMAIL);
 
         assertThat(found).contains(user);
 
-        then(userRepository).should().findByEmailAndLeaveFalse(email);
+        then(userRepository).should().findByEmailAndLeaveFalse(EMAIL);
     }
 }

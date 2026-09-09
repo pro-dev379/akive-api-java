@@ -2,6 +2,8 @@ package net.akive.api.plan.adapter.webapi.totalquantity;
 
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.plan.adapter.webapi.common.PlanApiPath;
+import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountDelayCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountUpdateCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyCompletedAmountUpdateCommand;
@@ -9,50 +11,53 @@ import net.akive.api.support.PrivateApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
-import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.*;
+import static net.akive.api.plan.domain.fixture.DailyQuantityFixture.*;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_PLAN_ID;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
+import static net.akive.api.plan.domain.fixture.WeeklyQuantityFixture.FIRST_WEEKLY_QUANTITY_ID;
 import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENGTH;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.springframework.http.HttpStatus.*;
 
+@WebMvcTest(DailyQuantityApi.class)
 class DailyQuantityApiTest extends PrivateApiTestSupport {
+
+    @MockitoBean
+    TotalQuantityModifier totalQuantityModifier;
 
     @Test
     void 일일_계획량을_수정한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyAmount = 50;
-        String targetDailyMemo = "첫날 조정";
-        String body = dailyAmountUpdateRequestJson(targetDailyAmount, targetDailyMemo);
+        String body = dailyAmountUpdateRequestJson(TARGET_DAILY_AMOUNT, TARGET_DAILY_MEMO);
         DailyAmountUpdateCommand command = DailyAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyAmount,
-                targetDailyMemo
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_AMOUNT,
+                TARGET_DAILY_MEMO
         );
 
         patchJson(
-                userId,
-                DAILY_QUANTITY,
+                PlanApiPath.DAILY_QUANTITY,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NO_CONTENT);
 
         then(totalQuantityModifier).should().updateDailyAmount(command);
@@ -61,20 +66,15 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidDailyAmountUpdateRequests")
     void 일일_계획량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
 
         patchJson(
-                userId,
-                DAILY_QUANTITY,
+                PlanApiPath.DAILY_QUANTITY,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(BAD_REQUEST);
 
         then(totalQuantityModifier).should(never()).updateDailyAmount(any(DailyAmountUpdateCommand.class));
@@ -83,20 +83,14 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 일일_계획량_수정_시_세션_총량이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyAmount = 50;
-        String body = dailyAmountUpdateRequestJson(targetDailyAmount, null);
+        String body = dailyAmountUpdateRequestJson(TARGET_DAILY_AMOUNT, null);
         DailyAmountUpdateCommand command = DailyAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyAmount,
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_AMOUNT,
                 null
         );
         willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
@@ -104,40 +98,29 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 .updateDailyAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY,
+                PlanApiPath.DAILY_QUANTITY,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("TOTAL_QUANTITY_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Total quantity not found.");
+        assertErrorResponse(result, TOTAL_QUANTITY_NOT_FOUND);
         then(totalQuantityModifier).should().updateDailyAmount(command);
     }
 
     @Test
     void 일일_계획량_수정_시_주간_계획량이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyAmount = 50;
-        String body = dailyAmountUpdateRequestJson(targetDailyAmount, null);
+        String body = dailyAmountUpdateRequestJson(TARGET_DAILY_AMOUNT, null);
         DailyAmountUpdateCommand command = DailyAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyAmount,
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_AMOUNT,
                 null
         );
         willThrow(new ResourceNotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
@@ -145,40 +128,29 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 .updateDailyAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY,
+                PlanApiPath.DAILY_QUANTITY,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("WEEKLY_QUANTITY_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Weekly quantity not found.");
+        assertErrorResponse(result, WEEKLY_QUANTITY_NOT_FOUND);
         then(totalQuantityModifier).should().updateDailyAmount(command);
     }
 
     @Test
     void 일일_계획량_수정_시_일일_계획량이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyAmount = 50;
-        String body = dailyAmountUpdateRequestJson(targetDailyAmount, null);
+        String body = dailyAmountUpdateRequestJson(TARGET_DAILY_AMOUNT, null);
         DailyAmountUpdateCommand command = DailyAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyAmount,
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_AMOUNT,
                 null
         );
         willThrow(new ResourceNotFoundException(DAILY_QUANTITY_NOT_FOUND))
@@ -186,40 +158,29 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 .updateDailyAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY,
+                PlanApiPath.DAILY_QUANTITY,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("DAILY_QUANTITY_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Daily quantity not found");
+        assertErrorResponse(result, DAILY_QUANTITY_NOT_FOUND);
         then(totalQuantityModifier).should().updateDailyAmount(command);
     }
 
     @Test
     void 일일_계획량_수정_시_일일_계획량을_늘리면_400을_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyAmount = 50;
-        String body = dailyAmountUpdateRequestJson(targetDailyAmount, null);
+        String body = dailyAmountUpdateRequestJson(TARGET_DAILY_AMOUNT, null);
         DailyAmountUpdateCommand command = DailyAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyAmount,
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_AMOUNT,
                 null
         );
         willThrow(new BusinessRuleViolationException(DAILY_AMOUNT_INCREASE_NOT_ALLOWED))
@@ -227,40 +188,29 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 .updateDailyAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY,
+                PlanApiPath.DAILY_QUANTITY,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(BAD_REQUEST);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("DAILY_AMOUNT_INCREASE_NOT_ALLOWED");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Daily amount cannot be increased here.");
+        assertErrorResponse(result, DAILY_AMOUNT_INCREASE_NOT_ALLOWED);
         then(totalQuantityModifier).should().updateDailyAmount(command);
     }
 
     @Test
     void 일일_계획량_수정_시_마지막_일일_계획량을_줄이면_400을_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyAmount = 50;
-        String body = dailyAmountUpdateRequestJson(targetDailyAmount, null);
+        String body = dailyAmountUpdateRequestJson(TARGET_DAILY_AMOUNT, null);
         DailyAmountUpdateCommand command = DailyAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyAmount,
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_AMOUNT,
                 null
         );
         willThrow(new BusinessRuleViolationException(LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED))
@@ -268,40 +218,29 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 .updateDailyAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY,
+                PlanApiPath.DAILY_QUANTITY,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(BAD_REQUEST);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Last daily amount cannot be reduced.");
+        assertErrorResponse(result, LAST_DAILY_AMOUNT_REDUCTION_NOT_ALLOWED);
         then(totalQuantityModifier).should().updateDailyAmount(command);
     }
 
     @Test
     void 일일_계획량_수정_시_일일_계획_달성량보다_적게_수정하면_400을_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyAmount = 50;
-        String body = dailyAmountUpdateRequestJson(targetDailyAmount, null);
+        String body = dailyAmountUpdateRequestJson(TARGET_DAILY_AMOUNT, null);
         DailyAmountUpdateCommand command = DailyAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyAmount,
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_AMOUNT,
                 null
         );
         willThrow(new BusinessRuleViolationException(DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
@@ -309,52 +248,40 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
                 .updateDailyAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY,
+                PlanApiPath.DAILY_QUANTITY,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(BAD_REQUEST);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Daily amount cannot be less than completed amount.");
+        assertErrorResponse(result, DAILY_AMOUNT_LESS_THAN_COMPLETED_AMOUNT);
         then(totalQuantityModifier).should().updateDailyAmount(command);
     }
 
     @Test
     void 일일_딜레이를_같은_주의_다른_날로_옮긴다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        Long receivingDailyQuantityId = 50L;
-        int dailyAmountToDelay = 10;
-        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        String body = dailyAmountDelayRequestJson(SECOND_DAILY_QUANTITY_ID, DAILY_AMOUNT_TO_DELAY);
         DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                receivingDailyQuantityId,
-                dailyAmountToDelay
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                SECOND_DAILY_QUANTITY_ID,
+                DAILY_AMOUNT_TO_DELAY
         );
 
         patchJson(
-                userId,
-                DAILY_QUANTITY_DELAYS,
+                PlanApiPath.DAILY_QUANTITY_DELAYS,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NO_CONTENT);
 
         then(totalQuantityModifier).should().delayDailyAmountTo(command);
@@ -363,20 +290,15 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidDailyAmountDelayRequests")
     void 일일_딜레이_옮길_시_요청값이_올바르지_않으면_400을_응답한다(String body) {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
 
         patchJson(
-                userId,
-                DAILY_QUANTITY_DELAYS,
+                PlanApiPath.DAILY_QUANTITY_DELAYS,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(BAD_REQUEST);
 
         then(totalQuantityModifier).should(never()).delayDailyAmountTo(any(DailyAmountDelayCommand.class));
@@ -385,240 +307,174 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 일일_딜레이_옮길_시_세션_총량이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        Long receivingDailyQuantityId = 50L;
-        int dailyAmountToDelay = 10;
-        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        String body = dailyAmountDelayRequestJson(SECOND_DAILY_QUANTITY_ID, DAILY_AMOUNT_TO_DELAY);
         DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                receivingDailyQuantityId,
-                dailyAmountToDelay
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                SECOND_DAILY_QUANTITY_ID,
+                DAILY_AMOUNT_TO_DELAY
         );
         willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY_DELAYS,
+                PlanApiPath.DAILY_QUANTITY_DELAYS,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("TOTAL_QUANTITY_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Total quantity not found.");
+        assertErrorResponse(result, TOTAL_QUANTITY_NOT_FOUND);
         then(totalQuantityModifier).should().delayDailyAmountTo(command);
     }
 
     @Test
     void 일일_딜레이_옮길_시_주간_계획량이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        Long receivingDailyQuantityId = 50L;
-        int dailyAmountToDelay = 10;
-        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        String body = dailyAmountDelayRequestJson(SECOND_DAILY_QUANTITY_ID, DAILY_AMOUNT_TO_DELAY);
         DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                receivingDailyQuantityId,
-                dailyAmountToDelay
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                SECOND_DAILY_QUANTITY_ID,
+                DAILY_AMOUNT_TO_DELAY
         );
         willThrow(new ResourceNotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY_DELAYS,
+                PlanApiPath.DAILY_QUANTITY_DELAYS,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("WEEKLY_QUANTITY_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Weekly quantity not found.");
+        assertErrorResponse(result, WEEKLY_QUANTITY_NOT_FOUND);
         then(totalQuantityModifier).should().delayDailyAmountTo(command);
     }
 
     @Test
     void 일일_딜레이_옮길_시_일일_계획량이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        Long receivingDailyQuantityId = 50L;
-        int dailyAmountToDelay = 10;
-        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        String body = dailyAmountDelayRequestJson(SECOND_DAILY_QUANTITY_ID, DAILY_AMOUNT_TO_DELAY);
         DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                receivingDailyQuantityId,
-                dailyAmountToDelay
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                SECOND_DAILY_QUANTITY_ID,
+                DAILY_AMOUNT_TO_DELAY
         );
         willThrow(new ResourceNotFoundException(DAILY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY_DELAYS,
+                PlanApiPath.DAILY_QUANTITY_DELAYS,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("DAILY_QUANTITY_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Daily quantity not found");
+        assertErrorResponse(result, DAILY_QUANTITY_NOT_FOUND);
         then(totalQuantityModifier).should().delayDailyAmountTo(command);
     }
 
     @Test
     void 일일_딜레이_옮길_시_같은_날로_옮기면_400을_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        Long receivingDailyQuantityId = 50L;
-        int dailyAmountToDelay = 10;
-        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        String body = dailyAmountDelayRequestJson(FIRST_DAILY_QUANTITY_ID, DAILY_AMOUNT_TO_DELAY);
         DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                receivingDailyQuantityId,
-                dailyAmountToDelay
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                FIRST_DAILY_QUANTITY_ID,
+                DAILY_AMOUNT_TO_DELAY
         );
         willThrow(new BusinessRuleViolationException(DAILY_DELAY_RECEIVER_SAME_AS_SOURCE))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY_DELAYS,
+                PlanApiPath.DAILY_QUANTITY_DELAYS,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(BAD_REQUEST);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("DAILY_DELAY_RECEIVER_SAME_AS_SOURCE");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Daily quantity receiving the delay must be different from source daily quantity.");
+        assertErrorResponse(result, DAILY_DELAY_RECEIVER_SAME_AS_SOURCE);
         then(totalQuantityModifier).should().delayDailyAmountTo(command);
     }
 
     @Test
     void 일일_딜레이_옮길_시_현재_일일_딜레이보다_많은_수량을_옮기면_400을_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        Long receivingDailyQuantityId = 50L;
-        int dailyAmountToDelay = 10;
-        String body = dailyAmountDelayRequestJson(receivingDailyQuantityId, dailyAmountToDelay);
+        String body = dailyAmountDelayRequestJson(SECOND_DAILY_QUANTITY_ID, DAILY_AMOUNT_TO_DELAY);
         DailyAmountDelayCommand command = DailyAmountDelayCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                receivingDailyQuantityId,
-                dailyAmountToDelay
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                SECOND_DAILY_QUANTITY_ID,
+                DAILY_AMOUNT_TO_DELAY
         );
         willThrow(new BusinessRuleViolationException(DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT))
                 .given(totalQuantityModifier)
                 .delayDailyAmountTo(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_QUANTITY_DELAYS,
+                PlanApiPath.DAILY_QUANTITY_DELAYS,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(BAD_REQUEST);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Daily delay amount exceeds current daily delayed amount.");
+        assertErrorResponse(result, DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT);
         then(totalQuantityModifier).should().delayDailyAmountTo(command);
     }
 
     @Test
     void 일일_계획_달성량을_수정한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyCompletedAmount = 50;
-        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        String body = dailyCompletedAmountUpdateRequestJson(TARGET_DAILY_COMPLETED_AMOUNT);
         DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyCompletedAmount
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_COMPLETED_AMOUNT
         );
 
         patchJson(
-                userId,
-                DAILY_COMPLETED_QUANTITIES,
+                PlanApiPath.DAILY_COMPLETED_QUANTITIES,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NO_CONTENT);
 
         then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
@@ -627,20 +483,15 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidDailyCompletedAmountUpdateRequests")
     void 일일_계획_달성량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
 
         patchJson(
-                userId,
-                DAILY_COMPLETED_QUANTITIES,
+                PlanApiPath.DAILY_COMPLETED_QUANTITIES,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(BAD_REQUEST);
 
         then(totalQuantityModifier).should(never())
@@ -649,162 +500,118 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 일일_계획_달성량_수정_시_달성량_증가분이_딜레이량보다_많으면_400을_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyCompletedAmount = 50;
-        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        String body = dailyCompletedAmountUpdateRequestJson(TARGET_DAILY_COMPLETED_AMOUNT);
         DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyCompletedAmount
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_COMPLETED_AMOUNT
         );
         willThrow(new BusinessRuleViolationException(DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT))
                 .given(totalQuantityModifier)
                 .updateDailyCompletedAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_COMPLETED_QUANTITIES,
+                PlanApiPath.DAILY_COMPLETED_QUANTITIES,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(BAD_REQUEST);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Daily amount to complete cannot exceed delayed amount.");
+        assertErrorResponse(result, DAILY_AMOUNT_TO_COMPLETE_EXCEEDS_DELAYED_AMOUNT);
         then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
     }
 
 
     @Test
     void 일일_계획_달성량_수정_시_세션_총량이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyCompletedAmount = 50;
-        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        String body = dailyCompletedAmountUpdateRequestJson(TARGET_DAILY_COMPLETED_AMOUNT);
         DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyCompletedAmount
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_COMPLETED_AMOUNT
         );
         willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .updateDailyCompletedAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_COMPLETED_QUANTITIES,
+                PlanApiPath.DAILY_COMPLETED_QUANTITIES,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("TOTAL_QUANTITY_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Total quantity not found.");
+        assertErrorResponse(result, TOTAL_QUANTITY_NOT_FOUND);
         then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
     }
 
     @Test
     void 일일_계획_달성량_수정_시_주간_계획량이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyCompletedAmount = 50;
-        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        String body = dailyCompletedAmountUpdateRequestJson(TARGET_DAILY_COMPLETED_AMOUNT);
         DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyCompletedAmount
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_COMPLETED_AMOUNT
         );
         willThrow(new ResourceNotFoundException(WEEKLY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .updateDailyCompletedAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_COMPLETED_QUANTITIES,
+                PlanApiPath.DAILY_COMPLETED_QUANTITIES,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("WEEKLY_QUANTITY_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Weekly quantity not found.");
+        assertErrorResponse(result, WEEKLY_QUANTITY_NOT_FOUND);
         then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
     }
 
     @Test
     void 일일_계획_달성량_수정_시_일일_계획량이_없으면_404를_응답한다() {
-        Long userId = 1L;
-        Long sessionalPlanId = 10L;
-        Long totalQuantityId = 20L;
-        Long weeklyQuantityId = 30L;
-        Long dailyQuantityId = 40L;
-        int targetDailyCompletedAmount = 50;
-        String body = dailyCompletedAmountUpdateRequestJson(targetDailyCompletedAmount);
+        String body = dailyCompletedAmountUpdateRequestJson(TARGET_DAILY_COMPLETED_AMOUNT);
         DailyCompletedAmountUpdateCommand command = DailyCompletedAmountUpdateCommand.of(
-                dailyQuantityId,
-                weeklyQuantityId,
-                totalQuantityId,
-                sessionalPlanId,
-                userId,
-                targetDailyCompletedAmount
+                FIRST_DAILY_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                TARGET_DAILY_COMPLETED_AMOUNT
         );
         willThrow(new ResourceNotFoundException(DAILY_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
                 .updateDailyCompletedAmount(command);
 
         MvcTestResultAssert result = patchJson(
-                userId,
-                DAILY_COMPLETED_QUANTITIES,
+                PlanApiPath.DAILY_COMPLETED_QUANTITIES,
+                USER_ID,
                 body,
-                sessionalPlanId,
-                totalQuantityId,
-                weeklyQuantityId,
-                dailyQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_TOTAL_QUANTITY_ID,
+                FIRST_WEEKLY_QUANTITY_ID,
+                FIRST_DAILY_QUANTITY_ID
         ).hasStatus(NOT_FOUND);
 
-        result.bodyJson()
-                .extractingPath("$.code")
-                .isEqualTo("DAILY_QUANTITY_NOT_FOUND");
-        result.bodyJson()
-                .extractingPath("$.message")
-                .isEqualTo("Daily quantity not found");
+        assertErrorResponse(result, DAILY_QUANTITY_NOT_FOUND);
         then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
     }
 

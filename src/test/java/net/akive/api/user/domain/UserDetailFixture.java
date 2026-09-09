@@ -1,0 +1,12 @@
+package net.akive.api.user.domain;
+
+public class UserDetailFixture {
+
+    public static final String NICKNAME = "member@abcdefg1234";
+    public static final String IMG_URL = "https://example.com/image.png";
+    public static final String AIM = "목표";
+
+    public static UserDetail createUserDetail() {
+        return UserDetail.of(NICKNAME, IMG_URL, AIM);
+    }
+}

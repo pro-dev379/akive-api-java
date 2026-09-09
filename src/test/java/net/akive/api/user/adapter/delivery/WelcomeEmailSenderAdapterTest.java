@@ -1,6 +1,5 @@
 package net.akive.api.user.adapter.delivery;
 
-import net.akive.api.common.domain.Email;
 import net.akive.api.core.config.email.EmailProperties;
 import net.akive.api.email.application.provided.EmailSender;
 import net.akive.api.email.application.provided.dto.EmailSendCommand;
@@ -12,7 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.common.domain.EmailFixture.createEmail;
+import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.UserFixture.EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -20,8 +20,6 @@ import static org.mockito.BDDMockito.then;
 @ExtendWith(MockitoExtension.class)
 class WelcomeEmailSenderAdapterTest {
 
-    private static final Email EMAIL = createEmail();
-    private static final String NICKNAME = "akive";
     private static final String FROM = "welcome@test.com";
     private static final String SUPPORT_EMAIL = "support@test.com";
 

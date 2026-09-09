@@ -1,5 +1,6 @@
 package net.akive.api.mentoring.adapter.persistence;
 
+import net.akive.api.mentoring.adapter.persistence.entity.MentoringProfileEntity;
 import net.akive.api.mentoring.domain.MentoringProfile;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
@@ -16,7 +17,14 @@ class MentoringProfileJpaAdapterTest extends RepositoryTestSupport {
         MentoringProfile mentoringProfile = MentoringProfile.create(savedUser);
 
         MentoringProfile savedMentoringProfile = mentoringProfileRepository.save(mentoringProfile);
+        flushAndClear();
 
-        assertThat(savedMentoringProfile.getMentoringProfileId()).isNotNull();
+        MentoringProfileEntity foundMentoringProfileEntity =
+                mentoringProfileJpaRepository.findById(savedMentoringProfile.getMentoringProfileId()).orElseThrow();
+        MentoringProfile foundMentoringProfile = foundMentoringProfileEntity.to();
+
+        assertThat(foundMentoringProfile.getMentoringProfileId())
+                .isEqualTo(savedMentoringProfile.getMentoringProfileId());
+        assertThat(foundMentoringProfile.getUser()).isEqualTo(savedUser);
     }
 }

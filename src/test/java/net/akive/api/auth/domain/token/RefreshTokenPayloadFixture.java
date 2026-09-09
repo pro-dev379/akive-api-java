@@ -5,15 +5,15 @@ import net.akive.api.user.domain.RoleType;
 
 import java.time.Instant;
 
+import static net.akive.api.auth.domain.token.RefreshTokenFixture.EXPIRE_AT;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
 import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
 
 public class RefreshTokenPayloadFixture {
 
-    public static final Instant REFRESH_TOKEN_EXPIRES_AT = Instant.parse("2026-07-03T00:01:00Z");
-
     public static RefreshTokenPayload createRefreshTokenPayload() {
-        return createRefreshTokenPayload(1L, createClientInstanceId(), MEMBER, REFRESH_TOKEN_EXPIRES_AT);
+        return createRefreshTokenPayload(USER_ID, createClientInstanceId(), MEMBER, EXPIRE_AT);
     }
 
     public static RefreshTokenPayload createRefreshTokenPayload(
@@ -21,7 +21,7 @@ public class RefreshTokenPayloadFixture {
             ClientInstanceId clientInstanceId,
             RoleType roleType
     ) {
-        return createRefreshTokenPayload(userId, clientInstanceId, roleType, REFRESH_TOKEN_EXPIRES_AT);
+        return createRefreshTokenPayload(userId, clientInstanceId, roleType, EXPIRE_AT);
     }
 
     public static RefreshTokenPayload createRefreshTokenPayload(

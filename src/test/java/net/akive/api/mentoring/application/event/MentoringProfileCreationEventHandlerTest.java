@@ -8,7 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.common.domain.EmailFixture.createEmail;
+import static net.akive.api.user.domain.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.UserFixture.EMAIL;
+import static net.akive.api.user.domain.UserFixture.USER_ID;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,11 +24,10 @@ class MentoringProfileCreationEventHandlerTest {
 
     @Test
     void 회원_가입_이벤트를_받으면_기본_멘토링_프로필을_생성한다() {
-        Long userId = 1L;
-        UserSignedUpEvent userSignedUpEvent = new UserSignedUpEvent(userId, createEmail(), "akive");
+        UserSignedUpEvent userSignedUpEvent = new UserSignedUpEvent(USER_ID, EMAIL, NICKNAME);
 
         mentoringProfileCreationEventHandler.handle(userSignedUpEvent);
 
-        then(mentoringProfileCreator).should().create(userId);
+        then(mentoringProfileCreator).should().create(USER_ID);
     }
 }

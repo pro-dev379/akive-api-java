@@ -3,7 +3,7 @@ package net.akive.api.auth.application.emailverification.service;
 import net.akive.api.auth.application.emailverification.required.EmailVerificationCodeGenerator;
 import net.akive.api.auth.application.emailverification.required.EmailVerificationStore;
 import net.akive.api.auth.domain.emailverification.EmailVerification;
-import net.akive.api.common.domain.Email;
+import net.akive.api.auth.domain.emailverification.EmailVerificationCode;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
@@ -20,10 +20,10 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationFixtu
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.user.domain.UserFixture.EMAIL;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -49,16 +49,14 @@ class EmailVerificationDomainServiceTest {
 
     @Test
     void 새로운_이메일_인증번호를_발급한다() {
-        Email email = createEmail();
-
         given(currentTimeProvider.now()).willReturn(NOW);
         given(emailVerificationCodeGenerator.generate()).willReturn(VERIFICATION_CODE);
-        given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
+        given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.empty());
 
-        EmailVerification emailVerification = emailVerificationDomainService.issue(email, SIGN_UP);
+        EmailVerification emailVerification = emailVerificationDomainService.issue(EMAIL, SIGN_UP);
 
-        assertThat(emailVerification.getEmail()).isEqualTo(email);
+        assertThat(emailVerification.getEmail()).isEqualTo(EMAIL);
         assertThat(emailVerification.getVerificationPurpose()).isEqualTo(SIGN_UP);
         assertThat(emailVerification.getVerificationCode()).isEqualTo(VERIFICATION_CODE);
         assertThat(emailVerification.isVerified()).isFalse();
@@ -66,26 +64,27 @@ class EmailVerificationDomainServiceTest {
         assertThat(emailVerification.getLastSentAt()).isEqualTo(NOW);
         assertThat(emailVerification.getExpiresAt()).isEqualTo(NOW.plus(VERIFICATION_CODE_EXPIRATION_DURATION));
 
-        then(emailVerificationValidationService).should().validateIssuable(email, SIGN_UP);
+        then(emailVerificationValidationService).should().validateIssuable(EMAIL, SIGN_UP);
     }
 
     @Test
     void 기존_인증정보가_존재하면_새_인증번호로_갱신한다() {
-        Email email = createEmail();
         given(currentTimeProvider.now()).willReturn(NOW);
 
+        EmailVerificationCode newVerificationCode = new EmailVerificationCode("654321");
         EmailVerification previous = createEmailVerification(
+                VERIFICATION_CODE,
                 SIGN_UP,
-                LocalDateTime.of(2025, 5, 21, 9, 55)
+                NOW.minusMinutes(5)
         );
 
-        given(emailVerificationCodeGenerator.generate()).willReturn(VERIFICATION_CODE);
-        given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
+        given(emailVerificationCodeGenerator.generate()).willReturn(newVerificationCode);
+        given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.of(previous));
 
-        EmailVerification emailVerification = emailVerificationDomainService.issue(email, SIGN_UP);
+        EmailVerification emailVerification = emailVerificationDomainService.issue(EMAIL, SIGN_UP);
 
-        assertThat(emailVerification.getVerificationCode()).isEqualTo(VERIFICATION_CODE);
+        assertThat(emailVerification.getVerificationCode()).isEqualTo(newVerificationCode);
         assertThat(emailVerification.getRenewalCount()).isEqualTo(1);
         assertThat(emailVerification.isVerified()).isFalse();
         assertThat(emailVerification.getLastSentAt()).isEqualTo(NOW);
@@ -94,12 +93,11 @@ class EmailVerificationDomainServiceTest {
 
     @Test
     void 인증번호_발급이_허용되지_않으면_후속_처리를_하지_않는다() {
-        Email email = createEmail();
         ResourceNotFoundException exception = new ResourceNotFoundException(USER_NOT_FOUND);
 
-        willThrow(exception).given(emailVerificationValidationService).validateIssuable(email, SIGN_UP);
+        willThrow(exception).given(emailVerificationValidationService).validateIssuable(EMAIL, SIGN_UP);
 
-        assertThatThrownBy(() -> emailVerificationDomainService.issue(email, SIGN_UP)).isSameAs(exception);
+        assertThatThrownBy(() -> emailVerificationDomainService.issue(EMAIL, SIGN_UP)).isSameAs(exception);
 
         then(currentTimeProvider).should(never()).now();
         then(emailVerificationCodeGenerator).should(never()).generate();
@@ -108,15 +106,14 @@ class EmailVerificationDomainServiceTest {
 
     @Test
     void 이메일_인증을_완료한다() {
-        Email email = createEmail();
-        EmailVerification emailVerification = createEmailVerification(SIGN_UP, NOW.minusMinutes(1));
+        EmailVerification emailVerification = createEmailVerification(VERIFICATION_CODE, SIGN_UP, NOW.minusMinutes(1));
 
         given(currentTimeProvider.now()).willReturn(NOW);
-        given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
+        given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
         EmailVerification verifiedEmailVerification = emailVerificationDomainService.verify(
-                email,
+                EMAIL,
                 SIGN_UP,
                 VERIFICATION_CODE
         );
@@ -126,54 +123,48 @@ class EmailVerificationDomainServiceTest {
 
     @Test
     void 인증정보가_존재하지_않으면_인증번호_검증이_실패한다() {
-        Email email = createEmail();
-
-        given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
+        given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> emailVerificationDomainService.verify(email, SIGN_UP, VERIFICATION_CODE))
+                .isThrownBy(() -> emailVerificationDomainService.verify(EMAIL, SIGN_UP, VERIFICATION_CODE))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(EMAIL_VERIFICATION_NOT_FOUND);
     }
 
     @Test
     void 인증_완료_확인한다() {
-        Email email = createEmail();
-        EmailVerification emailVerification = createEmailVerification(SIGN_UP, NOW.minusMinutes(2));
-        emailVerification.verify(VERIFICATION_CODE, NOW.minusMinutes(1));
+        EmailVerification emailVerification = createEmailVerification(VERIFICATION_CODE, SIGN_UP, NOW);
+        emailVerification.verify(VERIFICATION_CODE, NOW.plusMinutes(1));
 
-        given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
+        given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
-        emailVerificationDomainService.checkVerified(email, SIGN_UP);
+        emailVerificationDomainService.checkVerified(EMAIL, SIGN_UP);
 
-        then(emailVerificationStore).should().findByEmailAndVerificationPurpose(email, SIGN_UP);
+        then(emailVerificationStore).should().findByEmailAndVerificationPurpose(EMAIL, SIGN_UP);
     }
 
     @Test
     void 인증정보가_존재하지_않으면_인증_완료_확인에_실패한다() {
-        Email email = createEmail();
-
-        given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
+        given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.empty());
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> emailVerificationDomainService.checkVerified(email, SIGN_UP))
+                .isThrownBy(() -> emailVerificationDomainService.checkVerified(EMAIL, SIGN_UP))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMAIL_NOT_VERIFIED);
     }
 
     @Test
     void 인증이_완료되지_않은_인증정보이면_인증_완료_확인에_실패한다() {
-        Email email = createEmail();
-        EmailVerification emailVerification = createEmailVerification(SIGN_UP, NOW.minusMinutes(1));
+        EmailVerification emailVerification = createEmailVerification(VERIFICATION_CODE, SIGN_UP, NOW.minusMinutes(1));
 
-        given(emailVerificationStore.findByEmailAndVerificationPurpose(email, SIGN_UP))
+        given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> emailVerificationDomainService.checkVerified(email, SIGN_UP))
+                .isThrownBy(() -> emailVerificationDomainService.checkVerified(EMAIL, SIGN_UP))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMAIL_NOT_VERIFIED);
     }

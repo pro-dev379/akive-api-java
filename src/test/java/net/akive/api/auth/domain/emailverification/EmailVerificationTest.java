@@ -1,10 +1,9 @@
 package net.akive.api.auth.domain.emailverification;
 
-import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.BusinessRuleViolationException;
-import net.akive.api.common.exception.business.ResourceConflictException;
-import net.akive.api.common.exception.business.RateLimitExceededException;
 import net.akive.api.common.exception.business.AuthenticationException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.RateLimitExceededException;
+import net.akive.api.common.exception.business.ResourceConflictException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -13,12 +12,12 @@ import static net.akive.api.auth.domain.emailverification.EmailVerificationFixtu
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
-import static net.akive.api.common.domain.EmailFixture.createEmail;
+import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_VERIFICATION_CODE_MISMATCH;
-import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_VERIFIED;
 import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
-import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
+import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_VERIFIED;
+import static net.akive.api.user.domain.UserFixture.EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -26,16 +25,14 @@ class EmailVerificationTest {
 
     @Test
     void 이메일_인증_정보를_생성한다() {
-        Email email = createEmail();
-
         EmailVerification emailVerification = EmailVerification.create(
-                email,
+                EMAIL,
                 SIGN_UP,
                 VERIFICATION_CODE,
                 REQUESTED_AT
         );
 
-        assertThat(emailVerification.getEmail()).isEqualTo(email);
+        assertThat(emailVerification.getEmail()).isEqualTo(EMAIL);
         assertThat(emailVerification.getVerificationPurpose()).isEqualTo(SIGN_UP);
         assertThat(emailVerification.getVerificationCode()).isEqualTo(VERIFICATION_CODE);
         assertThat(emailVerification.getRenewalCount()).isZero();

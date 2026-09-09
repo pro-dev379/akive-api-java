@@ -11,7 +11,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.TOTAL_QUANTITY_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceConflictError.SUBJECT_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.domain.PlanFixture.SUBJECT_NAME;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_PLAN_ID;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_SUBJECT_NAME;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
 import static net.akive.api.plan.domain.policy.PlanPolicy.TOTAL_QUANTITY_MAX_COUNT;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -29,101 +31,94 @@ class TotalQuantityValidationServiceTest {
 
     @Test
     void 세션_총량을_생성할_수_있는지_검증한다() {
-        Long sessionalPlanId = 1L;
-        given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(sessionalPlanId, SUBJECT_NAME))
+        given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(SESSIONAL_PLAN_ID, FIRST_SUBJECT_NAME))
                 .willReturn(false);
-        given(totalQuantityRepository.countBySessionalPlanId(sessionalPlanId))
+        given(totalQuantityRepository.countBySessionalPlanId(SESSIONAL_PLAN_ID))
                 .willReturn(TOTAL_QUANTITY_MAX_COUNT - 1);
 
-        totalQuantityValidationService.validateCreatable(sessionalPlanId, SUBJECT_NAME);
+        totalQuantityValidationService.validateCreatable(SESSIONAL_PLAN_ID, FIRST_SUBJECT_NAME);
 
         then(totalQuantityRepository).should()
-                .existsBySessionalPlanIdAndSubjectName(sessionalPlanId, SUBJECT_NAME);
-        then(totalQuantityRepository).should().countBySessionalPlanId(sessionalPlanId);
+                .existsBySessionalPlanIdAndSubjectName(SESSIONAL_PLAN_ID, FIRST_SUBJECT_NAME);
+        then(totalQuantityRepository).should().countBySessionalPlanId(SESSIONAL_PLAN_ID);
     }
 
     @Test
     void 같은_과목명의_세션_총량이_있으면_생성할_수_없다() {
-        Long sessionalPlanId = 1L;
-        given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(sessionalPlanId, SUBJECT_NAME))
+        given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(SESSIONAL_PLAN_ID, FIRST_SUBJECT_NAME))
                 .willReturn(true);
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> totalQuantityValidationService.validateCreatable(
-                        sessionalPlanId,
-                        SUBJECT_NAME
+                        SESSIONAL_PLAN_ID,
+                        FIRST_SUBJECT_NAME
                 ))
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(SUBJECT_NAME_ALREADY_EXISTS);
 
         then(totalQuantityRepository).should()
-                .existsBySessionalPlanIdAndSubjectName(sessionalPlanId, SUBJECT_NAME);
-        then(totalQuantityRepository).should(never()).countBySessionalPlanId(sessionalPlanId);
+                .existsBySessionalPlanIdAndSubjectName(SESSIONAL_PLAN_ID, FIRST_SUBJECT_NAME);
+        then(totalQuantityRepository).should(never()).countBySessionalPlanId(SESSIONAL_PLAN_ID);
     }
 
     @Test
     void 세션_총량이_최대치에_도달하면_생성할_수_없다() {
-        Long sessionalPlanId = 1L;
-        given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(sessionalPlanId, SUBJECT_NAME))
+        given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectName(SESSIONAL_PLAN_ID, FIRST_SUBJECT_NAME))
                 .willReturn(false);
-        given(totalQuantityRepository.countBySessionalPlanId(sessionalPlanId))
+        given(totalQuantityRepository.countBySessionalPlanId(SESSIONAL_PLAN_ID))
                 .willReturn(TOTAL_QUANTITY_MAX_COUNT);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> totalQuantityValidationService.validateCreatable(
-                        sessionalPlanId,
-                        SUBJECT_NAME
+                        SESSIONAL_PLAN_ID,
+                        FIRST_SUBJECT_NAME
                 ))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(TOTAL_QUANTITY_LIMIT_EXCEEDED);
 
         then(totalQuantityRepository).should()
-                .existsBySessionalPlanIdAndSubjectName(sessionalPlanId, SUBJECT_NAME);
-        then(totalQuantityRepository).should().countBySessionalPlanId(sessionalPlanId);
+                .existsBySessionalPlanIdAndSubjectName(SESSIONAL_PLAN_ID, FIRST_SUBJECT_NAME);
+        then(totalQuantityRepository).should().countBySessionalPlanId(SESSIONAL_PLAN_ID);
     }
 
     @Test
     void 세션_총량을_수정할_수_있는지_검증한다() {
-        Long sessionalPlanId = 1L;
-        Long totalQuantityId = 2L;
         given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
-                sessionalPlanId,
-                SUBJECT_NAME,
-                totalQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_SUBJECT_NAME,
+                FIRST_TOTAL_QUANTITY_ID
         )).willReturn(false);
 
-        totalQuantityValidationService.validateUpdatable(totalQuantityId, sessionalPlanId, SUBJECT_NAME);
+        totalQuantityValidationService.validateUpdatable(FIRST_TOTAL_QUANTITY_ID, SESSIONAL_PLAN_ID, FIRST_SUBJECT_NAME);
 
         then(totalQuantityRepository).should().existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
-                sessionalPlanId,
-                SUBJECT_NAME,
-                totalQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_SUBJECT_NAME,
+                FIRST_TOTAL_QUANTITY_ID
         );
     }
 
     @Test
     void 같은_과목명의_다른_세션_총량이_있으면_수정할_수_없다() {
-        Long sessionalPlanId = 1L;
-        Long totalQuantityId = 2L;
         given(totalQuantityRepository.existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
-                sessionalPlanId,
-                SUBJECT_NAME,
-                totalQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_SUBJECT_NAME,
+                FIRST_TOTAL_QUANTITY_ID
         )).willReturn(true);
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> totalQuantityValidationService.validateUpdatable(
-                        totalQuantityId,
-                        sessionalPlanId,
-                        SUBJECT_NAME
+                        FIRST_TOTAL_QUANTITY_ID,
+                        SESSIONAL_PLAN_ID,
+                        FIRST_SUBJECT_NAME
                 ))
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(SUBJECT_NAME_ALREADY_EXISTS);
 
         then(totalQuantityRepository).should().existsBySessionalPlanIdAndSubjectNameAndTotalQuantityIdNot(
-                sessionalPlanId,
-                SUBJECT_NAME,
-                totalQuantityId
+                SESSIONAL_PLAN_ID,
+                FIRST_SUBJECT_NAME,
+                FIRST_TOTAL_QUANTITY_ID
         );
     }
 }

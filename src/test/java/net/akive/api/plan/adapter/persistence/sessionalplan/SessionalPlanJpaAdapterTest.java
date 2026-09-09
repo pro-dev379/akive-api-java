@@ -8,17 +8,14 @@ import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.plan.domain.PlanFixture.createSessionalPlan;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
-
-    private static final String SESSION_NAME = "2026 1월 학습";
 
     @Test
     void 세셔널_플랜을_저장한다() {
@@ -36,12 +33,12 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundSessionalPlan.getSessionalPlanId()).isEqualTo(savedSessionalPlan.getSessionalPlanId());
         assertThat(foundSessionalPlan.getUser().getUserId()).isEqualTo(savedUser.getUserId());
         assertThat(foundSessionalPlan.getSessionName()).isEqualTo(SESSION_NAME);
-        assertThat(foundSessionalPlan.getSessionPeriod()).isEqualTo(createSessionalPlan(savedUser).getSessionPeriod());
+        assertThat(foundSessionalPlan.getSessionPeriod()).isEqualTo(sessionalPlan.getSessionPeriod());
     }
 
     @Test
     void 세셔널_플랜_식별자와_회원_식별자로_조회한다() {
-        SessionalPlan savedSessionalPlan = saveSessionalPlan(SESSION_NAME);
+        SessionalPlan savedSessionalPlan = saveSessionalPlan();
         flushAndClear();
 
         SessionalPlan foundSessionalPlan = sessionalPlanRepository.findBySessionalPlanIdAndUserId(
@@ -127,7 +124,7 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> sessionalPlanRepository.deleteBySessionalPlanIdAndUserId(
-                        Long.MAX_VALUE,
+                        UNKNOWN_SESSIONAL_PLAN_ID,
                         savedSessionalPlan.getUser().getUserId()
                 ))
                 .extracting(ResourceNotFoundException::getError)
@@ -136,12 +133,12 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 회원의_진행_중인_세셔널_플랜_개수를_조회한다() {
-        SessionalPlan savedSessionalPlan = saveSessionalPlan();
+        SessionalPlan savedSessionalPlan = saveSessionalPlan(REQUESTED_AT);
         flushAndClear();
 
         long count = sessionalPlanRepository.countInProgressByUserId(
                 savedSessionalPlan.getUser().getUserId(),
-                LocalDate.of(2026, 1, 12)
+                REQUESTED_AT.toLocalDate()
         );
 
         assertThat(count).isEqualTo(1);

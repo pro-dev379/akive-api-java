@@ -3,7 +3,6 @@ package net.akive.api.plan.application.service.sessionalplan;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.plan.domain.model.SessionalPlan;
-import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 
 import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
-import static net.akive.api.plan.domain.PlanFixture.*;
-import static net.akive.api.user.domain.UserFixture.createPersistedUser;
+import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
+import static net.akive.api.user.domain.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.*;
@@ -35,15 +34,14 @@ class SessionalPlanDomainServiceTest {
 
     @Test
     void 세셔널_플랜을_생성한다() {
-        User user = createPersistedUser(1L);
-        SessionPeriod sessionPeriod = createSessionPeriod();
+        User user = createReconstructedUser();
         given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
 
-        SessionalPlan sessionalPlan = sessionalPlanDomainService.create(user, SESSION_NAME, sessionPeriod);
+        SessionalPlan sessionalPlan = sessionalPlanDomainService.create(user, SESSION_NAME, SESSION_PERIOD);
 
         assertThat(sessionalPlan.getUser()).isEqualTo(user);
         assertThat(sessionalPlan.getSessionName()).isEqualTo(SESSION_NAME);
-        assertThat(sessionalPlan.getSessionPeriod()).isEqualTo(sessionPeriod);
+        assertThat(sessionalPlan.getSessionPeriod()).isEqualTo(SESSION_PERIOD);
 
         then(currentTimeProvider).should().now();
         then(sessionalPlanValidationService).should()
@@ -51,9 +49,8 @@ class SessionalPlanDomainServiceTest {
     }
 
     @Test
-    void 세셔널_플랜_생성_검증에_실패하면_예외를_던진다() {
-        User user = createPersistedUser(1L);
-        SessionPeriod sessionPeriod = createSessionPeriod();
+    void 세셔널_플랜_생성_검증에_실패하면_생성에_실패하고_예외를_던진다() {
+        User user = createReconstructedUser();
         ResourceConflictException exception = new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS);
         given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
         willThrow(exception)
@@ -61,7 +58,7 @@ class SessionalPlanDomainServiceTest {
                 .validateCreatable(user.getUserId(), SESSION_NAME, REQUESTED_AT.toLocalDate());
 
         assertThatExceptionOfType(ResourceConflictException.class)
-                .isThrownBy(() -> sessionalPlanDomainService.create(user, SESSION_NAME, sessionPeriod))
+                .isThrownBy(() -> sessionalPlanDomainService.create(user, SESSION_NAME, SESSION_PERIOD))
                 .isSameAs(exception);
 
         then(currentTimeProvider).should().now();
@@ -71,44 +68,40 @@ class SessionalPlanDomainServiceTest {
 
     @Test
     void 세셔널_플랜을_수정한다() {
-        String targetSessionName = "2026 2월 학습";
-        User user = createPersistedUser(1L);
-        SessionalPlan currentSessionalPlan = createSessionalPlan(user);
-        SessionPeriod sessionPeriod = createSessionPeriod();
+        SessionalPlan currentSessionalPlan = createReconstructedSessionalPlan();
         LocalDateTime requestedAt = REQUESTED_AT.plusDays(1);
         given(currentTimeProvider.now()).willReturn(requestedAt);
 
-        sessionalPlanDomainService.update(currentSessionalPlan, targetSessionName, sessionPeriod);
+        sessionalPlanDomainService.update(currentSessionalPlan, TARGET_SESSION_NAME, TARGET_SESSION_PERIOD);
 
-        assertThat(currentSessionalPlan.getSessionName()).isEqualTo(targetSessionName);
-        assertThat(currentSessionalPlan.getSessionPeriod()).isEqualTo(sessionPeriod);
+        assertThat(currentSessionalPlan.getSessionName()).isEqualTo(TARGET_SESSION_NAME);
+        assertThat(currentSessionalPlan.getSessionPeriod()).isEqualTo(TARGET_SESSION_PERIOD);
 
         then(sessionalPlanValidationService).should()
-                .validateUpdatable(currentSessionalPlan, targetSessionName, sessionPeriod);
+                .validateUpdatable(currentSessionalPlan, TARGET_SESSION_NAME, TARGET_SESSION_PERIOD);
         then(currentTimeProvider).should().now();
     }
 
     @Test
-    void 세셔널_플랜_수정_검증에_실패하면_예외를_던진다() {
-        String targetSessionName = "2026 2월 학습";
-        User user = createPersistedUser(1L);
-        SessionalPlan currentSessionalPlan = createSessionalPlan(user);
-        SessionPeriod sessionPeriod = createSessionPeriod();
+    void 세셔널_플랜_수정_검증에_실패하면_수정에_실패하고_예외를_던진다() {
+        SessionalPlan currentSessionalPlan = createReconstructedSessionalPlan();
         ResourceConflictException exception = new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS);
         willThrow(exception)
                 .given(sessionalPlanValidationService)
-                .validateUpdatable(currentSessionalPlan, targetSessionName, sessionPeriod);
+                .validateUpdatable(currentSessionalPlan, TARGET_SESSION_NAME, TARGET_SESSION_PERIOD);
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> sessionalPlanDomainService.update(
                         currentSessionalPlan,
-                        targetSessionName,
-                        sessionPeriod
+                        TARGET_SESSION_NAME,
+                        TARGET_SESSION_PERIOD
                 ))
                 .isSameAs(exception);
 
+        assertThat(currentSessionalPlan.getSessionName()).isEqualTo(SESSION_NAME);
+        assertThat(currentSessionalPlan.getSessionPeriod()).isEqualTo(SESSION_PERIOD);
         then(sessionalPlanValidationService).should()
-                .validateUpdatable(currentSessionalPlan, targetSessionName, sessionPeriod);
+                .validateUpdatable(currentSessionalPlan, TARGET_SESSION_NAME, TARGET_SESSION_PERIOD);
         then(currentTimeProvider).should(never()).now();
     }
 }
