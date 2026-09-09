@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.user.domain.Goal;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -17,6 +19,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @Table(name = "goal")
 @Getter
+@EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor(access = PRIVATE)
 @NoArgsConstructor(access = PROTECTED)
 public class GoalEntity {
@@ -40,13 +43,9 @@ public class GoalEntity {
     @Column(name = "meal_1time_sec")
     private long meal1TimeSec;
 
-    @Column(updatable = false)
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @PrePersist
-    private void prePersist() {
-        createdAt = LocalDateTime.now();
-    }
 
     public static GoalEntity from(Goal goal) {
         GoalEntity goalEntity = new GoalEntity();
