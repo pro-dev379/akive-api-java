@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
@@ -98,7 +99,7 @@ class LoginApiTest extends PublicApiTestSupport {
     private MvcTestResultAssert postLoginByEmail(String clientInstanceIdHeader, LoginByEmailRequest request) {
         var requestBuilder = mvcTester.post()
                 .uri(LOGIN_BY_EMAIL_URL)
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(request));
 
         if (clientInstanceIdHeader != null) {

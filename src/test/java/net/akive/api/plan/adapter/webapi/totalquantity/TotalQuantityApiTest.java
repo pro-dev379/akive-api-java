@@ -87,7 +87,6 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidCreateRequests")
     void 세션_총량_생성_요청값이_올바르지_않으면_400을_응답한다(TotalQuantityCreateRequest request) {
-
         postJson(
                 PlanApiPath.TOTAL_QUANTITIES, 
                 USER_ID,
@@ -208,7 +207,6 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidUpdateRequests")
     void 세션_총량_수정_요청값이_올바르지_않으면_400을_응답한다(TotalQuantityUpdateRequest request) {
-
         putJson(
                 PlanApiPath.TOTAL_QUANTITY, 
                 USER_ID,

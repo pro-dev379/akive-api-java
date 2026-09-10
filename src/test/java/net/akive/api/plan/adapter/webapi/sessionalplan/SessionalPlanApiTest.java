@@ -84,7 +84,6 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     void 세셔널_플랜_생성_요청값이_올바르지_않으면_400을_응답한다(
             SessionalPlanCreateRequest request
     ) {
-
         postJson(PlanApiPath.SESSIONAL_PLANS, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).create(any(SessionalPlanCreateCommand.class));
@@ -200,7 +199,6 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidUpdateRequests")
     void 세셔널_플랜_수정_요청값이_올바르지_않으면_400을_응답한다(SessionalPlanUpdateRequest request) {
-
         putJson(PlanApiPath.SESSIONAL_PLAN, USER_ID, toJson(request), SESSIONAL_PLAN_ID).hasStatus(BAD_REQUEST);
 
         then(sessionalPlanCreator).should(never()).update(any(SessionalPlanUpdateCommand.class));

@@ -66,7 +66,6 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidAmountUpdateRequests")
     void 일일_계획량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
-
         patchJson(
                 PlanApiPath.DAILY_QUANTITY,
                 USER_ID,
@@ -290,7 +289,6 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidAmountDelayRequests")
     void 일일_딜레이_옮길_시_요청값이_올바르지_않으면_400을_응답한다(String body) {
-
         patchJson(
                 PlanApiPath.DAILY_QUANTITY_DELAYS,
                 USER_ID,
@@ -483,7 +481,6 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidCompletedAmountUpdateRequests")
     void 일일_계획_달성량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
-
         patchJson(
                 PlanApiPath.DAILY_COMPLETED_QUANTITIES,
                 USER_ID,

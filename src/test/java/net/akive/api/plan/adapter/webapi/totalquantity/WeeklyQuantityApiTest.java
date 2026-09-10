@@ -124,7 +124,6 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidQuantityReduceRequests")
     void 주간_계획량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
-
         patchJson(
                 PlanApiPath.WEEKLY_QUANTITY,
                 USER_ID,
@@ -312,7 +311,6 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidQuantityDelayRequests")
     void 주간_딜레이_이동_요청값이_올바르지_않으면_400을_응답한다(String body) {
-
         patchJson(
                 PlanApiPath.WEEKLY_QUANTITY_DELAYS,
                 USER_ID,
