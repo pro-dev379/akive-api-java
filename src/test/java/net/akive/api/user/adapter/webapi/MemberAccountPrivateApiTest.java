@@ -42,11 +42,11 @@ class MemberAccountPrivateApiTest extends PrivateApiTestSupport {
         MvcTestResultAssert result = get(MEMBER_ME_URL, USER_ID).hasStatus(OK);
 
         result.bodyJson().extractingPath("$.email").isEqualTo(EMAIL.value());
-        result.bodyJson().extractingPath("$.nickname").isEqualTo(NICKNAME);
         result.bodyJson().extractingPath("$.roleType").isEqualTo(ROLE_TYPE.name());
         result.bodyJson().extractingPath("$.loginType").isEqualTo(LOGIN_TYPE.name());
-        result.bodyJson().extractingPath("$.aim").isNull();
-        result.bodyJson().extractingPath("$.imgUrl").isNull();
+        result.bodyJson().extractingPath("$.userDetail.nickname").isEqualTo(NICKNAME);
+        result.bodyJson().extractingPath("$.userDetail.aim").isNull();
+        result.bodyJson().extractingPath("$.userDetail.imgUrl").isNull();
 
         then(userFinder).should().findOrThrowByUserIdAndNotWithdrawn(USER_ID);
     }

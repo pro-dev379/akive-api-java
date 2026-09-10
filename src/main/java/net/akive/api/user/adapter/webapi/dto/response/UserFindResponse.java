@@ -4,21 +4,23 @@ import net.akive.api.user.domain.User;
 
 public record UserFindResponse(
         String email,
-        String nickname,
         String roleType,
         String loginType,
-        String aim,
-        String imgUrl
+        UserDetailResponse userDetail
 ) {
 
     public static UserFindResponse from(User user) {
         return new UserFindResponse(
                 user.getEmail().value(),
-                user.getUserDetail().nickname(),
                 user.getRoleType().name(),
                 user.getLoginType().name(),
-                user.getUserDetail().aim(),
-                user.getUserDetail().imgUrl()
+                new UserDetailResponse(
+                        user.getUserDetail().nickname(),
+                        user.getUserDetail().aim(),
+                        user.getUserDetail().imgUrl()
+                )
         );
     }
+
+    public record UserDetailResponse(String nickname, String aim, String imgUrl) {}
 }
