@@ -69,12 +69,12 @@ public class User {
         return this.passwordHash != null;
     }
 
-    public void updatePasswordHash(String passwordHash) {
-        this.passwordHash = validateRequiredPasswordHash(passwordHash);
+    public void updatePasswordHash(String targetPasswordHash) {
+        this.passwordHash = validateRequiredPasswordHash(targetPasswordHash);
     }
 
-    public void updateUserDetail(String nickname, String imgUrl, String aim) {
-        this.userDetail = new UserDetail(nickname, imgUrl, aim);
+    public void updateUserDetail(String targetNickname, String targetImgUrl, String targetAim) {
+        this.userDetail = new UserDetail(targetNickname, targetImgUrl, targetAim);
     }
 
     public void withdraw(LocalDateTime withdrawnAt, String reason) {

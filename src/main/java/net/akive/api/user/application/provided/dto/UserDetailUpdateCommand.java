@@ -1,17 +1,17 @@
 package net.akive.api.user.application.provided.dto;
 
-import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
-import static net.akive.api.common.domain.DomainValidator.requirePositive;
+import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 
 public record UserDetailUpdateCommand(
         Long userId,
-        String nickname,
-        String imgUrl,
-        String aim
+        String targetNickname,
+        String targetImgUrl,
+        String targetAim
 ) {
 
     public UserDetailUpdateCommand {
         requirePositive(userId);
-        requireNotBlank(nickname);
+        targetNickname = requireMaxLength(requireNotBlank(targetNickname), NICKNAME_MAX_LENGTH);
     }
 }

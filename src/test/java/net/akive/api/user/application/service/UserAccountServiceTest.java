@@ -121,12 +121,13 @@ class UserAccountServiceTest {
 
         userAccountService.updateUserDetail(command);
 
-        assertThat(user.getUserDetail().nickname()).isEqualTo(command.nickname());
-        assertThat(user.getUserDetail().imgUrl()).isEqualTo(command.imgUrl());
-        assertThat(user.getUserDetail().aim()).isEqualTo(command.aim());
+        assertThat(user.getUserDetail().nickname()).isEqualTo(command.targetNickname());
+        assertThat(user.getUserDetail().imgUrl()).isEqualTo(command.targetImgUrl());
+        assertThat(user.getUserDetail().aim()).isEqualTo(command.targetAim());
 
         then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
-        then(userValidator).should().validateNicknameNotDuplicateExcludingUser(command.nickname(), command.userId());
+        then(userValidator).should()
+                .validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
         then(userRepository).should().save(user);
     }
 
@@ -154,7 +155,7 @@ class UserAccountServiceTest {
         given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
         willThrow(new ResourceConflictException(NICKNAME_ALREADY_EXISTS))
                 .given(userValidator)
-                .validateNicknameNotDuplicateExcludingUser(command.nickname(), command.userId());
+                .validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> userAccountService.updateUserDetail(command))
@@ -162,7 +163,8 @@ class UserAccountServiceTest {
                 .isEqualTo(NICKNAME_ALREADY_EXISTS);
 
         then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
-        then(userValidator).should().validateNicknameNotDuplicateExcludingUser(command.nickname(), command.userId());
+        then(userValidator).should()
+                .validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
         then(userRepository).should(never()).save(any(User.class));
     }
 

@@ -5,6 +5,7 @@ import net.akive.api.plan.domain.value.SessionPeriod;
 import java.time.LocalDate;
 
 import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 
 public record SessionalPlanCreateCommand(
         Long userId,
@@ -14,7 +15,7 @@ public record SessionalPlanCreateCommand(
 
     public SessionalPlanCreateCommand {
         requirePositive(userId);
-        sessionName = requireNotBlank(sessionName);
+        sessionName = requireMaxLength(requireNotBlank(sessionName), SESSION_NAME_MAX_LENGTH);
         requireNonNull(sessionPeriod);
     }
 

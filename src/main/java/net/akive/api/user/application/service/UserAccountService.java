@@ -63,9 +63,9 @@ public class UserAccountService implements UserAccountManager {
             throws ResourceNotFoundException, ResourceConflictException {
         User user = findNotWithdrawnUserOrThrow(command.userId());
 
-        userValidator.validateNicknameNotDuplicateExcludingUser(command.nickname(), command.userId());
+        userValidator.validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
 
-        user.updateUserDetail(command.nickname(), command.imgUrl(), command.aim());
+        user.updateUserDetail(command.targetNickname(), command.targetImgUrl(), command.targetAim());
 
         userRepository.save(user);
     }
