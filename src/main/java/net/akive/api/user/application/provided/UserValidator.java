@@ -11,4 +11,6 @@ public interface UserValidator {
     void validateEmailNotDuplicate(Email email) throws ResourceConflictException;
 
     void validateNicknameNotDuplicate(String nickname) throws ResourceConflictException;
+
+    void validateNicknameNotDuplicateExcludingUser(String nickname, Long userId) throws ResourceConflictException;
 }

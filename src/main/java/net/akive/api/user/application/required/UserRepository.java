@@ -7,13 +7,15 @@ import java.util.Optional;
 
 public interface UserRepository {
 
+    User save(User user);
+
     Optional<User> findByUserIdAndNotWithdrawn(Long userId);
 
     Optional<User> findByEmailAndNotWithdrawn(Email email);
 
-    Optional<User> findByEmail(Email email);
+    boolean existsByEmail(Email email);
 
-    Optional<User> findByNickname(String nickname);
+    boolean existsByNickname(String nickname);
 
-    User save(User user);
+    boolean existsByNicknameNotAndUserIdNot(String nickname, Long userId);
 }

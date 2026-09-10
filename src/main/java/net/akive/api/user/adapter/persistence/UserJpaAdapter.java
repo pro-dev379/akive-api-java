@@ -16,6 +16,11 @@ class UserJpaAdapter implements UserRepository {
     private final UserJpaRepository userJpaRepository;
 
     @Override
+    public User save(User user) {
+        return userJpaRepository.save(UserEntity.from(user)).to();
+    }
+
+    @Override
     public Optional<User> findByUserIdAndNotWithdrawn(Long userId) {
         return userJpaRepository.findByUserIdAndWithdrawal_WithdrawnAtIsNull(userId).map(UserEntity::to);
     }
@@ -26,17 +31,17 @@ class UserJpaAdapter implements UserRepository {
     }
 
     @Override
-    public Optional<User> findByEmail(Email email) {
-        return userJpaRepository.findByEmail(email.value()).map(UserEntity::to);
+    public boolean existsByEmail(Email email) {
+        return userJpaRepository.existsByEmail(email.value());
     }
 
     @Override
-    public Optional<User> findByNickname(String nickname) {
-        return userJpaRepository.findByUserDetail_Nickname(nickname).map(UserEntity::to);
+    public boolean existsByNickname(String nickname) {
+        return userJpaRepository.existsByUserDetail_Nickname(nickname);
     }
 
     @Override
-    public User save(User user) {
-        return userJpaRepository.save(UserEntity.from(user)).to();
+    public boolean existsByNicknameNotAndUserIdNot(String nickname, Long userId) {
+        return userJpaRepository.existsByUserDetail_NicknameAndUserIdNot(nickname, userId);
     }
 }

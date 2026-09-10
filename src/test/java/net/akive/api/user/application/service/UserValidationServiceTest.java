@@ -17,6 +17,7 @@ import static net.akive.api.common.exception.business.ResourceConflictError.NICK
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -55,45 +56,64 @@ class UserValidationServiceTest {
 
     @Test
     void 이메일_중복_검증에_성공한다() {
-        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.empty());
+        given(userRepository.existsByEmail(EMAIL)).willReturn(false);
 
         userValidationService.validateEmailNotDuplicate(EMAIL);
 
-        then(userRepository).should().findByEmail(EMAIL);
+        then(userRepository).should().existsByEmail(EMAIL);
     }
 
     @Test
     void 이미_존재하는_이메일이면_이메일_중복_검증에_실패한다() {
-        User user = createUser();
-        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
+        given(userRepository.existsByEmail(EMAIL)).willReturn(true);
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> userValidationService.validateEmailNotDuplicate(EMAIL))
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(EMAIL_ALREADY_EXISTS);
 
-        then(userRepository).should().findByEmail(EMAIL);
+        then(userRepository).should().existsByEmail(EMAIL);
     }
 
     @Test
     void 닉네임_중복_검증에_성공한다() {
-        given(userRepository.findByNickname(NICKNAME)).willReturn(Optional.empty());
+        given(userRepository.existsByNickname(NICKNAME)).willReturn(false);
 
         userValidationService.validateNicknameNotDuplicate(NICKNAME);
 
-        then(userRepository).should().findByNickname(NICKNAME);
+        then(userRepository).should().existsByNickname(NICKNAME);
     }
 
     @Test
     void 이미_존재하는_닉네임이면_닉네임_중복_검증에_실패한다() {
-        User user = createUser();
-        given(userRepository.findByNickname(NICKNAME)).willReturn(Optional.of(user));
+        given(userRepository.existsByNickname(NICKNAME)).willReturn(true);
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> userValidationService.validateNicknameNotDuplicate(NICKNAME))
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(NICKNAME_ALREADY_EXISTS);
 
-        then(userRepository).should().findByNickname(NICKNAME);
+        then(userRepository).should().existsByNickname(NICKNAME);
+    }
+
+    @Test
+    void 자기_자신을_제외한_닉네임_중복_검증에_성공한다() {
+        given(userRepository.existsByNicknameNotAndUserIdNot(NICKNAME, USER_ID)).willReturn(false);
+
+        userValidationService.validateNicknameNotDuplicateExcludingUser(NICKNAME, USER_ID);
+
+        then(userRepository).should().existsByNicknameNotAndUserIdNot(NICKNAME, USER_ID);
+    }
+
+    @Test
+    void 자기_자신을_제외하고도_이미_존재하는_닉네임이면_닉네임_중복_검증에_실패한다() {
+        given(userRepository.existsByNicknameNotAndUserIdNot(NICKNAME, USER_ID)).willReturn(true);
+
+        assertThatExceptionOfType(ResourceConflictException.class)
+                .isThrownBy(() -> userValidationService.validateNicknameNotDuplicateExcludingUser(NICKNAME, USER_ID))
+                .extracting(ResourceConflictException::getError)
+                .isEqualTo(NICKNAME_ALREADY_EXISTS);
+
+        then(userRepository).should().existsByNicknameNotAndUserIdNot(NICKNAME, USER_ID);
     }
 }

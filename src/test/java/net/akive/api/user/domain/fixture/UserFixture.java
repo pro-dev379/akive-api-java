@@ -21,6 +21,14 @@ public class UserFixture {
         return createUser(EMAIL, NICKNAME);
     }
 
+    public static User createUser(Email email) {
+        return createUser(email, NICKNAME);
+    }
+
+    public static User createUser(String nickname) {
+        return createUser(EMAIL, nickname);
+    }
+
     public static User createUser(Email email, String nickname) {
         return createUser(email, nickname, Withdrawal.none());
     }

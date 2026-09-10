@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
-import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWN_USER_EMAIL;
-import static net.akive.api.user.domain.fixture.WithdrawalFixture.createWithdrawnUser;
+import static net.akive.api.user.domain.fixture.WithdrawalFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserJpaAdapterTest extends RepositoryTestSupport {
@@ -24,7 +24,7 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
                 ROLE_TYPE,
                 LOGIN_TYPE,
                 PASSWORD_HASH,
-                UserDetail.of(NICKNAME, IMG_URL, AIM),
+                new UserDetail(NICKNAME, IMG_URL, AIM),
                 Withdrawal.none()
         );
 
@@ -46,7 +46,7 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 회원_식별자로_탈퇴하지_않은_회원을_조회한다() {
-        User user = createUser(EMAIL, NICKNAME, Withdrawal.none());
+        User user = createUser();
         User savedUser = userRepository.save(user);
         flushAndClear();
 
@@ -68,7 +68,7 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 이메일로_탈퇴하지_않은_회원을_조회한다() {
-        User user = createUser(EMAIL, NICKNAME, Withdrawal.none());
+        User user = createUser(EMAIL);
         User savedUser = userRepository.save(user);
         flushAndClear();
 
@@ -89,24 +89,101 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 이메일로_회원을_조회한다() {
-        User user = createUser(EMAIL, NICKNAME, Withdrawal.none());
-        User savedUser = userRepository.save(user);
+    void 이메일에_해당하는_회원이_존재하는지_확인한다() {
+        User user = createUser(EMAIL);
+        userRepository.save(user);
         flushAndClear();
 
-        Optional<User> foundUser = userRepository.findByEmail(EMAIL);
+        boolean exists = userRepository.existsByEmail(EMAIL);
 
-        assertThat(foundUser).contains(savedUser);
+        assertThat(exists).isTrue();
     }
 
     @Test
-    void 닉네임으로_회원을_조회한다() {
-        User user = createUser(EMAIL, NICKNAME, Withdrawal.none());
+    void 이메일에_해당하는_회원이_없으면_존재하지_않는다고_응답한다() {
+        boolean exists = userRepository.existsByEmail(createEmail("unknown@test.com"));
+
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    void 탈퇴한_회원도_이메일_존재_여부_확인_대상에_포함한다() {
+        User user = createWithdrawnUser(WITHDRAWN_USER_EMAIL);
+        userRepository.save(user);
+        flushAndClear();
+
+        boolean exists = userRepository.existsByEmail(WITHDRAWN_USER_EMAIL);
+
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void 닉네임에_해당하는_회원이_존재하는지_확인한다() {
+        User user = createUser(NICKNAME);
+        userRepository.save(user);
+        flushAndClear();
+
+        boolean exists = userRepository.existsByNickname(NICKNAME);
+
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void 닉네임에_해당하는_회원이_없으면_존재하지_않는다고_응답한다() {
+        boolean exists = userRepository.existsByNickname("unknown-member");
+
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    void 탈퇴한_회원도_닉네임_존재_여부_확인_대상에_포함한다() {
+        String withdrawnUserNickname = "withdrawn-member";
+        User user = createUser(
+                WITHDRAWN_USER_EMAIL,
+                withdrawnUserNickname,
+                Withdrawal.completedWith(WITHDRAWN_AT, WITHDRAWAL_REASON)
+        );
+        userRepository.save(user);
+        flushAndClear();
+
+        boolean exists = userRepository.existsByNickname(withdrawnUserNickname);
+
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void 자기_자신의_닉네임은_중복_확인_대상에서_제외한다() {
+        User user = createUser(NICKNAME);
         User savedUser = userRepository.save(user);
         flushAndClear();
 
-        Optional<User> foundUser = userRepository.findByNickname(NICKNAME);
+        boolean exists = userRepository.existsByNicknameNotAndUserIdNot(NICKNAME, savedUser.getUserId());
 
-        assertThat(foundUser).contains(savedUser);
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    void 다른_회원이_사용_중인_닉네임이면_중복으로_확인한다() {
+        String anotherUserNickname = "another-member";
+        User user = createUser(NICKNAME);
+        User anotherUser = createUser(createEmail("another@test.com"), anotherUserNickname, Withdrawal.none());
+        User savedUser = userRepository.save(user);
+        userRepository.save(anotherUser);
+        flushAndClear();
+
+        boolean exists = userRepository.existsByNicknameNotAndUserIdNot(anotherUserNickname, savedUser.getUserId());
+
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void 자기_자신을_제외하고_닉네임에_해당하는_회원이_없으면_존재하지_않는다고_응답한다() {
+        User user = createUser(NICKNAME);
+        User savedUser = userRepository.save(user);
+        flushAndClear();
+
+        boolean exists = userRepository.existsByNicknameNotAndUserIdNot("unknown-member", savedUser.getUserId());
+
+        assertThat(exists).isFalse();
     }
 }

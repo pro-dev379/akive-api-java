@@ -1,10 +1,13 @@
 package net.akive.api.user.application.service;
 
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.event.UserWithdrawnEvent;
+import net.akive.api.user.application.provided.UserValidator;
+import net.akive.api.user.application.provided.dto.UserDetailUpdateCommand;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.application.required.GoalRepository;
@@ -21,8 +24,10 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 
+import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserDetailUpdateCommand;
 import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserSignUpByEmailCommand;
 import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserWithdrawCommand;
 import static net.akive.api.user.domain.UserPolicy.*;
@@ -45,6 +50,9 @@ class UserAccountServiceTest {
 
     @Mock
     UserSignUpDomainService userSignUpDomainService;
+
+    @Mock
+    UserValidator userValidator;
 
     @Mock
     ApplicationEventPublisher applicationEventPublisher;
@@ -104,6 +112,60 @@ class UserAccountServiceTest {
         then(userRepository).should(never()).save(any(User.class));
         then(goalRepository).shouldHaveNoInteractions();
         then(applicationEventPublisher).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 회원_상세_정보를_변경한다() {
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand();
+        User user = createReconstructedUser(command.userId());
+
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+
+        userAccountService.updateUserDetail(command);
+
+        assertThat(user.getUserDetail().nickname()).isEqualTo(command.nickname());
+        assertThat(user.getUserDetail().imgUrl()).isEqualTo(command.imgUrl());
+        assertThat(user.getUserDetail().aim()).isEqualTo(command.aim());
+
+        then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userValidator).should().validateNicknameNotDuplicateExcludingUser(command.nickname(), command.userId());
+        then(userRepository).should().save(user);
+    }
+
+    @Test
+    void 상세_정보를_변경할_회원이_없으면_회원_상세_정보를_저장하지_않는다() {
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand(UNKNOWN_USER_ID);
+
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> userAccountService.updateUserDetail(command))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(USER_NOT_FOUND);
+
+        then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userValidator).shouldHaveNoInteractions();
+        then(userRepository).should(never()).save(any(User.class));
+    }
+
+    @Test
+    void 자기_자신을_제외하고도_이미_존재하는_닉네임이면_회원_상세_정보를_변경하지_않고_저장하지_않는다() {
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand();
+        User user = createReconstructedUser(command.userId());
+
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        willThrow(new ResourceConflictException(NICKNAME_ALREADY_EXISTS))
+                .given(userValidator)
+                .validateNicknameNotDuplicateExcludingUser(command.nickname(), command.userId());
+
+        assertThatExceptionOfType(ResourceConflictException.class)
+                .isThrownBy(() -> userAccountService.updateUserDetail(command))
+                .extracting(ResourceConflictException::getError)
+                .isEqualTo(NICKNAME_ALREADY_EXISTS);
+
+        then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userValidator).should().validateNicknameNotDuplicateExcludingUser(command.nickname(), command.userId());
+        then(userRepository).should(never()).save(any(User.class));
     }
 
     @Test

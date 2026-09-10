@@ -9,6 +9,6 @@ public class UserDetailFixture {
     public static final String AIM = "목표";
 
     public static UserDetail createUserDetail() {
-        return UserDetail.of(NICKNAME, IMG_URL, AIM);
+        return new UserDetail(NICKNAME, IMG_URL, AIM);
     }
 }

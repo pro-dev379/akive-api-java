@@ -14,8 +14,4 @@ public record UserDetail(String nickname, String imgUrl, String aim) {
     public static UserDetail initial(String nickname) {
         return new UserDetail(nickname, null, null);
     }
-
-    public static UserDetail of(String nickname, String imgUrl, String aim) {
-        return new UserDetail(nickname, imgUrl, aim);
-    }
 }

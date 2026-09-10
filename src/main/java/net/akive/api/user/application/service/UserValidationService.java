@@ -28,14 +28,22 @@ class UserValidationService implements UserValidator {
 
     @Override
     public void validateEmailNotDuplicate(Email email) throws ResourceConflictException {
-        if (userRepository.findByEmail(email).isPresent()) {
+        if (userRepository.existsByEmail(email)) {
             throw new ResourceConflictException(EMAIL_ALREADY_EXISTS);
         }
     }
 
     @Override
     public void validateNicknameNotDuplicate(String nickname) throws ResourceConflictException {
-        if (userRepository.findByNickname(nickname).isPresent()) {
+        if (userRepository.existsByNickname(nickname)) {
+            throw new ResourceConflictException(NICKNAME_ALREADY_EXISTS);
+        }
+    }
+
+    @Override
+    public void validateNicknameNotDuplicateExcludingUser(String nickname, Long userId)
+            throws ResourceConflictException {
+        if (userRepository.existsByNicknameNotAndUserIdNot(nickname, userId)) {
             throw new ResourceConflictException(NICKNAME_ALREADY_EXISTS);
         }
     }

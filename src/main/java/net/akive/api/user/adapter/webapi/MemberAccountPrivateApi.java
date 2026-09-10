@@ -2,6 +2,7 @@ package net.akive.api.user.adapter.webapi;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
 import net.akive.api.user.adapter.webapi.dto.response.UserFindResponse;
 import net.akive.api.user.application.provided.UserAccountManager;
@@ -26,6 +27,15 @@ public class MemberAccountPrivateApi {
         User foundUser = userFinder.findOrThrowByUserIdAndNotWithdrawn(userId);
 
         return UserFindResponse.from(foundUser);
+    }
+
+    @PatchMapping
+    @ResponseStatus(NO_CONTENT)
+    public void updateMyDetail(
+            @AuthenticatedUserId Long userId,
+            @Validated @RequestBody UserDetailUpdateRequest request
+    ) {
+        userAccountManager.updateUserDetail(request.to(userId));
     }
 
     @PostMapping("/withdraw")

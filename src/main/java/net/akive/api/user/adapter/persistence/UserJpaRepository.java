@@ -11,7 +11,9 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByEmailAndWithdrawal_WithdrawnAtIsNull(String email);
 
-    Optional<UserEntity> findByEmail(String email);
+    boolean existsByEmail(String email);
 
-    Optional<UserEntity> findByUserDetail_Nickname(String nickname);
+    boolean existsByUserDetail_Nickname(String nickname);
+
+    boolean existsByUserDetail_NicknameAndUserIdNot(String nickname, Long userId);
 }

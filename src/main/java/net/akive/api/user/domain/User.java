@@ -74,7 +74,7 @@ public class User {
     }
 
     public void updateUserDetail(String nickname, String imgUrl, String aim) {
-        this.userDetail = UserDetail.of(nickname, imgUrl, aim);
+        this.userDetail = new UserDetail(nickname, imgUrl, aim);
     }
 
     public void withdraw(LocalDateTime withdrawnAt, String reason) {

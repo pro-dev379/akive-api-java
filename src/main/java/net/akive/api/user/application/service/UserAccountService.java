@@ -8,6 +8,8 @@ import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.event.UserWithdrawnEvent;
 import net.akive.api.user.application.provided.UserAccountManager;
+import net.akive.api.user.application.provided.UserValidator;
+import net.akive.api.user.application.provided.dto.UserDetailUpdateCommand;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.application.required.GoalRepository;
@@ -24,6 +26,8 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.USER
 @Transactional
 @RequiredArgsConstructor
 public class UserAccountService implements UserAccountManager {
+
+    private final UserValidator userValidator;
 
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
@@ -55,10 +59,21 @@ public class UserAccountService implements UserAccountManager {
     }
 
     @Override
+    public void updateUserDetail(UserDetailUpdateCommand command)
+            throws ResourceNotFoundException, ResourceConflictException {
+        User user = findNotWithdrawnUserOrThrow(command.userId());
+
+        userValidator.validateNicknameNotDuplicateExcludingUser(command.nickname(), command.userId());
+
+        user.updateUserDetail(command.nickname(), command.imgUrl(), command.aim());
+
+        userRepository.save(user);
+    }
+
+    @Override
     public void updatePassword(Long userId, String passwordHash)
             throws BusinessRuleViolationException, ResourceNotFoundException {
-        User user = userRepository.findByUserIdAndNotWithdrawn(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+        User user = findNotWithdrawnUserOrThrow(userId);
 
         user.updatePasswordHash(passwordHash);
 
@@ -67,13 +82,17 @@ public class UserAccountService implements UserAccountManager {
 
     @Override
     public void withdraw(UserWithdrawCommand command) throws ResourceNotFoundException {
-        User user = userRepository.findByUserIdAndNotWithdrawn(command.userId())
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+        User user = findNotWithdrawnUserOrThrow(command.userId());
 
         user.withdraw(currentTimeProvider.now(), command.withdrawReason());
 
         userRepository.save(user);
 
         applicationEventPublisher.publishEvent(new UserWithdrawnEvent(command.userId()));
+    }
+
+    private User findNotWithdrawnUserOrThrow(Long userId) {
+        return userRepository.findByUserIdAndNotWithdrawn(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
     }
 }
