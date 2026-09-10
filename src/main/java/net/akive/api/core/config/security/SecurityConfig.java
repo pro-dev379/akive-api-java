@@ -28,6 +28,7 @@ public class SecurityConfig {
                         "/tokens",
                         "/login/**",
                         "/members/email",
+                        "/members/check-nickname",
                         "/verifications/**"
                 )
                 .csrf(AbstractHttpConfigurer::disable)

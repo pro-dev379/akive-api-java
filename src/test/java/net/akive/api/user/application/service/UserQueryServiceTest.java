@@ -1,5 +1,6 @@
 package net.akive.api.user.application.service;
 
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.User;
@@ -11,7 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -73,5 +77,71 @@ class UserQueryServiceTest {
         assertThat(foundUser).contains(user);
 
         then(userRepository).should().findByEmailAndNotWithdrawn(EMAIL);
+    }
+
+    @Test
+    void 닉네임에_해당하는_회원이_존재하는지_확인한다() {
+        given(userRepository.existsByNickname(NICKNAME)).willReturn(true);
+
+        boolean exists = userQueryService.existsByNickname(NICKNAME);
+
+        assertThat(exists).isTrue();
+        then(userRepository).should().existsByNickname(NICKNAME);
+    }
+
+    @Test
+    void 닉네임_존재_여부_확인_시_닉네임을_정규화한다() {
+        String nickname = " " + NICKNAME + " ";
+        given(userRepository.existsByNickname(NICKNAME)).willReturn(true);
+
+        boolean exists = userQueryService.existsByNickname(nickname);
+
+        assertThat(exists).isTrue();
+        then(userRepository).should().existsByNickname(NICKNAME);
+    }
+
+    @Test
+    void 닉네임_존재_여부_확인_시_닉네임이_최대_길이를_초과하면_예외가_발생한다() {
+        String nickname = "a".repeat(NICKNAME_MAX_LENGTH + 1);
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> userQueryService.existsByNickname(nickname))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(MAX_LENGTH_EXCEEDED);
+
+        then(userRepository).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 자기_자신을_제외하고_닉네임에_해당하는_회원이_존재하는지_확인한다() {
+        given(userRepository.existsByNicknameNotAndUserIdNot(NICKNAME, USER_ID)).willReturn(true);
+
+        boolean exists = userQueryService.existsByNicknameExcludingUser(NICKNAME, USER_ID);
+
+        assertThat(exists).isTrue();
+        then(userRepository).should().existsByNicknameNotAndUserIdNot(NICKNAME, USER_ID);
+    }
+
+    @Test
+    void 자기_자신을_제외한_닉네임_존재_여부_확인_시_닉네임과_회원_식별자를_정규화한다() {
+        String nickname = " " + NICKNAME + " ";
+        given(userRepository.existsByNicknameNotAndUserIdNot(NICKNAME, USER_ID)).willReturn(true);
+
+        boolean exists = userQueryService.existsByNicknameExcludingUser(nickname, USER_ID);
+
+        assertThat(exists).isTrue();
+        then(userRepository).should().existsByNicknameNotAndUserIdNot(NICKNAME, USER_ID);
+    }
+
+    @Test
+    void 자기_자신을_제외한_닉네임_존재_여부_확인_시_닉네임이_최대_길이를_초과하면_예외가_발생한다() {
+        String nickname = "a".repeat(NICKNAME_MAX_LENGTH + 1);
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> userQueryService.existsByNicknameExcludingUser(nickname, USER_ID))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(MAX_LENGTH_EXCEEDED);
+
+        then(userRepository).shouldHaveNoInteractions();
     }
 }

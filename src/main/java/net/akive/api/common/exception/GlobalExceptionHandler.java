@@ -3,6 +3,7 @@ package net.akive.api.common.exception;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import net.akive.api.common.exception.business.BusinessException;
 import net.akive.api.common.response.ApiErrorResponse;
@@ -21,11 +22,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static net.akive.api.common.exception.ApplicationErrorHttpStatusMapper.toHttpStatus;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.ENDPOINT_NOT_FOUND;
 import static net.akive.api.common.exception.internal.UnexpectedServerError.INTERNAL_SERVER_ERROR;
 import static net.akive.api.common.exception.web.HttpRequestError.METHOD_NOT_ALLOWED;
-import static net.akive.api.common.exception.ApplicationErrorHttpStatusMapper.toHttpStatus;
 
 @Slf4j
 @RestControllerAdvice
@@ -50,6 +51,24 @@ public class GlobalExceptionHandler {
                 .map(error -> new FieldErrorDetail(
                         error.getField(),
                         error.getDefaultMessage()
+                ))
+                .toList();
+
+        logInfo(request, "[ValidationException]", "errors=" + fieldErrors);
+
+        return createErrorResponse(INVALID_INPUT_VALUE, fieldErrors);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity<ApiErrorResponse> handleConstraintViolationException(
+            HttpServletRequest request,
+            ConstraintViolationException e
+    ) {
+        List<FieldErrorDetail> fieldErrors = e.getConstraintViolations()
+                .stream()
+                .map(violation -> new FieldErrorDetail(
+                        resolveConstraintViolationFieldName(violation.getPropertyPath().toString()),
+                        violation.getMessage()
                 ))
                 .toList();
 
@@ -131,6 +150,16 @@ public class GlobalExceptionHandler {
 
     private List<FieldErrorDetail> resolveMissingRequestValueFieldErrors(MissingRequestValueException e) {
         return List.of(new FieldErrorDetail(resolveMissingRequestValueFieldName(e), "Required value is missing."));
+    }
+
+    private String resolveConstraintViolationFieldName(String propertyPath) {
+        int lastDotIndex = propertyPath.lastIndexOf('.');
+
+        if (lastDotIndex == -1) {
+            return propertyPath;
+        }
+
+        return propertyPath.substring(lastDotIndex + 1);
     }
 
     private String resolveMissingRequestValueFieldName(MissingRequestValueException e) {

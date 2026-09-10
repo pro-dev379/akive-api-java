@@ -1,26 +1,33 @@
 package net.akive.api.user.adapter.webapi;
 
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
+import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
+import net.akive.api.user.application.provided.UserNicknameChecker;
 import net.akive.api.user.application.provided.dto.UserDetailUpdateCommand;
 import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.*;
+import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
@@ -34,12 +41,16 @@ class MemberAccountPrivateApiTest extends PrivateApiTestSupport {
 
     private static final String MEMBER_ME_URL = "/members/me";
     private static final String MEMBER_WITHDRAW_URL = "/members/me/withdraw";
+    private static final String MEMBER_CHECK_NICKNAME_URL = "/members/me/check-nickname";
 
     @MockitoBean
     UserAccountManager userAccountManager;
 
     @MockitoBean
     UserFinder userFinder;
+
+    @MockitoBean
+    UserNicknameChecker userNicknameChecker;
 
     @Test
     void 개인_정보를_조회한다() {
@@ -118,8 +129,72 @@ class MemberAccountPrivateApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 닉네임이_중복인지_확인한다() {
+        given(userNicknameChecker.existsByNicknameExcludingUser(NICKNAME, USER_ID)).willReturn(true);
+
+        MvcTestResultAssert result = get(
+                MEMBER_CHECK_NICKNAME_URL + "?targetNickname={targetNickname}",
+                USER_ID,
+                NICKNAME
+        ).hasStatus(OK);
+
+        result.bodyJson()
+                .extractingPath("$.isDuplicated")
+                .isEqualTo(true);
+        then(userNicknameChecker).should().existsByNicknameExcludingUser(NICKNAME, USER_ID);
+    }
+
+    @Test
+    void 닉네임이_중복이_아니면_isDuplicated_필드_값을_false로_응답한다() {
+        given(userNicknameChecker.existsByNicknameExcludingUser(NICKNAME, USER_ID)).willReturn(false);
+
+        MvcTestResultAssert result = get(
+                MEMBER_CHECK_NICKNAME_URL + "?targetNickname={targetNickname}",
+                USER_ID,
+                NICKNAME
+        ).hasStatus(OK);
+
+        result.bodyJson()
+                .extractingPath("$.isDuplicated")
+                .isEqualTo(false);
+        then(userNicknameChecker).should().existsByNicknameExcludingUser(NICKNAME, USER_ID);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "\t"})
+    void 닉네임_중복_확인_요청값이_올바르지_않으면_400을_응답한다(String targetNickname) {
+        MvcTestResultAssert result = get(
+                MEMBER_CHECK_NICKNAME_URL + "?targetNickname={targetNickname}",
+                USER_ID,
+                targetNickname
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_INPUT_VALUE);
+        result.bodyJson()
+                .extractingPath("$.errors[0].field")
+                .isEqualTo("targetNickname");
+        then(userNicknameChecker).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 닉네임_중복_확인_요청값이_최대_길이를_초과하면_400을_응답한다() {
+        String targetNickname = "a".repeat(NICKNAME_MAX_LENGTH + 1);
+        given(userNicknameChecker.existsByNicknameExcludingUser(targetNickname, USER_ID))
+                .willThrow(new BusinessRuleViolationException(MAX_LENGTH_EXCEEDED));
+
+        MvcTestResultAssert result = get(
+                MEMBER_CHECK_NICKNAME_URL + "?targetNickname={targetNickname}",
+                USER_ID,
+                targetNickname
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, MAX_LENGTH_EXCEEDED);
+        then(userNicknameChecker).should().existsByNicknameExcludingUser(targetNickname, USER_ID);
+    }
+
+    @Test
     void 회원을_탈퇴시킨다() {
-        var request = createUserWithdrawRequest();
+        UserWithdrawRequest request = createUserWithdrawRequest();
         UserWithdrawCommand command = UserWithdrawCommand.of(USER_ID, request.withdrawReason());
 
         postJson(MEMBER_WITHDRAW_URL, USER_ID, toJson(request)).hasStatus(NO_CONTENT);
@@ -129,7 +204,7 @@ class MemberAccountPrivateApiTest extends PrivateApiTestSupport {
 
     @Test
     void 회원_탈퇴_요청값이_올바르지_않으면_400을_응답한다() {
-        var request = createUserWithdrawRequest("a".repeat(WITHDRAWAL_REASON_MAX_LENGTH + 1));
+        UserWithdrawRequest request = createUserWithdrawRequest("a".repeat(WITHDRAWAL_REASON_MAX_LENGTH + 1));
 
         postJson(MEMBER_WITHDRAW_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
@@ -138,7 +213,7 @@ class MemberAccountPrivateApiTest extends PrivateApiTestSupport {
 
     @Test
     void 회원_탈퇴_시_멤버를_조회할_수_없으면_404를_응답한다() {
-        var request = createUserWithdrawRequest();
+        UserWithdrawRequest request = createUserWithdrawRequest();
         UserWithdrawCommand command = UserWithdrawCommand.of(UNKNOWN_USER_ID, request.withdrawReason());
         willThrow(new ResourceNotFoundException(USER_NOT_FOUND))
                 .given(userAccountManager)

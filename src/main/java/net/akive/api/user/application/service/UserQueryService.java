@@ -4,17 +4,20 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.application.provided.UserFinder;
+import net.akive.api.user.application.provided.UserNicknameChecker;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 
 @Service
 @RequiredArgsConstructor
-public class UserQueryService implements UserFinder {
+class UserQueryService implements UserFinder, UserNicknameChecker {
 
     private final UserRepository userRepository;
 
@@ -32,5 +35,18 @@ public class UserQueryService implements UserFinder {
     @Override
     public Optional<User> findByEmailAndNotWithdrawn(Email email) {
         return userRepository.findByEmailAndNotWithdrawn(email);
+    }
+
+    @Override
+    public boolean existsByNickname(String nickname) {
+        return userRepository.existsByNickname(requireMaxLength(requireNotBlank(nickname), NICKNAME_MAX_LENGTH));
+    }
+
+    @Override
+    public boolean existsByNicknameExcludingUser(String nickname, Long userId) {
+        return userRepository.existsByNicknameNotAndUserIdNot(
+                requireMaxLength(requireNotBlank(nickname), NICKNAME_MAX_LENGTH),
+                requirePositive(userId)
+        );
     }
 }
