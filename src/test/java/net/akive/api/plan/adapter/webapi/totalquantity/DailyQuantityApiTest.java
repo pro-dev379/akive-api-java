@@ -19,11 +19,11 @@ import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
+import static net.akive.api.plan.adapter.webapi.totalquantity.fixture.DailyQuantityRequestFixture.*;
 import static net.akive.api.plan.domain.fixture.DailyQuantityFixture.*;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_PLAN_ID;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
 import static net.akive.api.plan.domain.fixture.WeeklyQuantityFixture.FIRST_WEEKLY_QUANTITY_ID;
-import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -64,7 +64,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidDailyAmountUpdateRequests")
+    @MethodSource("invalidAmountUpdateRequests")
     void 일일_계획량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
 
         patchJson(
@@ -288,7 +288,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidDailyAmountDelayRequests")
+    @MethodSource("invalidAmountDelayRequests")
     void 일일_딜레이_옮길_시_요청값이_올바르지_않으면_400을_응답한다(String body) {
 
         patchJson(
@@ -481,7 +481,7 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidDailyCompletedAmountUpdateRequests")
+    @MethodSource("invalidCompletedAmountUpdateRequests")
     void 일일_계획_달성량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
 
         patchJson(
@@ -615,73 +615,16 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityModifier).should().updateDailyCompletedAmount(command);
     }
 
-    private static Stream<String> invalidDailyAmountUpdateRequests() {
-        return Stream.of(
-                """
-                {
-                  "targetDailyAmount": null
-                }
-                """,
-                dailyAmountUpdateRequestJson(null, null),
-                dailyAmountUpdateRequestJson(-1, null),
-                dailyAmountUpdateRequestJson(50, "a".repeat(QUANTITY_MEMO_MAX_LENGTH + 1))
-        );
+    private static Stream<String> invalidAmountUpdateRequests() {
+        return invalidDailyAmountUpdateRequests();
     }
 
-    private static Stream<String> invalidDailyCompletedAmountUpdateRequests() {
-        return Stream.of(
-                """
-                {
-                  "targetDailyCompletedAmount": null
-                }
-                """,
-                dailyCompletedAmountUpdateRequestJson(null),
-                dailyCompletedAmountUpdateRequestJson(-1)
-        );
+    private static Stream<String> invalidAmountDelayRequests() {
+        return invalidDailyAmountDelayRequests();
     }
 
-    private static Stream<String> invalidDailyAmountDelayRequests() {
-        return Stream.of(
-                """
-                {
-                  "receivingDailyQuantityId": null,
-                  "dailyAmountToDelay": 10
-                }
-                """,
-                dailyAmountDelayRequestJson(-1L, 10),
-                dailyAmountDelayRequestJson(50L, null),
-                dailyAmountDelayRequestJson(50L, -1)
-        );
+    private static Stream<String> invalidCompletedAmountUpdateRequests() {
+        return invalidDailyCompletedAmountUpdateRequests();
     }
 
-    private static String dailyAmountUpdateRequestJson(Integer targetDailyAmount, String targetDailyMemo) {
-        return """
-                {
-                  "targetDailyAmount": {
-                    "quantityAmount": %s,
-                    "quantityMemo": %s
-                  }
-                }
-                """.formatted(
-                targetDailyAmount,
-                targetDailyMemo == null ? null : "\"" + targetDailyMemo + "\""
-        );
-    }
-
-    private static String dailyCompletedAmountUpdateRequestJson(Integer targetDailyCompletedAmount) {
-        return """
-                {
-                  "targetDailyCompletedAmount": %s
-                }
-                """.formatted(targetDailyCompletedAmount);
-    }
-
-    private static String dailyAmountDelayRequestJson(Long receivingDailyQuantityId, Integer dailyAmountToDelay) {
-        return """
-                {
-                  "receivingDailyQuantityId": %s,
-                  "dailyAmountToDelay": %s
-                }
-                """.formatted(receivingDailyQuantityId, dailyAmountToDelay);
-    }
 }

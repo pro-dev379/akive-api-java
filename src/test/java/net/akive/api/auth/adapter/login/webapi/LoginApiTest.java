@@ -17,13 +17,12 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequestFixture.createLoginByEmailRequest;
+import static net.akive.api.auth.adapter.login.webapi.fixture.LoginByEmailRequestFixture.createLoginByEmailRequest;
+import static net.akive.api.auth.adapter.login.webapi.fixture.LoginByEmailRequestFixture.invalidLoginByEmailRequests;
 import static net.akive.api.auth.domain.token.AccessTokenFixture.ACCESS_TOKEN_VALUE;
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.REFRESH_TOKEN_VALUE;
-import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
-import static net.akive.api.user.domain.fixture.UserFixture.PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -60,7 +59,7 @@ class LoginApiTest extends PublicApiTestSupport {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidRequests")
+    @MethodSource("invalidLoginRequests")
     void 이메일_로그인_요청값이_올바르지_않으면_400을_응답한다(LoginByEmailRequest request) {
         postLoginByEmail(UUID.randomUUID().toString(), request).hasStatus(BAD_REQUEST);
 
@@ -109,18 +108,8 @@ class LoginApiTest extends PublicApiTestSupport {
         return requestBuilder.assertThat();
     }
 
-    private static Stream<LoginByEmailRequest> invalidRequests() {
-        return Stream.of(
-                createLoginByEmailRequest(null, PASSWORD),
-                createLoginByEmailRequest("", PASSWORD),
-                createLoginByEmailRequest(" ", PASSWORD),
-                createLoginByEmailRequest("invalid-email", PASSWORD),
-                createLoginByEmailRequest("test@", PASSWORD),
-                createLoginByEmailRequest("@test.com", PASSWORD),
-                createLoginByEmailRequest(EMAIL_ADDRESS, null),
-                createLoginByEmailRequest(EMAIL_ADDRESS, ""),
-                createLoginByEmailRequest(EMAIL_ADDRESS, " ")
-        );
+    private static Stream<LoginByEmailRequest> invalidLoginRequests() {
+        return invalidLoginByEmailRequests();
     }
 
     private static Stream<String> invalidClientInstanceIdHeaders() {

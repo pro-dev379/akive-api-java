@@ -18,14 +18,14 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.auth.adapter.emailverification.webapi.dto.request.EmailVerificationCodeIssueRequestFixture.createIssueRequest;
-import static net.akive.api.auth.adapter.emailverification.webapi.dto.request.EmailVerificationCodeVerifyRequestFixture.createVerifyRequest;
-import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.VERIFICATION_CODE;
+import static net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeIssueRequestFixture.createIssueRequest;
+import static net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeIssueRequestFixture.invalidIssueRequests;
+import static net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeVerifyRequestFixture.createVerifyRequest;
+import static net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeVerifyRequestFixture.invalidVerifyRequests;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.PASSWORD_RESET;
-import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_VERIFICATION_CODE_MISMATCH;
@@ -70,7 +70,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidIssueRequests")
+    @MethodSource("invalidCodeIssueRequests")
     void 인증번호_발급_요청값이_올바르지_않으면_400을_응답한다(EmailVerificationCodeIssueRequest request) throws Exception {
         postJson(VERIFICATION_CODE_ISSUE_URL, request).hasStatus(BAD_REQUEST);
 
@@ -139,7 +139,7 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidVerifyRequests")
+    @MethodSource("invalidCodeVerifyRequests")
     void 인증번호_검증_요청값이_올바르지_않으면_400을_응답한다(EmailVerificationCodeVerifyRequest request) throws Exception {
         postJson(VERIFICATION_CODE_VERIFY_URL, request).hasStatus(BAD_REQUEST);
 
@@ -214,21 +214,11 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
         assertErrorResponse(result, EMAIL_ALREADY_VERIFIED);
     }
 
-    private static Stream<EmailVerificationCodeIssueRequest> invalidIssueRequests() {
-        return Stream.of(
-                createIssueRequest("", SIGN_UP),
-                createIssueRequest("invalid-email", SIGN_UP),
-                createIssueRequest(EMAIL_ADDRESS, null)
-        );
+    private static Stream<EmailVerificationCodeIssueRequest> invalidCodeIssueRequests() {
+        return invalidIssueRequests();
     }
 
-    private static Stream<EmailVerificationCodeVerifyRequest> invalidVerifyRequests() {
-        return Stream.of(
-                createVerifyRequest("", SIGN_UP, VERIFICATION_CODE.value()),
-                createVerifyRequest("invalid-email", SIGN_UP, VERIFICATION_CODE.value()),
-                createVerifyRequest(EMAIL_ADDRESS, SIGN_UP, ""),
-                createVerifyRequest(EMAIL_ADDRESS, SIGN_UP, "12345"),
-                createVerifyRequest(EMAIL_ADDRESS, null, VERIFICATION_CODE.value())
-        );
+    private static Stream<EmailVerificationCodeVerifyRequest> invalidCodeVerifyRequests() {
+        return invalidVerifyRequests();
     }
 }

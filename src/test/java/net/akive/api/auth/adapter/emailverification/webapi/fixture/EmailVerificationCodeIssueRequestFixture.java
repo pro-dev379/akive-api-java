@@ -1,6 +1,9 @@
-package net.akive.api.auth.adapter.emailverification.webapi.dto.request;
+package net.akive.api.auth.adapter.emailverification.webapi.fixture;
 
+import net.akive.api.auth.adapter.emailverification.webapi.dto.request.EmailVerificationCodeIssueRequest;
 import net.akive.api.auth.domain.emailverification.EmailVerificationPurpose;
+
+import java.util.stream.Stream;
 
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.SIGN_UP;
 import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
@@ -24,5 +27,13 @@ public class EmailVerificationCodeIssueRequestFixture {
             EmailVerificationPurpose purpose
     ) {
         return new EmailVerificationCodeIssueRequest(emailAddress, purpose);
+    }
+
+    public static Stream<EmailVerificationCodeIssueRequest> invalidIssueRequests() {
+        return Stream.of(
+                createIssueRequest("", SIGN_UP),
+                createIssueRequest("invalid-email", SIGN_UP),
+                createIssueRequest(EMAIL_ADDRESS, null)
+        );
     }
 }

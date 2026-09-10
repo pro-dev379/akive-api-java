@@ -4,8 +4,6 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.webapi.common.PlanApiPath;
-import net.akive.api.plan.adapter.webapi.common.dto.request.SubjectRequest;
-import net.akive.api.plan.adapter.webapi.common.dto.request.TotalQuantityAmountRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityCreateRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityUpdateRequest;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityCreator;
@@ -35,10 +33,10 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.exception.business.ResourceConflictError.SUBJECT_NAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
+import static net.akive.api.plan.adapter.webapi.totalquantity.fixture.TotalQuantityRequestFixture.*;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_PLAN_ID;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createReconstructedSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.*;
-import static net.akive.api.plan.domain.policy.PlanPolicy.*;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,7 +58,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세션_총량을_생성한다() {
-        TotalQuantityCreateRequest request = createRequest();
+        TotalQuantityCreateRequest request = createTotalQuantityCreateRequest();
         TotalQuantityCreateCommand command = TotalQuantityCreateCommand.of(
                 SESSIONAL_PLAN_ID,
                 USER_ID,
@@ -102,7 +100,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세션_총량_생성_시_세셔널_플랜이_없으면_404를_응답한다() {
-        TotalQuantityCreateRequest request = createRequest();
+        TotalQuantityCreateRequest request = createTotalQuantityCreateRequest();
         TotalQuantityCreateCommand command = request.to(USER_ID, SESSIONAL_PLAN_ID);
         willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(totalQuantityCreator)
@@ -122,7 +120,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세션_총량_생성_시_세션_과목이_중복되면_409를_응답한다() {
-        TotalQuantityCreateRequest request = createRequest();
+        TotalQuantityCreateRequest request = createTotalQuantityCreateRequest();
         TotalQuantityCreateCommand command = request.to(USER_ID, SESSIONAL_PLAN_ID);
         willThrow(new ResourceConflictException(SUBJECT_NAME_ALREADY_EXISTS))
                 .given(totalQuantityCreator)
@@ -193,7 +191,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세션_총량을_수정한다() {
-        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateRequest request = createTotalQuantityUpdateRequest();
         TotalQuantityUpdateCommand command = request.to(USER_ID, SESSIONAL_PLAN_ID, FIRST_TOTAL_QUANTITY_ID);
 
         putJson(
@@ -224,7 +222,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세션_총량_수정_시_계획_달성량보다_적게_수정하면_400을_응답한다() {
-        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateRequest request = createTotalQuantityUpdateRequest();
         TotalQuantityUpdateCommand command = request.to(USER_ID, SESSIONAL_PLAN_ID, FIRST_TOTAL_QUANTITY_ID);
         willThrow(new BusinessRuleViolationException(TOTAL_AMOUNT_LESS_THAN_COMPLETED_AMOUNT))
                 .given(totalQuantityModifier)
@@ -246,7 +244,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세션_총량_수정_시_세션_총량이_없으면_404를_응답한다() {
-        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateRequest request = createTotalQuantityUpdateRequest();
         TotalQuantityUpdateCommand command = request.to(USER_ID, SESSIONAL_PLAN_ID, FIRST_TOTAL_QUANTITY_ID);
         willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
                 .given(totalQuantityModifier)
@@ -267,7 +265,7 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세션_총량_수정_시_세션_과목이_중복되면_409를_응답한다() {
-        TotalQuantityUpdateRequest request = updateRequest();
+        TotalQuantityUpdateRequest request = createTotalQuantityUpdateRequest();
         TotalQuantityUpdateCommand command = request.to(USER_ID, SESSIONAL_PLAN_ID, FIRST_TOTAL_QUANTITY_ID);
         willThrow(new ResourceConflictException(SUBJECT_NAME_ALREADY_EXISTS))
                 .given(totalQuantityModifier)
@@ -323,87 +321,12 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityModifier).should().delete(command);
     }
 
-    private static TotalQuantityCreateRequest createRequest() {
-        return new TotalQuantityCreateRequest(
-                new SubjectRequest(FIRST_SUBJECT_NAME, SUBJECT_CATEGORY),
-                new TotalQuantityAmountRequest(TOTAL_AMOUNT, QUANTITY_UNIT, null)
-        );
-    }
-
-    private static TotalQuantityUpdateRequest updateRequest() {
-        return new TotalQuantityUpdateRequest(
-                new SubjectRequest(FIRST_SUBJECT_NAME, SUBJECT_CATEGORY),
-                new TotalQuantityAmountRequest(TOTAL_AMOUNT, QUANTITY_UNIT, null)
-        );
-    }
-
     private static Stream<TotalQuantityCreateRequest> invalidCreateRequests() {
-        return invalidRequestValues()
-                .map(value -> new TotalQuantityCreateRequest(value.subject(), value.totalQuantityAmount()));
+        return invalidTotalQuantityCreateRequests();
     }
 
     private static Stream<TotalQuantityUpdateRequest> invalidUpdateRequests() {
-        return invalidRequestValues()
-                .map(value -> new TotalQuantityUpdateRequest(value.subject(), value.totalQuantityAmount()));
-    }
-
-    private static Stream<TotalQuantityRequestValue> invalidRequestValues() {
-        return Stream.of(
-                new TotalQuantityRequestValue(null, createTotalQuantityAmountRequest()),
-                new TotalQuantityRequestValue(createSubjectRequest(), null),
-                new TotalQuantityRequestValue(
-                        new SubjectRequest("", SUBJECT_CATEGORY),
-                        createTotalQuantityAmountRequest()
-                ),
-                new TotalQuantityRequestValue(
-                        new SubjectRequest("a".repeat(SUBJECT_NAME_MAX_LENGTH + 1), SUBJECT_CATEGORY),
-                        createTotalQuantityAmountRequest()
-                ),
-                new TotalQuantityRequestValue(
-                        new SubjectRequest(FIRST_SUBJECT_NAME, ""),
-                        createTotalQuantityAmountRequest()
-                ),
-                new TotalQuantityRequestValue(
-                        new SubjectRequest(FIRST_SUBJECT_NAME, "a".repeat(SUBJECT_CATEGORY_MAX_LENGTH + 1)),
-                        createTotalQuantityAmountRequest()
-                ),
-                new TotalQuantityRequestValue(
-                        createSubjectRequest(),
-                        new TotalQuantityAmountRequest(null, QUANTITY_UNIT, null)
-                ),
-                new TotalQuantityRequestValue(
-                        createSubjectRequest(),
-                        new TotalQuantityAmountRequest(-1, QUANTITY_UNIT, null)
-                ),
-                new TotalQuantityRequestValue(
-                        createSubjectRequest(),
-                        new TotalQuantityAmountRequest(TOTAL_AMOUNT, "", null)
-                ),
-                new TotalQuantityRequestValue(
-                        createSubjectRequest(),
-                        new TotalQuantityAmountRequest(
-                                TOTAL_AMOUNT,
-                                "a".repeat(QUANTITY_UNIT_MAX_LENGTH + 1),
-                                null
-                        )
-                ),
-                new TotalQuantityRequestValue(
-                        createSubjectRequest(),
-                        new TotalQuantityAmountRequest(
-                                TOTAL_AMOUNT,
-                                QUANTITY_UNIT,
-                                "a".repeat(QUANTITY_MEMO_MAX_LENGTH + 1)
-                        )
-                )
-        );
-    }
-
-    private static SubjectRequest createSubjectRequest() {
-        return new SubjectRequest(FIRST_SUBJECT_NAME, SUBJECT_CATEGORY);
-    }
-
-    private static TotalQuantityAmountRequest createTotalQuantityAmountRequest() {
-        return new TotalQuantityAmountRequest(TOTAL_AMOUNT, QUANTITY_UNIT, null);
+        return invalidTotalQuantityUpdateRequests();
     }
 
     private void assertSessionalPlanNotFoundResponse(MvcTestResultAssert result) {
@@ -458,11 +381,5 @@ class TotalQuantityApiTest extends PrivateApiTestSupport {
         result.bodyJson()
                 .extractingPath("$.weeklyQuantities[0].weeklyQuantityAmount.delayedQuantityAmount")
                 .isEqualTo(weeklyQuantityAmount.delayedQuantityAmount().value());
-    }
-
-    private record TotalQuantityRequestValue(
-            SubjectRequest subject,
-            TotalQuantityAmountRequest totalQuantityAmount
-    ) {
     }
 }

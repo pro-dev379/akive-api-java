@@ -16,11 +16,10 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
-import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
-import static net.akive.api.user.domain.fixture.UserFixture.PASSWORD;
+import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserSignUpByEmailRequest;
+import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.invalidUserSignUpByEmailRequests;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
@@ -41,7 +40,7 @@ class MemberAccountPublicApiTest extends PublicApiTestSupport {
 
     @Test
     void 이메일로_멤버_가입을_요청하면_201을_응답한다() throws Exception {
-        UserSignUpByEmailRequest request = createRequest();
+        UserSignUpByEmailRequest request = createUserSignUpByEmailRequest();
         UserSignUpByEmailCommand command = UserSignUpByEmailCommand.of(
                 request.email(),
                 request.password(),
@@ -54,7 +53,7 @@ class MemberAccountPublicApiTest extends PublicApiTestSupport {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidRequests")
+    @MethodSource("invalidSignUpRequests")
     void 이메일_멤버_가입_요청값이_올바르지_않으면_400을_응답한다(UserSignUpByEmailRequest request) throws Exception {
         postJson(SIGN_UP_MEMBER_BY_EMAIL_URL, request).hasStatus(BAD_REQUEST);
 
@@ -63,7 +62,7 @@ class MemberAccountPublicApiTest extends PublicApiTestSupport {
 
     @Test
     void 이메일_멤버_가입_요청_시_이미_가입된_회원이라면_409를_응답한다() throws Exception {
-        UserSignUpByEmailRequest request = createRequest();
+        UserSignUpByEmailRequest request = createUserSignUpByEmailRequest();
         UserSignUpByEmailCommand command = UserSignUpByEmailCommand.of(
                 request.email(),
                 request.password(),
@@ -80,7 +79,7 @@ class MemberAccountPublicApiTest extends PublicApiTestSupport {
 
     @Test
     void 이메일_멤버_가입_요청_시_닉네임이_중복되면_409를_응답한다() throws Exception {
-        UserSignUpByEmailRequest request = createRequest();
+        UserSignUpByEmailRequest request = createUserSignUpByEmailRequest();
         UserSignUpByEmailCommand command = UserSignUpByEmailCommand.of(
                 request.email(),
                 request.password(),
@@ -95,28 +94,7 @@ class MemberAccountPublicApiTest extends PublicApiTestSupport {
         assertErrorResponse(result, NICKNAME_ALREADY_EXISTS);
     }
 
-    private static Stream<UserSignUpByEmailRequest> invalidRequests() {
-        return Stream.of(
-                createRequest(null, PASSWORD, NICKNAME),
-                createRequest("", PASSWORD, NICKNAME),
-                createRequest(" ", PASSWORD, NICKNAME),
-                createRequest("invalid-email", PASSWORD, NICKNAME),
-                createRequest("test@", PASSWORD, NICKNAME),
-                createRequest("@test.com", PASSWORD, NICKNAME),
-                createRequest(EMAIL_ADDRESS, null, NICKNAME),
-                createRequest(EMAIL_ADDRESS, "", NICKNAME),
-                createRequest(EMAIL_ADDRESS, " ", NICKNAME),
-                createRequest(EMAIL_ADDRESS, "short1!", NICKNAME),
-                createRequest(EMAIL_ADDRESS, "password", NICKNAME),
-                createRequest(EMAIL_ADDRESS, PASSWORD, "123456789012345678901")
-        );
-    }
-
-    private static UserSignUpByEmailRequest createRequest() {
-        return createRequest(EMAIL_ADDRESS, PASSWORD, NICKNAME);
-    }
-
-    private static UserSignUpByEmailRequest createRequest(String email, String password, String nickname) {
-        return new UserSignUpByEmailRequest(email, password, nickname);
+    private static Stream<UserSignUpByEmailRequest> invalidSignUpRequests() {
+        return invalidUserSignUpByEmailRequests();
     }
 }

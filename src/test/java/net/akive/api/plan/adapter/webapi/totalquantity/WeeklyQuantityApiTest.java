@@ -27,11 +27,11 @@ import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
+import static net.akive.api.plan.adapter.webapi.totalquantity.fixture.WeeklyQuantityRequestFixture.*;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_PLAN_ID;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createReconstructedSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.*;
 import static net.akive.api.plan.domain.fixture.WeeklyQuantityFixture.*;
-import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.mockito.ArgumentMatchers.any;
@@ -122,7 +122,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidWeeklyQuantityReduceRequests")
+    @MethodSource("invalidQuantityReduceRequests")
     void 주간_계획량_수정_요청값이_올바르지_않으면_400을_응답한다(String body) {
 
         patchJson(
@@ -310,7 +310,7 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidWeeklyQuantityDelayRequests")
+    @MethodSource("invalidQuantityDelayRequests")
     void 주간_딜레이_이동_요청값이_올바르지_않으면_400을_응답한다(String body) {
 
         patchJson(
@@ -442,49 +442,12 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
         then(totalQuantityModifier).should().delayWeeklyAmountTo(command);
     }
 
-    private static Stream<String> invalidWeeklyQuantityReduceRequests() {
-        return Stream.of(
-                """
-                        {
-                          "targetWeeklyQuantityAmount": null
-                        }
-                        """,
-                weeklyQuantityReduceRequestJson(null, null),
-                weeklyQuantityReduceRequestJson(-1, null),
-                weeklyQuantityReduceRequestJson(TOTAL_AMOUNT, "a".repeat(QUANTITY_MEMO_MAX_LENGTH + 1))
-        );
+    private static Stream<String> invalidQuantityReduceRequests() {
+        return invalidWeeklyQuantityReduceRequests();
     }
 
-    private static Stream<String> invalidWeeklyQuantityDelayRequests() {
-        return Stream.of(
-                weeklyQuantityDelayRequestJson(null, TOTAL_AMOUNT),
-                weeklyQuantityDelayRequestJson(30L, null),
-                weeklyQuantityDelayRequestJson(-1L, TOTAL_AMOUNT),
-                weeklyQuantityDelayRequestJson(30L, -1)
-        );
-    }
-
-    private static String weeklyQuantityReduceRequestJson(Integer targetWeeklyAmount, String targetWeeklyMemo) {
-        return """
-                {
-                  "targetWeeklyQuantityAmount": {
-                    "quantityAmount": %s,
-                    "quantityMemo": %s
-                  }
-                }
-                """.formatted(
-                targetWeeklyAmount,
-                targetWeeklyMemo == null ? null : "\"" + targetWeeklyMemo + "\""
-        );
-    }
-
-    private static String weeklyQuantityDelayRequestJson(Long receivingWeeklyQuantityId, Integer weeklyAmountToDelay) {
-        return """
-                {
-                  "receivingWeeklyQuantityId": %s,
-                  "weeklyAmountToDelay": %s
-                }
-                """.formatted(receivingWeeklyQuantityId, weeklyAmountToDelay);
+    private static Stream<String> invalidQuantityDelayRequests() {
+        return invalidWeeklyQuantityDelayRequests();
     }
 
     private static WeeklyPlan.WeeklyPlanItem createWeeklyPlanItem(

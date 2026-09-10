@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.UUID;
 
-import static net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequestFixture.createLoginByEmailRequest;
+import static net.akive.api.auth.adapter.login.webapi.fixture.LoginByEmailRequestFixture.createLoginByEmailRequest;
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_ACCESS_TOKEN;
 import static org.mockito.ArgumentMatchers.any;

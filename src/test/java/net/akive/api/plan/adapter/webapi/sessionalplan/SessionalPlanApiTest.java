@@ -4,7 +4,6 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.webapi.common.PlanApiPath;
-import net.akive.api.plan.adapter.webapi.common.dto.request.SessionPeriodRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanCreateRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanUpdateRequest;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreator;
@@ -36,10 +35,10 @@ import java.util.stream.Stream;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.plan.adapter.webapi.sessionalplan.fixture.SessionalPlanRequestFixture.*;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.createReconstructedTotalQuantity;
-import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,7 +65,11 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         );
         given(sessionalPlanCreator.create(command)).willReturn(SESSIONAL_PLAN_ID);
 
-        MvcTestResultAssert result = postJson(PlanApiPath.SESSIONAL_PLANS, USER_ID, toJson(createRequest()))
+        MvcTestResultAssert result = postJson(
+                PlanApiPath.SESSIONAL_PLANS,
+                USER_ID,
+                toJson(createSessionalPlanCreateRequest())
+        )
                 .hasStatus(CREATED);
 
         result.bodyJson()
@@ -98,7 +101,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세셔널_플랜_생성_요청_시_세셔널_플랜명이_중복되면_409를_응답한다() {
-        SessionalPlanCreateRequest request = createRequest();
+        SessionalPlanCreateRequest request = createSessionalPlanCreateRequest();
         SessionalPlanCreateCommand command = request.to(USER_ID);
         willThrow(new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS))
                 .given(sessionalPlanCreator)
@@ -114,7 +117,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
 
     @Test
     void 진행_중인_세셔널_플랜_개수_제한을_초과하면_400을_응답한다() {
-        SessionalPlanCreateRequest request = createRequest();
+        SessionalPlanCreateRequest request = createSessionalPlanCreateRequest();
         SessionalPlanCreateCommand command = request.to(USER_ID);
         willThrow(new BusinessRuleViolationException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED))
                 .given(sessionalPlanCreator)
@@ -187,7 +190,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 12)
         );
-        String body = toJson(createUpdateRequest());
+        String body = toJson(createSessionalPlanUpdateRequest());
 
         putJson(PlanApiPath.SESSIONAL_PLAN, USER_ID, body, SESSIONAL_PLAN_ID).hasStatus(NO_CONTENT);
 
@@ -214,7 +217,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
 
     @Test
     void 세셔널_플랜_수정_시_세셔널_플랜이_없으면_404를_응답한다() {
-        SessionalPlanUpdateRequest request = createUpdateRequest();
+        SessionalPlanUpdateRequest request = createSessionalPlanUpdateRequest();
         SessionalPlanUpdateCommand command = request.to(SESSIONAL_PLAN_ID, USER_ID);
         willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(sessionalPlanCreator)
@@ -254,98 +257,12 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         then(sessionalPlanCreator).should().delete(command);
     }
 
-    private static SessionalPlanCreateRequest createRequest() {
-        return createRequest(SESSION_NAME);
-    }
-
-    private static SessionalPlanCreateRequest createRequest(String sessionName) {
-        return new SessionalPlanCreateRequest(sessionName, createSessionPeriodRequest());
-    }
-
     private static Stream<SessionalPlanCreateRequest> invalidCreateRequests() {
-        return invalidRequestValues()
-                .map(value -> new SessionalPlanCreateRequest(
-                        value.sessionName(),
-                        value.sessionPeriod()
-                ));
+        return invalidSessionalPlanCreateRequests();
     }
 
     private static Stream<SessionalPlanUpdateRequest> invalidUpdateRequests() {
-        return invalidRequestValues()
-                .map(value -> new SessionalPlanUpdateRequest(
-                        value.sessionName(),
-                        value.sessionPeriod()
-                ));
-    }
-
-    private static Stream<SessionalPlanRequestValue> invalidRequestValues() {
-        return Stream.of(
-                new SessionalPlanRequestValue(null, createSessionPeriodRequest()),
-                new SessionalPlanRequestValue("", createSessionPeriodRequest()),
-                new SessionalPlanRequestValue(
-                        "a".repeat(SESSION_NAME_MAX_LENGTH + 1),
-                        createSessionPeriodRequest()
-                ),
-                new SessionalPlanRequestValue(SESSION_NAME, null),
-                new SessionalPlanRequestValue(
-                        SESSION_NAME,
-                        new SessionPeriodRequest(null, LocalDate.of(2026, 1, 12))
-                ),
-                new SessionalPlanRequestValue(
-                        SESSION_NAME,
-                        new SessionPeriodRequest(LocalDate.of(2026, 1, 1), null)
-                ),
-                new SessionalPlanRequestValue(
-                        SESSION_NAME,
-                        new SessionPeriodRequest(
-                                LocalDate.of(2026, 2, 1),
-                                LocalDate.of(2026, 1, 1)
-                        )
-                ),
-                new SessionalPlanRequestValue(
-                        SESSION_NAME,
-                        new SessionPeriodRequest(
-                                LocalDate.of(2026, 1, 1),
-                                LocalDate.of(2999, 1, 1)
-                        )
-                )
-        );
-    }
-
-    private SessionalPlanUpdateRequest createUpdateRequest() {
-        return createUpdateRequest(createSessionPeriodRequest());
-    }
-
-    private SessionalPlanUpdateRequest createUpdateRequest(SessionPeriodRequest targetSessionPeriod) {
-        return new SessionalPlanUpdateRequest(SESSION_NAME, targetSessionPeriod);
-    }
-
-    private static SessionPeriodRequest createSessionPeriodRequest() {
-        return new SessionPeriodRequest(SESSION_PERIOD.startOn(), SESSION_PERIOD.endOn());
-    }
-
-    private static String createInvalidDateFormatRequestJson() {
-        return """
-                {
-                  "sessionName": "%s",
-                  "sessionPeriod": {
-                    "startOn": "2026/01/01",
-                    "endOn": "2026-02-01"
-                  }
-                }
-                """.formatted(SESSION_NAME);
-    }
-
-    private static String updateInvalidDateFormatRequestJson() {
-        return """
-                {
-                  "targetSessionName": "%s",
-                  "targetSessionPeriod": {
-                    "startOn": "2026/01/01",
-                    "endOn": "2026-02-01"
-                  }
-                }
-                """.formatted(SESSION_NAME);
+        return invalidSessionalPlanUpdateRequests();
     }
 
     private void assertSessionalPlanNotFoundResponse(MvcTestResultAssert result) {
@@ -409,11 +326,5 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         result.bodyJson()
                 .extractingPath("$.totalQuantities[0].weeklyQuantities[0].weeklyQuantityId")
                 .isEqualTo(weeklyQuantity.weeklyQuantityId().intValue());
-    }
-
-    private record SessionalPlanRequestValue(
-            String sessionName,
-            SessionPeriodRequest sessionPeriod
-    ) {
     }
 }

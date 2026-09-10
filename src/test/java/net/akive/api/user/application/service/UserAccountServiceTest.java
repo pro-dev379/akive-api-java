@@ -24,12 +24,10 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserDetailUpdateCommand;
-import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserSignUpByEmailCommand;
-import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserWithdrawCommand;
+import static net.akive.api.user.application.fixture.UserAccountCommandFixture.*;
 import static net.akive.api.user.domain.UserPolicy.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWN_AT;

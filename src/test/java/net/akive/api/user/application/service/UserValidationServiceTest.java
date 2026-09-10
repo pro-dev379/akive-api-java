@@ -16,9 +16,7 @@ import static net.akive.api.common.exception.business.ResourceConflictError.EMAI
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
-import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
-import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
-import static net.akive.api.user.domain.fixture.UserFixture.createUser;
+import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
