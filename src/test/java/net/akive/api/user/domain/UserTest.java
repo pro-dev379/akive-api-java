@@ -96,13 +96,24 @@ class UserTest {
     }
 
     @Test
-    void 탈퇴를_완료한다() {
+    void 회원_탈퇴를_완료한다() {
         User user = createUser();
 
         user.withdraw(WITHDRAWN_AT, WITHDRAWAL_REASON);
 
         assertThat(user.getWithdrawal().withdrawnAt()).isEqualTo(WITHDRAWN_AT);
         assertThat(user.getWithdrawal().withdrawalReason()).isEqualTo(WITHDRAWAL_REASON);
+    }
+
+    @Test
+    void 회원_탈퇴_여부를_반환한다() {
+        User user = createUser();
+
+        assertThat(user.isWithdrawn()).isFalse();
+
+        user.withdraw(WITHDRAWN_AT, WITHDRAWAL_REASON);
+
+        assertThat(user.isWithdrawn()).isTrue();
     }
 
     @Test

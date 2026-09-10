@@ -213,11 +213,18 @@ class RefreshTokenSessionServiceTest {
     }
 
     @Test
-    void 리프레시_토큰_세션을_삭제한다() {
+    void 회원_식별자로_리프레시_토큰_세션을_무효화한다() {
+        refreshTokenSessionService.revokeByUserId(USER_ID);
+
+        then(refreshTokenStore).should().deleteByUserId(USER_ID);
+    }
+
+    @Test
+    void 회원_식별자와_클라이언트_식별자로_리프레시_토큰_세션을_무효화한다() {
         ClientInstanceId clientInstanceId = createClientInstanceId();
 
-        refreshTokenSessionService.revoke(USER_ID, clientInstanceId);
+        refreshTokenSessionService.revokeByUserIdAndClientInstanceId(USER_ID, clientInstanceId);
 
-        then(refreshTokenStore).should().delete(USER_ID, clientInstanceId);
+        then(refreshTokenStore).should().deleteByUserIdAndClientInstanceId(USER_ID, clientInstanceId);
     }
 }

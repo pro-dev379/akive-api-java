@@ -27,4 +27,8 @@ public record Withdrawal(LocalDateTime withdrawnAt, String withdrawalReason) {
     public static Withdrawal completedWith(LocalDateTime withdrawnAt, String reason) {
         return new Withdrawal(withdrawnAt, reason);
     }
+
+    public boolean isWithdrawn() {
+        return this.withdrawnAt != null;
+    }
 }

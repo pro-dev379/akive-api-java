@@ -74,8 +74,13 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
     }
 
     @Override
-    public void revoke(Long userId, ClientInstanceId clientInstanceId) {
-        refreshTokenStore.delete(userId, clientInstanceId);
+    public void revokeByUserId(Long userId) {
+        refreshTokenStore.deleteByUserId(userId);
+    }
+
+    @Override
+    public void revokeByUserIdAndClientInstanceId(Long userId, ClientInstanceId clientInstanceId) {
+        refreshTokenStore.deleteByUserIdAndClientInstanceId(userId, clientInstanceId);
     }
 
     private void validateCurrent(Long userId, ClientInstanceId clientInstanceId, RefreshToken refreshToken) {

@@ -6,10 +6,12 @@ import net.akive.api.support.RedisTestSupport;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
+import static net.akive.api.user.domain.fixture.UserFixture.ANOTHER_USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -20,7 +22,7 @@ class RefreshTokenRedisAdapterTest extends RedisTestSupport {
     private static final Duration SHORT_TTL = Duration.ofMillis(300);
 
     @Test
-    void 리프레시_토큰을_저장하고_조회한다() {
+    void 회원_식별자와_클라이언트_식벼자로_리프레시_토큰을_저장하고_조회한다() {
         RefreshToken refreshToken = createRefreshToken();
         ClientInstanceId clientInstanceId = createClientInstanceId();
 
@@ -32,12 +34,51 @@ class RefreshTokenRedisAdapterTest extends RedisTestSupport {
     }
 
     @Test
-    void 리프레시_토큰을_삭제한다() {
+    void 회원_식별자로_해당_회원의_모든_리프레시_토큰을_조회한다() {
+        RefreshToken firstRefreshToken = createRefreshToken("first-refresh-token");
+        RefreshToken secondRefreshToken = createRefreshToken("second-refresh-token");
+        RefreshToken anotherUserRefreshToken = createRefreshToken("another-user-refresh-token");
+        ClientInstanceId firstClientInstanceId = createClientInstanceId();
+        ClientInstanceId secondClientInstanceId = createClientInstanceId();
+        ClientInstanceId anotherUserClientInstanceId = createClientInstanceId();
+        refreshTokenStore.save(USER_ID, firstClientInstanceId, firstRefreshToken, TTL);
+        refreshTokenStore.save(USER_ID, secondClientInstanceId, secondRefreshToken, TTL);
+        refreshTokenStore.save(ANOTHER_USER_ID, anotherUserClientInstanceId, anotherUserRefreshToken, TTL);
+
+        List<RefreshToken> userRefreshTokens = refreshTokenStore.findByUserId(USER_ID);
+
+
+        assertThat(userRefreshTokens).containsExactlyInAnyOrder(firstRefreshToken, secondRefreshToken);
+    }
+
+    @Test
+    void 회원_식별자로_해당_회원의_모든_리프레시_토큰을_삭제한다() {
+        RefreshToken firstRefreshToken = createRefreshToken("first-refresh-token");
+        RefreshToken secondRefreshToken = createRefreshToken("second-refresh-token");
+        RefreshToken anotherUserRefreshToken = createRefreshToken("another-user-refresh-token");
+        ClientInstanceId firstClientInstanceId = createClientInstanceId();
+        ClientInstanceId secondClientInstanceId = createClientInstanceId();
+        ClientInstanceId anotherUserClientInstanceId = createClientInstanceId();
+        refreshTokenStore.save(USER_ID, firstClientInstanceId, firstRefreshToken, TTL);
+        refreshTokenStore.save(USER_ID, secondClientInstanceId, secondRefreshToken, TTL);
+        refreshTokenStore.save(ANOTHER_USER_ID, anotherUserClientInstanceId, anotherUserRefreshToken, TTL);
+
+        refreshTokenStore.deleteByUserId(USER_ID);
+
+        List<RefreshToken> userRefreshTokens = refreshTokenStore.findByUserId(USER_ID);
+        List<RefreshToken> anotherUserRefreshTokens = refreshTokenStore.findByUserId(ANOTHER_USER_ID);
+
+        assertThat(userRefreshTokens).isEmpty();
+        assertThat(anotherUserRefreshTokens).contains(anotherUserRefreshToken);
+    }
+
+    @Test
+    void 회원_식별자와_클라이언트_식별자로_리프레시_토큰을_삭제한다() {
         RefreshToken refreshToken = createRefreshToken();
         ClientInstanceId clientInstanceId = createClientInstanceId();
         refreshTokenStore.save(USER_ID, clientInstanceId, refreshToken, TTL);
 
-        refreshTokenStore.delete(USER_ID, clientInstanceId);
+        refreshTokenStore.deleteByUserIdAndClientInstanceId(USER_ID, clientInstanceId);
 
         Optional<RefreshToken> found = refreshTokenStore.findByUserIdAndClientInstantId(USER_ID, clientInstanceId);
 

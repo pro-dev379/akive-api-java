@@ -1,17 +1,25 @@
 package net.akive.api.common.cache;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor
 public class RedisTemplateClient {
+
+    private static final long SCAN_COUNT = 1000L;
+    private static final int BATCH_SIZE = 1000;
 
     private static final DefaultRedisScript<Long> COMPARE_AND_SET_SCRIPT = new DefaultRedisScript<>(
             """
@@ -37,6 +45,25 @@ public class RedisTemplateClient {
         return Optional.of(type.cast(value));
     }
 
+    private <T> List<T> getValues(List<String> keys, Class<T> type) {
+        List<Object> values = customRedisTemplate.opsForValue().multiGet(keys);
+
+        if (values == null) return List.of();
+
+        return values
+                .stream()
+                .filter(Objects::nonNull)
+                .map(type::cast)
+                .toList();
+    }
+
+    public <T> List<T> getByPattern(String pattern, Class<T> type) {
+        List<T> values = new ArrayList<>();
+        scanKeys(pattern, keys -> values.addAll(getValues(keys, type)));
+
+        return values;
+    }
+
     public void set(String key, Object value, Duration ttl) {
         customRedisTemplate.opsForValue().set(key, value, ttl);
     }
@@ -55,5 +82,33 @@ public class RedisTemplateClient {
 
     public void delete(String key) {
         customRedisTemplate.delete(key);
+    }
+
+    public void deleteByPattern(String pattern) {
+        scanKeys(pattern, customRedisTemplate::delete);
+    }
+
+    private void scanKeys(String pattern, Consumer<List<String>> batchConsumer) {
+        ScanOptions options = ScanOptions.scanOptions()
+                .match(pattern)
+                .count(SCAN_COUNT)
+                .build();
+
+        List<String> keys = new ArrayList<>();
+
+        try (Cursor<String> cursor = customRedisTemplate.scan(options)) {
+            while (cursor.hasNext()) {
+                keys.add(cursor.next());
+
+                if (keys.size() >= BATCH_SIZE) {
+                    batchConsumer.accept(List.copyOf(keys));
+                    keys.clear();
+                }
+            }
+        }
+
+        if (!keys.isEmpty()) {
+            batchConsumer.accept(List.copyOf(keys));
+        }
     }
 }

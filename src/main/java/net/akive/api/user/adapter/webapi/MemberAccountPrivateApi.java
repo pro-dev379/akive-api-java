@@ -2,12 +2,16 @@ package net.akive.api.user.adapter.webapi;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
 import net.akive.api.user.adapter.webapi.dto.response.UserFindResponse;
+import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
+import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.domain.User;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping("/members/me")
@@ -15,11 +19,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberAccountPrivateApi {
 
     private final UserFinder userFinder;
+    private final UserAccountManager userAccountManager;
 
     @GetMapping
     public UserFindResponse find(@AuthenticatedUserId Long userId) {
         User foundUser = userFinder.findOrThrowByUserIdAndNotWithdrawn(userId);
 
         return UserFindResponse.from(foundUser);
+    }
+
+    @PostMapping("/withdraw")
+    @ResponseStatus(NO_CONTENT)
+    public void withdraw(
+            @AuthenticatedUserId Long userId,
+            @Validated @RequestBody UserWithdrawRequest request
+    ) {
+        UserWithdrawCommand command = UserWithdrawCommand.of(userId, request.withdrawReason());
+
+        userAccountManager.withdraw(command);
     }
 }

@@ -2,8 +2,11 @@ package net.akive.api.user.application.service;
 
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.user.application.event.UserSignedUpEvent;
+import net.akive.api.user.application.event.UserWithdrawnEvent;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
+import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.application.required.GoalRepository;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.Goal;
@@ -21,8 +24,10 @@ import java.util.Optional;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserSignUpByEmailCommand;
+import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserWithdrawCommand;
 import static net.akive.api.user.domain.UserPolicy.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
+import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWN_AT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +48,9 @@ class UserAccountServiceTest {
 
     @Mock
     ApplicationEventPublisher applicationEventPublisher;
+
+    @Mock
+    CurrentTimeProvider currentTimeProvider;
 
     @InjectMocks
     UserAccountService userAccountService;
@@ -81,7 +89,7 @@ class UserAccountServiceTest {
     }
 
     @Test
-    void 회원_가입_도메인_처리에_실패하면_회원과_기본_데이터를_생성하지_않고_웰컴_메일_전송_이벤트도_발행하지_않는다() {
+    void 회원_가입_도메인_처리에_실패하면_회원과_기본_데이터를_생성하지_않고_회원_가입_이벤트도_발행하지_않는다() {
         UserSignUpByEmailCommand command = createUserSignUpByEmailCommand();
 
         willThrow(new BusinessRuleViolationException(EMAIL_NOT_VERIFIED))
@@ -122,5 +130,43 @@ class UserAccountServiceTest {
 
         then(userRepository).should().findByUserIdAndNotWithdrawn(USER_ID);
         then(userRepository).should(never()).save(any(User.class));
+    }
+
+    @Test
+    void 회원을_탈퇴시키고_회원_탈퇴_이벤트를_발행한다() {
+        UserWithdrawCommand command = createUserWithdrawCommand();
+        User user = createReconstructedUser(command.userId());
+
+        given(currentTimeProvider.now()).willReturn(WITHDRAWN_AT);
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+
+        userAccountService.withdraw(command);
+
+        assertThat(user.isWithdrawn()).isTrue();
+        assertThat(user.getWithdrawal().withdrawnAt()).isEqualTo(WITHDRAWN_AT);
+        assertThat(user.getWithdrawal().withdrawalReason()).isEqualTo(command.withdrawReason());
+
+        then(userRepository).should().save(user);
+
+        ArgumentCaptor<UserWithdrawnEvent> eventCaptor = ArgumentCaptor.forClass(UserWithdrawnEvent.class);
+        then(applicationEventPublisher).should().publishEvent(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().userId()).isEqualTo(command.userId());
+    }
+
+    @Test
+    void 탈퇴시킬_회원이_없으면_회원_탈퇴_처리를_저장하지_않고_회원_탈퇴_이벤트도_발행하지_않는다() {
+        UserWithdrawCommand command = createUserWithdrawCommand(UNKNOWN_USER_ID);
+
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> userAccountService.withdraw(command))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(USER_NOT_FOUND);
+
+        then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(currentTimeProvider).shouldHaveNoInteractions();
+        then(userRepository).should(never()).save(any(User.class));
+        then(applicationEventPublisher).shouldHaveNoInteractions();
     }
 }

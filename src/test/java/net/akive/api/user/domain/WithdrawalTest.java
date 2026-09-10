@@ -74,4 +74,10 @@ class WithdrawalTest {
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_INPUT_VALUE);
     }
+
+    @Test
+    void 탈퇴_여부를_반환한다() {
+        assertThat(Withdrawal.none().isWithdrawn()).isFalse();
+        assertThat(Withdrawal.completedWith(WITHDRAWN_AT, WITHDRAWAL_REASON).isWithdrawn()).isTrue();
+    }
 }

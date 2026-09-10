@@ -24,7 +24,7 @@ public class UserQueryService implements UserFinder {
     }
 
     @Override
-    public User findOrThrowByUserIdAndNotWithdrawn(Long userId) {
+    public User findOrThrowByUserIdAndNotWithdrawn(Long userId) throws ResourceNotFoundException {
         return userRepository.findByUserIdAndNotWithdrawn(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
     }

@@ -2,8 +2,10 @@ package net.akive.api.user.adapter.webapi;
 
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.support.PrivateApiTestSupport;
+import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
+import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -11,17 +13,20 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
+import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWAL_REASON;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.never;
+import static org.springframework.http.HttpStatus.*;
 
 @WebMvcTest(MemberAccountPrivateApi.class)
 class MemberAccountPrivateApiTest extends PrivateApiTestSupport {
 
     private static final String MEMBER_ME_URL = "/members/me";
+    private static final String MEMBER_WITHDRAW_URL = "/members/me/withdraw";
 
     @MockitoBean
     UserAccountManager userAccountManager;
@@ -55,5 +60,39 @@ class MemberAccountPrivateApiTest extends PrivateApiTestSupport {
 
         assertErrorResponse(result, USER_NOT_FOUND);
         then(userFinder).should().findOrThrowByUserIdAndNotWithdrawn(UNKNOWN_USER_ID);
+    }
+
+    @Test
+    void 회원을_탈퇴시킨다() {
+        UserWithdrawRequest request = new UserWithdrawRequest(WITHDRAWAL_REASON);
+        UserWithdrawCommand command = UserWithdrawCommand.of(USER_ID, request.withdrawReason());
+
+        postJson(MEMBER_WITHDRAW_URL, USER_ID, toJson(request)).hasStatus(NO_CONTENT);
+
+        then(userAccountManager).should().withdraw(command);
+    }
+
+    @Test
+    void 회원_탈퇴_요청값이_올바르지_않으면_400을_응답한다() {
+        UserWithdrawRequest request = new UserWithdrawRequest("a".repeat(WITHDRAWAL_REASON_MAX_LENGTH + 1));
+
+        postJson(MEMBER_WITHDRAW_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
+
+        then(userAccountManager).should(never()).withdraw(any(UserWithdrawCommand.class));
+    }
+
+    @Test
+    void 회원_탈퇴_시_멤버를_조회할_수_없으면_404를_응답한다() {
+        UserWithdrawRequest request = new UserWithdrawRequest(WITHDRAWAL_REASON);
+        UserWithdrawCommand command = UserWithdrawCommand.of(UNKNOWN_USER_ID, request.withdrawReason());
+        willThrow(new ResourceNotFoundException(USER_NOT_FOUND))
+                .given(userAccountManager)
+                .withdraw(command);
+
+        MvcTestResultAssert result = postJson(MEMBER_WITHDRAW_URL, UNKNOWN_USER_ID, toJson(request))
+                .hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, USER_NOT_FOUND);
+        then(userAccountManager).should().withdraw(command);
     }
 }

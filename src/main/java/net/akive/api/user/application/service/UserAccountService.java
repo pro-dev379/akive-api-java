@@ -4,9 +4,12 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.user.application.event.UserSignedUpEvent;
+import net.akive.api.user.application.event.UserWithdrawnEvent;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
+import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.application.required.GoalRepository;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.Goal;
@@ -27,6 +30,7 @@ public class UserAccountService implements UserAccountManager {
 
     private final UserSignUpDomainService userSignUpDomainService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final CurrentTimeProvider currentTimeProvider;
 
     @Override
     public User signUpMemberByEmail(UserSignUpByEmailCommand command)
@@ -51,7 +55,6 @@ public class UserAccountService implements UserAccountManager {
     }
 
     @Override
-    @Transactional
     public void updatePassword(Long userId, String passwordHash)
             throws BusinessRuleViolationException, ResourceNotFoundException {
         User user = userRepository.findByUserIdAndNotWithdrawn(userId)
@@ -60,5 +63,17 @@ public class UserAccountService implements UserAccountManager {
         user.updatePasswordHash(passwordHash);
 
         userRepository.save(user);
+    }
+
+    @Override
+    public void withdraw(UserWithdrawCommand command) throws ResourceNotFoundException {
+        User user = userRepository.findByUserIdAndNotWithdrawn(command.userId())
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+
+        user.withdraw(currentTimeProvider.now(), command.withdrawReason());
+
+        userRepository.save(user);
+
+        applicationEventPublisher.publishEvent(new UserWithdrawnEvent(command.userId()));
     }
 }

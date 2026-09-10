@@ -15,5 +15,7 @@ public interface RefreshTokenSessionManager {
     Optional<RefreshToken> rotateIfRequired(RefreshTokenPayload payload, RefreshToken currentRefreshToken)
             throws AuthenticationException;
 
-    void revoke(Long userId, ClientInstanceId clientInstanceId);
+    void revokeByUserId(Long userId);
+
+    void revokeByUserIdAndClientInstanceId(Long userId, ClientInstanceId clientInstanceId);
 }

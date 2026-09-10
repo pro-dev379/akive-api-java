@@ -9,6 +9,7 @@ import net.akive.api.common.domain.ClientInstanceId;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -16,6 +17,11 @@ import java.util.Optional;
 class RefreshTokenRedisAdapter implements RefreshTokenStore {
 
     private final RedisTemplateClient redisTemplateClient;
+
+    @Override
+    public List<RefreshToken> findByUserId(Long userId) {
+        return redisTemplateClient.getByPattern(CacheKeyProvider.refreshTokenPattern(userId), RefreshToken.class);
+    }
 
     @Override
     public Optional<RefreshToken> findByUserIdAndClientInstantId(Long userId, ClientInstanceId clientInstanceId) {
@@ -44,7 +50,12 @@ class RefreshTokenRedisAdapter implements RefreshTokenStore {
     }
 
     @Override
-    public void delete(Long userId, ClientInstanceId clientInstanceId) {
+    public void deleteByUserId(Long userId) {
+        redisTemplateClient.deleteByPattern(CacheKeyProvider.refreshTokenPattern(userId));
+    }
+
+    @Override
+    public void deleteByUserIdAndClientInstanceId(Long userId, ClientInstanceId clientInstanceId) {
         redisTemplateClient.delete(CacheKeyProvider.refreshToken(userId, clientInstanceId));
     }
 }

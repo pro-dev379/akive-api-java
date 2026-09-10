@@ -16,4 +16,8 @@ public class CacheKeyProvider {
     public static String refreshToken(Long userId, ClientInstanceId clientInstanceId) {
         return "refresh-token:%s:%s".formatted(userId, clientInstanceId);
     }
+
+    public static String refreshTokenPattern(Long userId) {
+        return "refresh-token:%s:%s".formatted(userId, "*");
+    }
 }

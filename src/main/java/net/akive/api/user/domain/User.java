@@ -81,6 +81,10 @@ public class User {
         this.withdrawal = Withdrawal.completedWith(withdrawnAt, reason);
     }
 
+    public boolean isWithdrawn() {
+        return this.withdrawal.isWithdrawn();
+    }
+
     private static String validatePasswordHash(String passwordHash) {
         return passwordHash != null ? requireNotBlank(passwordHash) : null;
     }
