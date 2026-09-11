@@ -14,6 +14,7 @@ public enum ResourceNotFoundError implements ApplicationError {
     ENDPOINT_NOT_FOUND("Endpoint not found."),
 
     USER_NOT_FOUND("User not found."),
+    GOAL_NOT_FOUND("Goal not found."),
 
     SESSIONAL_PLAN_NOT_FOUND("Sessional plan not found."),
     TOTAL_QUANTITY_NOT_FOUND("Total quantity not found."),
