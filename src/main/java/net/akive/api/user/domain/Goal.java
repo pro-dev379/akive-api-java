@@ -9,8 +9,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
-import static net.akive.api.common.domain.DomainValidator.requireNonNegative;
-import static net.akive.api.common.domain.DomainValidator.requireNonNull;
+import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.user.domain.UserPolicy.*;
 
 @Getter
@@ -40,7 +39,23 @@ public class Goal {
             long meal1TimeSec
     ) {
         return Goal.builder()
-                .goalId(goalId)
+                .goalId(requirePositive(goalId))
+                .user(requireNonNull(user))
+                .attendOn(requireNonNull(attendOn))
+                .rest10MinSec(requireNonNegative(rest10MinSec))
+                .mealNum(requireNonNegative(mealNum))
+                .meal1TimeSec(requireNonNegative(meal1TimeSec))
+                .build();
+    }
+
+    public static Goal create(
+            User user,
+            LocalTime attendOn,
+            long rest10MinSec,
+            int mealNum,
+            long meal1TimeSec
+    ) {
+        return Goal.builder()
                 .user(requireNonNull(user))
                 .attendOn(requireNonNull(attendOn))
                 .rest10MinSec(requireNonNegative(rest10MinSec))
@@ -50,13 +65,13 @@ public class Goal {
     }
 
     public static Goal createDefault(User user) {
-        return Goal.builder()
-                .user(requireNonNull(user))
-                .attendOn(DEFAULT_GOAL_ATTEND_ON)
-                .rest10MinSec(DEFAULT_GOAL_REST_10_MIN_SEC)
-                .mealNum(DEFAULT_GOAL_MEAL_NUM)
-                .meal1TimeSec(DEFAULT_GOAL_MEAL_1_TIME_SEC)
-                .build();
+        return create(
+                user,
+                DEFAULT_GOAL_ATTEND_ON,
+                DEFAULT_GOAL_REST_10_MIN_SEC,
+                DEFAULT_GOAL_MEAL_NUM,
+                DEFAULT_GOAL_MEAL_1_TIME_SEC
+        );
     }
 
     @Override

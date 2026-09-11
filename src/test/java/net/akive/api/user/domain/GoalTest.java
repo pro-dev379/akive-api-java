@@ -43,6 +43,25 @@ class GoalTest {
         assertThat(goal.getMeal1TimeSec()).isEqualTo(DEFAULT_GOAL_MEAL_1_TIME_SEC);
     }
 
+    @Test
+    void 목표를_생성한다() {
+        User user = createUser();
+
+        Goal goal = Goal.create(
+                user,
+                DEFAULT_GOAL_ATTEND_ON,
+                DEFAULT_GOAL_REST_10_MIN_SEC,
+                DEFAULT_GOAL_MEAL_NUM,
+                DEFAULT_GOAL_MEAL_1_TIME_SEC
+        );
+
+        assertThat(goal.getGoalId()).isNull();
+        assertThat(goal.getUser()).isEqualTo(user);
+        assertThat(goal.getAttendOn()).isEqualTo(DEFAULT_GOAL_ATTEND_ON);
+        assertThat(goal.getRest10MinSec()).isEqualTo(DEFAULT_GOAL_REST_10_MIN_SEC);
+        assertThat(goal.getMealNum()).isEqualTo(DEFAULT_GOAL_MEAL_NUM);
+        assertThat(goal.getMeal1TimeSec()).isEqualTo(DEFAULT_GOAL_MEAL_1_TIME_SEC);
+    }
 
     @Test
     void 같은_식별자를_가진_목표는_같게_취급한다() {
