@@ -52,7 +52,7 @@ class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 다른_사용자의_주간_계획량은_조회하지_않는다() {
+    void 다른_회원의_주간_계획량은_조회하지_않는다() {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         WeekPeriod weekPeriod = new WeekPeriod(
                 LocalDate.of(2026, 1, 1),
