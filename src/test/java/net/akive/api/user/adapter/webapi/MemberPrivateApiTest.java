@@ -36,8 +36,8 @@ import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
 import static org.springframework.http.HttpStatus.*;
 
-@WebMvcTest(MemberAccountPrivateApi.class)
-class MemberAccountPrivateApiTest extends PrivateApiTestSupport {
+@WebMvcTest(MemberPrivateApi.class)
+class MemberPrivateApiTest extends PrivateApiTestSupport {
 
     private static final String MEMBER_ME_URL = "/members/me";
     private static final String MEMBER_WITHDRAW_URL = "/members/me/withdraw";

@@ -16,7 +16,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/members")
 @RequiredArgsConstructor
-public class MemberAccountPublicApi {
+public class MemberPublicApi {
 
     private final UserNicknameChecker userNicknameChecker;
     private final UserAccountManager userAccountManager;

@@ -32,9 +32,9 @@ import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
 import static org.springframework.http.HttpStatus.*;
 
-@WebMvcTest(MemberAccountPublicApi.class)
+@WebMvcTest(MemberPublicApi.class)
 @AutoConfigureMockMvc(addFilters = false)
-class MemberAccountPublicApiTest extends PublicApiTestSupport {
+class MemberPublicApiTest extends PublicApiTestSupport {
 
     private static final String SIGN_UP_MEMBER_BY_EMAIL_URL = "/members/email";
     private static final String MEMBER_CHECK_NICKNAME_URL = "/members/check-nickname";

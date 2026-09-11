@@ -21,7 +21,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 @RestController
 @RequestMapping("/members/me")
 @RequiredArgsConstructor
-public class MemberAccountPrivateApi {
+public class MemberPrivateApi {
 
     private final UserFinder userFinder;
     private final UserNicknameChecker userNicknameChecker;
