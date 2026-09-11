@@ -2,6 +2,8 @@ package net.akive.api.auth.adapter.emailverification.webapi;
 
 import net.akive.api.auth.adapter.emailverification.webapi.dto.request.EmailVerificationCodeIssueRequest;
 import net.akive.api.auth.adapter.emailverification.webapi.dto.request.EmailVerificationCodeVerifyRequest;
+import net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeIssueRequestFixture;
+import net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeVerifyRequestFixture;
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeIssuer;
 import net.akive.api.auth.application.emailverification.provided.EmailVerificationCodeVerifier;
 import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationCodeVerifyCommand;
@@ -19,9 +21,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.stream.Stream;
 
 import static net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeIssueRequestFixture.createIssueRequest;
-import static net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeIssueRequestFixture.invalidIssueRequests;
 import static net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeVerifyRequestFixture.createVerifyRequest;
-import static net.akive.api.auth.adapter.emailverification.webapi.fixture.EmailVerificationCodeVerifyRequestFixture.invalidVerifyRequests;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
@@ -215,10 +215,10 @@ class EmailVerificationApiTest extends PublicApiTestSupport {
     }
 
     private static Stream<EmailVerificationCodeIssueRequest> invalidCodeIssueRequests() {
-        return invalidIssueRequests();
+        return EmailVerificationCodeIssueRequestFixture.invalidCodeIssueRequests();
     }
 
     private static Stream<EmailVerificationCodeVerifyRequest> invalidCodeVerifyRequests() {
-        return invalidVerifyRequests();
+        return EmailVerificationCodeVerifyRequestFixture.invalidCodeVerifyRequests();
     }
 }

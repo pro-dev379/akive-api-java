@@ -37,7 +37,7 @@ public class DailyQuantityRequestFixture {
                 """.formatted(receivingDailyQuantityId, dailyAmountToDelay);
     }
 
-    public static Stream<String> invalidDailyAmountUpdateRequests() {
+    public static Stream<String> invalidAmountUpdateRequests() {
         return Stream.of(
                 """
                 {
@@ -50,7 +50,7 @@ public class DailyQuantityRequestFixture {
         );
     }
 
-    public static Stream<String> invalidDailyCompletedAmountUpdateRequests() {
+    public static Stream<String> invalidCompletedAmountUpdateRequests() {
         return Stream.of(
                 """
                 {
@@ -62,7 +62,7 @@ public class DailyQuantityRequestFixture {
         );
     }
 
-    public static Stream<String> invalidDailyAmountDelayRequests() {
+    public static Stream<String> invalidAmountDelayRequests() {
         return Stream.of(
                 """
                 {

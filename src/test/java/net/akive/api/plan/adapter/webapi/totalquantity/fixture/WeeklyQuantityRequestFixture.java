@@ -30,7 +30,7 @@ public class WeeklyQuantityRequestFixture {
                 """.formatted(receivingWeeklyQuantityId, weeklyAmountToDelay);
     }
 
-    public static Stream<String> invalidWeeklyQuantityReduceRequests() {
+    public static Stream<String> invalidQuantityReduceRequests() {
         return Stream.of(
                 """
                         {
@@ -43,7 +43,7 @@ public class WeeklyQuantityRequestFixture {
         );
     }
 
-    public static Stream<String> invalidWeeklyQuantityDelayRequests() {
+    public static Stream<String> invalidQuantityDelayRequests() {
         return Stream.of(
                 weeklyQuantityDelayRequestJson(null, TOTAL_AMOUNT),
                 weeklyQuantityDelayRequestJson(30L, null),

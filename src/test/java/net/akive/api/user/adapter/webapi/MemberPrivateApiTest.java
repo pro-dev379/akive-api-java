@@ -6,6 +6,7 @@ import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
+import net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.application.provided.UserNicknameChecker;
@@ -26,7 +27,8 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.*;
+import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserDetailUpdateRequest;
+import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserWithdrawRequest;
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
@@ -227,6 +229,6 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     }
 
     private static Stream<UserDetailUpdateRequest> invalidDetailUpdateRequests() {
-        return invalidUserDetailUpdateRequests();
+        return MemberAccountRequestFixture.invalidDetailUpdateRequests();
     }
 }

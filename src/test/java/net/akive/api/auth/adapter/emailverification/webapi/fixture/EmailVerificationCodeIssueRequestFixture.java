@@ -29,7 +29,7 @@ public class EmailVerificationCodeIssueRequestFixture {
         return new EmailVerificationCodeIssueRequest(emailAddress, purpose);
     }
 
-    public static Stream<EmailVerificationCodeIssueRequest> invalidIssueRequests() {
+    public static Stream<EmailVerificationCodeIssueRequest> invalidCodeIssueRequests() {
         return Stream.of(
                 createIssueRequest("", SIGN_UP),
                 createIssueRequest("invalid-email", SIGN_UP),

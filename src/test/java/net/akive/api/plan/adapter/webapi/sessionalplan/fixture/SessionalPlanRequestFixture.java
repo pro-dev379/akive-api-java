@@ -35,12 +35,12 @@ public class SessionalPlanRequestFixture {
         return new SessionPeriodRequest(SESSION_PERIOD.startOn(), SESSION_PERIOD.endOn());
     }
 
-    public static Stream<SessionalPlanCreateRequest> invalidSessionalPlanCreateRequests() {
+    public static Stream<SessionalPlanCreateRequest> invalidCreateRequests() {
         return invalidRequestValues()
                 .map(value -> new SessionalPlanCreateRequest(value.sessionName(), value.sessionPeriod()));
     }
 
-    public static Stream<SessionalPlanUpdateRequest> invalidSessionalPlanUpdateRequests() {
+    public static Stream<SessionalPlanUpdateRequest> invalidUpdateRequests() {
         return invalidRequestValues()
                 .map(value -> new SessionalPlanUpdateRequest(value.sessionName(), value.sessionPeriod()));
     }

@@ -27,7 +27,7 @@ public class EmailVerificationCodeVerifyRequestFixture {
         return new EmailVerificationCodeVerifyRequest(emailAddress, purpose, verificationCode);
     }
 
-    public static Stream<EmailVerificationCodeVerifyRequest> invalidVerifyRequests() {
+    public static Stream<EmailVerificationCodeVerifyRequest> invalidCodeVerifyRequests() {
         return Stream.of(
                 createVerifyRequest("", SIGN_UP, VERIFICATION_CODE.value()),
                 createVerifyRequest("invalid-email", SIGN_UP, VERIFICATION_CODE.value()),

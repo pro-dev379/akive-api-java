@@ -1,6 +1,7 @@
 package net.akive.api.auth.adapter.login.webapi;
 
 import net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequest;
+import net.akive.api.auth.adapter.login.webapi.fixture.LoginByEmailRequestFixture;
 import net.akive.api.auth.application.login.provided.LoginProcessor;
 import net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand;
 import net.akive.api.auth.domain.token.IssuedToken;
@@ -19,7 +20,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static net.akive.api.auth.adapter.login.webapi.fixture.LoginByEmailRequestFixture.createLoginByEmailRequest;
-import static net.akive.api.auth.adapter.login.webapi.fixture.LoginByEmailRequestFixture.invalidLoginByEmailRequests;
 import static net.akive.api.auth.domain.token.AccessTokenFixture.ACCESS_TOKEN_VALUE;
 import static net.akive.api.auth.domain.token.IssuedTokenFixture.createIssuedToken;
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.REFRESH_TOKEN_VALUE;
@@ -110,7 +110,7 @@ class LoginApiTest extends PublicApiTestSupport {
     }
 
     private static Stream<LoginByEmailRequest> invalidLoginRequests() {
-        return invalidLoginByEmailRequests();
+        return LoginByEmailRequestFixture.invalidLoginRequests();
     }
 
     private static Stream<String> invalidClientInstanceIdHeaders() {

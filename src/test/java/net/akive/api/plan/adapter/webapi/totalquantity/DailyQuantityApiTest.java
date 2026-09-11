@@ -3,6 +3,7 @@ package net.akive.api.plan.adapter.webapi.totalquantity;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.webapi.common.PlanApiPath;
+import net.akive.api.plan.adapter.webapi.totalquantity.fixture.DailyQuantityRequestFixture;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountDelayCommand;
 import net.akive.api.plan.application.provided.totalquantity.dto.DailyAmountUpdateCommand;
@@ -613,15 +614,15 @@ class DailyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     private static Stream<String> invalidAmountUpdateRequests() {
-        return invalidDailyAmountUpdateRequests();
+        return DailyQuantityRequestFixture.invalidAmountUpdateRequests();
     }
 
     private static Stream<String> invalidAmountDelayRequests() {
-        return invalidDailyAmountDelayRequests();
+        return DailyQuantityRequestFixture.invalidAmountDelayRequests();
     }
 
     private static Stream<String> invalidCompletedAmountUpdateRequests() {
-        return invalidDailyCompletedAmountUpdateRequests();
+        return DailyQuantityRequestFixture.invalidCompletedAmountUpdateRequests();
     }
 
 }

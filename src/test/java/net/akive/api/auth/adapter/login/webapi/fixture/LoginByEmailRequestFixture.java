@@ -18,7 +18,7 @@ public class LoginByEmailRequestFixture {
         return new LoginByEmailRequest(email, password);
     }
 
-    public static Stream<LoginByEmailRequest> invalidLoginByEmailRequests() {
+    public static Stream<LoginByEmailRequest> invalidLoginRequests() {
         return Stream.of(
                 createLoginByEmailRequest(null, PASSWORD),
                 createLoginByEmailRequest("", PASSWORD),

@@ -27,7 +27,7 @@ public class MemberAccountRequestFixture {
         return new UserSignUpByEmailRequest(email, password, nickname);
     }
 
-    public static Stream<UserSignUpByEmailRequest> invalidUserSignUpByEmailRequests() {
+    public static Stream<UserSignUpByEmailRequest> invalidSignUpRequests() {
         return Stream.of(
                 createUserSignUpByEmailRequest(null, PASSWORD, NICKNAME),
                 createUserSignUpByEmailRequest("", PASSWORD, NICKNAME),
@@ -59,7 +59,7 @@ public class MemberAccountRequestFixture {
         return new UserDetailUpdateRequest(targetUserDetail);
     }
 
-    public static Stream<UserDetailUpdateRequest> invalidUserDetailUpdateRequests() {
+    public static Stream<UserDetailUpdateRequest> invalidDetailUpdateRequests() {
         return Stream.of(
                 new UserDetailUpdateRequest(null),
                 createUserDetailUpdateRequest(null, IMG_URL, AIM),

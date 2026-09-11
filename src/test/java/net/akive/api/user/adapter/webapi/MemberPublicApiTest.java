@@ -4,6 +4,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.support.PublicApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserSignUpByEmailRequest;
+import net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.application.provided.UserNicknameChecker;
@@ -24,7 +25,6 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserSignUpByEmailRequest;
-import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.invalidUserSignUpByEmailRequests;
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 import static org.mockito.ArgumentMatchers.any;
@@ -165,6 +165,6 @@ class MemberPublicApiTest extends PublicApiTestSupport {
     }
 
     private static Stream<UserSignUpByEmailRequest> invalidSignUpRequests() {
-        return invalidUserSignUpByEmailRequests();
+        return MemberAccountRequestFixture.invalidSignUpRequests();
     }
 }

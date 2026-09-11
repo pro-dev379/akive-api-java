@@ -3,6 +3,7 @@ package net.akive.api.plan.adapter.webapi.totalquantity;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.webapi.common.PlanApiPath;
+import net.akive.api.plan.adapter.webapi.totalquantity.fixture.WeeklyQuantityRequestFixture;
 import net.akive.api.plan.application.provided.totalquantity.TotalQuantityModifier;
 import net.akive.api.plan.application.provided.totalquantity.WeeklyQuantityFinder;
 import net.akive.api.plan.application.provided.totalquantity.dto.WeeklyAmountDelayCommand;
@@ -441,11 +442,11 @@ class WeeklyQuantityApiTest extends PrivateApiTestSupport {
     }
 
     private static Stream<String> invalidQuantityReduceRequests() {
-        return invalidWeeklyQuantityReduceRequests();
+        return WeeklyQuantityRequestFixture.invalidQuantityReduceRequests();
     }
 
     private static Stream<String> invalidQuantityDelayRequests() {
-        return invalidWeeklyQuantityDelayRequests();
+        return WeeklyQuantityRequestFixture.invalidQuantityDelayRequests();
     }
 
     private static WeeklyPlan.WeeklyPlanItem createWeeklyPlanItem(

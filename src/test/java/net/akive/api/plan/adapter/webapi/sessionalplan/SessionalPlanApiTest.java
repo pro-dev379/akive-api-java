@@ -6,6 +6,7 @@ import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.webapi.common.PlanApiPath;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanCreateRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanUpdateRequest;
+import net.akive.api.plan.adapter.webapi.sessionalplan.fixture.SessionalPlanRequestFixture;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreator;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanCreateCommand;
@@ -256,11 +257,11 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     }
 
     private static Stream<SessionalPlanCreateRequest> invalidCreateRequests() {
-        return invalidSessionalPlanCreateRequests();
+        return SessionalPlanRequestFixture.invalidCreateRequests();
     }
 
     private static Stream<SessionalPlanUpdateRequest> invalidUpdateRequests() {
-        return invalidSessionalPlanUpdateRequests();
+        return SessionalPlanRequestFixture.invalidUpdateRequests();
     }
 
     private void assertSessionalPlanNotFoundResponse(MvcTestResultAssert result) {
