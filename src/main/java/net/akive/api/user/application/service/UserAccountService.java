@@ -71,11 +71,11 @@ public class UserAccountService implements UserAccountManager {
     }
 
     @Override
-    public void updatePassword(Long userId, String passwordHash)
+    public void updatePassword(Long userId, String targetPasswordHash)
             throws BusinessRuleViolationException, ResourceNotFoundException {
         User user = findNotWithdrawnUserOrThrow(userId);
 
-        user.updatePasswordHash(passwordHash);
+        user.updatePasswordHash(targetPasswordHash);
 
         userRepository.save(user);
     }

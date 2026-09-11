@@ -16,7 +16,7 @@ public interface UserAccountManager {
     void updateUserDetail(UserDetailUpdateCommand command)
             throws ResourceNotFoundException, ResourceConflictException;
 
-    void updatePassword(Long userId, String passwordHash)
+    void updatePassword(Long userId, String targetPasswordHash)
             throws BusinessRuleViolationException, ResourceNotFoundException;
 
     void withdraw(UserWithdrawCommand command) throws ResourceNotFoundException;
