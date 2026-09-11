@@ -8,6 +8,7 @@ import net.akive.api.user.application.provided.UserNicknameChecker;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.USER
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 class UserQueryService implements UserFinder, UserNicknameChecker {
 
