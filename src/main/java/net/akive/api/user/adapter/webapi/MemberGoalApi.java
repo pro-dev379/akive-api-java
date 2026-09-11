@@ -15,8 +15,8 @@ public class MemberGoalApi {
 
     private final GoalFinder goalFinder;
 
-    @GetMapping
-    public GoalFindResponse find(@AuthenticatedUserId Long userId) {
+    @GetMapping("/latest")
+    public GoalFindResponse findLatest(@AuthenticatedUserId Long userId) {
         return GoalFindResponse.from(goalFinder.findLatestByUserIdAndUserNotWithdrawn(userId));
     }
 }

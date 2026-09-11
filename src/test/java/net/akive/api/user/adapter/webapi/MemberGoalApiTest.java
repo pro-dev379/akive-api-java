@@ -20,7 +20,7 @@ import static org.springframework.http.HttpStatus.OK;
 @WebMvcTest(MemberGoalApi.class)
 class MemberGoalApiTest extends PrivateApiTestSupport {
 
-    private static final String MEMBER_GOALS_URL = "/members/me/goals";
+    private static final String MEMBER_LATEST_GOAL_URL = "/members/me/goals/latest";
 
     @MockitoBean
     GoalFinder goalFinder;
@@ -30,7 +30,7 @@ class MemberGoalApiTest extends PrivateApiTestSupport {
         Goal goal = Goal.createDefault(createUser(USER_ID));
         given(goalFinder.findLatestByUserIdAndUserNotWithdrawn(USER_ID)).willReturn(goal);
 
-        MvcTestResultAssert result = get(MEMBER_GOALS_URL, USER_ID).hasStatus(OK);
+        MvcTestResultAssert result = get(MEMBER_LATEST_GOAL_URL, USER_ID).hasStatus(OK);
 
         result.bodyJson().extractingPath("$.attendOn").isEqualTo(DEFAULT_GOAL_ATTEND_ON.toString());
         result.bodyJson().extractingPath("$.rest10MinSec").isEqualTo((int) DEFAULT_GOAL_REST_10_MIN_SEC);
@@ -44,7 +44,7 @@ class MemberGoalApiTest extends PrivateApiTestSupport {
         given(goalFinder.findLatestByUserIdAndUserNotWithdrawn(UNKNOWN_USER_ID))
                 .willThrow(new ResourceNotFoundException(GOAL_NOT_FOUND));
 
-        MvcTestResultAssert result = get(MEMBER_GOALS_URL, UNKNOWN_USER_ID).hasStatus(NOT_FOUND);
+        MvcTestResultAssert result = get(MEMBER_LATEST_GOAL_URL, UNKNOWN_USER_ID).hasStatus(NOT_FOUND);
 
         assertErrorResponse(result, GOAL_NOT_FOUND);
         then(goalFinder).should().findLatestByUserIdAndUserNotWithdrawn(UNKNOWN_USER_ID);
