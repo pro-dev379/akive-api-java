@@ -24,7 +24,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @AutoConfigureMockMvc(addFilters = false)
 class TokenApiTest extends PublicApiTestSupport {
 
-    private static final String TOKEN_REISSUE_URL = "/tokens";
+    private static final String TOKEN_REISSUE_URL = "/auth/tokens";
 
     @MockitoBean
     TokenIssuer tokenIssuer;

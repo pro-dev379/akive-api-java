@@ -43,8 +43,8 @@ import static org.springframework.http.HttpStatus.*;
 @AutoConfigureMockMvc(addFilters = false)
 class EmailVerificationApiTest extends PublicApiTestSupport {
 
-    private static final String VERIFICATION_CODE_ISSUE_URL = "/verifications/emails/codes";
-    private static final String VERIFICATION_CODE_VERIFY_URL = "/verifications/emails";
+    private static final String VERIFICATION_CODE_ISSUE_URL = "/auth/email-verifications/codes";
+    private static final String VERIFICATION_CODE_VERIFY_URL = "/auth/email-verifications";
 
     @MockitoBean
     EmailVerificationCodeIssuer emailVerificationCodeIssuer;

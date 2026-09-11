@@ -55,7 +55,7 @@ class PublicEndpointSecurityFilterChainTest {
                 .willReturn(createIssuedToken());
 
         mvcTester.post()
-                .uri("/login/email")
+                .uri("/auth/login/email")
                 .header(AUTHORIZATION, "Bearer invalid-access-token")
                 .header("X-Client-Instance-Id", UUID.randomUUID().toString())
                 .contentType(APPLICATION_JSON)

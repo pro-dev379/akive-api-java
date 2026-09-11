@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
 
 @RestController
-@RequestMapping("/tokens")
+@RequestMapping("/auth/tokens")
 @RequiredArgsConstructor
 public class TokenApi {
 

@@ -33,7 +33,7 @@ import static org.springframework.http.HttpStatus.*;
 @AutoConfigureMockMvc(addFilters = false)
 class LoginApiTest extends PublicApiTestSupport {
 
-    private static final String LOGIN_BY_EMAIL_URL = "/login/email";
+    private static final String LOGIN_BY_EMAIL_URL = "/auth/login/email";
 
     @MockitoBean
     LoginProcessor loginProcessor;

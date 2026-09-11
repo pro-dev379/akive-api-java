@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
-@RequestMapping("/verifications/emails")
+@RequestMapping("/auth/email-verifications")
 @RequiredArgsConstructor
 public class EmailVerificationApi {
 

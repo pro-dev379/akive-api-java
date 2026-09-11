@@ -25,11 +25,11 @@ public class SecurityConfig {
     public SecurityFilterChain publicSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher(
-                        "/tokens",
-                        "/login/**",
+                        "/auth/tokens",
+                        "/auth/login/**",
+                        "/auth/email-verifications/**",
                         "/members/email",
-                        "/members/check-nickname",
-                        "/verifications/**"
+                        "/members/check-nickname"
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
