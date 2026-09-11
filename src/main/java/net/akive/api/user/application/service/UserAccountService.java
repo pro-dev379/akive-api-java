@@ -1,6 +1,7 @@
 package net.akive.api.user.application.service;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
@@ -61,7 +62,7 @@ public class UserAccountService implements UserAccountManager {
     @Override
     public void updateUserDetail(UserDetailUpdateCommand command)
             throws ResourceNotFoundException, ResourceConflictException {
-        User user = findNotWithdrawnUserOrThrow(command.userId());
+        User user = findNotWithdrawnUserByUserIdOrThrow(command.userId());
 
         userValidator.validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
 
@@ -71,9 +72,19 @@ public class UserAccountService implements UserAccountManager {
     }
 
     @Override
-    public void updatePassword(Long userId, String targetPasswordHash)
+    public void updatePasswordByUserId(Long userId, String targetPasswordHash)
             throws BusinessRuleViolationException, ResourceNotFoundException {
-        User user = findNotWithdrawnUserOrThrow(userId);
+        User user = findNotWithdrawnUserByUserIdOrThrow(userId);
+
+        user.updatePasswordHash(targetPasswordHash);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public void updatePasswordByEmail(Email email, String targetPasswordHash)
+            throws BusinessRuleViolationException, ResourceNotFoundException {
+        User user = findNotWithdrawnUserByEmailOrThrow(email);
 
         user.updatePasswordHash(targetPasswordHash);
 
@@ -82,7 +93,7 @@ public class UserAccountService implements UserAccountManager {
 
     @Override
     public void withdraw(UserWithdrawCommand command) throws ResourceNotFoundException {
-        User user = findNotWithdrawnUserOrThrow(command.userId());
+        User user = findNotWithdrawnUserByUserIdOrThrow(command.userId());
 
         user.withdraw(currentTimeProvider.now(), command.withdrawReason());
 
@@ -91,8 +102,13 @@ public class UserAccountService implements UserAccountManager {
         applicationEventPublisher.publishEvent(new UserWithdrawnEvent(command.userId()));
     }
 
-    private User findNotWithdrawnUserOrThrow(Long userId) {
+    private User findNotWithdrawnUserByUserIdOrThrow(Long userId) {
         return userRepository.findByUserIdAndNotWithdrawn(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+    }
+
+    private User findNotWithdrawnUserByEmailOrThrow(Email email) {
+        return userRepository.findByEmailAndNotWithdrawn(email)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
     }
 }

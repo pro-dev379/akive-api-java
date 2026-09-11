@@ -16,6 +16,8 @@ public class UserFixture {
     public static final LoginType LOGIN_TYPE = LoginType.EMAIL;
     public static final String PASSWORD = "password123!";
     public static final String PASSWORD_HASH = "password-hash";
+    public static final String TARGET_PASSWORD = "targetPassword123!";
+    public static final String TARGET_PASSWORD_HASH = "target-password-hash";
 
     public static User createUser() {
         return createUser(EMAIL, NICKNAME);

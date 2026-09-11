@@ -38,6 +38,14 @@ public abstract class PublicApiTestSupport {
                 .assertThat();
     }
 
+    protected MvcTestResultAssert patchJson(String uri, String json, Object... uriVariables) {
+        return mvcTester.patch()
+                .uri(uri, uriVariables)
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .assertThat();
+    }
+
     protected String toJson(Object body) {
         try {
             return objectMapper.writeValueAsString(body);

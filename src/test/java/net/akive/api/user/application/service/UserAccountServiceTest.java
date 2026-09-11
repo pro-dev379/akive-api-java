@@ -169,28 +169,54 @@ class UserAccountServiceTest {
     }
 
     @Test
-    void 패스워드를_변경한다() {
-        User user = createReconstructedUser(USER_ID, null);
+    void 회원_식별자로_패스워드를_변경한다() {
+        User user = createReconstructedUser(USER_ID, PASSWORD_HASH);
 
         given(userRepository.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.of(user));
 
-        userAccountService.updatePassword(USER_ID, PASSWORD_HASH);
+        userAccountService.updatePasswordByUserId(USER_ID, TARGET_PASSWORD_HASH);
 
-        assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
+        assertThat(user.getPasswordHash()).isEqualTo(TARGET_PASSWORD_HASH);
         then(userRepository).should().findByUserIdAndNotWithdrawn(USER_ID);
         then(userRepository).should().save(user);
     }
 
     @Test
-    void 패스워드를_변경할_회원이_없으면_실패한다() {
+    void 회원_식별자로_패스워드를_변경할_회원이_없으면_실패한다() {
         given(userRepository.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> userAccountService.updatePassword(USER_ID, PASSWORD_HASH))
+                .isThrownBy(() -> userAccountService.updatePasswordByUserId(USER_ID, TARGET_PASSWORD_HASH))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
         then(userRepository).should().findByUserIdAndNotWithdrawn(USER_ID);
+        then(userRepository).should(never()).save(any(User.class));
+    }
+
+    @Test
+    void 이메일로_패스워드를_변경한다() {
+        User user = createReconstructedUser(USER_ID, PASSWORD_HASH);
+
+        given(userRepository.findByEmailAndNotWithdrawn(EMAIL)).willReturn(Optional.of(user));
+
+        userAccountService.updatePasswordByEmail(EMAIL, TARGET_PASSWORD_HASH);
+
+        assertThat(user.getPasswordHash()).isEqualTo(TARGET_PASSWORD_HASH);
+        then(userRepository).should().findByEmailAndNotWithdrawn(EMAIL);
+        then(userRepository).should().save(user);
+    }
+
+    @Test
+    void 이메일로_패스워드를_변경할_회원이_없으면_실패한다() {
+        given(userRepository.findByEmailAndNotWithdrawn(EMAIL)).willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> userAccountService.updatePasswordByEmail(EMAIL, TARGET_PASSWORD_HASH))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(USER_NOT_FOUND);
+
+        then(userRepository).should().findByEmailAndNotWithdrawn(EMAIL);
         then(userRepository).should(never()).save(any(User.class));
     }
 

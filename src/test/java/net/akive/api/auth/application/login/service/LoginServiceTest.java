@@ -102,7 +102,7 @@ class LoginServiceTest {
         then(legacyUserPasswordRepository).should().findByUserId(user.getUserId());
         then(legacyPasswordVerifier).should().matches(command.password(), legacyUserPassword.passwordHash());
         then(passwordEncoder).should().encode(command.password());
-        then(userAccountManager).should().updatePassword(user.getUserId(), MIGRATED_PASSWORD_HASH);
+        then(userAccountManager).should().updatePasswordByUserId(user.getUserId(), MIGRATED_PASSWORD_HASH);
         then(legacyUserPasswordRepository).should().deleteByUserId(user.getUserId());
         then(tokenIssuer).should().issue(tokenIssueCommand);
     }

@@ -4,8 +4,8 @@ import net.akive.api.auth.adapter.password.webapi.dto.PasswordUpdateRequest;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.auth.application.password.fixture.PasswordCommandFixture.TARGET_PASSWORD;
 import static net.akive.api.user.domain.fixture.UserFixture.PASSWORD;
+import static net.akive.api.user.domain.fixture.UserFixture.TARGET_PASSWORD;
 
 public class PasswordUpdateRequestFixture {
 

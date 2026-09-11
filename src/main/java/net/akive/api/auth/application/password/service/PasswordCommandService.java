@@ -1,9 +1,14 @@
 package net.akive.api.auth.application.password.service;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.auth.application.emailverification.provided.EmailVerificationChecker;
+import net.akive.api.auth.application.emailverification.provided.dto.EmailVerificationEnsureCommand;
 import net.akive.api.auth.application.password.provided.PasswordModifier;
+import net.akive.api.auth.application.password.provided.dto.PasswordResetCommand;
 import net.akive.api.auth.application.password.provided.dto.PasswordUpdateCommand;
+import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.AuthenticationException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
@@ -12,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static net.akive.api.auth.domain.emailverification.EmailVerificationPurpose.PASSWORD_RESET;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 
@@ -22,6 +28,7 @@ class PasswordCommandService implements PasswordModifier {
 
     private final UserFinder userFinder;
     private final UserAccountManager userAccountManager;
+    private final EmailVerificationChecker emailVerificationChecker;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -34,7 +41,17 @@ class PasswordCommandService implements PasswordModifier {
 
         String targetPasswordHash = passwordEncoder.encode(command.targetPassword());
 
-        userAccountManager.updatePassword(user.getUserId(), targetPasswordHash);
+        userAccountManager.updatePasswordByUserId(user.getUserId(), targetPasswordHash);
+    }
+
+    @Override
+    public void reset(PasswordResetCommand command)
+            throws BusinessRuleViolationException, ResourceNotFoundException {
+        ensureEmailVerified(command.email());
+
+        String targetPasswordHash = passwordEncoder.encode(command.targetPassword());
+
+        userAccountManager.updatePasswordByEmail(command.email(), targetPasswordHash);
     }
 
     private User findUserOrThrow(Long userId) {
@@ -46,5 +63,11 @@ class PasswordCommandService implements PasswordModifier {
         if (!passwordEncoder.matches(rawPassword, passwordHash)) {
             throw new AuthenticationException(INVALID_EMAIL_OR_PASSWORD);
         }
+    }
+
+    private void ensureEmailVerified(Email email) {
+        EmailVerificationEnsureCommand command = new EmailVerificationEnsureCommand(email, PASSWORD_RESET);
+
+        emailVerificationChecker.ensureEmailVerified(command);
     }
 }

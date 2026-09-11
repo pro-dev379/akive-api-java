@@ -28,6 +28,7 @@ public class SecurityConfig {
                         "/auth/tokens",
                         "/auth/login/**",
                         "/auth/email-verifications/**",
+                        "/auth/password-reset",
                         "/members/email",
                         "/members/check-nickname"
                 )

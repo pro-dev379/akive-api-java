@@ -78,7 +78,7 @@ class LoginService implements LoginProcessor {
     private void migratePassword(User user, String rawPassword) {
         String encodedPassword = passwordEncoder.encode(rawPassword);
 
-        userAccountManager.updatePassword(user.getUserId(), encodedPassword);
+        userAccountManager.updatePasswordByUserId(user.getUserId(), encodedPassword);
 
         legacyUserPasswordRepository.deleteByUserId(user.getUserId());
     }

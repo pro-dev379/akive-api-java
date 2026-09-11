@@ -1,5 +1,6 @@
 package net.akive.api.user.application.provided;
 
+import net.akive.api.common.domain.Email;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
@@ -16,7 +17,10 @@ public interface UserAccountManager {
     void updateUserDetail(UserDetailUpdateCommand command)
             throws ResourceNotFoundException, ResourceConflictException;
 
-    void updatePassword(Long userId, String targetPasswordHash)
+    void updatePasswordByUserId(Long userId, String targetPasswordHash)
+            throws BusinessRuleViolationException, ResourceNotFoundException;
+
+    void updatePasswordByEmail(Email email, String targetPasswordHash)
             throws BusinessRuleViolationException, ResourceNotFoundException;
 
     void withdraw(UserWithdrawCommand command) throws ResourceNotFoundException;

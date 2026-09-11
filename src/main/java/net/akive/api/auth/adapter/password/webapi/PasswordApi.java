@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/me/password")
 @RequiredArgsConstructor
 public class PasswordApi {
 
     private final PasswordModifier passwordModifier;
 
-    @PatchMapping("/me/password")
+    @PatchMapping
     @ResponseStatus(NO_CONTENT)
     public void update(@AuthenticatedUserId Long userId, @Validated @RequestBody PasswordUpdateRequest request) {
         passwordModifier.update(request.to(userId));
