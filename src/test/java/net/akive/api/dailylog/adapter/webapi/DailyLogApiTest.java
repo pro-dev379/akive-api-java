@@ -56,6 +56,22 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 특정_날짜의_일일_로그_목록_조회_시_요청_날짜가_올바르지_않으면_400을_응답한다() {
+        MvcTestResultAssert result = get(DAILY_LOGS_URL, USER_ID, "invalid-date")
+                .hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_INPUT_VALUE);
+        result.bodyJson()
+                .extractingPath("$.errors[0].field")
+                .isEqualTo("logOn");
+        result.bodyJson()
+                .extractingPath("$.errors[0].message")
+                .isEqualTo("Invalid date format. Expected yyyy-MM-dd.");
+
+        then(dailyLogFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 일일_로그가_있는_날짜_목록을_최신순으로_페이징_조회한다() {
         LocalDate olderLogOn = LocalDate.of(2026, 9, 1);
         LocalDate recentLogOn = olderLogOn.plusDays(1);
