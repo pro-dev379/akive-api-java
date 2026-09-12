@@ -15,8 +15,6 @@ import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
-import static net.akive.api.user.domain.LoginType.EMAIL;
-import static net.akive.api.user.domain.RoleType.MEMBER;
 
 @Entity
 @Table(
@@ -39,12 +37,12 @@ public class UserEntity extends BaseTimeEntity {
     private String email;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'MEMBER'")
-    private RoleType roleType = MEMBER;
+    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    private RoleType roleType;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'EMAIL'")
-    private LoginType loginType = EMAIL;
+    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    private LoginType loginType;
 
     private String passwordHash;
 
