@@ -60,7 +60,9 @@ public enum BusinessRuleViolationError implements ApplicationError {
     DAILY_DELAY_RECEIVER_SAME_AS_SOURCE(
             "Daily quantity receiving the delay must be different from source daily quantity."
     ),
-    DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT("Daily delay amount exceeds current daily delayed amount.")
+    DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT("Daily delay amount exceeds current daily delayed amount."),
+
+    DAILY_LOG_INTENSIVE_TIME_EXCEEDS_DURATION("Daily log intensive time exceeds duration.")
     ;
 
     private final String message;

@@ -3,6 +3,10 @@ package net.akive.api.support;
 import jakarta.persistence.EntityManager;
 import net.akive.api.auth.adapter.login.persistence.LegacyUserPasswordJpaRepository;
 import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
+import net.akive.api.dailylog.adapter.persistence.DailyLogJpaRepository;
+import net.akive.api.dailylog.adapter.persistence.entity.DailyLogEntity;
+import net.akive.api.dailylog.application.required.DailyLogRepository;
+import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.mentoring.adapter.persistence.MentoringProfileJpaRepository;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.plan.application.required.DailyQuantityRepository;
@@ -17,8 +21,10 @@ import net.akive.api.user.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.createDailyLog;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_SUBJECT_NAME;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.createTotalQuantity;
@@ -56,6 +62,12 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     @Autowired
     protected WeeklyQuantityRepository weeklyQuantityRepository;
+
+    @Autowired
+    protected DailyLogRepository dailyLogRepository;
+
+    @Autowired
+    protected DailyLogJpaRepository dailyLogJpaRepository;
 
     @Autowired
     protected EntityManager entityManager;
@@ -102,6 +114,10 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
         SessionalPlan savedSessionalPlan = sessionalPlanRepository.save(sessionalPlan);
 
         return totalQuantityRepository.save(createTotalQuantity(savedSessionalPlan, subjectName));
+    }
+
+    protected DailyLog saveDailyLog(User user, LocalDate logOn, int startHour) {
+        return dailyLogJpaRepository.save(DailyLogEntity.from(createDailyLog(user, logOn, startHour))).to();
     }
 
     protected void flushAndClear() {

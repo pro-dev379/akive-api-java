@@ -79,6 +79,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             HttpMessageNotReadableException.class,
+            IllegalArgumentException.class,
             MethodArgumentTypeMismatchException.class,
             MissingRequestValueException.class
     })
@@ -118,6 +119,10 @@ public class GlobalExceptionHandler {
     }
 
     private List<FieldErrorDetail> resolveInvalidInputFieldErrors(Exception e) {
+        if (e instanceof IllegalArgumentException illegalArgumentException) {
+            return resolveIllegalArgumentFieldErrors(illegalArgumentException);
+        }
+
         if (e instanceof MethodArgumentTypeMismatchException typeMismatchException) {
             return resolveTypeMismatchFieldErrors(typeMismatchException);
         }
@@ -131,6 +136,15 @@ public class GlobalExceptionHandler {
         }
 
         return List.of();
+    }
+
+    private List<FieldErrorDetail> resolveIllegalArgumentFieldErrors(IllegalArgumentException e) {
+        String message = e.getMessage();
+        if (message == null || message.isBlank()) {
+            message = "Invalid value.";
+        }
+
+        return List.of(new FieldErrorDetail("argument", message));
     }
 
     private List<FieldErrorDetail> resolveTypeMismatchFieldErrors(MethodArgumentTypeMismatchException e) {

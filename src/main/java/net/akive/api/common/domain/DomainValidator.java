@@ -3,6 +3,7 @@ package net.akive.api.common.domain;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -67,11 +68,7 @@ public final class DomainValidator {
             return null;
         }
 
-        if (value.length() > maxLength) {
-            throw new BusinessRuleViolationException(MAX_LENGTH_EXCEEDED);
-        }
-
-        return value;
+        return requireMaxLength(value, maxLength);
     }
 
     public static String requireMatches(String value, Pattern pattern) {
@@ -125,7 +122,24 @@ public final class DomainValidator {
         return value;
     }
 
+    public static Long requireNonNegativeIfPresent(Long value) {
+        if (value == null) {
+            return null;
+        }
+
+        return requireNonNegative(value);
+    }
+
     public static void requireStartNotAfterEnd(LocalDate startOn, LocalDate endOn) {
+        requireNonNull(startOn);
+        requireNonNull(endOn);
+
+        if (startOn.isAfter(endOn)) {
+            throw new BusinessRuleViolationException(INVALID_DATE_RANGE);
+        }
+    }
+
+    public static void requireStartNotAfterEnd(LocalDateTime startOn, LocalDateTime endOn) {
         requireNonNull(startOn);
         requireNonNull(endOn);
 
