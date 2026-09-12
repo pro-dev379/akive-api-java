@@ -33,7 +33,7 @@ class DailyLogQueryServiceTest {
     DailyLogQueryService dailyLogQueryService;
 
     @Test
-    void 회원_식별자와_날짜로_일일_로그를_조회한다() {
+    void 회원_식별자와_날짜로_일일_로그_목록을_조회한다() {
         User user = createReconstructedUser(USER_ID);
         List<DailyLog> dailyLogs = List.of(
                 createDailyLog(user, LOG_ON, 9),
@@ -50,7 +50,7 @@ class DailyLogQueryServiceTest {
     }
 
     @Test
-    void 회원_식별자로_일일_로그가_있는_날짜를_페이징_조회한다() {
+    void 회원_식별자로_일일_로그가_있는_날짜_목록을_페이징_조회한다() {
         List<LocalDate> contents = List.of(LOG_ON, ANOTHER_LOG_ON);
         PageCondition pageCondition = PageCondition.of(DEFAULT_PAGE, DEFAULT_SIZE, "logOn", DESC);
         PageResult<LocalDate> logOns = createPageResult(DEFAULT_PAGE, DEFAULT_SIZE, contents);

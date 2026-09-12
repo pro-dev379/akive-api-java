@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class DailyLogJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
-    void 회원_식별자와_날짜로_일일_로그를_시작_시간_오름차순으로_조회한다() {
+    void 회원_식별자와_날짜로_일일_로그_목록을_시작_시간_오름차순으로_조회한다() {
         User savedUser = saveUser();
         DailyLog recentDailyLog = saveDailyLog(savedUser, LOG_ON, 10);
         DailyLog olderDailyLog = saveDailyLog(savedUser, LOG_ON, 9);
@@ -36,7 +36,7 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 회원_식별자로_일일_로그가_있는_날짜를_중복_없이_페이징_조회한다() {
+    void 회원_식별자로_일일_로그가_있는_날짜_목록을_중복_없이_페이징_조회한다() {
         User savedUser = saveUser();
         LocalDate olderLogOn = LocalDate.of(2026, 9, 1);
         LocalDate recentLogOn = olderLogOn.plusDays(1);

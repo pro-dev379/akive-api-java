@@ -42,7 +42,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     DailyLogFinder dailyLogFinder;
 
     @Test
-    void 일일_로그를_조회한다() {
+    void 특정_날짜의_일일_로그_목록을_조회한다() {
         User user = createReconstructedUser(USER_ID);
         DailyLog dailyLog = createReconstructedDailyLog(user);
 
@@ -56,7 +56,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 일일_로그가_있는_날짜를_최신순으로_페이징_조회한다() {
+    void 일일_로그가_있는_날짜_목록을_최신순으로_페이징_조회한다() {
         LocalDate olderLogOn = LocalDate.of(2026, 9, 1);
         LocalDate recentLogOn = olderLogOn.plusDays(1);
         List<LocalDate> contents = List.of(recentLogOn, olderLogOn);
@@ -89,7 +89,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 페이지_파라미터가_없으면_기본값으로_일일_로그가_있는_날짜를_조회한다() {
+    void 일일_로그_날짜_목록_조회_시_페이지_파라미터가_없으면_기본값으로_일일_로그가_있는_날짜_목록을_조회한다() {
         PageResult<LocalDate> logOns = createPageResult(List.of(LOG_ON));
 
         given(dailyLogFinder.findLogOns(eq(USER_ID), any(PageCondition.class))).willReturn(logOns);
@@ -110,7 +110,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
             "0, 0, Size must be positive.",
             "0, 101, Size must not exceed 100."
     })
-    void 올바르지_않은_페이지_요청_파라미터이면_400을_응답한다(int page, int size, String message) {
+    void 일일_로그_날짜_목록_조회_시_페이지_요청_파라미터가_올바르지_않으면_400을_응답한다(int page, int size, String message) {
         MvcTestResultAssert result = get(
                 DAILY_LOG_ONS_URL + "?page={page}&size={size}",
                 USER_ID,
