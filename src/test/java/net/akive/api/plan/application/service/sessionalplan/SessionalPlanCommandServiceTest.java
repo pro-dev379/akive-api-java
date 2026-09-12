@@ -134,7 +134,7 @@ class SessionalPlanCommandServiceTest {
     }
 
     @Test
-    void 세셔널_플랜이_없으면_삭제에_실패하고_예외를_던진다() {
+    void 세셔널_플랜이_없으면_삭제에_실패하고_예외를_전파한다() {
         SessionalPlanDeleteCommand command = createSessionalPlanDeleteCommand(UNKNOWN_SESSIONAL_PLAN_ID);
         ResourceNotFoundException exception = new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND);
         willThrow(exception)

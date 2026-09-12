@@ -163,7 +163,7 @@ class TotalQuantityCommandServiceTest {
     }
 
     @Test
-    void 세션_총량이_없으면_삭제에_실패하고_예외를_던진다() {
+    void 세션_총량이_없으면_삭제에_실패하고_예외를_전파한다() {
         TotalQuantityDeleteCommand command = createTotalQuantityDeleteCommand(UNKNOWN_TOTAL_QUANTITY_ID);
 
         willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))

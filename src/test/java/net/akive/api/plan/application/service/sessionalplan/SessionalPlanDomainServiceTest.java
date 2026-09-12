@@ -49,7 +49,7 @@ class SessionalPlanDomainServiceTest {
     }
 
     @Test
-    void 세셔널_플랜_생성_검증에_실패하면_생성에_실패하고_예외를_던진다() {
+    void 세셔널_플랜_생성_검증에_실패하면_예외를_전파하고_생성하지_않는다() {
         User user = createReconstructedUser();
         ResourceConflictException exception = new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS);
         given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
@@ -83,7 +83,7 @@ class SessionalPlanDomainServiceTest {
     }
 
     @Test
-    void 세셔널_플랜_수정_검증에_실패하면_수정에_실패하고_예외를_던진다() {
+    void 세셔널_플랜_수정_검증에_실패하면_예외를_전파하고_수정하지_않는다() {
         SessionalPlan currentSessionalPlan = createReconstructedSessionalPlan();
         ResourceConflictException exception = new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS);
         willThrow(exception)

@@ -19,7 +19,7 @@ class TokenAuthenticationEntryPointTest {
             new TokenAuthenticationEntryPoint(objectMapper);
 
     @Test
-    void 액세스_토큰이_만료되면_만료된_액세스_토큰_예외를_던진다() throws Exception {
+    void 액세스_토큰이_만료되면_401을_응답한다() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         tokenAuthenticationEntryPoint.commence(
@@ -37,7 +37,7 @@ class TokenAuthenticationEntryPointTest {
     }
 
     @Test
-    void 액세스_토큰이_유효하지_않으면_유효하지_않은_액세스_토큰_예외를_던진다() throws Exception {
+    void 액세스_토큰이_유효하지_않으면_401을_응답한다() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         tokenAuthenticationEntryPoint.commence(

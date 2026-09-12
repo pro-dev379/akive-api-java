@@ -38,7 +38,7 @@ class EmailVerificationValidationServiceTest {
     }
 
     @Test
-    void 회원가입을_위한_인증_요청_시_이미_가입된_이메일이면_예외를_던진다() {
+    void 회원가입을_위한_인증_요청_시_이미_가입된_이메일이면_예외를_전파한다() {
         ResourceConflictException exception = new ResourceConflictException(EMAIL_ALREADY_EXISTS);
 
         willThrow(exception).given(userValidator).validateEmailNotDuplicate(EMAIL);
@@ -59,7 +59,7 @@ class EmailVerificationValidationServiceTest {
     }
 
     @Test
-    void 패스워드_리셋을_위한_이메일_인증_요청_시_회원이_없으면_예외를_던진다() {
+    void 패스워드_리셋을_위한_이메일_인증_요청_시_회원이_없으면_예외를_전파한다() {
         ResourceNotFoundException exception = new ResourceNotFoundException(USER_NOT_FOUND);
 
         willThrow(exception).given(userValidator).validateUserExistsByEmail(EMAIL);
