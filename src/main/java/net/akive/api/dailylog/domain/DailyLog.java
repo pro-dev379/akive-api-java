@@ -27,9 +27,7 @@ public class DailyLog {
 
     private LocalDate logOn;
 
-    private LocalDateTime startOn;
-
-    private LocalDateTime endOn;
+    private DailyLogTimeRange timeRange;
 
     private DailyLogType dailyLogType;
 
@@ -43,22 +41,19 @@ public class DailyLog {
             Long dailyLogId,
             User user,
             LocalDate logOn,
-            LocalDateTime startOn,
-            LocalDateTime endOn,
+            DailyLogTimeRange timeRange,
             DailyLogType dailyLogType,
             Long focusTimeSec,
             boolean focusRateExcluded,
             String contents
     ) {
-        requireStartNotAfterEnd(startOn, endOn);
-        validateFocusTimeSec(startOn, endOn, focusTimeSec);
+        validateFocusTimeSec(timeRange, focusTimeSec);
 
         return DailyLog.builder()
                 .dailyLogId(requirePositive(dailyLogId))
                 .user(requireNonNull(user))
                 .logOn(requireNonNull(logOn))
-                .startOn(requireNonNull(startOn))
-                .endOn(requireNonNull(endOn))
+                .timeRange(requireNonNull(timeRange))
                 .dailyLogType(requireNonNull(dailyLogType))
                 .focusTimeSec(requireNonNegativeIfPresent(focusTimeSec))
                 .focusRateExcluded(focusRateExcluded)
@@ -69,21 +64,18 @@ public class DailyLog {
     public static DailyLog create(
             User user,
             LocalDate logOn,
-            LocalDateTime startOn,
-            LocalDateTime endOn,
+            DailyLogTimeRange timeRange,
             DailyLogType dailyLogType,
             Long focusTimeSec,
             boolean focusRateExcluded,
             String contents
     ) {
-        requireStartNotAfterEnd(startOn, endOn);
-        validateFocusTimeSec(startOn, endOn, focusTimeSec);
+        validateFocusTimeSec(timeRange, focusTimeSec);
 
         return DailyLog.builder()
                 .user(requireNonNull(user))
                 .logOn(requireNonNull(logOn))
-                .startOn(requireNonNull(startOn))
-                .endOn(requireNonNull(endOn))
+                .timeRange(requireNonNull(timeRange))
                 .dailyLogType(requireNonNull(dailyLogType))
                 .focusTimeSec(requireNonNegativeIfPresent(focusTimeSec))
                 .focusRateExcluded(focusRateExcluded)
@@ -93,38 +85,38 @@ public class DailyLog {
 
     public void update(
             LocalDate targetLogOn,
-            LocalDateTime targetStartOn,
-            LocalDateTime targetEndOn,
+            DailyLogTimeRange targetTimeRange,
             DailyLogType targetDailyLogType,
             Long targetFocusTimeSec,
             boolean targetFocusRateExcluded,
             String targetContents
     ) {
-        requireStartNotAfterEnd(targetStartOn, targetEndOn);
-        validateFocusTimeSec(targetStartOn, targetEndOn, targetFocusTimeSec);
+        validateFocusTimeSec(targetTimeRange, targetFocusTimeSec);
 
         this.logOn = requireNonNull(targetLogOn);
-        this.startOn = requireNonNull(targetStartOn);
-        this.endOn = requireNonNull(targetEndOn);
+        this.timeRange = requireNonNull(targetTimeRange);
         this.dailyLogType = requireNonNull(targetDailyLogType);
         this.focusTimeSec = requireNonNegativeIfPresent(targetFocusTimeSec);
         this.focusRateExcluded = targetFocusRateExcluded;
         this.contents = requireNotBlank(targetContents);
     }
 
-    public static long calculateDailyLogDurationSec(LocalDateTime startOn, LocalDateTime endOn) {
-        requireNonNull(startOn);
-        requireNonNull(endOn);
-
-        return Duration.between(startOn, endOn).toSeconds();
+    public LocalDateTime getStartOn() {
+        return timeRange.getStartOn();
     }
 
-    private static void validateFocusTimeSec(
-            LocalDateTime startOn,
-            LocalDateTime endOn,
-            Long focusTimeSec
-    ) {
-        if (focusTimeSec != null && calculateDailyLogDurationSec(startOn, endOn) < focusTimeSec) {
+    public LocalDateTime getEndOn() {
+        return timeRange.getEndOn();
+    }
+
+    public static long calculateDailyLogDurationSec(DailyLogTimeRange timeRange) {
+        requireNonNull(timeRange);
+
+        return Duration.between(timeRange.getStartOn(), timeRange.getEndOn()).toSeconds();
+    }
+
+    private static void validateFocusTimeSec(DailyLogTimeRange timeRange, Long focusTimeSec) {
+        if (focusTimeSec != null && calculateDailyLogDurationSec(timeRange) < focusTimeSec) {
             throw new BusinessRuleViolationException(DAILY_LOG_FOCUS_TIME_EXCEEDS_DURATION);
         }
     }

@@ -3,10 +3,12 @@ package net.akive.api.support;
 import jakarta.persistence.EntityManager;
 import net.akive.api.auth.adapter.login.persistence.LegacyUserPasswordJpaRepository;
 import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.adapter.persistence.DailyLogJpaRepository;
 import net.akive.api.dailylog.adapter.persistence.entity.DailyLogEntity;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
+import net.akive.api.dailylog.domain.DailyLogTimeRange;
 import net.akive.api.mentoring.adapter.persistence.MentoringProfileJpaRepository;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.plan.application.required.DailyQuantityRepository;
@@ -70,6 +72,9 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
     protected DailyLogJpaRepository dailyLogJpaRepository;
 
     @Autowired
+    protected CurrentTimeProvider currentTimeProvider;
+
+    @Autowired
     protected EntityManager entityManager;
 
     protected User saveUser() {
@@ -117,7 +122,17 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
     }
 
     protected DailyLog saveDailyLog(User user, LocalDate logOn, int startHour) {
-        return dailyLogJpaRepository.save(DailyLogEntity.from(createDailyLog(user, logOn, startHour))).to();
+        return saveDailyLog(createDailyLog(user, logOn, startHour));
+    }
+
+    protected DailyLog saveDailyLog(User user, LocalDate logOn, DailyLogTimeRange timeRange) {
+        return saveDailyLog(createDailyLog(user, logOn, timeRange));
+    }
+
+    private DailyLog saveDailyLog(DailyLog dailyLog) {
+        return dailyLogJpaRepository
+                .save(DailyLogEntity.from(dailyLog))
+                .to(currentTimeProvider.now());
     }
 
     protected void flushAndClear() {

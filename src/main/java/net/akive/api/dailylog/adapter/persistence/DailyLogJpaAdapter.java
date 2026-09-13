@@ -5,9 +5,11 @@ import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.common.pagination.SortCondition;
 import net.akive.api.common.pagination.SortDirection;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.adapter.persistence.entity.DailyLogEntity;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
+import net.akive.api.dailylog.domain.DailyLogTimeRange;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,13 +26,19 @@ class DailyLogJpaAdapter implements DailyLogRepository {
     private static final Set<String> DAILY_LOG_SORT_PROPERTIES = Set.of("logOn");
 
     private final DailyLogJpaRepository dailyLogJpaRepository;
+    private final CurrentTimeProvider currentTimeProvider;
+
+    @Override
+    public DailyLog save(DailyLog dailyLog) {
+        return dailyLogJpaRepository.save(DailyLogEntity.from(dailyLog)).to(currentTimeProvider.now());
+    }
 
     @Override
     public List<DailyLog> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn) {
         return dailyLogJpaRepository
-                .findAllByUser_UserIdAndLogOnOrderByStartOn(userId, logOn)
+                .findAllByUserIdAndLogOnOrderByStartOn(userId, logOn)
                 .stream()
-                .map(DailyLogEntity::to)
+                .map(entity -> entity.to(currentTimeProvider.now()))
                 .toList();
     }
 
@@ -53,6 +61,29 @@ class DailyLogJpaAdapter implements DailyLogRepository {
                 logOns.isFirst(),
                 logOns.isLast(),
                 logOns.getContent()
+        );
+    }
+
+    @Override
+    public boolean existsOverlappingTimeByUserIdAndTimeRange(Long userId, DailyLogTimeRange timeRange) {
+        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndTimeRange(
+                userId,
+                timeRange.getStartOn(),
+                timeRange.getEndOn()
+        );
+    }
+
+    @Override
+    public boolean existsOverlappingTimeByUserIdAndTimeRangeAndDailyLogIdNot(
+            Long userId,
+            DailyLogTimeRange timeRange,
+            Long dailyLogId
+    ) {
+        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndTimeRangeAndDailyLogIdNot(
+                userId,
+                timeRange.getStartOn(),
+                timeRange.getEndOn(),
+                dailyLogId
         );
     }
 

@@ -3,14 +3,21 @@ package net.akive.api.dailylog.adapter.webapi;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
+import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogCreateResponse;
 import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogsFindResponse;
+import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
+import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
 import static net.akive.api.common.pagination.SortDirection.DESC;
+import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequestMapping("/daily-logs")
@@ -18,10 +25,24 @@ import static net.akive.api.common.pagination.SortDirection.DESC;
 public class DailyLogApi {
 
     private final DailyLogFinder dailyLogFinder;
+    private final DailyLogCreator dailyLogCreator;
+    private final CurrentTimeProvider currentTimeProvider;
 
     @GetMapping("/{logOn}")
     public DailyLogsFindResponse findAll(@AuthenticatedUserId Long userId, @PathVariable LocalDate logOn) {
         return DailyLogsFindResponse.from(dailyLogFinder.findAll(userId, logOn));
+    }
+
+    @PostMapping("/{logOn}")
+    @ResponseStatus(CREATED)
+    public DailyLogCreateResponse create(
+            @AuthenticatedUserId Long userId,
+            @PathVariable LocalDate logOn,
+            @Validated @RequestBody DailyLogCreateRequest request
+    ) {
+        DailyLogCreateCommand command = request.to(userId, logOn, currentTimeProvider.now());
+
+        return new DailyLogCreateResponse(dailyLogCreator.create(command));
     }
 
     @GetMapping("/log-ons")

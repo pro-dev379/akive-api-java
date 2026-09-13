@@ -48,11 +48,8 @@ public class DailyLogEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDate logOn;
 
-    @Column(nullable = false)
-    private LocalDateTime startOn;
-
-    @Column(nullable = false)
-    private LocalDateTime endOn;
+    @Embedded
+    private DailyLogTimeRangeEntity timeRange;
 
     @Enumerated(STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20)")
@@ -75,8 +72,7 @@ public class DailyLogEntity extends BaseTimeEntity {
                 dailyLog.getDailyLogId(),
                 UserEntity.from(dailyLog.getUser()),
                 dailyLog.getLogOn(),
-                dailyLog.getStartOn(),
-                dailyLog.getEndOn(),
+                DailyLogTimeRangeEntity.from(dailyLog.getTimeRange()),
                 dailyLog.getDailyLogType(),
                 dailyLog.getFocusTimeSec(),
                 focusRateExcludedValue(dailyLog.isFocusRateExcluded()),
@@ -84,13 +80,12 @@ public class DailyLogEntity extends BaseTimeEntity {
         );
     }
 
-    public DailyLog to() {
+    public DailyLog to(LocalDateTime now) {
         return DailyLog.reconstruct(
                 this.dailyLogId,
                 this.user.to(),
                 this.logOn,
-                this.startOn,
-                this.endOn,
+                this.timeRange.to(now),
                 this.dailyLogType,
                 this.focusTimeSec,
                 this.isFocusRateExcluded(),

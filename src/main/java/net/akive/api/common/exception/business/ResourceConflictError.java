@@ -18,6 +18,8 @@ public enum ResourceConflictError implements ApplicationError {
     SUBJECT_NAME_ALREADY_EXISTS("Subject name already exists."),
 
     EMAIL_ALREADY_VERIFIED("Email is already verified."),
+
+    DAILY_LOG_TIME_OVERLAPS("Daily log time overlaps with existing daily log.")
     ;
 
     private final String message;
