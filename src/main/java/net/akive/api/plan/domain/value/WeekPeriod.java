@@ -15,11 +15,7 @@ public record WeekPeriod(LocalDate startOn, LocalDate endOn) {
 
     public WeekPeriod {
         requireStartNotAfterEnd(startOn, endOn);
-
-        long inclusiveDays = ChronoUnit.DAYS.between(startOn, endOn) + 1;
-        if (inclusiveDays > DAYS_PER_WEEK) {
-            throw new BusinessRuleViolationException(INVALID_WEEK_PERIOD);
-        }
+        validateMaxDays(startOn, endOn);
     }
 
     public List<PlanDate> splitIntoDates() {
@@ -30,5 +26,12 @@ public record WeekPeriod(LocalDate startOn, LocalDate endOn) {
                 )
                 .map(PlanDate::from)
                 .toList();
+    }
+
+    private static void validateMaxDays(LocalDate startOn, LocalDate endOn) {
+        long inclusiveDays = ChronoUnit.DAYS.between(startOn, endOn) + 1;
+        if (inclusiveDays > DAYS_PER_WEEK) {
+            throw new BusinessRuleViolationException(INVALID_WEEK_PERIOD);
+        }
     }
 }

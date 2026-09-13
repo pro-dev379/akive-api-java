@@ -12,14 +12,24 @@ public record Email(String value) {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     public Email {
-        value = requireNotBlank(value);
-
-        if (!EMAIL_PATTERN.matcher(value).matches()) {
-            throw new BusinessRuleViolationException(INVALID_FORMAT);
-        }
+        value = validateValue(value);
     }
 
     public String value() {
         return value;
+    }
+
+    private static String validateValue(String value) {
+        String validatedValue = requireNotBlank(value);
+
+        validateFormat(validatedValue);
+
+        return validatedValue;
+    }
+
+    private static void validateFormat(String value) {
+        if (!EMAIL_PATTERN.matcher(value).matches()) {
+            throw new BusinessRuleViolationException(INVALID_FORMAT);
+        }
     }
 }

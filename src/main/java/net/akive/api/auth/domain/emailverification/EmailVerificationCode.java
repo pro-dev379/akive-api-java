@@ -9,14 +9,24 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 public record EmailVerificationCode(String value) {
 
     public EmailVerificationCode {
-        value = requireNotBlank(value);
-
-        if (!VERIFICATION_CODE_PATTERN.matcher(value).matches()) {
-            throw new BusinessRuleViolationException(EMAIL_VERIFICATION_INVALID_CODE_FORMAT);
-        }
+        value = validateValue(value);
     }
 
     public String value() {
         return value;
+    }
+
+    private static String validateValue(String value) {
+        String validatedValue = requireNotBlank(value);
+
+        validateFormat(validatedValue);
+
+        return validatedValue;
+    }
+
+    private static void validateFormat(String value) {
+        if (!VERIFICATION_CODE_PATTERN.matcher(value).matches()) {
+            throw new BusinessRuleViolationException(EMAIL_VERIFICATION_INVALID_CODE_FORMAT);
+        }
     }
 }

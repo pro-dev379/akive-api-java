@@ -9,8 +9,7 @@ public record TotalQuantityAmount(
 ) {
 
     public TotalQuantityAmount {
-        requireNonNull(quantityAmount);
-        requireNonNull(quantityUnit);
+        validateRequiredValues(quantityAmount, quantityUnit);
         quantityMemo = quantityMemo == null ? QuantityMemo.NONE : quantityMemo;
     }
 
@@ -28,5 +27,10 @@ public record TotalQuantityAmount(
                 new QuantityUnit(quantityUnit),
                 QuantityMemo.NONE
         );
+    }
+
+    private static void validateRequiredValues(QuantityAmount quantityAmount, QuantityUnit quantityUnit) {
+        requireNonNull(quantityAmount);
+        requireNonNull(quantityUnit);
     }
 }

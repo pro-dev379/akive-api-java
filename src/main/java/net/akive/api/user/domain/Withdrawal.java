@@ -12,12 +12,7 @@ import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
 public record Withdrawal(LocalDateTime withdrawnAt, String withdrawalReason) {
 
     public Withdrawal {
-        if (withdrawnAt != null) {
-            withdrawalReason = requireNotBlank(withdrawalReason);
-            requireMaxLength(withdrawalReason, WITHDRAWAL_REASON_MAX_LENGTH);
-        } else if (withdrawalReason != null) {
-            throw new BusinessRuleViolationException(INVALID_INPUT_VALUE);
-        }
+        withdrawalReason = validateWithdrawal(withdrawnAt, withdrawalReason);
     }
 
     public static Withdrawal none() {
@@ -30,5 +25,17 @@ public record Withdrawal(LocalDateTime withdrawnAt, String withdrawalReason) {
 
     public boolean isWithdrawn() {
         return this.withdrawnAt != null;
+    }
+
+    private static String validateWithdrawal(LocalDateTime withdrawnAt, String withdrawalReason) {
+        if (withdrawnAt != null) {
+            return requireMaxLength(requireNotBlank(withdrawalReason), WITHDRAWAL_REASON_MAX_LENGTH);
+        }
+
+        if (withdrawalReason != null) {
+            throw new BusinessRuleViolationException(INVALID_INPUT_VALUE);
+        }
+
+        return null;
     }
 }

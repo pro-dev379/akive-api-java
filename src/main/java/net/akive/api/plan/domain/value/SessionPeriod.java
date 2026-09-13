@@ -18,16 +18,9 @@ import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_PERIOD_MAX_MON
 public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
 
     public SessionPeriod {
-        requireNonNull(startOn);
-        requireNonNull(endOn);
-
-        if (!startOn.isBefore(endOn)) {
-            throw new BusinessRuleViolationException(INVALID_SESSION_PERIOD);
-        }
-
-        if (endOn.isAfter(startOn.plusMonths(SESSION_PERIOD_MAX_MONTHS))) {
-            throw new BusinessRuleViolationException(SESSION_PERIOD_MAX_MONTHS_EXCEEDED);
-        }
+        validateRequiredValues(startOn, endOn);
+        validateDateRange(startOn, endOn);
+        validateMaxMonths(startOn, endOn);
     }
 
     public List<SessionWeek> splitIntoWeeks() {
@@ -79,5 +72,22 @@ public record SessionPeriod(LocalDate startOn, LocalDate endOn) {
         }
 
         return first;
+    }
+
+    private static void validateRequiredValues(LocalDate startOn, LocalDate endOn) {
+        requireNonNull(startOn);
+        requireNonNull(endOn);
+    }
+
+    private static void validateDateRange(LocalDate startOn, LocalDate endOn) {
+        if (!startOn.isBefore(endOn)) {
+            throw new BusinessRuleViolationException(INVALID_SESSION_PERIOD);
+        }
+    }
+
+    private static void validateMaxMonths(LocalDate startOn, LocalDate endOn) {
+        if (endOn.isAfter(startOn.plusMonths(SESSION_PERIOD_MAX_MONTHS))) {
+            throw new BusinessRuleViolationException(SESSION_PERIOD_MAX_MONTHS_EXCEEDED);
+        }
     }
 }

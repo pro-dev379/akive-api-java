@@ -13,16 +13,9 @@ public record DailyQuantityAmount(
 ) {
 
     public DailyQuantityAmount {
-        requireNonNull(quantityAmount);
-        requireNonNull(completedQuantityAmount);
-        requireNonNull(delayedQuantityAmount);
+        validateRequiredValues(quantityAmount, completedQuantityAmount, delayedQuantityAmount);
         quantityMemo = quantityMemo == null ? QuantityMemo.NONE : quantityMemo;
-
-        QuantityAmount calculatedQuantityAmount = completedQuantityAmount.add(delayedQuantityAmount);
-
-        if (!calculatedQuantityAmount.equals(quantityAmount)) {
-            throw new BusinessRuleViolationException(DAILY_AMOUNT_MISMATCH);
-        }
+        validateAmountMatches(quantityAmount, completedQuantityAmount, delayedQuantityAmount);
     }
 
     public static DailyQuantityAmount of(
@@ -119,5 +112,27 @@ public record DailyQuantityAmount(
                 this.delayedQuantityAmount,
                 targetMemo
         );
+    }
+
+    private static void validateRequiredValues(
+            QuantityAmount quantityAmount,
+            QuantityAmount completedQuantityAmount,
+            QuantityAmount delayedQuantityAmount
+    ) {
+        requireNonNull(quantityAmount);
+        requireNonNull(completedQuantityAmount);
+        requireNonNull(delayedQuantityAmount);
+    }
+
+    private static void validateAmountMatches(
+            QuantityAmount quantityAmount,
+            QuantityAmount completedQuantityAmount,
+            QuantityAmount delayedQuantityAmount
+    ) {
+        QuantityAmount calculatedQuantityAmount = completedQuantityAmount.add(delayedQuantityAmount);
+
+        if (!calculatedQuantityAmount.equals(quantityAmount)) {
+            throw new BusinessRuleViolationException(DAILY_AMOUNT_MISMATCH);
+        }
     }
 }
