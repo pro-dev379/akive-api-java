@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_LOG_FOCUS_TIME_EXCEEDS_DURATION;
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceConflictError.DAILY_LOG_TIME_OVERLAPS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.common.pagination.SortDirection.DESC;
@@ -93,10 +92,59 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 일일_로그_생성_시_미래_시간_범위로_요청하면_400을_응답한다() {
+        DailyLogCreateRequest request = createDailyLogCreateRequest(
+                createDailyLogTimeRangeRequest(
+                        NOW.plusHours(1),
+                        NOW.plusHours(2)
+                )
+        );
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+
+        MvcTestResultAssert result = postJson(
+                DAILY_LOGS_URL,
+                USER_ID,
+                toJson(request),
+                LOG_ON
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_TIME_RANGE_IN_FUTURE);
+
+        then(currentTimeProvider).should().now();
+        then(dailyLogCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 일일_로그_생성_시_시간_범위가_24시간을_초과하면_400을_응답한다() {
+        DailyLogCreateRequest request = createDailyLogCreateRequest(
+                createDailyLogTimeRangeRequest(
+                        startOn(LOG_ON, 9),
+                        endOn(LOG_ON.plusDays(1), 10)
+                )
+        );
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+
+
+        MvcTestResultAssert result = postJson(
+                DAILY_LOGS_URL,
+                USER_ID,
+                toJson(request),
+                LOG_ON
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_TIME_RANGE_TOO_LONG);
+
+        then(currentTimeProvider).should().now();
+        then(dailyLogCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 일일_로그_생성_시_집중_시간이_시간_범위보다_크면_400을_응답한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest(
                 createDailyLogTimeRangeRequest(startOn(LOG_ON, 9), endOn(LOG_ON, 10)),
-                36001L
+                3601L
         );
         DailyLogCreateCommand command = request.to(USER_ID, LOG_ON, NOW);
 

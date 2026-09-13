@@ -3,6 +3,7 @@ package net.akive.api.dailylog.adapter.webapi.fixture;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogTimeRangeRequest;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
@@ -13,6 +14,13 @@ public class DailyLogRequestFixture {
 
     public static DailyLogCreateRequest createDailyLogCreateRequest() {
         return createDailyLogCreateRequest(createDailyLogTimeRangeRequest(), FOCUS_TIME_SEC);
+    }
+
+    public static DailyLogCreateRequest createDailyLogCreateRequest(DailyLogTimeRangeRequest timeRangeRequest) {
+        return createDailyLogCreateRequest(
+                timeRangeRequest,
+                Duration.between(timeRangeRequest.startOn(), timeRangeRequest.endOn()).toSeconds()
+        );
     }
 
     public static DailyLogCreateRequest createDailyLogCreateRequest(
