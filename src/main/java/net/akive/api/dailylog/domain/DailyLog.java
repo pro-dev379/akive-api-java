@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_LOG_INTENSIVE_TIME_EXCEEDS_DURATION;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_LOG_FOCUS_TIME_EXCEEDS_DURATION;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -33,9 +33,9 @@ public class DailyLog {
 
     private DailyLogType dailyLogType;
 
-    private Long intensiveTimeSec;
+    private Long focusTimeSec;
 
-    private boolean intensiveExcluded;
+    private boolean focusRateExcluded;
 
     private String contents;
 
@@ -46,12 +46,12 @@ public class DailyLog {
             LocalDateTime startOn,
             LocalDateTime endOn,
             DailyLogType dailyLogType,
-            Long intensiveTimeSec,
-            boolean intensiveExcluded,
+            Long focusTimeSec,
+            boolean focusRateExcluded,
             String contents
     ) {
         requireStartNotAfterEnd(startOn, endOn);
-        validateIntensiveTimeSec(startOn, endOn, intensiveTimeSec);
+        validateFocusTimeSec(startOn, endOn, focusTimeSec);
 
         return DailyLog.builder()
                 .dailyLogId(requirePositive(dailyLogId))
@@ -60,8 +60,8 @@ public class DailyLog {
                 .startOn(requireNonNull(startOn))
                 .endOn(requireNonNull(endOn))
                 .dailyLogType(requireNonNull(dailyLogType))
-                .intensiveTimeSec(requireNonNegativeIfPresent(intensiveTimeSec))
-                .intensiveExcluded(intensiveExcluded)
+                .focusTimeSec(requireNonNegativeIfPresent(focusTimeSec))
+                .focusRateExcluded(focusRateExcluded)
                 .contents(requireNotBlank(contents))
                 .build();
     }
@@ -72,12 +72,12 @@ public class DailyLog {
             LocalDateTime startOn,
             LocalDateTime endOn,
             DailyLogType dailyLogType,
-            Long intensiveTimeSec,
-            boolean intensiveExcluded,
+            Long focusTimeSec,
+            boolean focusRateExcluded,
             String contents
     ) {
         requireStartNotAfterEnd(startOn, endOn);
-        validateIntensiveTimeSec(startOn, endOn, intensiveTimeSec);
+        validateFocusTimeSec(startOn, endOn, focusTimeSec);
 
         return DailyLog.builder()
                 .user(requireNonNull(user))
@@ -85,8 +85,8 @@ public class DailyLog {
                 .startOn(requireNonNull(startOn))
                 .endOn(requireNonNull(endOn))
                 .dailyLogType(requireNonNull(dailyLogType))
-                .intensiveTimeSec(requireNonNegativeIfPresent(intensiveTimeSec))
-                .intensiveExcluded(intensiveExcluded)
+                .focusTimeSec(requireNonNegativeIfPresent(focusTimeSec))
+                .focusRateExcluded(focusRateExcluded)
                 .contents(requireNotBlank(contents))
                 .build();
     }
@@ -96,19 +96,19 @@ public class DailyLog {
             LocalDateTime targetStartOn,
             LocalDateTime targetEndOn,
             DailyLogType targetDailyLogType,
-            Long targetIntensiveTimeSec,
-            boolean targetIntensiveExcluded,
+            Long targetFocusTimeSec,
+            boolean targetFocusRateExcluded,
             String targetContents
     ) {
         requireStartNotAfterEnd(targetStartOn, targetEndOn);
-        validateIntensiveTimeSec(targetStartOn, targetEndOn, targetIntensiveTimeSec);
+        validateFocusTimeSec(targetStartOn, targetEndOn, targetFocusTimeSec);
 
         this.logOn = requireNonNull(targetLogOn);
         this.startOn = requireNonNull(targetStartOn);
         this.endOn = requireNonNull(targetEndOn);
         this.dailyLogType = requireNonNull(targetDailyLogType);
-        this.intensiveTimeSec = requireNonNegativeIfPresent(targetIntensiveTimeSec);
-        this.intensiveExcluded = targetIntensiveExcluded;
+        this.focusTimeSec = requireNonNegativeIfPresent(targetFocusTimeSec);
+        this.focusRateExcluded = targetFocusRateExcluded;
         this.contents = requireNotBlank(targetContents);
     }
 
@@ -119,13 +119,13 @@ public class DailyLog {
         return Duration.between(startOn, endOn).toSeconds();
     }
 
-    private static void validateIntensiveTimeSec(
+    private static void validateFocusTimeSec(
             LocalDateTime startOn,
             LocalDateTime endOn,
-            Long intensiveTimeSec
+            Long focusTimeSec
     ) {
-        if (intensiveTimeSec != null && calculateDailyLogDurationSec(startOn, endOn) < intensiveTimeSec) {
-            throw new BusinessRuleViolationException(DAILY_LOG_INTENSIVE_TIME_EXCEEDS_DURATION);
+        if (focusTimeSec != null && calculateDailyLogDurationSec(startOn, endOn) < focusTimeSec) {
+            throw new BusinessRuleViolationException(DAILY_LOG_FOCUS_TIME_EXCEEDS_DURATION);
         }
     }
 }

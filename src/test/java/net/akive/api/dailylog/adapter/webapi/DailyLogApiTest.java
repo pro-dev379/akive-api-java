@@ -159,8 +159,8 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.dailyLogs[0].dailyLogType")
                 .isEqualTo(dailyLog.getDailyLogType().name());
         result.bodyJson()
-                .extractingPath("$.dailyLogs[0].intensiveTimeSec")
-                .isEqualTo(dailyLog.getIntensiveTimeSec().intValue());
+                .extractingPath("$.dailyLogs[0].focusTimeSec")
+                .isEqualTo(dailyLog.getFocusTimeSec().intValue());
         result.bodyJson()
                 .extractingPath("$.dailyLogs[0].contents")
                 .isEqualTo(dailyLog.getContents());

@@ -17,7 +17,7 @@ public record DailyLogsFindResponse(List<DailyLogResponse> dailyLogs) {
             LocalDateTime startOn,
             LocalDateTime endOn,
             DailyLogType dailyLogType,
-            Long intensiveTimeSec,
+            Long focusTimeSec,
             String contents
     ) {
         public static DailyLogResponse from(DailyLog dailyLog) {
@@ -26,7 +26,7 @@ public record DailyLogsFindResponse(List<DailyLogResponse> dailyLogs) {
                     dailyLog.getStartOn(),
                     dailyLog.getEndOn(),
                     dailyLog.getDailyLogType(),
-                    dailyLog.getIntensiveTimeSec(),
+                    dailyLog.getFocusTimeSec(),
                     dailyLog.getContents()
             );
         }

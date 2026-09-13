@@ -58,14 +58,14 @@ public class DailyLogEntity extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "VARCHAR(20)")
     private DailyLogType dailyLogType;
 
-    private Long intensiveTimeSec;
+    private Long focusTimeSec;
 
     @Column(
-            name = "is_intensive_excluded",
+            name = "is_focus_rate_excluded",
             nullable = false,
             columnDefinition = "TINYINT(1) UNSIGNED NOT NULL DEFAULT 0"
     )
-    private byte intensiveExcluded = 0;
+    private byte focusRateExcluded = 0;
 
     @Column(nullable = false)
     private String contents;
@@ -78,8 +78,8 @@ public class DailyLogEntity extends BaseTimeEntity {
                 dailyLog.getStartOn(),
                 dailyLog.getEndOn(),
                 dailyLog.getDailyLogType(),
-                dailyLog.getIntensiveTimeSec(),
-                intensiveExcludedValue(dailyLog.isIntensiveExcluded()),
+                dailyLog.getFocusTimeSec(),
+                focusRateExcludedValue(dailyLog.isFocusRateExcluded()),
                 dailyLog.getContents()
         );
     }
@@ -92,21 +92,21 @@ public class DailyLogEntity extends BaseTimeEntity {
                 this.startOn,
                 this.endOn,
                 this.dailyLogType,
-                this.intensiveTimeSec,
-                this.isIntensiveExcluded(),
+                this.focusTimeSec,
+                this.isFocusRateExcluded(),
                 this.contents
         );
     }
 
-    private boolean isIntensiveExcluded() {
-        if (intensiveExcluded != 0 && intensiveExcluded != 1) {
-            throw new IllegalStateException("Invalid intensiveExcluded value: " + intensiveExcluded);
+    private boolean isFocusRateExcluded() {
+        if (focusRateExcluded != 0 && focusRateExcluded != 1) {
+            throw new IllegalStateException("Invalid focusRateExcluded value: " + focusRateExcluded);
         }
 
-        return intensiveExcluded == 1;
+        return focusRateExcluded == 1;
     }
 
-    private static byte intensiveExcludedValue(boolean intensiveExcluded) {
-        return intensiveExcluded ? (byte) 1 : (byte) 0;
+    private static byte focusRateExcludedValue(boolean focusRateExcluded) {
+        return focusRateExcluded ? (byte) 1 : (byte) 0;
     }
 }

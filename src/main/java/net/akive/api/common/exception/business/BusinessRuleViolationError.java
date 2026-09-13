@@ -62,7 +62,7 @@ public enum BusinessRuleViolationError implements ApplicationError {
     ),
     DAILY_DELAY_AMOUNT_EXCEEDS_CURRENT_DAILY_DELAYED_AMOUNT("Daily delay amount exceeds current daily delayed amount."),
 
-    DAILY_LOG_INTENSIVE_TIME_EXCEEDS_DURATION("Daily log intensive time exceeds duration.")
+    DAILY_LOG_FOCUS_TIME_EXCEEDS_DURATION("Daily log focus time exceeds duration.")
     ;
 
     private final String message;

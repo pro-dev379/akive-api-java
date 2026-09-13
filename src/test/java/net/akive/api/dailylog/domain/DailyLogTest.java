@@ -27,7 +27,7 @@ class DailyLogTest {
                 START_ON,
                 END_ON,
                 STUDY,
-                INTENSIVE_TIME_SEC,
+                FOCUS_TIME_SEC,
                 true,
                 CONTENTS
         );
@@ -38,8 +38,8 @@ class DailyLogTest {
         assertThat(dailyLog.getStartOn()).isEqualTo(START_ON);
         assertThat(dailyLog.getEndOn()).isEqualTo(END_ON);
         assertThat(dailyLog.getDailyLogType()).isEqualTo(STUDY);
-        assertThat(dailyLog.getIntensiveTimeSec()).isEqualTo(INTENSIVE_TIME_SEC);
-        assertThat(dailyLog.isIntensiveExcluded()).isTrue();
+        assertThat(dailyLog.getFocusTimeSec()).isEqualTo(FOCUS_TIME_SEC);
+        assertThat(dailyLog.isFocusRateExcluded()).isTrue();
         assertThat(dailyLog.getContents()).isEqualTo(CONTENTS);
     }
 
@@ -52,7 +52,7 @@ class DailyLogTest {
                 START_ON,
                 END_ON,
                 STUDY,
-                INTENSIVE_TIME_SEC,
+                FOCUS_TIME_SEC,
                 false,
                 CONTENTS
         );
@@ -62,8 +62,8 @@ class DailyLogTest {
         assertThat(dailyLog.getStartOn()).isEqualTo(START_ON);
         assertThat(dailyLog.getEndOn()).isEqualTo(END_ON);
         assertThat(dailyLog.getDailyLogType()).isEqualTo(STUDY);
-        assertThat(dailyLog.getIntensiveTimeSec()).isEqualTo(INTENSIVE_TIME_SEC);
-        assertThat(dailyLog.isIntensiveExcluded()).isFalse();
+        assertThat(dailyLog.getFocusTimeSec()).isEqualTo(FOCUS_TIME_SEC);
+        assertThat(dailyLog.isFocusRateExcluded()).isFalse();
         assertThat(dailyLog.getContents()).isEqualTo(CONTENTS);
     }
     
@@ -81,7 +81,7 @@ class DailyLogTest {
         );
 
         assertThat(DailyLog.calculateDailyLogDurationSec(START_ON, START_ON)).isZero();
-        assertThat(dailyLog.getIntensiveTimeSec()).isZero();
+        assertThat(dailyLog.getFocusTimeSec()).isZero();
     }
 
     @Test
@@ -97,7 +97,7 @@ class DailyLogTest {
                 CONTENTS
         );
 
-        assertThat(dailyLog.getIntensiveTimeSec()).isNull();
+        assertThat(dailyLog.getFocusTimeSec()).isNull();
     }
 
     @Test
@@ -109,7 +109,7 @@ class DailyLogTest {
                         END_ON.plusMinutes(1),
                         END_ON,
                         STUDY,
-                        INTENSIVE_TIME_SEC,
+                        FOCUS_TIME_SEC,
                         false,
                         CONTENTS
                 ))
@@ -134,7 +134,7 @@ class DailyLogTest {
                         CONTENTS
                 ))
                 .extracting(BusinessRuleViolationException::getError)
-                .isEqualTo(DAILY_LOG_INTENSIVE_TIME_EXCEEDS_DURATION);
+                .isEqualTo(DAILY_LOG_FOCUS_TIME_EXCEEDS_DURATION);
     }
 
     @Test
@@ -162,7 +162,7 @@ class DailyLogTest {
                 START_ON,
                 END_ON,
                 STUDY,
-                INTENSIVE_TIME_SEC,
+                FOCUS_TIME_SEC,
                 false,
                 CONTENTS
         );
@@ -181,8 +181,8 @@ class DailyLogTest {
         assertThat(dailyLog.getStartOn()).isEqualTo(TARGET_START_ON);
         assertThat(dailyLog.getEndOn()).isEqualTo(TARGET_END_ON);
         assertThat(dailyLog.getDailyLogType()).isEqualTo(ATTENDANCE);
-        assertThat(dailyLog.getIntensiveTimeSec()).isNull();
-        assertThat(dailyLog.isIntensiveExcluded()).isTrue();
+        assertThat(dailyLog.getFocusTimeSec()).isNull();
+        assertThat(dailyLog.isFocusRateExcluded()).isTrue();
         assertThat(dailyLog.getContents()).isEqualTo(TARGET_CONTENTS);
     }
 }

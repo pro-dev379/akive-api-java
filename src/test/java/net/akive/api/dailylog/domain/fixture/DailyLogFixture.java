@@ -15,7 +15,7 @@ public class DailyLogFixture {
     public static final LocalDate ANOTHER_LOG_ON = LocalDate.of(2026, 9, 13);
     public static final LocalDateTime START_ON = LocalDateTime.of(2026, 9, 12, 9, 0);
     public static final LocalDateTime END_ON = LocalDateTime.of(2026, 9, 12, 10, 0);
-    public static final Long INTENSIVE_TIME_SEC = 3_000L;
+    public static final Long FOCUS_TIME_SEC = 3_000L;
     public static final String CONTENTS = "오늘의 학습 기록";
     public static final LocalDate TARGET_LOG_ON = LocalDate.of(2026, 9, 14);
     public static final LocalDateTime TARGET_START_ON = LocalDateTime.of(2026, 9, 13, 11, 0);
@@ -30,7 +30,7 @@ public class DailyLogFixture {
                 START_ON,
                 END_ON,
                 STUDY,
-                INTENSIVE_TIME_SEC,
+                FOCUS_TIME_SEC,
                 false,
                 CONTENTS
         );
@@ -43,7 +43,7 @@ public class DailyLogFixture {
                 startOn(logOn, startHour),
                 startOn(logOn, startHour + 1),
                 STUDY,
-                INTENSIVE_TIME_SEC,
+                FOCUS_TIME_SEC,
                 false,
                 CONTENTS
         );
