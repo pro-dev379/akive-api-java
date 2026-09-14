@@ -7,6 +7,7 @@ import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
 import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogCreateResponse;
+import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogTypesFindResponse;
 import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogsFindResponse;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
@@ -52,5 +53,10 @@ public class DailyLogApi {
             @RequestParam(required = false) Integer size
     ) {
         return dailyLogFinder.findLogOns(userId, PageCondition.of(page, size, "logOn", DESC));
+    }
+
+    @GetMapping("/types")
+    public DailyLogTypesFindResponse findDailyLogTypes() {
+        return DailyLogTypesFindResponse.from(dailyLogFinder.findDailyLogTypes());
     }
 }

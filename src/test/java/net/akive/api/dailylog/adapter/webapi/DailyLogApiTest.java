@@ -34,6 +34,7 @@ import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
 import static net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture.createDailyLogCreateRequest;
 import static net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture.createFocusTimeRequest;
+import static net.akive.api.dailylog.domain.DailyLogType.*;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
@@ -330,6 +331,27 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
         then(dailyLogFinder).shouldHaveNoInteractions();
     }
+
+    @Test
+    void 일일_로그_타입_목록을_조회한다() {
+        given(dailyLogFinder.findDailyLogTypes()).willReturn(List.of(STUDY, REST, MEAL, ATTENDANCE, ETC));
+
+        MvcTestResultAssert result = get("/daily-logs/types", USER_ID).hasStatusOk();
+
+        result.bodyJson().extractingPath("$.dailyLogTypes[0].code").isEqualTo(STUDY.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[0].label").isEqualTo(STUDY.getLabel());
+        result.bodyJson().extractingPath("$.dailyLogTypes[1].code").isEqualTo(REST.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[1].label").isEqualTo(REST.getLabel());
+        result.bodyJson().extractingPath("$.dailyLogTypes[2].code").isEqualTo(MEAL.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[2].label").isEqualTo(MEAL.getLabel());
+        result.bodyJson().extractingPath("$.dailyLogTypes[3].code").isEqualTo(ATTENDANCE.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[3].label").isEqualTo(ATTENDANCE.getLabel());
+        result.bodyJson().extractingPath("$.dailyLogTypes[4].code").isEqualTo(ETC.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[4].label").isEqualTo(ETC.getLabel());
+
+        then(dailyLogFinder).should().findDailyLogTypes();
+    }
+
 
     private void assertDailyLogResponse(MvcTestResultAssert result, DailyLog dailyLog) {
         result.bodyJson()

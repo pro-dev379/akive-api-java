@@ -6,10 +6,12 @@ import net.akive.api.common.pagination.PageResult;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
+import net.akive.api.dailylog.domain.DailyLogType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -22,6 +24,11 @@ class DailyLogQueryService implements DailyLogFinder {
     @Override
     public List<DailyLog> findAll(Long userId, LocalDate logOn) {
         return dailyLogRepository.findAllByUserIdAndLogOnOrderByStartOn(userId, logOn);
+    }
+
+    @Override
+    public List<DailyLogType> findDailyLogTypes() {
+        return Arrays.stream(DailyLogType.values()).toList();
     }
 
     @Override
