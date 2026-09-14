@@ -3,7 +3,7 @@ package net.akive.api.dailylog.application.required;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.dailylog.domain.DailyLog;
-import net.akive.api.dailylog.domain.DailyLogTimeRange;
+import net.akive.api.dailylog.domain.FocusTime;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,11 +16,11 @@ public interface DailyLogRepository {
 
     PageResult<LocalDate> findLogOnsByUserId(Long userId, PageCondition pageCondition);
 
-    boolean existsOverlappingTimeByUserIdAndTimeRange(Long userId, DailyLogTimeRange timeRange);
+    boolean existsOverlappingTimeByUserIdAndFocusTime(Long userId, FocusTime focusTime);
 
-    boolean existsOverlappingTimeByUserIdAndTimeRangeAndDailyLogIdNot(
+    boolean existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
             Long userId,
-            DailyLogTimeRange timeRange,
+            FocusTime focusTime,
             Long dailyLogId
     );
 }

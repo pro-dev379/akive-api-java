@@ -14,12 +14,12 @@ public interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Lon
 
     @Query(
             value = """
-                    select distinct d.logOn
+                    select distinct d.focusTime.logOn
                     from DailyLogEntity d
                     where d.user.userId = :userId
                     """,
             countQuery = """
-                    select count(distinct d.logOn)
+                    select count(distinct d.focusTime.logOn)
                     from DailyLogEntity d
                     where d.user.userId = :userId
                     """
@@ -30,8 +30,8 @@ public interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Lon
         select d
         from DailyLogEntity d
         where d.user.userId = :userId
-          and d.logOn = :logOn
-        order by d.timeRange.startOn
+          and d.focusTime.logOn = :logOn
+        order by d.focusTime.startOn
     """)
     List<DailyLogEntity> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn);
 
@@ -39,20 +39,20 @@ public interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Lon
         select count(d) > 0
         from DailyLogEntity d
         where d.user.userId = :userId
-          and d.timeRange.startOn < :endOn
-          and d.timeRange.endOn > :startOn
+          and d.focusTime.startOn < :endOn
+          and d.focusTime.endOn > :startOn
     """)
-    boolean existsOverlappingTimeByUserIdAndTimeRange(Long userId, LocalDateTime startOn, LocalDateTime endOn);
+    boolean existsOverlappingTimeByUserIdAndFocusTime(Long userId, LocalDateTime startOn, LocalDateTime endOn);
 
     @Query("""
         select count(d) > 0
         from DailyLogEntity d
         where d.user.userId = :userId
           and d.dailyLogId <> :excludedDailyLogId
-          and d.timeRange.startOn < :endOn
-          and d.timeRange.endOn > :startOn
+          and d.focusTime.startOn < :endOn
+          and d.focusTime.endOn > :startOn
     """)
-    boolean existsOverlappingTimeByUserIdAndTimeRangeAndDailyLogIdNot(
+    boolean existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
             Long userId,
             LocalDateTime startOn,
             LocalDateTime endOn,

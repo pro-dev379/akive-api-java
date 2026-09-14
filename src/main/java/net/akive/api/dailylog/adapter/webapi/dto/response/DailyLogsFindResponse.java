@@ -1,8 +1,8 @@
 package net.akive.api.dailylog.adapter.webapi.dto.response;
 
 import net.akive.api.dailylog.domain.DailyLog;
-import net.akive.api.dailylog.domain.DailyLogTimeRange;
 import net.akive.api.dailylog.domain.DailyLogType;
+import net.akive.api.dailylog.domain.FocusTime;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,30 +15,32 @@ public record DailyLogsFindResponse(List<DailyLogResponse> dailyLogs) {
 
     public record DailyLogResponse(
             Long dailyLogId,
-            DailyLogTimeRangeResponse timeRange,
+            FocusTimeResponse focusTime,
             DailyLogType dailyLogType,
-            Long focusTimeSec,
             String contents
     ) {
         public static DailyLogResponse from(DailyLog dailyLog) {
             return new DailyLogResponse(
                     dailyLog.getDailyLogId(),
-                    DailyLogTimeRangeResponse.from(dailyLog.getTimeRange()),
+                    FocusTimeResponse.from(dailyLog.getFocusTime()),
                     dailyLog.getDailyLogType(),
-                    dailyLog.getFocusTimeSec(),
                     dailyLog.getContents()
             );
         }
     }
 
-    public record DailyLogTimeRangeResponse(
+    public record FocusTimeResponse(
             LocalDateTime startOn,
-            LocalDateTime endOn
+            LocalDateTime endOn,
+            Long focusTimeSec,
+            boolean focusRateExcluded
     ) {
-        public static DailyLogTimeRangeResponse from(DailyLogTimeRange timeRange) {
-            return new DailyLogTimeRangeResponse(
-                    timeRange.getStartOn(),
-                    timeRange.getEndOn()
+        public static FocusTimeResponse from(FocusTime focusTime) {
+            return new FocusTimeResponse(
+                    focusTime.getStartOn(),
+                    focusTime.getEndOn(),
+                    focusTime.getFocusTimeSec(),
+                    focusTime.isFocusRateExcluded()
             );
         }
     }

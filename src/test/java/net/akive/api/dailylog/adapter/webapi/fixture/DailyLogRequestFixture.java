@@ -1,7 +1,6 @@
 package net.akive.api.dailylog.adapter.webapi.fixture;
 
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
-import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogTimeRangeRequest;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -13,61 +12,66 @@ import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
 public class DailyLogRequestFixture {
 
     public static DailyLogCreateRequest createDailyLogCreateRequest() {
-        return createDailyLogCreateRequest(createDailyLogTimeRangeRequest(), FOCUS_TIME_SEC);
+        return createDailyLogCreateRequest(createFocusTimeRequest(), FOCUS_TIME_SEC);
     }
 
-    public static DailyLogCreateRequest createDailyLogCreateRequest(DailyLogTimeRangeRequest timeRangeRequest) {
+    public static DailyLogCreateRequest createDailyLogCreateRequest(
+            DailyLogCreateRequest.FocusTimeRequest focusTimeRequest
+    ) {
         return createDailyLogCreateRequest(
-                timeRangeRequest,
-                Duration.between(timeRangeRequest.startOn(), timeRangeRequest.endOn()).toSeconds()
+                focusTimeRequest,
+                Duration.between(focusTimeRequest.startOn(), focusTimeRequest.endOn()).toSeconds()
         );
     }
 
     public static DailyLogCreateRequest createDailyLogCreateRequest(
-            DailyLogTimeRangeRequest timeRangeRequest,
+            DailyLogCreateRequest.FocusTimeRequest focusTimeRequest,
             Long focusTimeSec
     ) {
         return new DailyLogCreateRequest(
-                timeRangeRequest,
+                new DailyLogCreateRequest.FocusTimeRequest(
+                        focusTimeRequest.startOn(),
+                        focusTimeRequest.endOn(),
+                        focusTimeSec,
+                        focusTimeRequest.focusRateExcluded()
+                ),
                 STUDY,
-                focusTimeSec,
-                false,
                 CONTENTS
         );
     }
 
-    public static DailyLogTimeRangeRequest createDailyLogTimeRangeRequest() {
-        return createDailyLogTimeRangeRequest(START_ON, END_ON);
+    public static DailyLogCreateRequest.FocusTimeRequest createFocusTimeRequest() {
+        return createFocusTimeRequest(START_ON, END_ON);
     }
 
-    public static DailyLogTimeRangeRequest createDailyLogTimeRangeRequest(
-            LocalDateTime starOn,
+    public static DailyLogCreateRequest.FocusTimeRequest createFocusTimeRequest(
+            LocalDateTime startOn,
             LocalDateTime endOn
     ) {
-        return new DailyLogTimeRangeRequest(starOn, endOn);
+        return new DailyLogCreateRequest.FocusTimeRequest(startOn, endOn, FOCUS_TIME_SEC, false);
     }
 
     public static Stream<DailyLogCreateRequest> invalidCreateRequests() {
         return Stream.of(
-                new DailyLogCreateRequest(null, STUDY, FOCUS_TIME_SEC, false, CONTENTS),
+                new DailyLogCreateRequest(null, STUDY, CONTENTS),
                 new DailyLogCreateRequest(
-                        new DailyLogTimeRangeRequest(null, END_ON),
+                        new DailyLogCreateRequest.FocusTimeRequest(null, END_ON, FOCUS_TIME_SEC, false),
                         STUDY,
-                        FOCUS_TIME_SEC,
-                        false,
                         CONTENTS
                 ),
                 new DailyLogCreateRequest(
-                        new DailyLogTimeRangeRequest(START_ON, null),
+                        new DailyLogCreateRequest.FocusTimeRequest(START_ON, null, FOCUS_TIME_SEC, false),
                         STUDY,
-                        FOCUS_TIME_SEC,
-                        false,
                         CONTENTS
                 ),
-                new DailyLogCreateRequest(createDailyLogTimeRangeRequest(), null, FOCUS_TIME_SEC, false, CONTENTS),
-                new DailyLogCreateRequest(createDailyLogTimeRangeRequest(), STUDY, -1L, false, CONTENTS),
-                new DailyLogCreateRequest(createDailyLogTimeRangeRequest(), STUDY, FOCUS_TIME_SEC, false, " "),
-                new DailyLogCreateRequest(createDailyLogTimeRangeRequest(), STUDY, FOCUS_TIME_SEC, false, null)
+                new DailyLogCreateRequest(createFocusTimeRequest(), null, CONTENTS),
+                new DailyLogCreateRequest(
+                        new DailyLogCreateRequest.FocusTimeRequest(START_ON, END_ON, -1L, false),
+                        STUDY,
+                        CONTENTS
+                ),
+                new DailyLogCreateRequest(createFocusTimeRequest(), STUDY, " "),
+                new DailyLogCreateRequest(createFocusTimeRequest(), STUDY, null)
         );
     }
 }

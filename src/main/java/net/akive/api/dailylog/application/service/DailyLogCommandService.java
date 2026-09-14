@@ -8,7 +8,7 @@ import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
-import net.akive.api.dailylog.domain.DailyLogTimeRange;
+import net.akive.api.dailylog.domain.FocusTime;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Service;
@@ -30,15 +30,12 @@ class DailyLogCommandService implements DailyLogCreator {
             throws BusinessRuleViolationException, ResourceNotFoundException, ResourceConflictException {
         User user = findUserOrThrow(command.userId());
 
-        validateTimeNotOverlapping(command.userId(), command.timeRange());
+        validateTimeNotOverlapping(command.userId(), command.focusTime());
 
         DailyLog dailyLog = DailyLog.create(
                 user,
-                command.logOn(),
-                command.timeRange(),
+                command.focusTime(),
                 command.dailyLogType(),
-                command.focusTimeSec(),
-                command.focusRateExcluded(),
                 command.contents()
         );
 
@@ -52,8 +49,8 @@ class DailyLogCommandService implements DailyLogCreator {
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
     }
 
-    private void validateTimeNotOverlapping(Long userId, DailyLogTimeRange timeRange) {
-        if (dailyLogRepository.existsOverlappingTimeByUserIdAndTimeRange(userId, timeRange)) {
+    private void validateTimeNotOverlapping(Long userId, FocusTime focusTime) {
+        if (dailyLogRepository.existsOverlappingTimeByUserIdAndFocusTime(userId, focusTime)) {
             throw new ResourceConflictException(DAILY_LOG_TIME_OVERLAPS);
         }
     }

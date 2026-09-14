@@ -9,7 +9,7 @@ import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.adapter.persistence.entity.DailyLogEntity;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
-import net.akive.api.dailylog.domain.DailyLogTimeRange;
+import net.akive.api.dailylog.domain.FocusTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -65,24 +65,24 @@ class DailyLogJpaAdapter implements DailyLogRepository {
     }
 
     @Override
-    public boolean existsOverlappingTimeByUserIdAndTimeRange(Long userId, DailyLogTimeRange timeRange) {
-        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndTimeRange(
+    public boolean existsOverlappingTimeByUserIdAndFocusTime(Long userId, FocusTime focusTime) {
+        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndFocusTime(
                 userId,
-                timeRange.getStartOn(),
-                timeRange.getEndOn()
+                focusTime.getStartOn(),
+                focusTime.getEndOn()
         );
     }
 
     @Override
-    public boolean existsOverlappingTimeByUserIdAndTimeRangeAndDailyLogIdNot(
+    public boolean existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
             Long userId,
-            DailyLogTimeRange timeRange,
+            FocusTime focusTime,
             Long dailyLogId
     ) {
-        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndTimeRangeAndDailyLogIdNot(
+        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
                 userId,
-                timeRange.getStartOn(),
-                timeRange.getEndOn(),
+                focusTime.getStartOn(),
+                focusTime.getEndOn(),
                 dailyLogId
         );
     }
@@ -103,6 +103,6 @@ class DailyLogJpaAdapter implements DailyLogRepository {
             throw new IllegalArgumentException("Unsupported daily log sort property: " + property);
         }
 
-        return property;
+        return "focusTime." + property;
     }
 }

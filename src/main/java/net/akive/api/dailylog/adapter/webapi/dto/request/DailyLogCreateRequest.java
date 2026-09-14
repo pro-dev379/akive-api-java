@@ -5,29 +5,36 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
-import net.akive.api.dailylog.domain.DailyLogTimeRange;
 import net.akive.api.dailylog.domain.DailyLogType;
+import net.akive.api.dailylog.domain.FocusTime;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record DailyLogCreateRequest(
-        @NotNull @Valid DailyLogTimeRangeRequest timeRange,
+        @NotNull @Valid FocusTimeRequest focusTime,
         @NotNull DailyLogType dailyLogType,
-        @Min(0) Long focusTimeSec,
-        boolean focusRateExcluded,
         @NotBlank String contents
 ) {
 
     public DailyLogCreateCommand to(Long userId, LocalDate logOn, LocalDateTime now) {
         return new DailyLogCreateCommand(
                 userId,
-                logOn,
-                DailyLogTimeRange.of(this.timeRange.startOn(), this.timeRange.endOn(), now),
+                this.focusTime.to(logOn, now),
                 this.dailyLogType,
-                this.focusTimeSec,
-                this.focusRateExcluded,
                 this.contents
         );
+    }
+
+    public record FocusTimeRequest(
+            @NotNull LocalDateTime startOn,
+            @NotNull LocalDateTime endOn,
+            @Min(0) Long focusTimeSec,
+            boolean focusRateExcluded
+    ) {
+
+        public FocusTime to(LocalDate logOn, LocalDateTime now) {
+            return FocusTime.of(logOn, this.startOn, this.endOn, this.focusTimeSec, this.focusRateExcluded, now);
+        }
     }
 }
