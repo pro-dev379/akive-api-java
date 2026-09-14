@@ -14,6 +14,7 @@ public class DailyLogFixture {
 
     public static final Long DAILY_LOG_ID = 1L;
     public static final Long ANOTHER_DAILY_LOG_ID = 2L;
+    public static final Long UNKNOWN_DAILY_LOG_ID = Long.MAX_VALUE;
     public static final LocalDate LOG_ON = LocalDate.of(2026, 9, 12);
     public static final LocalDate ANOTHER_LOG_ON = LocalDate.of(2026, 9, 13);
     public static final LocalDateTime START_ON = LocalDateTime.of(2026, 9, 12, 9, 0);

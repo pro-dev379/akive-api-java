@@ -6,6 +6,7 @@ import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
+import net.akive.api.dailylog.application.provided.dto.DailyLogDeleteCommand;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.FocusTime;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static net.akive.api.common.exception.business.ResourceConflictError.DAILY_LOG_TIME_OVERLAPS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.DAILY_LOG_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 
 @Service
@@ -44,9 +46,21 @@ class DailyLogCommandService implements DailyLogCreator {
         return savedDailyLog.getDailyLogId();
     }
 
+    @Override
+    public void delete(DailyLogDeleteCommand command) throws ResourceNotFoundException {
+        DailyLog dailyLog = findDailyLogOrThrow(command.dailyLogId(), command.userId());
+
+        dailyLogRepository.delete(dailyLog);
+    }
+
     private User findUserOrThrow(Long userId) {
         return userFinder.findByUserIdAndNotWithdrawn(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+    }
+
+    private DailyLog findDailyLogOrThrow(Long dailyLogId, Long userId) {
+        return dailyLogRepository.findByDailyLogIdAndUserId(dailyLogId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(DAILY_LOG_NOT_FOUND));
     }
 
     private void validateTimeNotOverlapping(Long userId, FocusTime focusTime) {

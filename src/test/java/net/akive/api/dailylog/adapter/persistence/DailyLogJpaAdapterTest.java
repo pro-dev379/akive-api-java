@@ -47,31 +47,6 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 회원_식별자와_날짜로_일일_로그_목록을_시작_시간_오름차순으로_조회한다() {
-        User savedUser = saveUser();
-        FocusTime recentFocusTime = createFocusTime(
-                startOn(LOG_ON, 10),
-                endOn(LOG_ON, 11)
-        );
-        FocusTime olderFocusTime = createFocusTime(
-                startOn(LOG_ON, 9),
-                endOn(LOG_ON, 10)
-        );
-        DailyLog recentDailyLog = saveDailyLog(savedUser, recentFocusTime);
-        DailyLog olderDailyLog = saveDailyLog(savedUser, olderFocusTime);
-        flushAndClear();
-
-        List<DailyLog> foundDailyLogs = dailyLogRepository.findAllByUserIdAndLogOnOrderByStartOn(
-                savedUser.getUserId(),
-                LOG_ON
-        );
-
-        assertThat(foundDailyLogs)
-                .extracting(DailyLog::getDailyLogId)
-                .containsExactly(olderDailyLog.getDailyLogId(), recentDailyLog.getDailyLogId());
-    }
-
-    @Test
     void 회원_식별자로_일일_로그가_있는_날짜_목록을_중복_없이_페이징_조회한다() {
         User savedUser = saveUser();
         LocalDate olderLogOn = LocalDate.of(2026, 9, 1);
@@ -106,6 +81,31 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
                 ))
                 .withMessageContaining("Unsupported daily log sort property: unknownProperty")
                 .withCauseInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 회원_식별자와_날짜로_일일_로그_목록을_시작_시간_오름차순으로_조회한다() {
+        User savedUser = saveUser();
+        FocusTime recentFocusTime = createFocusTime(
+                startOn(LOG_ON, 10),
+                endOn(LOG_ON, 11)
+        );
+        FocusTime olderFocusTime = createFocusTime(
+                startOn(LOG_ON, 9),
+                endOn(LOG_ON, 10)
+        );
+        DailyLog recentDailyLog = saveDailyLog(savedUser, recentFocusTime);
+        DailyLog olderDailyLog = saveDailyLog(savedUser, olderFocusTime);
+        flushAndClear();
+
+        List<DailyLog> foundDailyLogs = dailyLogRepository.findAllByUserIdAndLogOnOrderByStartOn(
+                savedUser.getUserId(),
+                LOG_ON
+        );
+
+        assertThat(foundDailyLogs)
+                .extracting(DailyLog::getDailyLogId)
+                .containsExactly(olderDailyLog.getDailyLogId(), recentDailyLog.getDailyLogId());
     }
 
     @Test
@@ -169,5 +169,17 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
         );
 
         assertThat(exists).isFalse();
+    }
+
+    @Test
+    void 일일_로그를_삭제한다() {
+        User savedUser = saveUser();
+        DailyLog savedDailyLog = saveDailyLog(savedUser, LOG_ON, 9);
+        flushAndClear();
+
+        dailyLogRepository.delete(savedDailyLog);
+        flushAndClear();
+
+        assertThat(dailyLogJpaRepository.findById(savedDailyLog.getDailyLogId())).isEmpty();
     }
 }

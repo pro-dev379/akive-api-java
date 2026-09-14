@@ -33,6 +33,20 @@ class DailyLogQueryServiceTest {
     DailyLogQueryService dailyLogQueryService;
 
     @Test
+    void 회원_식별자로_일일_로그가_있는_날짜_목록을_페이징_조회한다() {
+        List<LocalDate> contents = List.of(LOG_ON, ANOTHER_LOG_ON);
+        PageCondition pageCondition = PageCondition.of(DEFAULT_PAGE, DEFAULT_SIZE, "logOn", DESC);
+        PageResult<LocalDate> logOns = createPageResult(DEFAULT_PAGE, DEFAULT_SIZE, contents);
+
+        given(dailyLogRepository.findLogOnsByUserId(USER_ID, pageCondition)).willReturn(logOns);
+
+        PageResult<LocalDate> foundLogOns = dailyLogQueryService.findLogOns(USER_ID, pageCondition);
+
+        assertThat(foundLogOns).isEqualTo(logOns);
+        then(dailyLogRepository).should().findLogOnsByUserId(USER_ID, pageCondition);
+    }
+
+    @Test
     void 회원_식별자와_날짜로_일일_로그_목록을_조회한다() {
         User user = createReconstructedUser(USER_ID);
         List<DailyLog> dailyLogs = List.of(
@@ -47,19 +61,5 @@ class DailyLogQueryServiceTest {
 
         assertThat(foundDailyLogs).isEqualTo(dailyLogs);
         then(dailyLogRepository).should().findAllByUserIdAndLogOnOrderByStartOn(USER_ID, LOG_ON);
-    }
-
-    @Test
-    void 회원_식별자로_일일_로그가_있는_날짜_목록을_페이징_조회한다() {
-        List<LocalDate> contents = List.of(LOG_ON, ANOTHER_LOG_ON);
-        PageCondition pageCondition = PageCondition.of(DEFAULT_PAGE, DEFAULT_SIZE, "logOn", DESC);
-        PageResult<LocalDate> logOns = createPageResult(DEFAULT_PAGE, DEFAULT_SIZE, contents);
-
-        given(dailyLogRepository.findLogOnsByUserId(USER_ID, pageCondition)).willReturn(logOns);
-
-        PageResult<LocalDate> foundLogOns = dailyLogQueryService.findLogOns(USER_ID, pageCondition);
-
-        assertThat(foundLogOns).isEqualTo(logOns);
-        then(dailyLogRepository).should().findLogOnsByUserId(USER_ID, pageCondition);
     }
 }

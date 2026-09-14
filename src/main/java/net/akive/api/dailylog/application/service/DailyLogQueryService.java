@@ -27,12 +27,12 @@ class DailyLogQueryService implements DailyLogFinder {
     }
 
     @Override
-    public List<DailyLogType> findDailyLogTypes() {
-        return Arrays.stream(DailyLogType.values()).toList();
+    public PageResult<LocalDate> findLogOns(Long userId, PageCondition pageCondition) {
+        return dailyLogRepository.findLogOnsByUserId(userId, pageCondition);
     }
 
     @Override
-    public PageResult<LocalDate> findLogOns(Long userId, PageCondition pageCondition) {
-        return dailyLogRepository.findLogOnsByUserId(userId, pageCondition);
+    public List<DailyLogType> findDailyLogTypes() {
+        return Arrays.stream(DailyLogType.values()).toList();
     }
 }

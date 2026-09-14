@@ -7,14 +7,17 @@ import net.akive.api.dailylog.domain.FocusTime;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface DailyLogRepository {
 
     DailyLog save(DailyLog dailyLog);
 
-    List<DailyLog> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn);
-
     PageResult<LocalDate> findLogOnsByUserId(Long userId, PageCondition pageCondition);
+
+    Optional<DailyLog> findByDailyLogIdAndUserId(Long dailyLogId, Long userId);
+
+    List<DailyLog> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn);
 
     boolean existsOverlappingTimeByUserIdAndFocusTime(Long userId, FocusTime focusTime);
 
@@ -23,4 +26,6 @@ public interface DailyLogRepository {
             FocusTime focusTime,
             Long dailyLogId
     );
+
+    void delete(DailyLog dailyLog);
 }

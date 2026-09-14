@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -31,15 +32,6 @@ class DailyLogJpaAdapter implements DailyLogRepository {
     @Override
     public DailyLog save(DailyLog dailyLog) {
         return dailyLogJpaRepository.save(DailyLogEntity.from(dailyLog)).to(currentTimeProvider.now());
-    }
-
-    @Override
-    public List<DailyLog> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn) {
-        return dailyLogJpaRepository
-                .findAllByUserIdAndLogOnOrderByStartOn(userId, logOn)
-                .stream()
-                .map(entity -> entity.to(currentTimeProvider.now()))
-                .toList();
     }
 
     @Override
@@ -65,6 +57,21 @@ class DailyLogJpaAdapter implements DailyLogRepository {
     }
 
     @Override
+    public Optional<DailyLog> findByDailyLogIdAndUserId(Long dailyLogId, Long userId) {
+        return dailyLogJpaRepository.findByDailyLogIdAndUser_UserId(dailyLogId, userId)
+                .map(entity -> entity.to(currentTimeProvider.now()));
+    }
+
+    @Override
+    public List<DailyLog> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn) {
+        return dailyLogJpaRepository
+                .findAllByUserIdAndLogOnOrderByStartOn(userId, logOn)
+                .stream()
+                .map(entity -> entity.to(currentTimeProvider.now()))
+                .toList();
+    }
+
+    @Override
     public boolean existsOverlappingTimeByUserIdAndFocusTime(Long userId, FocusTime focusTime) {
         return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndFocusTime(
                 userId,
@@ -85,6 +92,11 @@ class DailyLogJpaAdapter implements DailyLogRepository {
                 focusTime.getEndOn(),
                 dailyLogId
         );
+    }
+
+    @Override
+    public void delete(DailyLog dailyLog) {
+        dailyLogJpaRepository.delete(DailyLogEntity.from(dailyLog));
     }
 
     private Sort toSort(SortCondition sortCondition) {

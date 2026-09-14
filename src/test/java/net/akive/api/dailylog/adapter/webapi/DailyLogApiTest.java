@@ -10,6 +10,7 @@ import net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
+import net.akive.api.dailylog.application.provided.dto.DailyLogDeleteCommand;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.domain.User;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceConflictError.DAILY_LOG_TIME_OVERLAPS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.DAILY_LOG_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
@@ -226,6 +228,29 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
         then(currentTimeProvider).should().now();
         then(dailyLogCreator).should().create(command);
+    }
+
+    @Test
+    void 일일_로그를_삭제한다() {
+        DailyLogDeleteCommand command = new DailyLogDeleteCommand(DAILY_LOG_ID, USER_ID);
+
+        delete(DAILY_LOGS_URL, USER_ID, DAILY_LOG_ID).hasStatus(NO_CONTENT);
+
+        then(dailyLogCreator).should().delete(command);
+    }
+
+    @Test
+    void 삭제할_일일_로그가_없으면_404를_응답한다() {
+        DailyLogDeleteCommand command = new DailyLogDeleteCommand(UNKNOWN_DAILY_LOG_ID, USER_ID);
+        willThrow(new ResourceNotFoundException(DAILY_LOG_NOT_FOUND))
+                .given(dailyLogCreator)
+                .delete(command);
+
+        MvcTestResultAssert result = delete(DAILY_LOGS_URL, USER_ID, UNKNOWN_DAILY_LOG_ID).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, DAILY_LOG_NOT_FOUND);
+
+        then(dailyLogCreator).should().delete(command);
     }
 
     @Test

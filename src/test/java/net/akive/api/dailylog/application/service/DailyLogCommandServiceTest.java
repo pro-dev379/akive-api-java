@@ -3,6 +3,7 @@ package net.akive.api.dailylog.application.service;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
+import net.akive.api.dailylog.application.provided.dto.DailyLogDeleteCommand;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.user.application.provided.UserFinder;
@@ -17,9 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.ResourceConflictError.DAILY_LOG_TIME_OVERLAPS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.DAILY_LOG_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.dailylog.application.fixture.DailyLogCommandFixture.createDailyLogCreateCommand;
-import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.DAILY_LOG_ID;
+import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -107,5 +109,36 @@ class DailyLogCommandServiceTest {
         then(dailyLogRepository).should()
                 .existsOverlappingTimeByUserIdAndFocusTime(command.userId(), command.focusTime());
         then(dailyLogRepository).should(never()).save(any());
+    }
+
+    @Test
+    void 일일_로그를_삭제한다() {
+        User user = createReconstructedUser(USER_ID);
+        DailyLog dailyLog = createReconstructedDailyLog(user);
+        DailyLogDeleteCommand command = new DailyLogDeleteCommand(DAILY_LOG_ID, USER_ID);
+
+        given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
+                .willReturn(Optional.of(dailyLog));
+
+        dailyLogCommandService.delete(command);
+
+        then(dailyLogRepository).should().findByDailyLogIdAndUserId(command.dailyLogId(), command.userId());
+        then(dailyLogRepository).should().delete(dailyLog);
+    }
+
+    @Test
+    void 일일_로그가_없으면_삭제에_실패하고_예외를_던진다() {
+        DailyLogDeleteCommand command = new DailyLogDeleteCommand(DAILY_LOG_ID, USER_ID);
+
+        given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
+                .willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> dailyLogCommandService.delete(command))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(DAILY_LOG_NOT_FOUND);
+
+        then(dailyLogRepository).should().findByDailyLogIdAndUserId(command.dailyLogId(), command.userId());
+        then(dailyLogRepository).should(never()).delete(any());
     }
 }

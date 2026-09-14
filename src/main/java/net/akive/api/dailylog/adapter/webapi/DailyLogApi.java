@@ -12,6 +12,7 @@ import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogsFindResponse;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
+import net.akive.api.dailylog.application.provided.dto.DailyLogDeleteCommand;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping("/daily-logs")
@@ -44,6 +46,12 @@ public class DailyLogApi {
         DailyLogCreateCommand command = request.to(userId, logOn, currentTimeProvider.now());
 
         return new DailyLogCreateResponse(dailyLogCreator.create(command));
+    }
+
+    @DeleteMapping("/{dailyLogId}")
+    @ResponseStatus(NO_CONTENT)
+    public void delete(@AuthenticatedUserId Long userId, @PathVariable Long dailyLogId) {
+        dailyLogCreator.delete(new DailyLogDeleteCommand(dailyLogId, userId));
     }
 
     @GetMapping("/log-ons")
