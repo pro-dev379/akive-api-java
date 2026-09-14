@@ -18,13 +18,10 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 @RequiredArgsConstructor
 class DailyLogJpaAdapter implements DailyLogRepository {
-
-    private static final Set<String> DAILY_LOG_SORT_PROPERTIES = Set.of("logOn");
 
     private final DailyLogJpaRepository dailyLogJpaRepository;
     private final CurrentTimeProvider currentTimeProvider;
@@ -111,10 +108,12 @@ class DailyLogJpaAdapter implements DailyLogRepository {
     }
 
     private String toDailyLogProperty(String property) {
-        if (!DAILY_LOG_SORT_PROPERTIES.contains(property)) {
-            throw new IllegalArgumentException("Unsupported daily log sort property: " + property);
-        }
-
-        return "focusTime." + property;
+        return switch (property) {
+            case "dailyLogId" -> "dailyLogId";
+            case "logOn" -> "focusTime.logOn";
+            case "startOn" -> "focusTime.startOn";
+            case "endOn" -> "focusTime.endOn";
+            default -> throw new IllegalArgumentException("Unsupported daily log sort property: " + property);
+        };
     }
 }
