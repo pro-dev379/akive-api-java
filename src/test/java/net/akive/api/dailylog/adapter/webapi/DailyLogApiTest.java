@@ -49,7 +49,8 @@ import static org.springframework.http.HttpStatus.*;
 @WebMvcTest(DailyLogApi.class)
 class DailyLogApiTest extends PrivateApiTestSupport {
 
-    private static final String DAILY_LOGS_URL = "/daily-logs/{logOn}";
+    private static final String DAILY_LOGS_URL = "/daily-logs";
+    private static final String DAILY_LOG_URL = "/daily-logs/{dailyLogId}";
     private static final String DAILY_LOG_ONS_URL = "/daily-logs/log-ons";
 
     @MockitoBean
@@ -64,7 +65,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그를_생성한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest();
-        DailyLogCreateCommand command = request.to(USER_ID, LOG_ON, NOW);
+        DailyLogCreateCommand command = request.to(USER_ID, NOW);
 
         given(currentTimeProvider.now()).willReturn(NOW);
         given(dailyLogCreator.create(command)).willReturn(DAILY_LOG_ID);
@@ -72,8 +73,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         MvcTestResultAssert result = postJson(
                 DAILY_LOGS_URL,
                 USER_ID,
-                toJson(request),
-                LOG_ON
+                toJson(request)
         ).hasStatus(CREATED);
 
         result.bodyJson()
@@ -87,7 +87,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("invalidCreateRequests")
     void 일일_로그_생성_요청값이_올바르지_않으면_400을_응답한다(DailyLogCreateRequest request) {
-        postJson(DAILY_LOGS_URL, USER_ID, toJson(request), LOG_ON).hasStatus(BAD_REQUEST);
+        postJson(DAILY_LOGS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         then(currentTimeProvider).shouldHaveNoInteractions();
         then(dailyLogCreator).shouldHaveNoInteractions();
@@ -96,15 +96,14 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_미래_로그_날짜로_요청하면_400을_응답한다() {
         LocalDate logOn = NOW.toLocalDate().plusDays(1);
-        DailyLogCreateRequest request = createDailyLogCreateRequest(createFocusTimeRequest());
+        DailyLogCreateRequest request = createDailyLogCreateRequest(createFocusTimeRequest(logOn));
 
         given(currentTimeProvider.now()).willReturn(NOW);
 
         MvcTestResultAssert result = postJson(
                 DAILY_LOGS_URL,
                 USER_ID,
-                toJson(request),
-                logOn
+                toJson(request)
         ).hasStatus(BAD_REQUEST);
 
         assertErrorResponse(result, DAILY_LOG_DATE_IN_FUTURE);
@@ -127,8 +126,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         MvcTestResultAssert result = postJson(
                 DAILY_LOGS_URL,
                 USER_ID,
-                toJson(request),
-                LOG_ON
+                toJson(request)
         ).hasStatus(BAD_REQUEST);
 
         assertErrorResponse(result, DAILY_LOG_TIME_RANGE_IN_FUTURE);
@@ -152,8 +150,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         MvcTestResultAssert result = postJson(
                 DAILY_LOGS_URL,
                 USER_ID,
-                toJson(request),
-                LOG_ON
+                toJson(request)
         ).hasStatus(BAD_REQUEST);
 
         assertErrorResponse(result, DAILY_LOG_TIME_RANGE_TOO_LONG);
@@ -174,8 +171,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         MvcTestResultAssert result = postJson(
                 DAILY_LOGS_URL,
                 USER_ID,
-                toJson(request),
-                LOG_ON
+                toJson(request)
         ).hasStatus(BAD_REQUEST);
 
         assertErrorResponse(result, DAILY_LOG_FOCUS_TIME_EXCEEDS_DURATION);
@@ -187,7 +183,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_회원이_없으면_404를_응답한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest();
-        DailyLogCreateCommand command = request.to(USER_ID, LOG_ON, NOW);
+        DailyLogCreateCommand command = request.to(USER_ID, NOW);
 
         given(currentTimeProvider.now()).willReturn(NOW);
         willThrow(new ResourceNotFoundException(USER_NOT_FOUND))
@@ -197,8 +193,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         MvcTestResultAssert result = postJson(
                 DAILY_LOGS_URL,
                 USER_ID,
-                toJson(request),
-                LOG_ON
+                toJson(request)
         ).hasStatus(NOT_FOUND);
 
         assertErrorResponse(result, USER_NOT_FOUND);
@@ -210,7 +205,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_기존_일일_로그의_시간_범위와_오버랩되면_409를_응답한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest();
-        DailyLogCreateCommand command = request.to(USER_ID, LOG_ON, NOW);
+        DailyLogCreateCommand command = request.to(USER_ID, NOW);
 
         given(currentTimeProvider.now()).willReturn(NOW);
         willThrow(new ResourceConflictException(DAILY_LOG_TIME_OVERLAPS))
@@ -220,8 +215,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         MvcTestResultAssert result = postJson(
                 DAILY_LOGS_URL,
                 USER_ID,
-                toJson(request),
-                LOG_ON
+                toJson(request)
         ).hasStatus(CONFLICT);
 
         assertErrorResponse(result, DAILY_LOG_TIME_OVERLAPS);
@@ -234,7 +228,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     void 일일_로그를_삭제한다() {
         DailyLogDeleteCommand command = new DailyLogDeleteCommand(DAILY_LOG_ID, USER_ID);
 
-        delete(DAILY_LOGS_URL, USER_ID, DAILY_LOG_ID).hasStatus(NO_CONTENT);
+        delete(DAILY_LOG_URL, USER_ID, DAILY_LOG_ID).hasStatus(NO_CONTENT);
 
         then(dailyLogCreator).should().delete(command);
     }
@@ -246,7 +240,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 .given(dailyLogCreator)
                 .delete(command);
 
-        MvcTestResultAssert result = delete(DAILY_LOGS_URL, USER_ID, UNKNOWN_DAILY_LOG_ID).hasStatus(NOT_FOUND);
+        MvcTestResultAssert result = delete(DAILY_LOG_URL, USER_ID, UNKNOWN_DAILY_LOG_ID).hasStatus(NOT_FOUND);
 
         assertErrorResponse(result, DAILY_LOG_NOT_FOUND);
 
@@ -260,7 +254,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
         given(dailyLogFinder.findAll(USER_ID, LOG_ON)).willReturn(List.of(dailyLog));
 
-        MvcTestResultAssert result = get(DAILY_LOGS_URL, USER_ID, LOG_ON).hasStatusOk();
+        MvcTestResultAssert result = get(DAILY_LOGS_URL + "?logOn={logOn}", USER_ID, LOG_ON).hasStatusOk();
 
         assertDailyLogResponse(result, dailyLog);
 
@@ -269,7 +263,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
     @Test
     void 특정_날짜의_일일_로그_목록_조회_시_요청_날짜가_올바르지_않으면_400을_응답한다() {
-        MvcTestResultAssert result = get(DAILY_LOGS_URL, USER_ID, "invalid-date")
+        MvcTestResultAssert result = get(DAILY_LOGS_URL + "?logOn={logOn}", USER_ID, "invalid-date")
                 .hasStatus(BAD_REQUEST);
 
         assertErrorResponse(result, INVALID_INPUT_VALUE);

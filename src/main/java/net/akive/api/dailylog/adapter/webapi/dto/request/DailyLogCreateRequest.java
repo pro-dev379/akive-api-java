@@ -17,23 +17,24 @@ public record DailyLogCreateRequest(
         @NotBlank String contents
 ) {
 
-    public DailyLogCreateCommand to(Long userId, LocalDate logOn, LocalDateTime now) {
+    public DailyLogCreateCommand to(Long userId, LocalDateTime now) {
         return new DailyLogCreateCommand(
                 userId,
-                this.focusTime.to(logOn, now),
+                this.focusTime.to(now),
                 this.dailyLogType,
                 this.contents
         );
     }
 
     public record FocusTimeRequest(
+            @NotNull LocalDate logOn,
             @NotNull LocalDateTime startOn,
             @NotNull LocalDateTime endOn,
             @Min(0) Long focusTimeSec,
             boolean focusRateExcluded
     ) {
 
-        public FocusTime to(LocalDate logOn, LocalDateTime now) {
+        public FocusTime to(LocalDateTime now) {
             return FocusTime.of(logOn, this.startOn, this.endOn, this.focusTimeSec, this.focusRateExcluded, now);
         }
     }

@@ -31,19 +31,18 @@ public class DailyLogApi {
     private final DailyLogCreator dailyLogCreator;
     private final CurrentTimeProvider currentTimeProvider;
 
-    @GetMapping("/{logOn}")
-    public DailyLogsFindResponse findAll(@AuthenticatedUserId Long userId, @PathVariable LocalDate logOn) {
+    @GetMapping
+    public DailyLogsFindResponse findAll(@AuthenticatedUserId Long userId, @RequestParam LocalDate logOn) {
         return DailyLogsFindResponse.from(dailyLogFinder.findAll(userId, logOn));
     }
 
-    @PostMapping("/{logOn}")
+    @PostMapping
     @ResponseStatus(CREATED)
     public DailyLogCreateResponse create(
             @AuthenticatedUserId Long userId,
-            @PathVariable LocalDate logOn,
             @Validated @RequestBody DailyLogCreateRequest request
     ) {
-        DailyLogCreateCommand command = request.to(userId, logOn, currentTimeProvider.now());
+        DailyLogCreateCommand command = request.to(userId, currentTimeProvider.now());
 
         return new DailyLogCreateResponse(dailyLogCreator.create(command));
     }
