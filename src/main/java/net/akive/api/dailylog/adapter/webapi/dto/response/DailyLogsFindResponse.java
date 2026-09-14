@@ -4,6 +4,7 @@ import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.DailyLogType;
 import net.akive.api.dailylog.domain.FocusTime;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public record DailyLogsFindResponse(List<DailyLogResponse> dailyLogs) {
 
     public record DailyLogResponse(
             Long dailyLogId,
+            LocalDate logOn,
             FocusTimeResponse focusTime,
             DailyLogType dailyLogType,
             String contents
@@ -22,6 +24,7 @@ public record DailyLogsFindResponse(List<DailyLogResponse> dailyLogs) {
         public static DailyLogResponse from(DailyLog dailyLog) {
             return new DailyLogResponse(
                     dailyLog.getDailyLogId(),
+                    dailyLog.getLogOn(),
                     FocusTimeResponse.from(dailyLog.getFocusTime()),
                     dailyLog.getDailyLogType(),
                     dailyLog.getContents()

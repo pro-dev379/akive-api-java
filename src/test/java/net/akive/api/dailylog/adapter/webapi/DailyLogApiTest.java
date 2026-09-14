@@ -96,7 +96,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_미래_로그_날짜로_요청하면_400을_응답한다() {
         LocalDate logOn = NOW.toLocalDate().plusDays(1);
-        DailyLogCreateRequest request = createDailyLogCreateRequest(createFocusTimeRequest(logOn));
+        DailyLogCreateRequest request = createDailyLogCreateRequest(logOn);
 
         given(currentTimeProvider.now()).willReturn(NOW);
 
@@ -376,6 +376,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         result.bodyJson()
                 .extractingPath("$.dailyLogs[0].dailyLogId")
                 .isEqualTo(dailyLog.getDailyLogId().intValue());
+        result.bodyJson()
+                .extractingPath("$.dailyLogs[0].logOn")
+                .isEqualTo(dailyLog.getLogOn().toString());
         result.bodyJson()
                 .extractingPath("$.dailyLogs[0].focusTime.startOn")
                 .isEqualTo(dailyLog.getStartOn().format(ISO_LOCAL_DATE_TIME));

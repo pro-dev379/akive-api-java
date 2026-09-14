@@ -5,7 +5,6 @@ import lombok.Getter;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static net.akive.api.common.domain.DomainValidator.*;
@@ -17,8 +16,6 @@ public final class FocusTime {
 
     private static final int MAX_TIME_RANGE_HOURS = 24;
 
-    private final LocalDate logOn;
-
     private final LocalDateTime startOn;
 
     private final LocalDateTime endOn;
@@ -28,7 +25,6 @@ public final class FocusTime {
     private final boolean focusRateExcluded;
 
     private FocusTime(
-            LocalDate logOn,
             LocalDateTime startOn,
             LocalDateTime endOn,
             Long focusTimeSec,
@@ -37,10 +33,9 @@ public final class FocusTime {
     ) {
         requireStartNotAfterEnd(startOn, endOn);
         validateMaxPeriod(startOn, endOn);
-        validateNotFuture(logOn, endOn, now);
+        validateNotFuture(endOn, now);
         validateFocusTimeSec(startOn, endOn, focusTimeSec);
 
-        this.logOn = requireNonNull(logOn);
         this.startOn = startOn;
         this.endOn = endOn;
         this.focusTimeSec = requireNonNegativeIfPresent(focusTimeSec);
@@ -48,14 +43,13 @@ public final class FocusTime {
     }
 
     public static FocusTime of(
-            LocalDate logOn,
             LocalDateTime startOn,
             LocalDateTime endOn,
             Long focusTimeSec,
             boolean focusRateExcluded,
             LocalDateTime now
     ) {
-        return new FocusTime(logOn, startOn, endOn, focusTimeSec, focusRateExcluded, now);
+        return new FocusTime(startOn, endOn, focusTimeSec, focusRateExcluded, now);
     }
 
     public long durationSec() {
@@ -71,13 +65,8 @@ public final class FocusTime {
         }
     }
 
-    private static void validateNotFuture(LocalDate logOn, LocalDateTime endOn, LocalDateTime now) {
-        requireNonNull(logOn);
+    private static void validateNotFuture(LocalDateTime endOn, LocalDateTime now) {
         requireNonNull(now);
-
-        if (logOn.isAfter(now.toLocalDate())) {
-            throw new BusinessRuleViolationException(DAILY_LOG_DATE_IN_FUTURE);
-        }
 
         if (endOn.isAfter(now)) {
             throw new BusinessRuleViolationException(DAILY_LOG_TIME_RANGE_IN_FUTURE);

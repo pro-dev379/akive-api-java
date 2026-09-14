@@ -16,12 +16,12 @@ public interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Lon
 
     @Query(
             value = """
-                    select distinct d.focusTime.logOn
+                    select distinct d.logOn
                     from DailyLogEntity d
                     where d.user.userId = :userId
                     """,
             countQuery = """
-                    select count(distinct d.focusTime.logOn)
+                    select count(distinct d.logOn)
                     from DailyLogEntity d
                     where d.user.userId = :userId
                     """
@@ -34,7 +34,7 @@ public interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Lon
         select d
         from DailyLogEntity d
         where d.user.userId = :userId
-          and d.focusTime.logOn = :logOn
+          and d.logOn = :logOn
         order by d.focusTime.startOn
     """)
     List<DailyLogEntity> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn);

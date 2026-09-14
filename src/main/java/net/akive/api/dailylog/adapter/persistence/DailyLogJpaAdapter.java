@@ -110,7 +110,7 @@ class DailyLogJpaAdapter implements DailyLogRepository {
     private String toDailyLogProperty(String property) {
         return switch (property) {
             case "dailyLogId" -> "dailyLogId";
-            case "logOn" -> "focusTime.logOn";
+            case "logOn" -> "logOn";
             case "startOn" -> "focusTime.startOn";
             case "endOn" -> "focusTime.endOn";
             default -> throw new IllegalArgumentException("Unsupported daily log sort property: " + property);

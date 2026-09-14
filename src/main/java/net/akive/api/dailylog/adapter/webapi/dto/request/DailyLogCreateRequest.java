@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record DailyLogCreateRequest(
+        @NotNull LocalDate logOn,
         @NotNull @Valid FocusTimeRequest focusTime,
         @NotNull DailyLogType dailyLogType,
         @NotBlank String contents
@@ -20,14 +21,15 @@ public record DailyLogCreateRequest(
     public DailyLogCreateCommand to(Long userId, LocalDateTime now) {
         return new DailyLogCreateCommand(
                 userId,
+                this.logOn,
                 this.focusTime.to(now),
                 this.dailyLogType,
-                this.contents
+                this.contents,
+                now
         );
     }
 
     public record FocusTimeRequest(
-            @NotNull LocalDate logOn,
             @NotNull LocalDateTime startOn,
             @NotNull LocalDateTime endOn,
             @Min(0) Long focusTimeSec,
@@ -35,7 +37,7 @@ public record DailyLogCreateRequest(
     ) {
 
         public FocusTime to(LocalDateTime now) {
-            return FocusTime.of(logOn, this.startOn, this.endOn, this.focusTimeSec, this.focusRateExcluded, now);
+            return FocusTime.of(this.startOn, this.endOn, this.focusTimeSec, this.focusRateExcluded, now);
         }
     }
 }

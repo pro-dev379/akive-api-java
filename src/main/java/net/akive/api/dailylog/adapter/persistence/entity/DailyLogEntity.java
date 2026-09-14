@@ -9,6 +9,7 @@ import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.DailyLogType;
 import net.akive.api.user.adapter.persistence.entity.UserEntity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static jakarta.persistence.EnumType.STRING;
@@ -44,6 +45,9 @@ public class DailyLogEntity extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
+    @Column(nullable = false)
+    private LocalDate logOn;
+
     @Embedded
     private FocusTimeEntity focusTime;
 
@@ -58,6 +62,7 @@ public class DailyLogEntity extends BaseTimeEntity {
         return new DailyLogEntity(
                 dailyLog.getDailyLogId(),
                 UserEntity.from(dailyLog.getUser()),
+                dailyLog.getLogOn(),
                 FocusTimeEntity.from(dailyLog.getFocusTime()),
                 dailyLog.getDailyLogType(),
                 dailyLog.getContents()
@@ -68,9 +73,11 @@ public class DailyLogEntity extends BaseTimeEntity {
         return DailyLog.reconstruct(
                 this.dailyLogId,
                 this.user.to(),
+                this.logOn,
                 this.focusTime.to(now),
                 this.dailyLogType,
-                this.contents
+                this.contents,
+                now
         );
     }
 }

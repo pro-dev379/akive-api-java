@@ -21,13 +21,12 @@ public class DailyLogFixture {
     public static final LocalDateTime END_ON = LocalDateTime.of(2026, 9, 12, 10, 0);
     public static final LocalDateTime NOW = LocalDateTime.of(2026, 9, 14, 23, 59);
     public static final Long FOCUS_TIME_SEC = 3_000L;
-    public static final FocusTime FOCUS_TIME = FocusTime.of(LOG_ON, START_ON, END_ON, FOCUS_TIME_SEC, false, NOW);
+    public static final FocusTime FOCUS_TIME = FocusTime.of(START_ON, END_ON, FOCUS_TIME_SEC, false, NOW);
     public static final String CONTENTS = "오늘의 학습 기록";
     public static final LocalDate TARGET_LOG_ON = LocalDate.of(2026, 9, 14);
     public static final LocalDateTime TARGET_START_ON = LocalDateTime.of(2026, 9, 13, 11, 0);
     public static final LocalDateTime TARGET_END_ON = LocalDateTime.of(2026, 9, 13, 12, 0);
     public static final FocusTime TARGET_FOCUS_TIME = FocusTime.of(
-            TARGET_LOG_ON,
             TARGET_START_ON,
             TARGET_END_ON,
             null,
@@ -40,22 +39,30 @@ public class DailyLogFixture {
         return DailyLog.reconstruct(
                 DAILY_LOG_ID,
                 user,
+                LOG_ON,
                 FOCUS_TIME,
                 STUDY,
-                CONTENTS
+                CONTENTS,
+                NOW
         );
     }
 
     public static DailyLog createDailyLog(User user, LocalDate logOn, int startHour) {
-        return createDailyLog(user, createFocusTime(logOn, startHour));
+        return createDailyLog(user, logOn, createFocusTime(logOn, startHour));
     }
 
     public static DailyLog createDailyLog(User user, FocusTime focusTime) {
+        return createDailyLog(user, LOG_ON, focusTime);
+    }
+
+    public static DailyLog createDailyLog(User user, LocalDate logOn, FocusTime focusTime) {
         return DailyLog.create(
                 user,
+                logOn,
                 focusTime,
                 STUDY,
-                CONTENTS
+                CONTENTS,
+                NOW
         );
     }
 

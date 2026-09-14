@@ -49,9 +49,11 @@ class DailyLogCommandServiceTest {
         DailyLog savedDailyLog = DailyLog.reconstruct(
                 DAILY_LOG_ID,
                 user,
+                command.logOn(),
                 command.focusTime(),
                 command.dailyLogType(),
-                command.contents()
+                command.contents(),
+                command.requestedAt()
         );
 
         given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
@@ -71,6 +73,7 @@ class DailyLogCommandServiceTest {
 
         DailyLog dailyLog = dailyLogCaptor.getValue();
         assertThat(dailyLog.getUser()).isEqualTo(user);
+        assertThat(dailyLog.getLogOn()).isEqualTo(command.logOn());
         assertThat(dailyLog.getFocusTime()).isEqualTo(command.focusTime());
         assertThat(dailyLog.getDailyLogType()).isEqualTo(command.dailyLogType());
         assertThat(dailyLog.getContents()).isEqualTo(command.contents());

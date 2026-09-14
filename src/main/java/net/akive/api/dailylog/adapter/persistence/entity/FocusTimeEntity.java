@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.dailylog.domain.FocusTime;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -18,9 +17,6 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 public class FocusTimeEntity {
-
-    @Column(nullable = false)
-    private LocalDate logOn;
 
     @Column(nullable = false)
     private LocalDateTime startOn;
@@ -39,7 +35,6 @@ public class FocusTimeEntity {
 
     public static FocusTimeEntity from(FocusTime focusTime) {
         return new FocusTimeEntity(
-                focusTime.getLogOn(),
                 focusTime.getStartOn(),
                 focusTime.getEndOn(),
                 focusTime.getFocusTimeSec(),
@@ -49,7 +44,6 @@ public class FocusTimeEntity {
 
     public FocusTime to(LocalDateTime now) {
         return FocusTime.of(
-                this.logOn,
                 this.startOn,
                 this.endOn,
                 this.focusTimeSec,

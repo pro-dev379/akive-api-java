@@ -36,9 +36,11 @@ class DailyLogCommandService implements DailyLogCreator {
 
         DailyLog dailyLog = DailyLog.create(
                 user,
+                command.logOn(),
                 command.focusTime(),
                 command.dailyLogType(),
-                command.contents()
+                command.contents(),
+                command.requestedAt()
         );
 
         DailyLog savedDailyLog = dailyLogRepository.save(dailyLog);

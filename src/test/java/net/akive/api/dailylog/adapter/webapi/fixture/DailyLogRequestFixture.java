@@ -30,8 +30,8 @@ public class DailyLogRequestFixture {
             Long focusTimeSec
     ) {
         return new DailyLogCreateRequest(
+                LOG_ON,
                 new DailyLogCreateRequest.FocusTimeRequest(
-                        focusTimeRequest.logOn(),
                         focusTimeRequest.startOn(),
                         focusTimeRequest.endOn(),
                         focusTimeSec,
@@ -43,54 +43,60 @@ public class DailyLogRequestFixture {
     }
 
     public static DailyLogCreateRequest.FocusTimeRequest createFocusTimeRequest() {
-        return createFocusTimeRequest(LOG_ON, START_ON, END_ON);
+        return createFocusTimeRequest(START_ON, END_ON);
     }
 
-    public static DailyLogCreateRequest.FocusTimeRequest createFocusTimeRequest(LocalDate logOn) {
-        return createFocusTimeRequest(logOn, START_ON, END_ON);
+    public static DailyLogCreateRequest createDailyLogCreateRequest(LocalDate logOn) {
+        return new DailyLogCreateRequest(logOn, createFocusTimeRequest(), STUDY, CONTENTS);
     }
 
     public static DailyLogCreateRequest.FocusTimeRequest createFocusTimeRequest(
             LocalDateTime startOn,
             LocalDateTime endOn
     ) {
-        return createFocusTimeRequest(LOG_ON, startOn, endOn);
-    }
-
-    public static DailyLogCreateRequest.FocusTimeRequest createFocusTimeRequest(
-            LocalDate logOn,
-            LocalDateTime startOn,
-            LocalDateTime endOn
-    ) {
-        return new DailyLogCreateRequest.FocusTimeRequest(logOn, startOn, endOn, FOCUS_TIME_SEC, false);
+        return new DailyLogCreateRequest.FocusTimeRequest(startOn, endOn, FOCUS_TIME_SEC, false);
     }
 
     public static Stream<DailyLogCreateRequest> invalidCreateRequests() {
         return Stream.of(
-                new DailyLogCreateRequest(null, STUDY, CONTENTS),
                 new DailyLogCreateRequest(
-                        new DailyLogCreateRequest.FocusTimeRequest(null, START_ON, END_ON, FOCUS_TIME_SEC, false),
+                        null,
+                        createFocusTimeRequest(),
                         STUDY,
                         CONTENTS
                 ),
                 new DailyLogCreateRequest(
-                        new DailyLogCreateRequest.FocusTimeRequest(LOG_ON, null, END_ON, FOCUS_TIME_SEC, false),
+                        LOG_ON,
+                        null,
                         STUDY,
                         CONTENTS
                 ),
                 new DailyLogCreateRequest(
-                        new DailyLogCreateRequest.FocusTimeRequest(LOG_ON, START_ON, null, FOCUS_TIME_SEC, false),
+                        LOG_ON,
+                        new DailyLogCreateRequest.FocusTimeRequest(null, END_ON, FOCUS_TIME_SEC, false),
                         STUDY,
                         CONTENTS
                 ),
-                new DailyLogCreateRequest(createFocusTimeRequest(), null, CONTENTS),
                 new DailyLogCreateRequest(
-                        new DailyLogCreateRequest.FocusTimeRequest(LOG_ON, START_ON, END_ON, -1L, false),
+                        LOG_ON,
+                        new DailyLogCreateRequest.FocusTimeRequest(START_ON, null, FOCUS_TIME_SEC, false),
                         STUDY,
                         CONTENTS
                 ),
-                new DailyLogCreateRequest(createFocusTimeRequest(), STUDY, " "),
-                new DailyLogCreateRequest(createFocusTimeRequest(), STUDY, null)
+                new DailyLogCreateRequest(
+                        LOG_ON,
+                        createFocusTimeRequest(),
+                        null,
+                        CONTENTS
+                ),
+                new DailyLogCreateRequest(
+                        LOG_ON,
+                        new DailyLogCreateRequest.FocusTimeRequest(START_ON, END_ON, -1L, false),
+                        STUDY,
+                        CONTENTS
+                ),
+                new DailyLogCreateRequest(LOG_ON, createFocusTimeRequest(), STUDY, " "),
+                new DailyLogCreateRequest(LOG_ON, createFocusTimeRequest(), STUDY, null)
         );
     }
 }

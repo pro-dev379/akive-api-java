@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.user.domain.User;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_LOG_DATE_IN_FUTURE;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -23,6 +25,8 @@ public class DailyLog {
 
     private User user;
 
+    private LocalDate logOn;
+
     private FocusTime focusTime;
 
     private DailyLogType dailyLogType;
@@ -32,13 +36,18 @@ public class DailyLog {
     public static DailyLog reconstruct(
             Long dailyLogId,
             User user,
+            LocalDate logOn,
             FocusTime focusTime,
             DailyLogType dailyLogType,
-            String contents
+            String contents,
+            LocalDateTime now
     ) {
+        validateLogOnNotFuture(logOn, now);
+
         return DailyLog.builder()
                 .dailyLogId(requirePositive(dailyLogId))
                 .user(requireNonNull(user))
+                .logOn(requireNonNull(logOn))
                 .focusTime(requireNonNull(focusTime))
                 .dailyLogType(requireNonNull(dailyLogType))
                 .contents(requireNotBlank(contents))
@@ -47,12 +56,17 @@ public class DailyLog {
 
     public static DailyLog create(
             User user,
+            LocalDate logOn,
             FocusTime focusTime,
             DailyLogType dailyLogType,
-            String contents
+            String contents,
+            LocalDateTime now
     ) {
+        validateLogOnNotFuture(logOn, now);
+
         return DailyLog.builder()
                 .user(requireNonNull(user))
+                .logOn(requireNonNull(logOn))
                 .focusTime(requireNonNull(focusTime))
                 .dailyLogType(requireNonNull(dailyLogType))
                 .contents(requireNotBlank(contents))
@@ -60,17 +74,18 @@ public class DailyLog {
     }
 
     public void update(
+            LocalDate targetLogOn,
             FocusTime targetFocusTime,
             DailyLogType targetDailyLogType,
-            String targetContents
+            String targetContents,
+            LocalDateTime now
     ) {
+        validateLogOnNotFuture(targetLogOn, now);
+
+        this.logOn = requireNonNull(targetLogOn);
         this.focusTime = requireNonNull(targetFocusTime);
         this.dailyLogType = requireNonNull(targetDailyLogType);
         this.contents = requireNotBlank(targetContents);
-    }
-
-    public LocalDate getLogOn() {
-        return focusTime.getLogOn();
     }
 
     public LocalDateTime getStartOn() {
@@ -102,5 +117,14 @@ public class DailyLog {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    private static void validateLogOnNotFuture(LocalDate logOn, LocalDateTime now) {
+        requireNonNull(logOn);
+        requireNonNull(now);
+
+        if (logOn.isAfter(now.toLocalDate())) {
+            throw new BusinessRuleViolationException(DAILY_LOG_DATE_IN_FUTURE);
+        }
     }
 }
