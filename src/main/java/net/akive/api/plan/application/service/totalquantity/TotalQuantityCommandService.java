@@ -53,11 +53,13 @@ public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQ
 
     @Override
     public void delete(TotalQuantityDeleteCommand command) throws ResourceNotFoundException {
-        totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+        TotalQuantity totalQuantity = findTotalQuantityOrThrow(
                 command.sessionalPlanId(),
                 command.userId(),
                 command.totalQuantityId()
         );
+
+        totalQuantityRepository.delete(totalQuantity);
     }
 
     @Override

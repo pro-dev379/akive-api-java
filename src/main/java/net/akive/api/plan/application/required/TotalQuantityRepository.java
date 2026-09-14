@@ -27,11 +27,7 @@ public interface TotalQuantityRepository {
             Long totalQuantityId
     );
 
-    void deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
-            Long sessionalPlanId,
-            Long userId,
-            Long totalQuantityId
-    );
+    void delete(TotalQuantity totalQuantity);
 
     long countBySessionalPlanId(Long sessionalPlanId);
 }

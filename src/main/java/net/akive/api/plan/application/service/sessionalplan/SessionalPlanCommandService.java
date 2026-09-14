@@ -47,7 +47,9 @@ class SessionalPlanCommandService implements SessionalPlanCreator {
 
     @Override
     public void delete(SessionalPlanDeleteCommand command) throws ResourceNotFoundException {
-        sessionalPlanRepository.deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+        SessionalPlan sessionalPlan = findSessionalPlanOrThrow(command.sessionalPlanId(), command.userId());
+
+        sessionalPlanRepository.delete(sessionalPlan);
     }
 
     @Override

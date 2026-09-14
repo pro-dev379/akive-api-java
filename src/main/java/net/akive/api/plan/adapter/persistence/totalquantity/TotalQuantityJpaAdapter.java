@@ -1,7 +1,6 @@
 package net.akive.api.plan.adapter.persistence.totalquantity;
 
 import lombok.RequiredArgsConstructor;
-import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.persistence.entity.TotalQuantityEntity;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.TotalQuantity;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Repository
@@ -78,20 +76,8 @@ class TotalQuantityJpaAdapter implements TotalQuantityRepository {
     }
 
     @Override
-    public void deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
-            Long sessionalPlanId,
-            Long userId,
-            Long totalQuantityId
-    ) {
-        TotalQuantityEntity totalQuantityEntity = totalQuantityJpaRepository
-                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                        sessionalPlanId,
-                        userId,
-                        totalQuantityId
-                )
-                .orElseThrow(() -> new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND));
-
-        totalQuantityJpaRepository.delete(totalQuantityEntity);
+    public void delete(TotalQuantity totalQuantity) {
+        totalQuantityJpaRepository.delete(TotalQuantityEntity.from(totalQuantity));
     }
 
     @Override

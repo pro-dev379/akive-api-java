@@ -1,6 +1,5 @@
 package net.akive.api.plan.adapter.persistence.sessionalplan;
 
-import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
 import net.akive.api.plan.domain.value.SessionPeriod;
@@ -10,10 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
 
@@ -108,27 +105,14 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         Long sessionalPlanId = savedTotalQuantity.getSessionalPlan().getSessionalPlanId();
         Long userId = savedTotalQuantity.getSessionalPlan().getUser().getUserId();
+        SessionalPlan sessionalPlan = savedTotalQuantity.getSessionalPlan();
         flushAndClear();
 
-        sessionalPlanRepository.deleteBySessionalPlanIdAndUserId(sessionalPlanId, userId);
+        sessionalPlanRepository.delete(sessionalPlan);
         flushAndClear();
 
         assertThat(sessionalPlanRepository.findBySessionalPlanIdAndUserId(sessionalPlanId, userId)).isEmpty();
         assertThat(totalQuantityRepository.countBySessionalPlanId(sessionalPlanId)).isZero();
-    }
-
-    @Test
-    void 세셔널_플랜이_없으면_삭제에_실패하고_예외를_던진다() {
-        SessionalPlan savedSessionalPlan = saveSessionalPlan();
-        flushAndClear();
-
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> sessionalPlanRepository.deleteBySessionalPlanIdAndUserId(
-                        UNKNOWN_SESSIONAL_PLAN_ID,
-                        savedSessionalPlan.getUser().getUserId()
-                ))
-                .extracting(ResourceNotFoundException::getError)
-                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
     }
 
     @Test

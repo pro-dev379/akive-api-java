@@ -152,27 +152,34 @@ class TotalQuantityCommandServiceTest {
 
     @Test
     void 세션_총량을_삭제한다() {
+        TotalQuantity totalQuantity = createReconstructedTotalQuantity(FIRST_TOTAL_QUANTITY_ID);
         TotalQuantityDeleteCommand command = createTotalQuantityDeleteCommand(FIRST_TOTAL_QUANTITY_ID);
+
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                FIRST_TOTAL_QUANTITY_ID
+        )).willReturn(Optional.of(totalQuantity));
+
         totalQuantityCommandService.delete(command);
 
-        then(totalQuantityRepository).should().deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+        then(totalQuantityRepository).should().findBySessionalPlanIdAndUserIdAndTotalQuantityId(
                 SESSIONAL_PLAN_ID,
                 USER_ID,
                 FIRST_TOTAL_QUANTITY_ID
         );
+        then(totalQuantityRepository).should().delete(totalQuantity);
     }
 
     @Test
-    void 세션_총량이_없으면_삭제에_실패하고_예외를_전파한다() {
+    void 세션_총량이_없으면_삭제에_실패하고_예외를_던진다() {
         TotalQuantityDeleteCommand command = createTotalQuantityDeleteCommand(UNKNOWN_TOTAL_QUANTITY_ID);
 
-        willThrow(new ResourceNotFoundException(TOTAL_QUANTITY_NOT_FOUND))
-                .given(totalQuantityRepository)
-                .deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                        SESSIONAL_PLAN_ID,
-                        USER_ID,
-                        UNKNOWN_TOTAL_QUANTITY_ID
-                );
+        given(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                SESSIONAL_PLAN_ID,
+                USER_ID,
+                UNKNOWN_TOTAL_QUANTITY_ID
+        )).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> totalQuantityCommandService.delete(command))
@@ -180,11 +187,12 @@ class TotalQuantityCommandServiceTest {
                 .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
 
         then(totalQuantityRepository).should()
-                .deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
+                .findBySessionalPlanIdAndUserIdAndTotalQuantityId(
                         SESSIONAL_PLAN_ID,
                         USER_ID,
                         UNKNOWN_TOTAL_QUANTITY_ID
                 );
+        then(totalQuantityRepository).should(never()).delete(any());
     }
 
     @Test

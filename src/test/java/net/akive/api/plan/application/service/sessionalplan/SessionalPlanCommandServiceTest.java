@@ -125,27 +125,33 @@ class SessionalPlanCommandServiceTest {
 
     @Test
     void 세셔널_플랜을_삭제한다() {
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID);
         SessionalPlanDeleteCommand command = createSessionalPlanDeleteCommand(SESSIONAL_PLAN_ID);
+
+        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId()))
+                .willReturn(Optional.of(sessionalPlan));
 
         sessionalPlanCommandService.delete(command);
 
         then(sessionalPlanRepository).should()
-                .deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+                .findBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+        then(sessionalPlanRepository).should().delete(sessionalPlan);
     }
 
     @Test
-    void 세셔널_플랜이_없으면_삭제에_실패하고_예외를_전파한다() {
+    void 세셔널_플랜이_없으면_삭제에_실패하고_예외를_던진다() {
         SessionalPlanDeleteCommand command = createSessionalPlanDeleteCommand(UNKNOWN_SESSIONAL_PLAN_ID);
-        ResourceNotFoundException exception = new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND);
-        willThrow(exception)
-                .given(sessionalPlanRepository)
-                .deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+
+        given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId()))
+                .willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> sessionalPlanCommandService.delete(command))
-                .isSameAs(exception);
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(sessionalPlanRepository).should()
-                .deleteBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+                .findBySessionalPlanIdAndUserId(command.sessionalPlanId(), command.userId());
+        then(sessionalPlanRepository).should(never()).delete(any());
     }
 }

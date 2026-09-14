@@ -27,7 +27,7 @@ public interface SessionalPlanRepository {
             Long sessionalPlanId
     );
 
-    void deleteBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId);
+    void delete(SessionalPlan sessionalPlan);
 
     long countInProgressByUserId(Long userId, LocalDate now);
 }

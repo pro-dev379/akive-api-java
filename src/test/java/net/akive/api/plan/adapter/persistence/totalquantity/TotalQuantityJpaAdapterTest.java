@@ -1,6 +1,5 @@
 package net.akive.api.plan.adapter.persistence.totalquantity;
 
-import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
 import net.akive.api.support.RepositoryTestSupport;
@@ -8,11 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTAL_QUANTITY_NOT_FOUND;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.*;
-import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
 
@@ -126,11 +122,7 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         assertThat(countWeeklyQuantitiesByTotalQuantityId(savedTotalQuantity.getTotalQuantityId())).isPositive();
         assertThat(countDailyQuantitiesByTotalQuantityId(savedTotalQuantity.getTotalQuantityId())).isPositive();
 
-        totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
-                savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
-                savedTotalQuantity.getTotalQuantityId()
-        );
+        totalQuantityRepository.delete(savedTotalQuantity);
         flushAndClear();
 
         assertThat(totalQuantityRepository.findBySessionalPlanIdAndUserIdAndTotalQuantityId(
@@ -143,30 +135,6 @@ class TotalQuantityJpaAdapterTest extends RepositoryTestSupport {
         ).isZero();
         assertThat(countWeeklyQuantitiesByTotalQuantityId(savedTotalQuantity.getTotalQuantityId())).isZero();
         assertThat(countDailyQuantitiesByTotalQuantityId(savedTotalQuantity.getTotalQuantityId())).isZero();
-    }
-
-    @Test
-    void 세션_총량이_없으면_삭제에_실패하고_예외를_던진다() {
-        TotalQuantity savedTotalQuantity = saveTotalQuantity();
-        flushAndClear();
-
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                        savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
-                        savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
-                        UNKNOWN_TOTAL_QUANTITY_ID
-                ))
-                .extracting(ResourceNotFoundException::getError)
-                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
-
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> totalQuantityRepository.deleteBySessionalPlanIdAndUserIdAndTotalQuantityId(
-                        savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
-                        UNKNOWN_USER_ID,
-                        savedTotalQuantity.getTotalQuantityId()
-                ))
-                .extracting(ResourceNotFoundException::getError)
-                .isEqualTo(TOTAL_QUANTITY_NOT_FOUND);
     }
 
     private Long countWeeklyQuantitiesByTotalQuantityId(Long totalQuantityId) {
