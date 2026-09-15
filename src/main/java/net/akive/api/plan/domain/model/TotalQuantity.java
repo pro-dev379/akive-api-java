@@ -48,7 +48,7 @@ public class TotalQuantity {
                 .sessionalPlan(requireNonNull(sessionalPlan))
                 .subject(requireNonNull(subject))
                 .totalQuantityAmount(requireNonNull(totalQuantityAmount))
-                .weeklyQuantities(requireNotEmpty(List.copyOf(weeklyQuantities)))
+                .weeklyQuantities(List.copyOf(requireNotEmpty(weeklyQuantities)))
                 .build();
     }
 
@@ -65,7 +65,7 @@ public class TotalQuantity {
                 .sessionalPlan(requireNonNull(sessionalPlan))
                 .subject(requireNonNull(subject))
                 .totalQuantityAmount(requireNonNull(totalQuantityAmount))
-                .weeklyQuantities(requireNotEmpty(List.copyOf(weeklyQuantities)))
+                .weeklyQuantities(List.copyOf(requireNotEmpty(weeklyQuantities)))
                 .build();
     }
 

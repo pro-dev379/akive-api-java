@@ -44,7 +44,7 @@ public class WeeklyQuantity {
                 .weeklyQuantityId(requirePositive(weeklyQuantityId))
                 .weekPeriod(requireNonNull(weekPeriod))
                 .weeklyQuantityAmount(requireNonNull(weeklyQuantityAmount))
-                .dailyQuantities(requireNotEmpty(List.copyOf(dailyQuantities)))
+                .dailyQuantities(List.copyOf(requireNotEmpty(dailyQuantities)))
                 .build();
     }
 
@@ -68,7 +68,7 @@ public class WeeklyQuantity {
         return WeeklyQuantity.builder()
                 .weekPeriod(requireNonNull(weekPeriod))
                 .weeklyQuantityAmount(requireNonNull(weeklyQuantityAmount))
-                .dailyQuantities(requireNotEmpty(List.copyOf(dailyQuantities)))
+                .dailyQuantities(List.copyOf(requireNotEmpty(dailyQuantities)))
                 .build();
     }
 
