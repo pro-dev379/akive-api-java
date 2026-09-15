@@ -69,15 +69,15 @@ public class DailyLogEntity extends BaseTimeEntity {
         );
     }
 
-    public DailyLog to(LocalDateTime now) {
+    public DailyLog to(LocalDateTime reconstructedAt) {
         return DailyLog.reconstruct(
                 this.dailyLogId,
                 this.user.to(),
                 this.logOn,
-                this.focusTime.to(now),
+                this.focusTime.to(reconstructedAt),
                 this.dailyLogType,
                 this.contents,
-                now
+                reconstructedAt
         );
     }
 }

@@ -42,13 +42,13 @@ public class FocusTimeEntity {
         );
     }
 
-    public FocusTime to(LocalDateTime now) {
+    public FocusTime to(LocalDateTime reconstructedAt) {
         return FocusTime.of(
                 this.startOn,
                 this.endOn,
                 this.focusTimeSec,
                 this.isFocusRateExcluded(),
-                now
+                reconstructedAt
         );
     }
 

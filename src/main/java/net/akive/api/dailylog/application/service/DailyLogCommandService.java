@@ -7,6 +7,7 @@ import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
 import net.akive.api.dailylog.application.provided.dto.DailyLogDeleteCommand;
+import net.akive.api.dailylog.application.provided.dto.DailyLogUpdateCommand;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.FocusTime;
@@ -49,6 +50,24 @@ class DailyLogCommandService implements DailyLogCreator {
     }
 
     @Override
+    public void update(DailyLogUpdateCommand command)
+            throws BusinessRuleViolationException, ResourceNotFoundException, ResourceConflictException {
+        DailyLog dailyLog = findDailyLogOrThrow(command.dailyLogId(), command.userId());
+
+        validateTimeNotOverlappingExcludingSelf(command.userId(), command.targetFocusTime(), command.dailyLogId());
+
+        dailyLog.update(
+                command.targetLogOn(),
+                command.targetFocusTime(),
+                command.targetDailyLogType(),
+                command.targetContents(),
+                command.requestedAt()
+        );
+
+        dailyLogRepository.save(dailyLog);
+    }
+
+    @Override
     public void delete(DailyLogDeleteCommand command) throws ResourceNotFoundException {
         DailyLog dailyLog = findDailyLogOrThrow(command.dailyLogId(), command.userId());
 
@@ -67,6 +86,18 @@ class DailyLogCommandService implements DailyLogCreator {
 
     private void validateTimeNotOverlapping(Long userId, FocusTime focusTime) {
         if (dailyLogRepository.existsOverlappingTimeByUserIdAndFocusTime(userId, focusTime)) {
+            throw new ResourceConflictException(DAILY_LOG_TIME_OVERLAPS);
+        }
+    }
+
+    private void validateTimeNotOverlappingExcludingSelf(Long userId, FocusTime focusTime, Long dailyLogId) {
+        boolean isOverlapping = dailyLogRepository.existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+                userId,
+                focusTime,
+                dailyLogId
+        );
+
+        if (isOverlapping) {
             throw new ResourceConflictException(DAILY_LOG_TIME_OVERLAPS);
         }
     }

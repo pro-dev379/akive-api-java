@@ -6,6 +6,7 @@ import net.akive.api.common.pagination.PageResult;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
+import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogUpdateRequest;
 import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogCreateResponse;
 import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogTypesFindResponse;
 import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogsFindResponse;
@@ -17,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -42,9 +44,22 @@ public class DailyLogApi {
             @AuthenticatedUserId Long userId,
             @Validated @RequestBody DailyLogCreateRequest request
     ) {
-        DailyLogCreateCommand command = request.to(userId, currentTimeProvider.now());
+        LocalDateTime requestedAt = currentTimeProvider.now();
+        DailyLogCreateCommand command = request.to(userId, requestedAt);
 
         return new DailyLogCreateResponse(dailyLogCreator.create(command));
+    }
+
+    @PutMapping("/{dailyLogId}")
+    @ResponseStatus(NO_CONTENT)
+    public void update(
+            @AuthenticatedUserId Long userId,
+            @PathVariable Long dailyLogId,
+            @Validated @RequestBody DailyLogUpdateRequest request
+    ) {
+        LocalDateTime requestedAt = currentTimeProvider.now();
+
+        dailyLogCreator.update(request.to(dailyLogId, userId, requestedAt));
     }
 
     @DeleteMapping("/{dailyLogId}")

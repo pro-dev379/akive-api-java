@@ -40,9 +40,9 @@ public class DailyLog {
             FocusTime focusTime,
             DailyLogType dailyLogType,
             String contents,
-            LocalDateTime now
+            LocalDateTime reconstructedAt
     ) {
-        validateLogOnNotFuture(logOn, now);
+        validateLogOnNotFuture(logOn, reconstructedAt);
 
         return DailyLog.builder()
                 .dailyLogId(requirePositive(dailyLogId))
@@ -60,9 +60,9 @@ public class DailyLog {
             FocusTime focusTime,
             DailyLogType dailyLogType,
             String contents,
-            LocalDateTime now
+            LocalDateTime requestedAt
     ) {
-        validateLogOnNotFuture(logOn, now);
+        validateLogOnNotFuture(logOn, requestedAt);
 
         return DailyLog.builder()
                 .user(requireNonNull(user))
@@ -78,9 +78,9 @@ public class DailyLog {
             FocusTime targetFocusTime,
             DailyLogType targetDailyLogType,
             String targetContents,
-            LocalDateTime now
+            LocalDateTime requestedAt
     ) {
-        validateLogOnNotFuture(targetLogOn, now);
+        validateLogOnNotFuture(targetLogOn, requestedAt);
 
         this.logOn = requireNonNull(targetLogOn);
         this.focusTime = requireNonNull(targetFocusTime);
@@ -119,11 +119,11 @@ public class DailyLog {
         return getClass().hashCode();
     }
 
-    private static void validateLogOnNotFuture(LocalDate logOn, LocalDateTime now) {
+    private static void validateLogOnNotFuture(LocalDate logOn, LocalDateTime baseTime) {
         requireNonNull(logOn);
-        requireNonNull(now);
+        requireNonNull(baseTime);
 
-        if (logOn.isAfter(now.toLocalDate())) {
+        if (logOn.isAfter(baseTime.toLocalDate())) {
             throw new BusinessRuleViolationException(DAILY_LOG_DATE_IN_FUTURE);
         }
     }

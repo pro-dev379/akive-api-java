@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +29,9 @@ class DailyLogJpaAdapter implements DailyLogRepository {
 
     @Override
     public DailyLog save(DailyLog dailyLog) {
-        return dailyLogJpaRepository.save(DailyLogEntity.from(dailyLog)).to(currentTimeProvider.now());
+        LocalDateTime reconstructedAt = currentTimeProvider.now();
+
+        return dailyLogJpaRepository.save(DailyLogEntity.from(dailyLog)).to(reconstructedAt);
     }
 
     @Override
@@ -55,16 +58,20 @@ class DailyLogJpaAdapter implements DailyLogRepository {
 
     @Override
     public Optional<DailyLog> findByDailyLogIdAndUserId(Long dailyLogId, Long userId) {
+        LocalDateTime reconstructedAt = currentTimeProvider.now();
+
         return dailyLogJpaRepository.findByDailyLogIdAndUser_UserId(dailyLogId, userId)
-                .map(entity -> entity.to(currentTimeProvider.now()));
+                .map(entity -> entity.to(reconstructedAt));
     }
 
     @Override
     public List<DailyLog> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn) {
+        LocalDateTime reconstructedAt = currentTimeProvider.now();
+
         return dailyLogJpaRepository
                 .findAllByUserIdAndLogOnOrderByStartOn(userId, logOn)
                 .stream()
-                .map(entity -> entity.to(currentTimeProvider.now()))
+                .map(entity -> entity.to(reconstructedAt))
                 .toList();
     }
 

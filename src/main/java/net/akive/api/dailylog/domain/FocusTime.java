@@ -29,11 +29,11 @@ public final class FocusTime {
             LocalDateTime endOn,
             Long focusTimeSec,
             boolean focusRateExcluded,
-            LocalDateTime now
+            LocalDateTime baseTime
     ) {
         requireStartNotAfterEnd(startOn, endOn);
         validateMaxPeriod(startOn, endOn);
-        validateNotFuture(endOn, now);
+        validateNotFuture(endOn, baseTime);
         validateFocusTimeSec(startOn, endOn, focusTimeSec);
 
         this.startOn = startOn;
@@ -47,9 +47,9 @@ public final class FocusTime {
             LocalDateTime endOn,
             Long focusTimeSec,
             boolean focusRateExcluded,
-            LocalDateTime now
+            LocalDateTime baseTime
     ) {
-        return new FocusTime(startOn, endOn, focusTimeSec, focusRateExcluded, now);
+        return new FocusTime(startOn, endOn, focusTimeSec, focusRateExcluded, baseTime);
     }
 
     public long durationSec() {
@@ -65,10 +65,10 @@ public final class FocusTime {
         }
     }
 
-    private static void validateNotFuture(LocalDateTime endOn, LocalDateTime now) {
-        requireNonNull(now);
+    private static void validateNotFuture(LocalDateTime endOn, LocalDateTime baseTime) {
+        requireNonNull(baseTime);
 
-        if (endOn.isAfter(now)) {
+        if (endOn.isAfter(baseTime)) {
             throw new BusinessRuleViolationException(DAILY_LOG_TIME_RANGE_IN_FUTURE);
         }
     }

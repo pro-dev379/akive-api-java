@@ -6,11 +6,13 @@ import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
+import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogUpdateRequest;
 import net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
 import net.akive.api.dailylog.application.provided.dto.DailyLogDeleteCommand;
+import net.akive.api.dailylog.application.provided.dto.DailyLogUpdateCommand;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.domain.User;
@@ -34,10 +36,10 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.DAIL
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
-import static net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture.createDailyLogCreateRequest;
-import static net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture.createFocusTimeRequest;
+import static net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture.*;
 import static net.akive.api.dailylog.domain.DailyLogType.*;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
+import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.CONTENTS;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,9 +96,36 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 일일_로그_생성_요청의_날짜_형식이_올바르지_않으면_400을_응답한다() {
+        String body = """
+                {
+                  "logOn": "invalid-date",
+                  "focusTime": {
+                    "startOn": "%s",
+                    "endOn": "%s",
+                    "focusTimeSec": %d,
+                    "focusRateExcluded": false
+                  },
+                  "dailyLogType": "%s",
+                  "contents": "%s"
+                }
+                """.formatted(
+                START_ON.format(ISO_LOCAL_DATE_TIME),
+                END_ON.format(ISO_LOCAL_DATE_TIME),
+                FOCUS_TIME_SEC,
+                STUDY.name(),
+                CONTENTS
+        );
+
+        postJson(DAILY_LOGS_URL, USER_ID, body).hasStatus(BAD_REQUEST);
+
+        then(currentTimeProvider).shouldHaveNoInteractions();
+        then(dailyLogCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 일일_로그_생성_시_미래_로그_날짜로_요청하면_400을_응답한다() {
-        LocalDate logOn = NOW.toLocalDate().plusDays(1);
-        DailyLogCreateRequest request = createDailyLogCreateRequest(logOn);
+        DailyLogCreateRequest request = createDailyLogCreateRequest(NOW.toLocalDate().plusDays(1));
 
         given(currentTimeProvider.now()).willReturn(NOW);
 
@@ -222,6 +251,196 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
         then(currentTimeProvider).should().now();
         then(dailyLogCreator).should().create(command);
+    }
+
+    @Test
+    void 일일_로그를_수정한다() {
+        DailyLogUpdateRequest request = createDailyLogUpdateRequest();
+        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, NOW);
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+
+        putJson(
+                DAILY_LOG_URL,
+                USER_ID,
+                toJson(request),
+                DAILY_LOG_ID
+        ).hasStatus(NO_CONTENT);
+
+        then(currentTimeProvider).should().now();
+        then(dailyLogCreator).should().update(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUpdateRequests")
+    void 일일_로그_수정_요청값이_올바르지_않으면_400을_응답한다(DailyLogUpdateRequest request) {
+        putJson(DAILY_LOG_URL, USER_ID, toJson(request), DAILY_LOG_ID).hasStatus(BAD_REQUEST);
+
+        then(currentTimeProvider).shouldHaveNoInteractions();
+        then(dailyLogCreator).should(never()).update(any(DailyLogUpdateCommand.class));
+    }
+
+    @Test
+    void 일일_로그_수정_요청의_날짜_형식이_올바르지_않으면_400을_응답한다() {
+        String body = """
+                {
+                  "targetLogOn": "invalid-date",
+                  "targetFocusTime": {
+                    "startOn": "%s",
+                    "endOn": "%s",
+                    "focusTimeSec": %d,
+                    "focusRateExcluded": false
+                  },
+                  "targetDailyLogType": "%s",
+                  "targetContents": "%s"
+                }
+                """.formatted(
+                TARGET_START_ON.format(ISO_LOCAL_DATE_TIME),
+                TARGET_END_ON.format(ISO_LOCAL_DATE_TIME),
+                FOCUS_TIME_SEC,
+                STUDY.name(),
+                TARGET_CONTENTS
+        );
+
+        putJson(DAILY_LOG_URL, USER_ID, body, DAILY_LOG_ID).hasStatus(BAD_REQUEST);
+
+        then(currentTimeProvider).shouldHaveNoInteractions();
+        then(dailyLogCreator).should(never()).update(any(DailyLogUpdateCommand.class));
+    }
+
+    @Test
+    void 일일_로그_수정_시_미래_로그_날짜로_요청하면_400을_응답한다() {
+        DailyLogUpdateRequest request = createDailyLogUpdateRequest(NOW.toLocalDate().plusDays(1));
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+
+        MvcTestResultAssert result = putJson(
+                DAILY_LOG_URL,
+                USER_ID,
+                toJson(request),
+                DAILY_LOG_ID
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_DATE_IN_FUTURE);
+
+        then(currentTimeProvider).should().now();
+        then(dailyLogCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 일일_로그_수정_시_미래_시간_범위로_요청하면_400을_응답한다() {
+        DailyLogUpdateRequest request = createDailyLogUpdateRequest(
+                createFocusTimeRequest(
+                        NOW.plusHours(1),
+                        NOW.plusHours(2)
+                )
+        );
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+
+        MvcTestResultAssert result = putJson(
+                DAILY_LOG_URL,
+                USER_ID,
+                toJson(request),
+                DAILY_LOG_ID
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_TIME_RANGE_IN_FUTURE);
+
+        then(currentTimeProvider).should().now();
+        then(dailyLogCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 일일_로그_수정_시_시간_범위가_24시간을_초과하면_400을_응답한다() {
+        DailyLogUpdateRequest request = createDailyLogUpdateRequest(
+                createFocusTimeRequest(
+                        startOn(LOG_ON, 9),
+                        endOn(LOG_ON.plusDays(1), 10)
+                )
+        );
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+
+        MvcTestResultAssert result = putJson(
+                DAILY_LOG_URL,
+                USER_ID,
+                toJson(request),
+                DAILY_LOG_ID
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_TIME_RANGE_TOO_LONG);
+
+        then(currentTimeProvider).should().now();
+        then(dailyLogCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 일일_로그_수정_시_실제_집중_시간이_시간_범위보다_크면_400을_응답한다() {
+        DailyLogUpdateRequest request = createDailyLogUpdateRequest(
+                createFocusTimeRequest(startOn(LOG_ON, 9), endOn(LOG_ON, 10)),
+                3601L
+        );
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+
+        MvcTestResultAssert result = putJson(
+                DAILY_LOG_URL,
+                USER_ID,
+                toJson(request),
+                DAILY_LOG_ID
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_FOCUS_TIME_EXCEEDS_DURATION);
+
+        then(currentTimeProvider).should().now();
+        then(dailyLogCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 일일_로그_수정_시_일일_로그가_없으면_404를_응답한다() {
+        DailyLogUpdateRequest request = createDailyLogUpdateRequest();
+        DailyLogUpdateCommand command = request.to(UNKNOWN_DAILY_LOG_ID, USER_ID, NOW);
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+        willThrow(new ResourceNotFoundException(DAILY_LOG_NOT_FOUND))
+                .given(dailyLogCreator)
+                .update(command);
+
+        MvcTestResultAssert result = putJson(
+                DAILY_LOG_URL,
+                USER_ID,
+                toJson(request),
+                UNKNOWN_DAILY_LOG_ID
+        ).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, DAILY_LOG_NOT_FOUND);
+
+        then(currentTimeProvider).should().now();
+        then(dailyLogCreator).should().update(command);
+    }
+
+    @Test
+    void 일일_로그_수정_시_시간_범위가_오버랩되면_409를_응답한다() {
+        DailyLogUpdateRequest request = createDailyLogUpdateRequest();
+        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, NOW);
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+        willThrow(new ResourceConflictException(DAILY_LOG_TIME_OVERLAPS))
+                .given(dailyLogCreator)
+                .update(command);
+
+        MvcTestResultAssert result = putJson(
+                DAILY_LOG_URL,
+                USER_ID,
+                toJson(request),
+                DAILY_LOG_ID
+        ).hasStatus(CONFLICT);
+
+        assertErrorResponse(result, DAILY_LOG_TIME_OVERLAPS);
+
+        then(currentTimeProvider).should().now();
+        then(dailyLogCreator).should().update(command);
     }
 
     @Test
@@ -401,5 +620,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
     private static Stream<DailyLogCreateRequest> invalidCreateRequests() {
         return DailyLogRequestFixture.invalidCreateRequests();
+    }
+
+    private static Stream<DailyLogUpdateRequest> invalidUpdateRequests() {
+        return DailyLogRequestFixture.invalidUpdateRequests();
     }
 }

@@ -4,6 +4,7 @@ import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
 import net.akive.api.dailylog.application.provided.dto.DailyLogDeleteCommand;
+import net.akive.api.dailylog.application.provided.dto.DailyLogUpdateCommand;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.user.application.provided.UserFinder;
@@ -21,7 +22,9 @@ import static net.akive.api.common.exception.business.ResourceConflictError.DAIL
 import static net.akive.api.common.exception.business.ResourceNotFoundError.DAILY_LOG_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.dailylog.application.fixture.DailyLogCommandFixture.createDailyLogCreateCommand;
-import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
+import static net.akive.api.dailylog.application.fixture.DailyLogCommandFixture.createDailyLogUpdateCommand;
+import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.DAILY_LOG_ID;
+import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.createReconstructedDailyLog;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -111,6 +114,82 @@ class DailyLogCommandServiceTest {
         then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
         then(dailyLogRepository).should()
                 .existsOverlappingTimeByUserIdAndFocusTime(command.userId(), command.focusTime());
+        then(dailyLogRepository).should(never()).save(any());
+    }
+
+    @Test
+    void 일일_로그를_수정한다() {
+        User user = createReconstructedUser(USER_ID);
+        DailyLog dailyLog = createReconstructedDailyLog(user);
+        DailyLogUpdateCommand command = createDailyLogUpdateCommand();
+
+        given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
+                .willReturn(Optional.of(dailyLog));
+        given(dailyLogRepository.existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+                command.userId(),
+                command.targetFocusTime(),
+                command.dailyLogId()
+        )).willReturn(false);
+
+        dailyLogCommandService.update(command);
+
+        then(dailyLogRepository).should().findByDailyLogIdAndUserId(command.dailyLogId(), command.userId());
+        then(dailyLogRepository).should().existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+                command.userId(),
+                command.targetFocusTime(),
+                command.dailyLogId()
+        );
+        then(dailyLogRepository).should().save(dailyLog);
+
+        assertThat(dailyLog.getLogOn()).isEqualTo(command.targetLogOn());
+        assertThat(dailyLog.getFocusTime()).isEqualTo(command.targetFocusTime());
+        assertThat(dailyLog.getDailyLogType()).isEqualTo(command.targetDailyLogType());
+        assertThat(dailyLog.getContents()).isEqualTo(command.targetContents());
+    }
+
+    @Test
+    void 일일_로그_수정_시_수정할_일일_로그가_없으면_예외를_던진다() {
+        DailyLogUpdateCommand command = createDailyLogUpdateCommand();
+
+        given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
+                .willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> dailyLogCommandService.update(command))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(DAILY_LOG_NOT_FOUND);
+
+        then(dailyLogRepository).should().findByDailyLogIdAndUserId(command.dailyLogId(), command.userId());
+        then(dailyLogRepository).should(never())
+                .existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(any(), any(), any());
+        then(dailyLogRepository).should(never()).save(any());
+    }
+
+    @Test
+    void 일일_로그_수정_시_다른_일일_로그와_시간_범위가_오버랩되면_예외를_던진다() {
+        User user = createReconstructedUser(USER_ID);
+        DailyLog dailyLog = createReconstructedDailyLog(user);
+        DailyLogUpdateCommand command = createDailyLogUpdateCommand();
+
+        given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
+                .willReturn(Optional.of(dailyLog));
+        given(dailyLogRepository.existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+                command.userId(),
+                command.targetFocusTime(),
+                command.dailyLogId()
+        )).willReturn(true);
+
+        assertThatExceptionOfType(ResourceConflictException.class)
+                .isThrownBy(() -> dailyLogCommandService.update(command))
+                .extracting(ResourceConflictException::getError)
+                .isEqualTo(DAILY_LOG_TIME_OVERLAPS);
+
+        then(dailyLogRepository).should().findByDailyLogIdAndUserId(command.dailyLogId(), command.userId());
+        then(dailyLogRepository).should().existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+                command.userId(),
+                command.targetFocusTime(),
+                command.dailyLogId()
+        );
         then(dailyLogRepository).should(never()).save(any());
     }
 
