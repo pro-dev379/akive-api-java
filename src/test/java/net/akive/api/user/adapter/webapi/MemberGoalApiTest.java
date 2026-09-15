@@ -30,7 +30,6 @@ import static org.springframework.http.HttpStatus.*;
 @WebMvcTest(MemberGoalApi.class)
 class MemberGoalApiTest extends PrivateApiTestSupport {
 
-    private static final String MEMBER_GOALS_URL = "/members/me/goals";
     private static final String MEMBER_LATEST_GOAL_URL = "/members/me/goals/latest";
 
     @MockitoBean
@@ -44,7 +43,7 @@ class MemberGoalApiTest extends PrivateApiTestSupport {
         GoalCreateRequest request = createGoalCreateRequest();
         GoalCreateCommand command = createGoalCreateCommand();
 
-        postJson(MEMBER_GOALS_URL, USER_ID, toJson(request)).hasStatus(CREATED);
+        postJson(MEMBER_LATEST_GOAL_URL, USER_ID, toJson(request)).hasStatus(CREATED);
 
         then(goalCreator).should().create(command);
     }
@@ -52,7 +51,7 @@ class MemberGoalApiTest extends PrivateApiTestSupport {
     @ParameterizedTest
     @MethodSource("net.akive.api.user.adapter.webapi.fixture.MemberGoalRequestFixture#invalidGoalCreateRequests")
     void 최신_목표_추가_요청값이_올바르지_않으면_400을_응답한다(GoalCreateRequest request) {
-        postJson(MEMBER_GOALS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
+        postJson(MEMBER_LATEST_GOAL_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         then(goalCreator).should(never()).create(any(GoalCreateCommand.class));
     }
@@ -65,7 +64,7 @@ class MemberGoalApiTest extends PrivateApiTestSupport {
                 .given(goalCreator)
                 .create(command);
 
-        MvcTestResultAssert result = postJson(MEMBER_GOALS_URL, UNKNOWN_USER_ID, toJson(request))
+        MvcTestResultAssert result = postJson(MEMBER_LATEST_GOAL_URL, UNKNOWN_USER_ID, toJson(request))
                 .hasStatus(NOT_FOUND);
 
         assertErrorResponse(result, USER_NOT_FOUND);

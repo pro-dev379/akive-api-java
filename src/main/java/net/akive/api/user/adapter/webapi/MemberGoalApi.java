@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
-@RequestMapping("/members/me/goals")
+@RequestMapping("/members/me/goals/latest")
 @RequiredArgsConstructor
 public class MemberGoalApi {
 
@@ -28,7 +28,7 @@ public class MemberGoalApi {
         goalCreator.create(request.to(userId));
     }
 
-    @GetMapping("/latest")
+    @GetMapping
     public GoalFindResponse findLatest(@AuthenticatedUserId Long userId) {
         return GoalFindResponse.from(goalFinder.findLatestByUserIdAndUserNotWithdrawn(userId));
     }
