@@ -16,8 +16,8 @@ import static net.akive.api.user.domain.LoginType.EMAIL;
 
 @Getter
 @Builder(access = PRIVATE)
-@NoArgsConstructor(access = PRIVATE)
 @AllArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
 public class User {
 
     private Long userId;

@@ -14,8 +14,8 @@ import static net.akive.api.common.domain.DomainValidator.requirePositive;
 
 @Getter
 @Builder(access = PRIVATE)
-@NoArgsConstructor(access = PRIVATE)
 @AllArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
 public class MentoringProfile {
 
     private Long mentoringProfileId;

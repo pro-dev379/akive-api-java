@@ -14,15 +14,14 @@ import java.util.List;
 import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
-import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.DAILY_QUANTITY_NOT_FOUND;
 
 @Getter
 @Builder(access = PRIVATE)
-@NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
 public class WeeklyQuantity {
 
     private Long weeklyQuantityId;

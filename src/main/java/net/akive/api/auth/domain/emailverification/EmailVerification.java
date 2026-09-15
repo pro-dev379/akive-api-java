@@ -26,8 +26,8 @@ import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_
 
 @Getter
 @Builder(access = PRIVATE)
-@NoArgsConstructor(access = PRIVATE)
 @AllArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
 public class EmailVerification {
 
     private Email email;

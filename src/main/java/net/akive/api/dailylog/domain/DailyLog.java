@@ -17,8 +17,8 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 
 @Getter
 @Builder(access = PRIVATE)
-@NoArgsConstructor(access = PRIVATE)
 @AllArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
 public class DailyLog {
 
     private Long dailyLogId;

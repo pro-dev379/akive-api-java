@@ -12,15 +12,14 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
-import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_SESSION_PERIOD;
 import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGTH;
 
 @Getter
 @Builder(access = PRIVATE)
-@NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
 public class SessionalPlan {
 
     private Long sessionalPlanId;

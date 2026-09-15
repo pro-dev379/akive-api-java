@@ -11,15 +11,14 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
-import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 
 @Getter
 @Builder(access = PRIVATE)
-@NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
 public class DailyQuantity {
 
     private Long dailyQuantityId;
