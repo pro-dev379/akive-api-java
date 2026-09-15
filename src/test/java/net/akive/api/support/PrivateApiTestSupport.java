@@ -58,6 +58,24 @@ public abstract class PrivateApiTestSupport {
                 .assertThat();
     }
 
+    protected MvcTestResultAssert delete(
+            String uri,
+            Long userId,
+            String headerName,
+            String headerValue,
+            Object... uriVariables
+    ) {
+        var requestBuilder = mvcTester.delete()
+                .uri(uri, uriVariables)
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(userId))));
+
+        if (headerValue != null) {
+            requestBuilder.header(headerName, headerValue);
+        }
+
+        return requestBuilder.assertThat();
+    }
+
     protected String toJson(Object body) {
         try {
             return objectMapper.writeValueAsString(body);

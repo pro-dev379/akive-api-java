@@ -17,7 +17,7 @@ import static net.akive.api.common.exception.business.AuthenticationError.INVALI
 @RestController
 @RequestMapping("/auth/tokens")
 @RequiredArgsConstructor
-public class TokenApi {
+public class TokenIssueApi {
 
     private static final String BEARER_PREFIX = "Bearer ";
 

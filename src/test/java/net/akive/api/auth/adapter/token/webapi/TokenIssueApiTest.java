@@ -20,9 +20,9 @@ import static org.mockito.BDDMockito.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
-@WebMvcTest(TokenApi.class)
+@WebMvcTest(TokenIssueApi.class)
 @AutoConfigureMockMvc(addFilters = false)
-class TokenApiTest extends PublicApiTestSupport {
+class TokenIssueApiTest extends PublicApiTestSupport {
 
     private static final String TOKEN_REISSUE_URL = "/auth/tokens";
 
@@ -92,5 +92,4 @@ class TokenApiTest extends PublicApiTestSupport {
 
         then(tokenIssuer).should().reissue(command);
     }
-
 }
