@@ -3,13 +3,14 @@ package net.akive.api.plan.application.service.sessionalplan;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
-import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanFindQuery;
+import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDetailFindQuery;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.application.result.SessionalPlanDetail;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
+import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.plan.domain.value.SessionWeek;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,7 @@ class SessionalPlanQueryService implements SessionalPlanFinder {
     }
 
     @Override
-    public SessionalPlanDetail find(SessionalPlanFindQuery query) throws ResourceNotFoundException {
+    public SessionalPlanDetail findDetail(SessionalPlanDetailFindQuery query) throws ResourceNotFoundException {
         SessionalPlan sessionalPlan = findSessionalPlanOrThrow(query.sessionalPlanId(), query.userId());
         List<SessionWeek> sessionWeeks = sessionalPlan.getSessionPeriod().splitIntoWeeks();
 
@@ -45,6 +46,11 @@ class SessionalPlanQueryService implements SessionalPlanFinder {
                 .toList();
 
         return new SessionalPlanDetail(sessionalPlan, totalQuantityProgresses);
+    }
+
+    @Override
+    public List<SessionPeriod> findSessionPeriodsByUserId(Long userId) {
+        return sessionalPlanRepository.findSessionPeriodsByUserId(userId);
     }
 
     private SessionalPlan findSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {

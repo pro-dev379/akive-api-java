@@ -11,7 +11,7 @@ import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreato
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanCreateCommand;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDeleteCommand;
-import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanFindQuery;
+import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDetailFindQuery;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanUpdateCommand;
 import net.akive.api.plan.application.result.SessionalPlanDetail;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
@@ -151,7 +151,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
         User user = createReconstructedUser(USER_ID);
         SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, user);
         TotalQuantity totalQuantity = createReconstructedTotalQuantity(FIRST_TOTAL_QUANTITY_ID, sessionalPlan);
-        SessionalPlanFindQuery query = new SessionalPlanFindQuery(USER_ID, SESSIONAL_PLAN_ID);
+        SessionalPlanDetailFindQuery query = new SessionalPlanDetailFindQuery(USER_ID, SESSIONAL_PLAN_ID);
         SessionalPlanDetail detail = new SessionalPlanDetail(
                 sessionalPlan,
                 List.of(TotalQuantityProgress.of(
@@ -159,26 +159,26 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
                         sessionalPlan.getSessionPeriod().splitIntoWeeks()
                 ))
         );
-        given(sessionalPlanFinder.find(query)).willReturn(detail);
+        given(sessionalPlanFinder.findDetail(query)).willReturn(detail);
 
         MvcTestResultAssert result = get(PlanApiPath.SESSIONAL_PLAN, USER_ID, SESSIONAL_PLAN_ID).hasStatusOk();
 
         assertSessionalPlanDetailResponse(result, detail);
 
-        then(sessionalPlanFinder).should().find(query);
+        then(sessionalPlanFinder).should().findDetail(query);
     }
 
     @Test
     void 세셔널_플랜_조회_시_세셔널_플랜이_없으면_404를_응답한다() {
-        SessionalPlanFindQuery query = new SessionalPlanFindQuery(USER_ID, SESSIONAL_PLAN_ID);
-        given(sessionalPlanFinder.find(query))
+        SessionalPlanDetailFindQuery query = new SessionalPlanDetailFindQuery(USER_ID, SESSIONAL_PLAN_ID);
+        given(sessionalPlanFinder.findDetail(query))
                 .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
         MvcTestResultAssert result = get(PlanApiPath.SESSIONAL_PLAN, USER_ID, SESSIONAL_PLAN_ID).hasStatus(NOT_FOUND);
 
         assertSessionalPlanNotFoundResponse(result);
 
-        then(sessionalPlanFinder).should().find(query);
+        then(sessionalPlanFinder).should().findDetail(query);
     }
 
     @Test

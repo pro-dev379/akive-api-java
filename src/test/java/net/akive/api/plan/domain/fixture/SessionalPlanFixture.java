@@ -17,13 +17,14 @@ public class SessionalPlanFixture {
     public static final int FIRST_WEEK_NUM = 1;
     public static final int UNKNOWN_WEEK_NUM = 999;
     public static final String SESSION_NAME = "2026 1월 학습";
+    public static final String ANOTHER_SESSION_NAME = "2026 2월 학습";
     public static final LocalDateTime REQUESTED_AT =
             LocalDateTime.of(2025, 12, 31, 10, 0);
     public static final SessionPeriod SESSION_PERIOD = new SessionPeriod(
             LocalDate.of(2026, 1, 1),
             LocalDate.of(2026, 1, 12)
     );
-    public static final String TARGET_SESSION_NAME = "2026 2월 학습";
+    public static final String TARGET_SESSION_NAME = "업데이트 2026 2월 학습";
     public static final SessionPeriod TARGET_SESSION_PERIOD = new SessionPeriod(
             LocalDate.of(2026, 2, 1),
             LocalDate.of(2026, 2, 12)

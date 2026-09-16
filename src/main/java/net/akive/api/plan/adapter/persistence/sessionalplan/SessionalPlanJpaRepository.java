@@ -14,6 +14,8 @@ public interface SessionalPlanJpaRepository extends JpaRepository<SessionalPlanE
 
     Optional<SessionalPlanEntity> findBySessionalPlanIdAndUser_UserId(Long sessionalPlanId, Long userId);
 
+    List<SessionalPlanEntity> findByUser_UserId(Long userId, Sort sort);
+
     @Query("""
         select sp.sessionPeriod
         from SessionalPlanEntity sp
@@ -22,7 +24,13 @@ public interface SessionalPlanJpaRepository extends JpaRepository<SessionalPlanE
     """)
     Optional<SessionPeriodEntity> findSessionPeriodBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId);
 
-    List<SessionalPlanEntity> findByUser_UserId(Long userId, Sort sort);
+    @Query("""
+        select sp.sessionPeriod
+        from SessionalPlanEntity sp
+        where sp.user.userId = :userId
+        order by sp.sessionPeriod.startOn asc, sp.sessionPeriod.endOn asc
+    """)
+    List<SessionPeriodEntity> findSessionPeriodsByUserId(Long userId);
 
     boolean existsBySessionalPlanIdAndUser_UserId(Long sessionalPlanId, Long userId);
 

@@ -34,6 +34,15 @@ class SessionalPlanJpaAdapter implements SessionalPlanRepository {
     }
 
     @Override
+    public List<SessionalPlan> findAllByUserIdOrderBySessionalPlanIdDesc(Long userId) {
+        return sessionalPlanJpaRepository
+                .findByUser_UserId(userId, Sort.by(DESC, "sessionalPlanId"))
+                .stream()
+                .map(SessionalPlanEntity::to)
+                .toList();
+    }
+
+    @Override
     public Optional<SessionPeriod> findSessionPeriodBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId) {
         return sessionalPlanJpaRepository
                 .findSessionPeriodBySessionalPlanIdAndUserId(sessionalPlanId, userId)
@@ -41,11 +50,10 @@ class SessionalPlanJpaAdapter implements SessionalPlanRepository {
     }
 
     @Override
-    public List<SessionalPlan> findAllByUserIdOrderBySessionalPlanIdDesc(Long userId) {
-        return sessionalPlanJpaRepository
-                .findByUser_UserId(userId, Sort.by(DESC, "sessionalPlanId"))
+    public List<SessionPeriod> findSessionPeriodsByUserId(Long userId) {
+        return sessionalPlanJpaRepository.findSessionPeriodsByUserId(userId)
                 .stream()
-                .map(SessionalPlanEntity::to)
+                .map(SessionPeriodEntity::to)
                 .toList();
     }
 

@@ -10,7 +10,7 @@ import net.akive.api.plan.adapter.webapi.sessionalplan.dto.response.SessionalPla
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreator;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDeleteCommand;
-import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanFindQuery;
+import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDetailFindQuery;
 import net.akive.api.plan.application.result.SessionalPlanDetail;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,9 +46,9 @@ public class SessionalPlanApi {
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId
     ) {
-        SessionalPlanFindQuery query = new SessionalPlanFindQuery(userId, sessionalPlanId);
+        SessionalPlanDetailFindQuery query = new SessionalPlanDetailFindQuery(userId, sessionalPlanId);
 
-        SessionalPlanDetail result = sessionalPlanFinder.find(query);
+        SessionalPlanDetail result = sessionalPlanFinder.findDetail(query);
 
         return SessionalPlanFindResponse.from(result);
     }

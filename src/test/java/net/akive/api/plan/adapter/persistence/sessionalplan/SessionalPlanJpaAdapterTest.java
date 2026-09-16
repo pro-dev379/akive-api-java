@@ -7,6 +7,7 @@ import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
@@ -50,6 +51,29 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
+    void 회원_식별자로_세셔널_플랜을_식별자_내림차순으로_조회한다() {
+        User savedUser = saveUser();
+        SessionalPlan firstSessionalPlan = sessionalPlanRepository.save(
+                createSessionalPlan(savedUser, SESSION_NAME)
+        );
+        SessionalPlan secondSessionalPlan = sessionalPlanRepository.save(
+                createSessionalPlan(savedUser, ANOTHER_SESSION_NAME)
+        );
+        flushAndClear();
+
+        List<SessionalPlan> sessionalPlans = sessionalPlanRepository
+                .findAllByUserIdOrderBySessionalPlanIdDesc(savedUser.getUserId());
+
+        assertThat(sessionalPlans)
+                .extracting(SessionalPlan::getSessionalPlanId)
+                .containsExactly(
+                        secondSessionalPlan.getSessionalPlanId(),
+                        firstSessionalPlan.getSessionalPlanId()
+                );
+    }
+
+
+    @Test
     void 세셔널_플랜_식별자와_회원_식별자로_세션_기간을_조회한다() {
         SessionalPlan savedSessionalPlan = saveSessionalPlan();
         flushAndClear();
@@ -63,25 +87,34 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 회원_식별자로_세셔널_플랜을_식별자_내림차순으로_조회한다() {
+    void 회원_식별자로_세션_기간_목록을_날짜순으로_조회한다() {
         User savedUser = saveUser();
-        SessionalPlan firstSessionalPlan = sessionalPlanRepository.save(
-                createSessionalPlan(savedUser, "2026 1월 학습")
+        SessionPeriod firstSessionPeriod = new SessionPeriod(
+                LocalDate.of(2026, 1, 1),
+                LocalDate.of(2026, 1, 12)
         );
-        SessionalPlan secondSessionalPlan = sessionalPlanRepository.save(
-                createSessionalPlan(savedUser, "2026 2월 학습")
+        SessionPeriod secondSessionPeriod = new SessionPeriod(
+                LocalDate.of(2026, 2, 1),
+                LocalDate.of(2026, 2, 12)
         );
+        sessionalPlanRepository.save(SessionalPlan.create(
+                savedUser,
+                SESSION_NAME,
+                firstSessionPeriod,
+                REQUESTED_AT
+        ));
+        sessionalPlanRepository.save(SessionalPlan.create(
+                savedUser,
+                ANOTHER_SESSION_NAME,
+                secondSessionPeriod,
+                REQUESTED_AT
+        ));
         flushAndClear();
 
-        List<SessionalPlan> sessionalPlans = sessionalPlanRepository
-                .findAllByUserIdOrderBySessionalPlanIdDesc(savedUser.getUserId());
+        List<SessionPeriod> sessionPeriods =
+                sessionalPlanRepository.findSessionPeriodsByUserId(savedUser.getUserId());
 
-        assertThat(sessionalPlans)
-                .extracting(SessionalPlan::getSessionalPlanId)
-                .containsExactly(
-                        secondSessionalPlan.getSessionalPlanId(),
-                        firstSessionalPlan.getSessionalPlanId()
-                );
+        assertThat(sessionPeriods).containsExactly(firstSessionPeriod, secondSessionPeriod);
     }
 
     @Test

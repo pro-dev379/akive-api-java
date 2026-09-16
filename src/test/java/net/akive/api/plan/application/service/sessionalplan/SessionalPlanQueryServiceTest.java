@@ -1,13 +1,14 @@
 package net.akive.api.plan.application.service.sessionalplan;
 
 import net.akive.api.common.exception.business.ResourceNotFoundException;
-import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanFindQuery;
+import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDetailFindQuery;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.application.result.SessionalPlanDetail;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
+import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,14 +64,14 @@ class SessionalPlanQueryServiceTest {
         User user = createReconstructedUser(USER_ID);
         SessionalPlan sessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, user);
         TotalQuantity totalQuantity = createReconstructedTotalQuantity(FIRST_TOTAL_QUANTITY_ID, sessionalPlan);
-        SessionalPlanFindQuery query = new SessionalPlanFindQuery(USER_ID, SESSIONAL_PLAN_ID);
+        SessionalPlanDetailFindQuery query = new SessionalPlanDetailFindQuery(USER_ID, SESSIONAL_PLAN_ID);
 
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(SESSIONAL_PLAN_ID, USER_ID))
                 .willReturn(Optional.of(sessionalPlan));
         given(totalQuantityRepository.findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(SESSIONAL_PLAN_ID))
                 .willReturn(List.of(totalQuantity));
 
-        SessionalPlanDetail sessionalPlanDetail = sessionalPlanQueryService.find(query);
+        SessionalPlanDetail sessionalPlanDetail = sessionalPlanQueryService.findDetail(query);
 
         assertThat(sessionalPlanDetail.sessionalPlan()).isEqualTo(sessionalPlan);
         assertThat(sessionalPlanDetail.totalQuantities()).hasSize(1);
@@ -88,17 +89,29 @@ class SessionalPlanQueryServiceTest {
 
     @Test
     void 세셔널_플랜이_없으면_상세_조회에_실패하고_예외를_던진다() {
-        SessionalPlanFindQuery query = new SessionalPlanFindQuery(USER_ID, UNKNOWN_SESSIONAL_PLAN_ID);
+        SessionalPlanDetailFindQuery query = new SessionalPlanDetailFindQuery(USER_ID, UNKNOWN_SESSIONAL_PLAN_ID);
         given(sessionalPlanRepository.findBySessionalPlanIdAndUserId(UNKNOWN_SESSIONAL_PLAN_ID, USER_ID))
                 .willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> sessionalPlanQueryService.find(query))
+                .isThrownBy(() -> sessionalPlanQueryService.findDetail(query))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(sessionalPlanRepository).should().findBySessionalPlanIdAndUserId(UNKNOWN_SESSIONAL_PLAN_ID, USER_ID);
         then(totalQuantityRepository).should(never())
                 .findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(UNKNOWN_SESSIONAL_PLAN_ID);
+    }
+
+    @Test
+    void 회원_식별자로_세션_기간_목록을_조회한다() {
+        given(sessionalPlanRepository.findSessionPeriodsByUserId(USER_ID))
+                .willReturn(List.of(SESSION_PERIOD));
+
+        List<SessionPeriod> sessionPeriods = sessionalPlanQueryService.findSessionPeriodsByUserId(USER_ID);
+
+        assertThat(sessionPeriods).containsExactly(SESSION_PERIOD);
+
+        then(sessionalPlanRepository).should().findSessionPeriodsByUserId(USER_ID);
     }
 }

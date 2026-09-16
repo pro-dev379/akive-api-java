@@ -13,9 +13,11 @@ public interface SessionalPlanRepository {
 
     Optional<SessionalPlan> findBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId);
 
+    List<SessionalPlan> findAllByUserIdOrderBySessionalPlanIdDesc(Long userId);
+
     Optional<SessionPeriod> findSessionPeriodBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId);
 
-    List<SessionalPlan> findAllByUserIdOrderBySessionalPlanIdDesc(Long userId);
+    List<SessionPeriod> findSessionPeriodsByUserId(Long userId);
 
     boolean existsBySessionalPlanIdAndUserId(Long sessionalPlanId, Long userId);
 
