@@ -25,7 +25,7 @@ class EmailTest {
 
     @ParameterizedTest
     @MethodSource("invalidEmailValues")
-    void 이메일_값이_유효하지_않으면_생성이_거부된다(
+    void 이메일_값이_올바르지_않으면_생성이_거부된다(
             String email,
             BusinessRuleViolationError expectedError
     ) {

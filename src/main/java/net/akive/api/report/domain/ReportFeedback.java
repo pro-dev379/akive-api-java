@@ -12,7 +12,7 @@ public record ReportFeedback(
     public ReportFeedback {
         requireNonNull(feedbackType);
         requireNonNull(feedbackSource);
-        requireNonNegative(sortOrder);
+        requirePositive(sortOrder);
         requireNotBlank(content);
     }
 }

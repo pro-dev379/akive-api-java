@@ -19,7 +19,9 @@ public enum ResourceConflictError implements ApplicationError {
 
     EMAIL_ALREADY_VERIFIED("Email is already verified."),
 
-    DAILY_LOG_TIME_OVERLAPS("Daily log time overlaps with existing daily log.")
+    DAILY_LOG_TIME_OVERLAPS("Daily log time overlaps with existing daily log."),
+
+    REPORT_ALREADY_EXISTS("Report already exists.")
     ;
 
     private final String message;

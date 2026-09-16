@@ -1,4 +1,4 @@
-package net.akive.api.report.adapter.webapi.dto;
+package net.akive.api.report.adapter.webapi.dto.response;
 
 import net.akive.api.report.domain.ReportType;
 

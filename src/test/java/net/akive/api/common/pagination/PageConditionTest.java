@@ -79,7 +79,7 @@ class PageConditionTest {
     }
 
     @Test
-    void 정렬_속성이_유효하지_않으면_페이징_조건을_생성할_수_없다() {
+    void 정렬_속성이_올바르지_않으면_페이징_조건을_생성할_수_없다() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> PageCondition.of(PAGE, SIZE, "   "))
                 .withMessage("Sort property must not be blank.");
