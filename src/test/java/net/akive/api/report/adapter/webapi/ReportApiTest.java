@@ -20,12 +20,11 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMPTY_COLLECTION;
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_REPORT_TYPE;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceConflictError.REPORT_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture.createEmptyReportFeedbackCreateRequest;
+import static net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture.createEmptyReportFeedbackRequest;
 import static net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture.createReportCreateRequest;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportCreateCommand;
 import static net.akive.api.report.domain.ReportFixture.*;
@@ -80,13 +79,26 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 리포트_생성_시_피드백이_하나도_없으면_400을_응답한다() {
-        ReportCreateRequest request = createEmptyReportFeedbackCreateRequest();
+    void 리포트_생성_시_피드백_내용이_하나도_없으면_400을_응답한다() {
+        ReportCreateRequest reportCreateRequest = createReportCreateRequest(createEmptyReportFeedbackRequest());
+        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+
+        MvcTestResultAssert result = postJson(REPORTS_URL, USER_ID, toJson(reportCreateRequest)).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, EMPTY_COLLECTION);
+
+        then(currentTimeProvider).should().now();
+        then(reportCreator).should(never()).create(any(ReportCreateCommand.class));
+    }
+
+    @Test
+    void 리포트_생성_시_리포트_작성일이_미래면_400을_응답한다() {
+        ReportCreateRequest request = createReportCreateRequest(REQUESTED_AT.toLocalDate().plusDays(1));
         given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
 
         MvcTestResultAssert result = postJson(REPORTS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
-        assertErrorResponse(result, EMPTY_COLLECTION);
+        assertErrorResponse(result, REPORT_DATE_IN_FUTURE);
 
         then(currentTimeProvider).should().now();
         then(reportCreator).should(never()).create(any(ReportCreateCommand.class));
@@ -121,6 +133,23 @@ class ReportApiTest extends PrivateApiTestSupport {
         MvcTestResultAssert result = postJson(REPORTS_URL, UNKNOWN_USER_ID, toJson(request)).hasStatus(NOT_FOUND);
 
         assertErrorResponse(result, USER_NOT_FOUND);
+
+        then(currentTimeProvider).should().now();
+        then(reportCreator).should().create(command);
+    }
+
+    @Test
+    void 리포트_생성_시_세셔널_플랜이_없으면_404를_응답한다() {
+        ReportCreateRequest request = createReportCreateRequest();
+        ReportCreateCommand command = createReportCreateCommand(USER_ID);
+        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND))
+                .given(reportCreator)
+                .create(command);
+
+        MvcTestResultAssert result = postJson(REPORTS_URL, USER_ID, toJson(request)).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, SESSIONAL_PLAN_NOT_FOUND);
 
         then(currentTimeProvider).should().now();
         then(reportCreator).should().create(command);
@@ -167,7 +196,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 작성_가능한_리포트_타입_조회_시_세셔널_플랜이_없으면_404를_응답한다() {
+    void 작성_가능한_리포트_타입_조회_시_리포트_날짜와_관련된_세셔널_플랜이_없으면_404를_응답한다() {
         given(reportFinder.findAvailableReportTypes(USER_ID, REPORT_ON))
                 .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 

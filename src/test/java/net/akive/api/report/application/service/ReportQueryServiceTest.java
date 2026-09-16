@@ -45,7 +45,7 @@ class ReportQueryServiceTest {
     }
 
     @Test
-    void 해당_날짜와_관련된_세셔널_플랜이_없으면_작성_가능한_리포트_타입_조회에_실패한다() {
+    void 리포트_날짜와_관련된_세셔널_플랜이_없으면_작성_가능한_리포트_타입_조회에_실패한다() {
         given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
