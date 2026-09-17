@@ -6,6 +6,7 @@ import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.report.adapter.webapi.dto.request.ReportCreateRequest;
 import net.akive.api.report.adapter.webapi.dto.request.ReportFeedbackUpdateRequest;
 import net.akive.api.report.adapter.webapi.dto.response.ReportCreateResponse;
+import net.akive.api.report.adapter.webapi.dto.response.ReportFindResponse;
 import net.akive.api.report.adapter.webapi.dto.response.ReportTypesFindResponse;
 import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.ReportFinder;
@@ -39,6 +40,11 @@ public class ReportApi {
         LocalDateTime requestedAt = currentTimeProvider.now();
 
         return new ReportCreateResponse(reportCreator.create(request.to(userId, requestedAt)));
+    }
+
+    @GetMapping("/{reportId}")
+    public ReportFindResponse find(@AuthenticatedUserId Long userId, @PathVariable Long reportId) {
+        return ReportFindResponse.from(reportFinder.find(reportId, userId));
     }
 
     @PutMapping("/{reportId}")

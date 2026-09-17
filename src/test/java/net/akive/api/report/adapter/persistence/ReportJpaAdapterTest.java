@@ -55,13 +55,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 저장된_리포트를_다시_저장할_때_피드백_목록을_모두_교체해서_저장한다() {
         User savedUser = saveUser();
-        Report report = Report.create(
-                savedUser,
-                REPORT_ON,
-                WEEKLY,
-                createReportFeedbackItems(),
-                currentTimeProvider.now()
-        );
+        Report report = createReport(savedUser);
         Report savedReport = reportRepository.save(report);
         flushAndClear();
 
@@ -82,13 +76,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 리포트_식별자와_회원_식별자로_리포트를_조회한다() {
         User savedUser = saveUser();
-        Report report = Report.create(
-                savedUser,
-                REPORT_ON,
-                WEEKLY,
-                createReportFeedbackItems(),
-                currentTimeProvider.now()
-        );
+        Report report = createReport(savedUser);
         Report savedReport = reportRepository.save(report);
         flushAndClear();
 
@@ -100,28 +88,21 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundReport).isPresent();
         assertThat(foundReport.get().getReportId()).isEqualTo(savedReport.getReportId());
         assertThat(foundReport.get().getUser().getUserId()).isEqualTo(savedUser.getUserId());
-        assertThat(foundReport.get().getReportOn()).isEqualTo(REPORT_ON);
-        assertThat(foundReport.get().getReportType()).isEqualTo(WEEKLY);
-        assertThat(foundReport.get().getFeedbackItems()).containsExactlyElementsOf(report.getFeedbackItems());
+        assertThat(foundReport.get().getReportOn()).isEqualTo(savedReport.getReportOn());
+        assertThat(foundReport.get().getReportType()).isEqualTo(savedReport.getReportType());
+        assertThat(foundReport.get().getFeedbackItems()).containsExactlyElementsOf(savedReport.getFeedbackItems());
     }
 
     @Test
     void 회원_식별자와_리포트_작성일과_리포트_타입으로_존재_여부를_조회한다() {
         User savedUser = saveUser();
-        Report report = Report.create(
-                savedUser,
-                REPORT_ON,
-                WEEKLY,
-                List.of(createReportFeedback(HIGHLIGHT)),
-                currentTimeProvider.now()
-        );
-        reportRepository.save(report);
+        Report savedReport = reportRepository.save(createReport(savedUser));
         flushAndClear();
 
         boolean exists = reportRepository.existsByUserIdAndReportOnAndReportType(
                 savedUser.getUserId(),
-                REPORT_ON,
-                WEEKLY
+                savedReport.getReportOn(),
+                savedReport.getReportType()
         );
 
         assertThat(exists).isTrue();

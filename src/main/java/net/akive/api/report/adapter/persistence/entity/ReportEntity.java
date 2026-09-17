@@ -52,6 +52,7 @@ public class ReportEntity extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "VARCHAR(20)")
     private ReportType reportType;
 
+    @OrderBy("sortOrder ASC")
     @OneToMany(mappedBy = "report", cascade = ALL, orphanRemoval = true)
     private List<ReportFeedbackEntity> feedbackItems = new ArrayList<>();
 

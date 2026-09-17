@@ -2,6 +2,8 @@ package net.akive.api.report.application.service;
 
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
+import net.akive.api.report.application.required.ReportRepository;
+import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,10 +13,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import static net.akive.api.common.exception.business.ResourceNotFoundError.REPORT_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.report.domain.ReportFixture.REPORT_ON;
-import static net.akive.api.report.domain.ReportFixture.createYear2026SessionPeriod;
+import static net.akive.api.report.domain.ReportFixture.*;
 import static net.akive.api.report.domain.ReportType.MONTHLY;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
@@ -29,8 +32,37 @@ class ReportQueryServiceTest {
     @Mock
     SessionalPlanFinder sessionalPlanFinder;
 
+    @Mock
+    ReportRepository reportRepository;
+
     @InjectMocks
     ReportQueryService reportQueryService;
+
+    @Test
+    void 리포트를_조회한다() {
+        Report report = createReconstructedReport();
+        given(reportRepository.findByReportIdAndUserId(REPORT_ID, USER_ID))
+                .willReturn(Optional.of(report));
+
+        Report foundReport = reportQueryService.find(REPORT_ID, USER_ID);
+
+        assertThat(foundReport).isEqualTo(report);
+
+        then(reportRepository).should().findByReportIdAndUserId(REPORT_ID, USER_ID);
+    }
+
+    @Test
+    void 리포트가_없으면_조회에_실패한다() {
+        given(reportRepository.findByReportIdAndUserId(UNKNOWN_REPORT_ID, USER_ID))
+                .willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> reportQueryService.find(UNKNOWN_REPORT_ID, USER_ID))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(REPORT_NOT_FOUND);
+
+        then(reportRepository).should().findByReportIdAndUserId(UNKNOWN_REPORT_ID, USER_ID);
+    }
 
     @Test
     void 작성_가능한_리포트_타입을_조회한다() {

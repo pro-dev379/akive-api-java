@@ -11,6 +11,7 @@ import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.ReportFinder;
 import net.akive.api.report.application.provided.dto.ReportCreateCommand;
 import net.akive.api.report.application.provided.dto.ReportFeedbackItemsUpdateCommand;
+import net.akive.api.report.domain.Report;
 import net.akive.api.support.PrivateApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -172,6 +173,44 @@ class ReportApiTest extends PrivateApiTestSupport {
 
         then(currentTimeProvider).should().now();
         then(reportCreator).should().create(command);
+    }
+
+    @Test
+    void 리포트를_조회한다() {
+        Report report = createReconstructedReport();
+        given(reportFinder.find(REPORT_ID, USER_ID)).willReturn(report);
+
+        MvcTestResultAssert result = get(REPORT_URL, USER_ID, REPORT_ID).hasStatusOk();
+
+        result.bodyJson()
+                .extractingPath("$.reportId")
+                .isEqualTo(report.getReportId().intValue());
+        result.bodyJson()
+                .extractingPath("$.reportOn")
+                .isEqualTo(report.getReportOn().toString());
+        result.bodyJson()
+                .extractingPath("$.reportType")
+                .isEqualTo(report.getReportType().name());
+        result.bodyJson()
+                .extractingPath("$.feedback.highlights[0]")
+                .isEqualTo(report.getFeedbackItems().get(0).content());
+        result.bodyJson()
+                .extractingPath("$.feedback.improvements[0]")
+                .isEqualTo(report.getFeedbackItems().get(1).content());
+
+        then(reportFinder).should().find(REPORT_ID, USER_ID);
+    }
+
+    @Test
+    void 리포트_조회_시_리포트가_없으면_404를_응답한다() {
+        given(reportFinder.find(UNKNOWN_REPORT_ID, USER_ID))
+                .willThrow(new ResourceNotFoundException(REPORT_NOT_FOUND));
+
+        MvcTestResultAssert result = get(REPORT_URL, USER_ID, UNKNOWN_REPORT_ID).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, REPORT_NOT_FOUND);
+
+        then(reportFinder).should().find(UNKNOWN_REPORT_ID, USER_ID);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package net.akive.api.report.domain;
 
 import net.akive.api.plan.domain.value.SessionPeriod;
+import net.akive.api.user.domain.User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +10,8 @@ import java.util.List;
 import static net.akive.api.report.domain.FeedbackSource.USER;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
 import static net.akive.api.report.domain.FeedbackType.IMPROVEMENT;
+import static net.akive.api.report.domain.ReportType.WEEKLY;
+import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 
 public class ReportFixture {
 
@@ -27,6 +30,85 @@ public class ReportFixture {
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 12, 31)
         );
+    }
+
+    public static Report createReport() {
+        return createReport(createReconstructedUser());
+    }
+
+    public static Report createReport(User user) {
+        return createReport(user, REPORT_ON, WEEKLY, createReportFeedbackItems(), REQUESTED_AT);
+    }
+
+    public static Report createReport(LocalDate reportOn) {
+        return createReport(reportOn, createReportFeedbackItems());
+    }
+
+    public static Report createReport(List<ReportFeedback> feedbackItems) {
+        return createReport(REPORT_ON, feedbackItems);
+    }
+
+    public static Report createReport(LocalDate reportOn, List<ReportFeedback> feedbackItems) {
+        return createReport(createReconstructedUser(), reportOn, WEEKLY, feedbackItems, REQUESTED_AT);
+    }
+
+    public static Report createReport(
+            User user,
+            LocalDate reportOn,
+            ReportType reportType,
+            List<ReportFeedback> feedbackItems,
+            LocalDateTime requestedAt
+    ) {
+        return Report.create(user, reportOn, reportType, feedbackItems, requestedAt);
+    }
+
+    public static Report createReconstructedReport() {
+        return createReconstructedReport(REPORT_ID);
+    }
+
+    public static Report createReconstructedReport(Long reportId) {
+        return createReconstructedReport(reportId, createReconstructedUser());
+    }
+
+    public static Report createReconstructedReport(Long reportId, User user) {
+        return createReconstructedReport(
+                reportId,
+                user,
+                REPORT_ON,
+                WEEKLY,
+                createReportFeedbackItems(),
+                REQUESTED_AT
+        );
+    }
+
+    public static Report createReconstructedReport(LocalDate reportOn) {
+        return createReconstructedReport(reportOn, createReportFeedbackItems());
+    }
+
+    public static Report createReconstructedReport(List<ReportFeedback> feedbackItems) {
+        return createReconstructedReport(REPORT_ON, feedbackItems);
+    }
+
+    public static Report createReconstructedReport(LocalDate reportOn, List<ReportFeedback> feedbackItems) {
+        return createReconstructedReport(
+                REPORT_ID,
+                createReconstructedUser(),
+                reportOn,
+                WEEKLY,
+                feedbackItems,
+                REQUESTED_AT
+        );
+    }
+
+    public static Report createReconstructedReport(
+            Long reportId,
+            User user,
+            LocalDate reportOn,
+            ReportType reportType,
+            List<ReportFeedback> feedbackItems,
+            LocalDateTime requestedAt
+    ) {
+        return Report.reconstruct(reportId, user, reportOn, reportType, feedbackItems, requestedAt);
     }
 
     public static ReportFeedback createReportFeedback(FeedbackType feedbackType) {

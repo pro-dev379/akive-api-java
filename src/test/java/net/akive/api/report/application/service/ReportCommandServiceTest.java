@@ -26,7 +26,6 @@ import static net.akive.api.report.application.service.fixture.ReportCommandFixt
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportFeedbackItemsUpdateCommand;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
 import static net.akive.api.report.domain.ReportFixture.*;
-import static net.akive.api.report.domain.ReportType.WEEKLY;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -124,14 +123,7 @@ class ReportCommandServiceTest {
     @Test
     void 리포트_피드백_목록을_수정한다() {
         User user = createReconstructedUser(USER_ID);
-        Report report = Report.reconstruct(
-                REPORT_ID,
-                user,
-                REPORT_ON,
-                WEEKLY,
-                createReportFeedbackItems(),
-                REQUESTED_AT
-        );
+        Report report = createReconstructedReport(REPORT_ID, user);
         ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(USER_ID);
         given(reportRepository.findByReportIdAndUserId(command.reportId(), command.userId()))
                 .willReturn(Optional.of(report));

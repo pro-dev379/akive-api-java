@@ -9,10 +9,10 @@ import java.util.List;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMPTY_COLLECTION;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.REPORT_DATE_IN_FUTURE;
-import static net.akive.api.report.domain.FeedbackType.*;
+import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
+import static net.akive.api.report.domain.FeedbackType.NOTE;
 import static net.akive.api.report.domain.ReportFixture.*;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
-import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.*;
 
@@ -20,7 +20,7 @@ class ReportTest {
 
     @Test
     void 저장된_리포트를_복원한다() {
-        User user = createReconstructedUser(USER_ID);
+        User user = createReconstructedUser();
         List<ReportFeedback> feedbackItems = createReportFeedbackItems();
 
         Report report = Report.reconstruct(
@@ -42,14 +42,7 @@ class ReportTest {
     @Test
     void 리포트_작성일이_미래이면_리포트를_복원할_수_없다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> Report.reconstruct(
-                        REPORT_ID,
-                        createReconstructedUser(USER_ID),
-                        REQUESTED_AT.toLocalDate().plusDays(1),
-                        WEEKLY,
-                        createReportFeedbackItems(),
-                        REQUESTED_AT
-                ))
+                .isThrownBy(() -> createReconstructedReport(REQUESTED_AT.toLocalDate().plusDays(1)))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(REPORT_DATE_IN_FUTURE);
     }
@@ -57,21 +50,14 @@ class ReportTest {
     @Test
     void 피드백_목록이_비어있는_값이면_리포트를_복원할_수_없다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> Report.reconstruct(
-                        REPORT_ID,
-                        createReconstructedUser(USER_ID),
-                        REPORT_ON,
-                        WEEKLY,
-                        List.of(),
-                        REQUESTED_AT
-                ))
+                .isThrownBy(() -> createReconstructedReport(List.of()))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMPTY_COLLECTION);
     }
 
     @Test
     void 리포트를_생성한다() {
-        User user = createReconstructedUser(USER_ID);
+        User user = createReconstructedUser();
         List<ReportFeedback> feedbackItems = createReportFeedbackItems();
 
         Report report = Report.create(
@@ -92,13 +78,7 @@ class ReportTest {
     @Test
     void 리포트_작성일이_미래이면_리포트를_생성할_수_없다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> Report.create(
-                        createReconstructedUser(USER_ID),
-                        REQUESTED_AT.toLocalDate().plusDays(1),
-                        WEEKLY,
-                        createReportFeedbackItems(),
-                        REQUESTED_AT
-                ))
+                .isThrownBy(() -> createReport(REQUESTED_AT.toLocalDate().plusDays(1)))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(REPORT_DATE_IN_FUTURE);
     }
@@ -106,26 +86,14 @@ class ReportTest {
     @Test
     void 피드백_목록이_비어있는_값이면_리포트를_생성할_수_없다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> Report.create(
-                        createReconstructedUser(USER_ID),
-                        REPORT_ON,
-                        WEEKLY,
-                        List.of(),
-                        REQUESTED_AT
-                ))
+                .isThrownBy(() -> createReport(List.of()))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMPTY_COLLECTION);
     }
 
     @Test
     void 리포트_피드백_목록을_수정한다() {
-        Report report = Report.create(
-                createReconstructedUser(USER_ID),
-                REPORT_ON,
-                WEEKLY,
-                createReportFeedbackItems(),
-                REQUESTED_AT
-        );
+        Report report = createReport();
         ReportFeedback targetFeedback = createReportFeedback(NOTE);
 
         report.updateFeedbackItems(List.of(targetFeedback));
@@ -135,13 +103,7 @@ class ReportTest {
 
     @Test
     void 리포트_피드백_목록을_비어있는_값으로_수정할_수_없다() {
-        Report report = Report.create(
-                createReconstructedUser(USER_ID),
-                REPORT_ON,
-                WEEKLY,
-                createReportFeedbackItems(),
-                REQUESTED_AT
-        );
+        Report report = createReport();
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> report.updateFeedbackItems(List.of()))
@@ -152,13 +114,7 @@ class ReportTest {
     @Test
     void 피드백_목록은_외부에서_수정할_수_없다() {
         List<ReportFeedback> feedbackItems = new ArrayList<>(createReportFeedbackItems());
-        Report report = Report.create(
-                createReconstructedUser(USER_ID),
-                REPORT_ON,
-                WEEKLY,
-                feedbackItems,
-                REQUESTED_AT
-        );
+        Report report = createReport(feedbackItems);
 
         feedbackItems.clear();
 
@@ -169,23 +125,8 @@ class ReportTest {
 
     @Test
     void 같은_식별자를_가진_리포트는_같게_취급한다() {
-        User user = createReconstructedUser(USER_ID);
-        Report report = Report.reconstruct(
-                REPORT_ID,
-                user,
-                REPORT_ON,
-                WEEKLY,
-                List.of(createReportFeedback(HIGHLIGHT)),
-                REQUESTED_AT
-        );
-        Report sameReport = Report.reconstruct(
-                REPORT_ID,
-                user,
-                REPORT_ON.plusDays(1),
-                WEEKLY,
-                List.of(createReportFeedback(IMPROVEMENT)),
-                REQUESTED_AT.plusDays(1)
-        );
+        Report report = createReconstructedReport(REPORT_ID);
+        Report sameReport = createReconstructedReport(REPORT_ID);
 
         assertThat(report).isEqualTo(sameReport);
         assertThat(report.hashCode()).isEqualTo(sameReport.hashCode());
@@ -193,29 +134,15 @@ class ReportTest {
 
     @Test
     void 식별자가_다른_리포트는_다르게_취급한다() {
-        Report report = Report.reconstruct(
-                REPORT_ID,
-                createReconstructedUser(USER_ID),
-                REPORT_ON,
-                WEEKLY,
-                createReportFeedbackItems(),
-                REQUESTED_AT
-        );
-        Report anotherReport = Report.reconstruct(
-                ANOTHER_REPORT_ID,
-                createReconstructedUser(USER_ID),
-                REPORT_ON,
-                WEEKLY,
-                createReportFeedbackItems(),
-                REQUESTED_AT
-        );
+        Report report = createReconstructedReport(REPORT_ID);
+        Report anotherReport = createReconstructedReport(ANOTHER_REPORT_ID);
 
         assertThat(report).isNotEqualTo(anotherReport);
     }
 
     @Test
     void 식별자가_없는_리포트끼리는_나머지_값이_같더라도_다른_것으로_취급한다() {
-        User user = createReconstructedUser(USER_ID);
+        User user = createReconstructedUser();
         Report report = Report.create(user, REPORT_ON, WEEKLY, createReportFeedbackItems(), REQUESTED_AT);
         Report anotherReport = Report.create(user, REPORT_ON, WEEKLY, createReportFeedbackItems(), REQUESTED_AT);
 
