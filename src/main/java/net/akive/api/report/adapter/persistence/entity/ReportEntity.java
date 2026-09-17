@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.report.domain.Report;
+import net.akive.api.report.domain.ReportFeedback;
 import net.akive.api.report.domain.ReportType;
 import net.akive.api.user.adapter.persistence.entity.UserEntity;
 
@@ -86,5 +87,15 @@ public class ReportEntity extends BaseTimeEntity {
         reportFeedback.assignReport(this);
 
         this.feedbackItems.add(reportFeedback);
+    }
+
+    public void clearFeedbackItems() {
+        this.feedbackItems.clear();
+    }
+
+    public void updateFeedbackItems(List<ReportFeedback> feedbackItems) {
+        feedbackItems.stream()
+                .map(ReportFeedbackEntity::from)
+                .forEach(this::addReportFeedback);
     }
 }

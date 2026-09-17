@@ -4,10 +4,13 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.report.domain.FeedbackSource;
 import net.akive.api.report.domain.FeedbackType;
 import net.akive.api.report.domain.ReportFeedback;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
@@ -27,9 +30,10 @@ import static net.akive.api.report.domain.FeedbackSource.USER;
         }
 )
 @Getter
+@EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor(access = PRIVATE)
 @NoArgsConstructor(access = PROTECTED)
-public class ReportFeedbackEntity extends BaseTimeEntity {
+public class ReportFeedbackEntity {
 
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long reportFeedbackId;
@@ -51,6 +55,10 @@ public class ReportFeedbackEntity extends BaseTimeEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     public static ReportFeedbackEntity from(ReportFeedback reportFeedback) {
         ReportFeedbackEntity reportFeedbackEntity = new ReportFeedbackEntity();

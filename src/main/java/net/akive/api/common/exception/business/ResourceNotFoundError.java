@@ -25,7 +25,9 @@ public enum ResourceNotFoundError implements ApplicationError {
 
     EMAIL_VERIFICATION_NOT_FOUND("Email verification not found."),
 
-    DAILY_LOG_NOT_FOUND("Daily log not found.")
+    DAILY_LOG_NOT_FOUND("Daily log not found."),
+
+    REPORT_NOT_FOUND("Report not found."),
     ;
 
     private final String message;

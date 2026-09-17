@@ -3,6 +3,7 @@ package net.akive.api.report.application.service;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.report.application.provided.dto.ReportCreateCommand;
+import net.akive.api.report.application.provided.dto.ReportFeedbackItemsUpdateCommand;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportFeedback;
@@ -19,11 +20,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.ResourceConflictError.REPORT_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.REPORT_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportCreateCommand;
+import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportFeedbackItemsUpdateCommand;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
-import static net.akive.api.report.domain.ReportFixture.REPORT_ID;
-import static net.akive.api.report.domain.ReportFixture.createReportFeedback;
+import static net.akive.api.report.domain.ReportFixture.*;
+import static net.akive.api.report.domain.ReportType.WEEKLY;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -115,6 +118,44 @@ class ReportCommandServiceTest {
         then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
         then(reportValidationService).should()
                 .validateCreatable(command.userId(), command.reportOn(), command.reportType());
+        then(reportRepository).should(never()).save(any());
+    }
+
+    @Test
+    void 리포트_피드백_목록을_수정한다() {
+        User user = createReconstructedUser(USER_ID);
+        Report report = Report.reconstruct(
+                REPORT_ID,
+                user,
+                REPORT_ON,
+                WEEKLY,
+                createReportFeedbackItems(),
+                REQUESTED_AT
+        );
+        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(USER_ID);
+        given(reportRepository.findByReportIdAndUserId(command.reportId(), command.userId()))
+                .willReturn(Optional.of(report));
+
+        reportCommandService.updateFeedbackItems(command);
+
+        then(reportRepository).should().findByReportIdAndUserId(command.reportId(), command.userId());
+        then(reportRepository).should().save(report);
+
+        assertThat(report.getFeedbackItems()).containsExactlyElementsOf(command.targetFeedbackItems());
+    }
+
+    @Test
+    void 리포트가_없으면_피드백_목록을_수정할_수_없다() {
+        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(UNKNOWN_REPORT_ID, USER_ID);
+        given(reportRepository.findByReportIdAndUserId(command.reportId(), command.userId()))
+                .willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> reportCommandService.updateFeedbackItems(command))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(REPORT_NOT_FOUND);
+
+        then(reportRepository).should().findByReportIdAndUserId(command.reportId(), command.userId());
         then(reportRepository).should(never()).save(any());
     }
 }

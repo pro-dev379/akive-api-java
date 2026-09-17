@@ -1,6 +1,7 @@
 package net.akive.api.report.application.service.fixture;
 
 import net.akive.api.report.application.provided.dto.ReportCreateCommand;
+import net.akive.api.report.application.provided.dto.ReportFeedbackItemsUpdateCommand;
 import net.akive.api.report.domain.ReportFeedback;
 
 import java.util.List;
@@ -24,6 +25,21 @@ public class ReportCommandFixture {
                 WEEKLY,
                 feedbackItems,
                 REQUESTED_AT
+        );
+    }
+
+    public static ReportFeedbackItemsUpdateCommand createReportFeedbackItemsUpdateCommand(Long userId) {
+        return createReportFeedbackItemsUpdateCommand(REPORT_ID, userId);
+    }
+
+    public static ReportFeedbackItemsUpdateCommand createReportFeedbackItemsUpdateCommand(
+            Long reportId,
+            Long userId
+    ) {
+        return new ReportFeedbackItemsUpdateCommand(
+                reportId,
+                userId,
+                createTargetReportFeedbackItems()
         );
     }
 }

@@ -10,6 +10,7 @@ import net.akive.api.user.domain.User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
@@ -65,6 +66,25 @@ public class Report {
                 .reportType(requireNonNull(reportType))
                 .feedbackItems(List.copyOf(requireNotEmpty(feedbackItems)))
                 .build();
+    }
+
+    public void updateFeedbackItems(List<ReportFeedback> targetFeedbackItems) {
+        this.feedbackItems = List.copyOf(requireNotEmpty(targetFeedbackItems));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Report that = (Report) o;
+
+        return this.reportId != null && Objects.equals(this.reportId, that.reportId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     private static void validateReportOnNotFuture(LocalDate reportOn, LocalDateTime baseTime) {

@@ -6,6 +6,7 @@ import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.dto.ReportCreateCommand;
+import net.akive.api.report.application.provided.dto.ReportFeedbackItemsUpdateCommand;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
 import net.akive.api.user.application.provided.UserFinder;
@@ -13,6 +14,7 @@ import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static net.akive.api.common.exception.business.ResourceNotFoundError.REPORT_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 
 @Service
@@ -45,8 +47,23 @@ class ReportCommandService implements ReportCreator {
         return savedReport.getReportId();
     }
 
+    @Override
+    public void updateFeedbackItems(ReportFeedbackItemsUpdateCommand command)
+            throws BusinessRuleViolationException, ResourceNotFoundException {
+        Report report = findReportOrThrow(command.reportId(), command.userId());
+
+        report.updateFeedbackItems(command.targetFeedbackItems());
+
+        reportRepository.save(report);
+    }
+
     private User findUserOrThrow(Long userId) {
         return userFinder.findByUserIdAndNotWithdrawn(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+    }
+
+    private Report findReportOrThrow(Long reportId, Long userId) {
+        return reportRepository.findByReportIdAndUserId(reportId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(REPORT_NOT_FOUND));
     }
 }

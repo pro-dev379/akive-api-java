@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
 import static net.akive.api.report.domain.FeedbackType.IMPROVEMENT;
-import static net.akive.api.report.domain.ReportFixture.REPORT_ON;
-import static net.akive.api.report.domain.ReportFixture.createReportFeedback;
+import static net.akive.api.report.domain.ReportFixture.*;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,7 +26,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
     ReportJpaRepository reportJpaRepository;
 
     @Test
-    void 리포트를_저장한다() {
+    void 신규_리포트를_저장한다() {
         User savedUser = saveUser();
         ReportFeedback firstFeedback = createReportFeedback(HIGHLIGHT);
         ReportFeedback secondFeedback = createReportFeedback(IMPROVEMENT);
@@ -50,6 +50,59 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundReport.getReportOn()).isEqualTo(REPORT_ON);
         assertThat(foundReport.getReportType()).isEqualTo(WEEKLY);
         assertThat(foundReport.getFeedbackItems()).containsExactly(firstFeedback, secondFeedback);
+    }
+
+    @Test
+    void 저장된_리포트를_다시_저장할_때_피드백_목록을_모두_교체해서_저장한다() {
+        User savedUser = saveUser();
+        Report report = Report.create(
+                savedUser,
+                REPORT_ON,
+                WEEKLY,
+                createReportFeedbackItems(),
+                currentTimeProvider.now()
+        );
+        Report savedReport = reportRepository.save(report);
+        flushAndClear();
+
+        List<ReportFeedback> targetFeedbackItems = createTargetReportFeedbackItems();
+        savedReport.updateFeedbackItems(targetFeedbackItems);
+
+        reportRepository.save(savedReport);
+        flushAndClear();
+
+        Report foundReport = reportJpaRepository.findById(savedReport.getReportId())
+                .orElseThrow()
+                .to(currentTimeProvider.now());
+
+        assertThat(foundReport.getFeedbackItems())
+                .containsExactlyElementsOf(targetFeedbackItems);
+    }
+
+    @Test
+    void 리포트_식별자와_회원_식별자로_리포트를_조회한다() {
+        User savedUser = saveUser();
+        Report report = Report.create(
+                savedUser,
+                REPORT_ON,
+                WEEKLY,
+                createReportFeedbackItems(),
+                currentTimeProvider.now()
+        );
+        Report savedReport = reportRepository.save(report);
+        flushAndClear();
+
+        Optional<Report> foundReport = reportRepository.findByReportIdAndUserId(
+                savedReport.getReportId(),
+                savedUser.getUserId()
+        );
+
+        assertThat(foundReport).isPresent();
+        assertThat(foundReport.get().getReportId()).isEqualTo(savedReport.getReportId());
+        assertThat(foundReport.get().getUser().getUserId()).isEqualTo(savedUser.getUserId());
+        assertThat(foundReport.get().getReportOn()).isEqualTo(REPORT_ON);
+        assertThat(foundReport.get().getReportType()).isEqualTo(WEEKLY);
+        assertThat(foundReport.get().getFeedbackItems()).containsExactlyElementsOf(report.getFeedbackItems());
     }
 
     @Test

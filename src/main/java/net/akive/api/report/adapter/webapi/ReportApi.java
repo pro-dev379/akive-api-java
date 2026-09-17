@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.report.adapter.webapi.dto.request.ReportCreateRequest;
+import net.akive.api.report.adapter.webapi.dto.request.ReportFeedbackUpdateRequest;
 import net.akive.api.report.adapter.webapi.dto.response.ReportCreateResponse;
 import net.akive.api.report.adapter.webapi.dto.response.ReportTypesFindResponse;
 import net.akive.api.report.application.provided.ReportCreator;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping("/reports")
@@ -37,6 +39,16 @@ public class ReportApi {
         LocalDateTime requestedAt = currentTimeProvider.now();
 
         return new ReportCreateResponse(reportCreator.create(request.to(userId, requestedAt)));
+    }
+
+    @PutMapping("/{reportId}")
+    @ResponseStatus(NO_CONTENT)
+    public void updateFeedback(
+            @AuthenticatedUserId Long userId,
+            @PathVariable Long reportId,
+            @Validated @RequestBody ReportFeedbackUpdateRequest request
+    ) {
+        reportCreator.updateFeedbackItems(request.to(reportId, userId));
     }
 
     @GetMapping("/available-types")

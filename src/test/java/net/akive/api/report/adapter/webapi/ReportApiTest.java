@@ -5,10 +5,12 @@ import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.report.adapter.webapi.dto.request.ReportCreateRequest;
+import net.akive.api.report.adapter.webapi.dto.request.ReportFeedbackUpdateRequest;
 import net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture;
 import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.ReportFinder;
 import net.akive.api.report.application.provided.dto.ReportCreateCommand;
+import net.akive.api.report.application.provided.dto.ReportFeedbackItemsUpdateCommand;
 import net.akive.api.support.PrivateApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,11 +24,10 @@ import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceConflictError.REPORT_ALREADY_EXISTS;
-import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture.createEmptyReportFeedbackRequest;
-import static net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture.createReportCreateRequest;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
+import static net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture.*;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportCreateCommand;
+import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportFeedbackItemsUpdateCommand;
 import static net.akive.api.report.domain.ReportFixture.*;
 import static net.akive.api.report.domain.ReportType.MONTHLY;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
@@ -41,6 +42,7 @@ import static org.springframework.http.HttpStatus.*;
 class ReportApiTest extends PrivateApiTestSupport {
 
     private static final String REPORTS_URL = "/reports";
+    private static final String REPORT_URL = "/reports/{reportId}";
     private static final String AVAILABLE_REPORT_TYPES_URL = "/reports/available-types?reportOn={reportOn}";
 
     @MockitoBean
@@ -173,6 +175,52 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 리포트_피드백_목록을_수정한다() {
+        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
+        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(USER_ID);
+
+        putJson(REPORT_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(NO_CONTENT);
+
+        then(reportCreator).should().updateFeedbackItems(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUpdateRequests")
+    void 리포트_수정_요청값이_올바르지_않으면_400을_응답한다(ReportFeedbackUpdateRequest request) {
+        putJson(REPORT_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(BAD_REQUEST);
+
+        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
+    }
+
+    @Test
+    void 리포트_수정_시_피드백_내용이_하나도_없으면_400을_응답한다() {
+        ReportFeedbackUpdateRequest request = new ReportFeedbackUpdateRequest(createEmptyReportFeedbackRequest());
+
+        MvcTestResultAssert result = putJson(REPORT_URL, USER_ID, toJson(request), REPORT_ID)
+                .hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, EMPTY_COLLECTION);
+
+        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
+    }
+
+    @Test
+    void 리포트_수정_시_리포트가_없으면_404를_응답한다() {
+        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
+        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(UNKNOWN_REPORT_ID, USER_ID);
+        willThrow(new ResourceNotFoundException(REPORT_NOT_FOUND))
+                .given(reportCreator)
+                .updateFeedbackItems(command);
+
+        MvcTestResultAssert result = putJson(REPORT_URL, USER_ID, toJson(request), UNKNOWN_REPORT_ID)
+                .hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, REPORT_NOT_FOUND);
+
+        then(reportCreator).should().updateFeedbackItems(command);
+    }
+
+    @Test
     void 작성_가능한_리포트_타입을_조회한다() {
         given(reportFinder.findAvailableReportTypes(USER_ID, REPORT_ON))
                 .willReturn(List.of(WEEKLY, MONTHLY));
@@ -209,5 +257,9 @@ class ReportApiTest extends PrivateApiTestSupport {
 
     private static Stream<ReportCreateRequest> invalidCreateRequests() {
         return ReportRequestFixture.invalidCreateRequests();
+    }
+
+    private static Stream<ReportFeedbackUpdateRequest> invalidUpdateRequests() {
+        return ReportRequestFixture.invalidUpdateRequests();
     }
 }
