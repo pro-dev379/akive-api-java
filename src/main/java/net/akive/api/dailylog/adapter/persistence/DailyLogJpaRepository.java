@@ -26,7 +26,7 @@ public interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Lon
                     where d.user.userId = :userId
                     """
     )
-    Page<LocalDate> findLogOnsByUserId(Long userId, Pageable pageable);
+    Page<LocalDate> findLogOnPageByUserId(Long userId, Pageable pageable);
 
     Optional<DailyLogEntity> findByDailyLogIdAndUser_UserId(Long dailyLogId, Long userId);
 

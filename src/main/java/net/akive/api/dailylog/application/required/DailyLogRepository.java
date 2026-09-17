@@ -13,7 +13,7 @@ public interface DailyLogRepository {
 
     DailyLog save(DailyLog dailyLog);
 
-    PageResult<LocalDate> findLogOnsByUserId(Long userId, PageCondition pageCondition);
+    PageResult<LocalDate> findLogOnPageByUserId(Long userId, PageCondition pageCondition);
 
     Optional<DailyLog> findByDailyLogIdAndUserId(Long dailyLogId, Long userId);
 

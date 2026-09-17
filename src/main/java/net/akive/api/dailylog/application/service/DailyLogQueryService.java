@@ -27,8 +27,8 @@ class DailyLogQueryService implements DailyLogFinder {
     }
 
     @Override
-    public PageResult<LocalDate> findLogOns(Long userId, PageCondition pageCondition) {
-        return dailyLogRepository.findLogOnsByUserId(userId, pageCondition);
+    public PageResult<LocalDate> findLogOnPage(Long userId, PageCondition pageCondition) {
+        return dailyLogRepository.findLogOnPageByUserId(userId, pageCondition);
     }
 
     @Override

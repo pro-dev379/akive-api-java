@@ -35,8 +35,8 @@ class DailyLogJpaAdapter implements DailyLogRepository {
     }
 
     @Override
-    public PageResult<LocalDate> findLogOnsByUserId(Long userId, PageCondition pageCondition) {
-        Page<LocalDate> logOns = dailyLogJpaRepository.findLogOnsByUserId(
+    public PageResult<LocalDate> findLogOnPageByUserId(Long userId, PageCondition pageCondition) {
+        Page<LocalDate> logOnPage = dailyLogJpaRepository.findLogOnPageByUserId(
                 userId,
                 PageRequest.of(
                         pageCondition.getPage(),
@@ -46,13 +46,13 @@ class DailyLogJpaAdapter implements DailyLogRepository {
         );
 
         return PageResult.of(
-                logOns.getNumber(),
-                logOns.getSize(),
-                logOns.getTotalElements(),
-                logOns.getTotalPages(),
-                logOns.isFirst(),
-                logOns.isLast(),
-                logOns.getContent()
+                logOnPage.getNumber(),
+                logOnPage.getSize(),
+                logOnPage.getTotalElements(),
+                logOnPage.getTotalPages(),
+                logOnPage.isFirst(),
+                logOnPage.isLast(),
+                logOnPage.getContent()
         );
     }
 

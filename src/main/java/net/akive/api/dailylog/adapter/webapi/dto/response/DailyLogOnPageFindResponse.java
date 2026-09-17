@@ -6,15 +6,15 @@ import net.akive.api.common.pagination.PageResult;
 import java.time.LocalDate;
 import java.util.List;
 
-public record DailyLogOnsFindResponse(
+public record DailyLogOnPageFindResponse(
         PageInfo pageInfo,
         List<LocalDate> logOns
 ) {
 
-    public static DailyLogOnsFindResponse from(PageResult<LocalDate> logOns) {
-        return new DailyLogOnsFindResponse(
-                logOns.pageInfo(),
-                logOns.contents()
+    public static DailyLogOnPageFindResponse from(PageResult<LocalDate> logOnPage) {
+        return new DailyLogOnPageFindResponse(
+                logOnPage.pageInfo(),
+                logOnPage.contents()
         );
     }
 }

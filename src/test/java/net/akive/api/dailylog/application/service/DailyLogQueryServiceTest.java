@@ -36,14 +36,14 @@ class DailyLogQueryServiceTest {
     void 회원_식별자로_일일_로그가_있는_날짜_목록을_페이징_조회한다() {
         List<LocalDate> contents = List.of(LOG_ON, ANOTHER_LOG_ON);
         PageCondition pageCondition = PageCondition.of(DEFAULT_PAGE, DEFAULT_SIZE, "logOn", DESC);
-        PageResult<LocalDate> logOns = createPageResult(DEFAULT_PAGE, DEFAULT_SIZE, contents);
+        PageResult<LocalDate> logOnPage = createPageResult(DEFAULT_PAGE, DEFAULT_SIZE, contents);
 
-        given(dailyLogRepository.findLogOnsByUserId(USER_ID, pageCondition)).willReturn(logOns);
+        given(dailyLogRepository.findLogOnPageByUserId(USER_ID, pageCondition)).willReturn(logOnPage);
 
-        PageResult<LocalDate> foundLogOns = dailyLogQueryService.findLogOns(USER_ID, pageCondition);
+        PageResult<LocalDate> foundLogOnPage = dailyLogQueryService.findLogOnPage(USER_ID, pageCondition);
 
-        assertThat(foundLogOns).isEqualTo(logOns);
-        then(dailyLogRepository).should().findLogOnsByUserId(USER_ID, pageCondition);
+        assertThat(foundLogOnPage).isEqualTo(logOnPage);
+        then(dailyLogRepository).should().findLogOnPageByUserId(USER_ID, pageCondition);
     }
 
     @Test

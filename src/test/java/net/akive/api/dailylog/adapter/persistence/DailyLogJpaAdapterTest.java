@@ -56,18 +56,18 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
         saveDailyLog(savedUser, recentLogOn, 9);
         flushAndClear();
 
-        PageResult<LocalDate> foundLogOns = dailyLogRepository.findLogOnsByUserId(
+        PageResult<LocalDate> foundLogOnPage = dailyLogRepository.findLogOnPageByUserId(
                 savedUser.getUserId(),
                 PageCondition.of(0, 1, "logOn", DESC)
         );
 
-        assertThat(foundLogOns.pageInfo().page()).isZero();
-        assertThat(foundLogOns.pageInfo().size()).isEqualTo(1);
-        assertThat(foundLogOns.pageInfo().totalElement()).isEqualTo(2);
-        assertThat(foundLogOns.pageInfo().totalPage()).isEqualTo(2);
-        assertThat(foundLogOns.pageInfo().first()).isTrue();
-        assertThat(foundLogOns.pageInfo().last()).isFalse();
-        assertThat(foundLogOns.contents()).containsExactly(recentLogOn);
+        assertThat(foundLogOnPage.pageInfo().page()).isZero();
+        assertThat(foundLogOnPage.pageInfo().size()).isEqualTo(1);
+        assertThat(foundLogOnPage.pageInfo().totalElement()).isEqualTo(2);
+        assertThat(foundLogOnPage.pageInfo().totalPage()).isEqualTo(2);
+        assertThat(foundLogOnPage.pageInfo().first()).isTrue();
+        assertThat(foundLogOnPage.pageInfo().last()).isFalse();
+        assertThat(foundLogOnPage.contents()).containsExactly(recentLogOn);
     }
 
     @Test
@@ -75,7 +75,7 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
         User savedUser = saveUser();
 
         assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-                .isThrownBy(() -> dailyLogRepository.findLogOnsByUserId(
+                .isThrownBy(() -> dailyLogRepository.findLogOnPageByUserId(
                         savedUser.getUserId(),
                         PageCondition.of(0, 10, "unknownProperty", DESC)
                 ))

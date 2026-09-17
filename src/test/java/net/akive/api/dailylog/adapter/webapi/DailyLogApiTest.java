@@ -497,13 +497,13 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 일일_로그가_있는_날짜_목록을_최신순으로_페이징_조회한다() {
+    void 일일_로그가_있는_날짜_목록을_최신_날짜_순으로_페이징_조회한다() {
         LocalDate olderLogOn = LocalDate.of(2026, 9, 1);
         LocalDate recentLogOn = olderLogOn.plusDays(1);
         List<LocalDate> contents = List.of(recentLogOn, olderLogOn);
-        PageResult<LocalDate> logOns = createPageResult(DEFAULT_PAGE, DEFAULT_SIZE, contents);
+        PageResult<LocalDate> logOnPage = createPageResult(DEFAULT_PAGE, DEFAULT_SIZE, contents);
 
-        given(dailyLogFinder.findLogOns(eq(USER_ID), any(PageCondition.class))).willReturn(logOns);
+        given(dailyLogFinder.findLogOnPage(eq(USER_ID), any(PageCondition.class))).willReturn(logOnPage);
 
         MvcTestResultAssert result = get(
                 DAILY_LOG_ONS_URL + "?page={page}&size={size}",
@@ -522,23 +522,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         result.bodyJson().extractingPath("$.logOns[1]").isEqualTo(olderLogOn.toString());
 
         ArgumentCaptor<PageCondition> pageConditionCaptor = ArgumentCaptor.forClass(PageCondition.class);
-        then(dailyLogFinder).should().findLogOns(eq(USER_ID), pageConditionCaptor.capture());
-        assertThat(pageConditionCaptor.getValue().getPage()).isEqualTo(DEFAULT_PAGE);
-        assertThat(pageConditionCaptor.getValue().getSize()).isEqualTo(DEFAULT_SIZE);
-        assertThat(pageConditionCaptor.getValue().getSortCondition().property()).isEqualTo("logOn");
-        assertThat(pageConditionCaptor.getValue().getSortCondition().sortDirection()).isEqualTo(DESC);
-    }
-
-    @Test
-    void 일일_로그_날짜_목록_조회_시_페이지_파라미터가_없으면_기본값으로_일일_로그가_있는_날짜_목록을_조회한다() {
-        PageResult<LocalDate> logOns = createPageResult(List.of(LOG_ON));
-
-        given(dailyLogFinder.findLogOns(eq(USER_ID), any(PageCondition.class))).willReturn(logOns);
-
-        get(DAILY_LOG_ONS_URL, USER_ID).hasStatusOk();
-
-        ArgumentCaptor<PageCondition> pageConditionCaptor = ArgumentCaptor.forClass(PageCondition.class);
-        then(dailyLogFinder).should().findLogOns(eq(USER_ID), pageConditionCaptor.capture());
+        then(dailyLogFinder).should().findLogOnPage(eq(USER_ID), pageConditionCaptor.capture());
         assertThat(pageConditionCaptor.getValue().getPage()).isEqualTo(DEFAULT_PAGE);
         assertThat(pageConditionCaptor.getValue().getSize()).isEqualTo(DEFAULT_SIZE);
         assertThat(pageConditionCaptor.getValue().getSortCondition().property()).isEqualTo("logOn");

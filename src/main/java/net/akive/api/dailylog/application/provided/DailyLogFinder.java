@@ -14,5 +14,5 @@ public interface DailyLogFinder {
 
     List<DailyLogType> findDailyLogTypes();
 
-    PageResult<LocalDate> findLogOns(Long userId, PageCondition pageCondition);
+    PageResult<LocalDate> findLogOnPage(Long userId, PageCondition pageCondition);
 }
