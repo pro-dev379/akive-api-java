@@ -52,6 +52,7 @@ class ReportApiTest extends PrivateApiTestSupport {
 
     private static final String REPORTS_URL = "/reports";
     private static final String REPORT_URL = "/reports/{reportId}";
+    private static final String REPORT_HEADERS_URL = "/reports/headers";
     private static final String AVAILABLE_REPORT_TYPES_URL = "/reports/available-types?reportOn={reportOn}";
 
     @MockitoBean
@@ -75,7 +76,7 @@ class ReportApiTest extends PrivateApiTestSupport {
                 .willReturn(reportHeaderPage);
 
         MvcTestResultAssert result = get(
-                REPORTS_URL + "?page={page}&size={size}",
+                REPORT_HEADERS_URL + "?page={page}&size={size}",
                 USER_ID,
                 DEFAULT_PAGE,
                 DEFAULT_SIZE
@@ -99,7 +100,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     })
     void 리포트_헤더_목록_조회_시_페이지_요청_파라미터가_올바르지_않으면_400을_응답한다(int page, int size, String message) {
         MvcTestResultAssert result = get(
-                REPORTS_URL + "?page={page}&size={size}",
+                REPORT_HEADERS_URL + "?page={page}&size={size}",
                 USER_ID,
                 page,
                 size
