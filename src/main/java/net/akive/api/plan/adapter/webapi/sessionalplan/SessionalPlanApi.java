@@ -5,7 +5,7 @@ import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanCreateRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanUpdateRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.response.SessionalPlanCreateResponse;
-import net.akive.api.plan.adapter.webapi.sessionalplan.dto.response.SessionalPlanFindResponse;
+import net.akive.api.plan.adapter.webapi.sessionalplan.dto.response.SessionalPlanDetailFindResponse;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.response.SessionalPlansFindResponse;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanCreator;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
@@ -42,7 +42,7 @@ public class SessionalPlanApi {
     }
 
     @GetMapping("/{sessionalPlanId}")
-    public SessionalPlanFindResponse find(
+    public SessionalPlanDetailFindResponse find(
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId
     ) {
@@ -50,7 +50,7 @@ public class SessionalPlanApi {
 
         SessionalPlanDetail result = sessionalPlanFinder.findDetail(query);
 
-        return SessionalPlanFindResponse.from(result);
+        return SessionalPlanDetailFindResponse.from(result);
     }
 
     @PutMapping("/{sessionalPlanId}")

@@ -10,7 +10,7 @@ import net.akive.api.plan.application.result.WeeklyQuantityProgress;
 
 import java.util.List;
 
-public record SessionalPlanFindResponse(
+public record SessionalPlanDetailFindResponse(
         Long sessionalPlanId,
         String sessionName,
         SessionPeriodResponse sessionPeriod,
@@ -18,8 +18,8 @@ public record SessionalPlanFindResponse(
         List<TotalQuantityResponse> totalQuantities
 ) {
 
-    public static SessionalPlanFindResponse from(SessionalPlanDetail detail) {
-        return new SessionalPlanFindResponse(
+    public static SessionalPlanDetailFindResponse from(SessionalPlanDetail detail) {
+        return new SessionalPlanDetailFindResponse(
                 detail.sessionalPlan().getSessionalPlanId(),
                 detail.sessionalPlan().getSessionName(),
                 SessionPeriodResponse.from(detail.sessionalPlan().getSessionPeriod()),

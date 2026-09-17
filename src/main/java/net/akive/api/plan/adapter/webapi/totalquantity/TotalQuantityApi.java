@@ -2,7 +2,7 @@ package net.akive.api.plan.adapter.webapi.totalquantity;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
-import net.akive.api.plan.adapter.webapi.sessionalplan.dto.response.SessionalPlanFindResponse;
+import net.akive.api.plan.adapter.webapi.sessionalplan.dto.response.SessionalPlanDetailFindResponse;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityCreateRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityUpdateRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.response.TotalQuantityCreateResponse;
@@ -39,7 +39,7 @@ public class TotalQuantityApi {
     }
 
     @GetMapping("/{totalQuantityId}")
-    public SessionalPlanFindResponse.TotalQuantityResponse find(
+    public SessionalPlanDetailFindResponse.TotalQuantityResponse find(
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId,
             @PathVariable Long totalQuantityId
@@ -52,7 +52,7 @@ public class TotalQuantityApi {
 
         TotalQuantityProgress result = totalQuantityFinder.find(query);
 
-        return SessionalPlanFindResponse.TotalQuantityResponse.from(result);
+        return SessionalPlanDetailFindResponse.TotalQuantityResponse.from(result);
     }
 
     @PutMapping("/{totalQuantityId}")
