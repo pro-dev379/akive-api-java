@@ -57,6 +57,13 @@ class ReportCommandService implements ReportCreator {
         reportRepository.save(report);
     }
 
+    @Override
+    public void delete(Long reportId, Long userId) {
+        Report report = findReportOrThrow(reportId, userId);
+
+        reportRepository.delete(report);
+    }
+
     private User findUserOrThrow(Long userId) {
         return userFinder.findByUserIdAndNotWithdrawn(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));

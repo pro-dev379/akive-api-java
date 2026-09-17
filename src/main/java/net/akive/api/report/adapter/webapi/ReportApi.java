@@ -57,6 +57,12 @@ public class ReportApi {
         reportCreator.updateFeedbackItems(request.to(reportId, userId));
     }
 
+    @DeleteMapping("/{reportId}")
+    @ResponseStatus(NO_CONTENT)
+    public void delete(@AuthenticatedUserId Long userId, @PathVariable Long reportId) {
+        reportCreator.delete(reportId, userId);
+    }
+
     @GetMapping("/available-types")
     public ReportTypesFindResponse findAvailableReportTypes(
             @AuthenticatedUserId Long userId,

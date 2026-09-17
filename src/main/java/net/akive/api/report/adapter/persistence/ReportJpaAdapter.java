@@ -17,6 +17,7 @@ import java.util.Optional;
 class ReportJpaAdapter implements ReportRepository {
 
     private final ReportJpaRepository reportJpaRepository;
+
     private final CurrentTimeProvider currentTimeProvider;
     private final EntityManager entityManager;
 
@@ -45,5 +46,10 @@ class ReportJpaAdapter implements ReportRepository {
     @Override
     public boolean existsByUserIdAndReportOnAndReportType(Long userId, LocalDate reportOn, ReportType reportType) {
         return reportJpaRepository.existsByUser_UserIdAndReportOnAndReportType(userId, reportOn, reportType);
+    }
+
+    @Override
+    public void delete(Report report) {
+        reportJpaRepository.deleteById(report.getReportId());
     }
 }

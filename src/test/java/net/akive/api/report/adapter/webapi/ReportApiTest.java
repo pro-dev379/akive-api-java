@@ -260,6 +260,26 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 리포트를_삭제한다() {
+        delete(REPORT_URL, USER_ID, REPORT_ID).hasStatus(NO_CONTENT);
+
+        then(reportCreator).should().delete(REPORT_ID, USER_ID);
+    }
+
+    @Test
+    void 리포트_삭제_시_리포트가_없으면_404를_응답한다() {
+        willThrow(new ResourceNotFoundException(REPORT_NOT_FOUND))
+                .given(reportCreator)
+                .delete(UNKNOWN_REPORT_ID, USER_ID);
+
+        MvcTestResultAssert result = delete(REPORT_URL, USER_ID, UNKNOWN_REPORT_ID).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, REPORT_NOT_FOUND);
+
+        then(reportCreator).should().delete(UNKNOWN_REPORT_ID, USER_ID);
+    }
+
+    @Test
     void 작성_가능한_리포트_타입을_조회한다() {
         given(reportFinder.findAvailableReportTypes(USER_ID, REPORT_ON))
                 .willReturn(List.of(WEEKLY, MONTHLY));

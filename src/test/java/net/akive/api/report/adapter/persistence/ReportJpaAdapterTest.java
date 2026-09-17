@@ -107,4 +107,31 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
 
         assertThat(exists).isTrue();
     }
+
+    @Test
+    void 리포트를_삭제한다() {
+        User savedUser = saveUser();
+        Report savedReport = reportRepository.save(createReport(savedUser));
+        flushAndClear();
+
+        assertThat(countReportFeedbacksByReportId(savedReport.getReportId()))
+                .isEqualTo(savedReport.getFeedbackItems().size());
+
+        reportRepository.delete(savedReport);
+        flushAndClear();
+
+        assertThat(reportJpaRepository.findById(savedReport.getReportId())).isEmpty();
+        assertThat(countReportFeedbacksByReportId(savedReport.getReportId())).isZero();
+    }
+
+    private long countReportFeedbacksByReportId(Long reportId) {
+        return entityManager
+                .createQuery("""
+                        select count(reportFeedback)
+                        from ReportFeedbackEntity reportFeedback
+                        where reportFeedback.report.reportId = :reportId
+                        """, Long.class)
+                .setParameter("reportId", reportId)
+                .getSingleResult();
+    }
 }

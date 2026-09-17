@@ -13,4 +13,6 @@ public interface ReportCreator {
 
     void updateFeedbackItems(ReportFeedbackItemsUpdateCommand command)
             throws BusinessRuleViolationException, ResourceNotFoundException;
+
+    void delete(Long reportId, Long userId);
 }

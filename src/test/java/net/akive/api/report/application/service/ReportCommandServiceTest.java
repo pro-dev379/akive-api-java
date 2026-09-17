@@ -150,4 +150,30 @@ class ReportCommandServiceTest {
         then(reportRepository).should().findByReportIdAndUserId(command.reportId(), command.userId());
         then(reportRepository).should(never()).save(any());
     }
+
+    @Test
+    void 리포트를_삭제한다() {
+        Report report = createReconstructedReport();
+        given(reportRepository.findByReportIdAndUserId(REPORT_ID, USER_ID))
+                .willReturn(Optional.of(report));
+
+        reportCommandService.delete(REPORT_ID, USER_ID);
+
+        then(reportRepository).should().findByReportIdAndUserId(REPORT_ID, USER_ID);
+        then(reportRepository).should().delete(report);
+    }
+
+    @Test
+    void 리포트가_없으면_삭제할_수_없다() {
+        given(reportRepository.findByReportIdAndUserId(UNKNOWN_REPORT_ID, USER_ID))
+                .willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> reportCommandService.delete(UNKNOWN_REPORT_ID, USER_ID))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(REPORT_NOT_FOUND);
+
+        then(reportRepository).should().findByReportIdAndUserId(UNKNOWN_REPORT_ID, USER_ID);
+        then(reportRepository).should(never()).delete(any());
+    }
 }

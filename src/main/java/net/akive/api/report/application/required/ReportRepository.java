@@ -13,4 +13,6 @@ public interface ReportRepository {
     Optional<Report> findByReportIdAndUserId(Long reportId, Long userId);
 
     boolean existsByUserIdAndReportOnAndReportType(Long userId, LocalDate reportOn, ReportType reportType);
+
+    void delete(Report report);
 }
