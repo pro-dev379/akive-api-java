@@ -30,13 +30,13 @@ class ReportQueryService implements ReportFinder {
     private final ReportRepository reportRepository;
 
     @Override
-    public PageResult<ReportHeaderResult> findHeaderPage(Long userId, PageCondition pageCondition) {
-        return reportRepository.findHeaderPageByUserId(userId, pageCondition);
+    public Report find(Long reportId, Long userId) {
+        return findReportOrThrow(reportId, userId);
     }
 
     @Override
-    public Report find(Long reportId, Long userId) {
-        return findReportOrThrow(reportId, userId);
+    public PageResult<ReportHeaderResult> findHeaderPage(Long userId, PageCondition pageCondition) {
+        return reportRepository.findHeaderPageByUserId(userId, pageCondition);
     }
 
     @Override

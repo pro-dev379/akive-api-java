@@ -36,18 +36,6 @@ public class ReportApi {
 
     private final CurrentTimeProvider currentTimeProvider;
 
-    @GetMapping
-    public ReportHeaderPageFindResponse findRecentHeaders(
-            @AuthenticatedUserId Long userId,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size
-    ) {
-        PageResult<ReportHeaderResult> reportHeaderPage =
-                reportFinder.findHeaderPage(userId, PageCondition.of(page, size, "reportOn", DESC));
-
-        return ReportHeaderPageFindResponse.from(reportHeaderPage);
-    }
-
     @PostMapping
     @ResponseStatus(CREATED)
     public ReportCreateResponse create(
@@ -79,6 +67,19 @@ public class ReportApi {
     public void delete(@AuthenticatedUserId Long userId, @PathVariable Long reportId) {
         reportCreator.delete(reportId, userId);
     }
+
+    @GetMapping("/headers")
+    public ReportHeaderPageFindResponse findRecentHeaders(
+            @AuthenticatedUserId Long userId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        PageResult<ReportHeaderResult> reportHeaderPage =
+                reportFinder.findHeaderPage(userId, PageCondition.of(page, size, "reportOn", DESC));
+
+        return ReportHeaderPageFindResponse.from(reportHeaderPage);
+    }
+
 
     @GetMapping("/available-types")
     public ReportTypesFindResponse findAvailableReportTypes(

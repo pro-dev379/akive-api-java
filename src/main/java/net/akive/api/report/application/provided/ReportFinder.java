@@ -12,9 +12,9 @@ import java.util.List;
 
 public interface ReportFinder {
 
-    PageResult<ReportHeaderResult> findHeaderPage(Long userId, PageCondition pageCondition);
-
     Report find(Long reportId, Long userId);
+
+    PageResult<ReportHeaderResult> findHeaderPage(Long userId, PageCondition pageCondition);
 
     List<ReportType> findAvailableReportTypes(Long userId, LocalDate reportOn) throws ResourceNotFoundException;
 }
