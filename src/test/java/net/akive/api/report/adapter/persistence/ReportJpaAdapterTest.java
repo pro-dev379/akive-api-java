@@ -1,5 +1,8 @@
 package net.akive.api.report.adapter.persistence;
 
+import net.akive.api.common.pagination.PageCondition;
+import net.akive.api.common.pagination.PageResult;
+import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportFeedback;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
 
+import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
 import static net.akive.api.report.domain.FeedbackType.IMPROVEMENT;
 import static net.akive.api.report.domain.ReportFixture.*;
@@ -91,6 +95,32 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundReport.get().getReportOn()).isEqualTo(savedReport.getReportOn());
         assertThat(foundReport.get().getReportType()).isEqualTo(savedReport.getReportType());
         assertThat(foundReport.get().getFeedbackItems()).containsExactlyElementsOf(savedReport.getFeedbackItems());
+    }
+
+    @Test
+    void 회원_식별자로_리포트_헤더_목록을_페이징_조회한다() {
+        User savedUser = saveUser();
+        reportRepository.save(createReport(savedUser, REPORT_ON.minusDays(1)));
+        Report recentReport = reportRepository.save(createReport(savedUser, REPORT_ON));
+        flushAndClear();
+
+        PageResult<ReportHeaderResult> reportHeaderPage = reportRepository.findHeaderPageByUserId(
+                savedUser.getUserId(),
+                PageCondition.of(0, 1, "reportOn", DESC)
+        );
+
+        assertThat(reportHeaderPage.pageInfo().page()).isZero();
+        assertThat(reportHeaderPage.pageInfo().size()).isEqualTo(1);
+        assertThat(reportHeaderPage.pageInfo().totalElement()).isEqualTo(2);
+        assertThat(reportHeaderPage.pageInfo().totalPage()).isEqualTo(2);
+        assertThat(reportHeaderPage.pageInfo().first()).isTrue();
+        assertThat(reportHeaderPage.pageInfo().last()).isFalse();
+        assertThat(reportHeaderPage.contents())
+                .containsExactly(new ReportHeaderResult(
+                        recentReport.getReportId(),
+                        recentReport.getReportOn(),
+                        recentReport.getReportType()
+                ));
     }
 
     @Test

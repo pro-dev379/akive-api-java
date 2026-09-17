@@ -37,7 +37,11 @@ public class ReportFixture {
     }
 
     public static Report createReport(User user) {
-        return createReport(user, REPORT_ON, WEEKLY, createReportFeedbackItems(), REQUESTED_AT);
+        return createReport(user, REPORT_ON);
+    }
+
+    public static Report createReport(User user, LocalDate reportOn) {
+        return createReport(user, reportOn, WEEKLY, createReportFeedbackItems(), REQUESTED_AT);
     }
 
     public static Report createReport(LocalDate reportOn) {

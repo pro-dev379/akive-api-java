@@ -1,15 +1,19 @@
 package net.akive.api.report.adapter.webapi;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.pagination.PageCondition;
+import net.akive.api.common.pagination.PageResult;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.report.adapter.webapi.dto.request.ReportCreateRequest;
 import net.akive.api.report.adapter.webapi.dto.request.ReportFeedbackUpdateRequest;
 import net.akive.api.report.adapter.webapi.dto.response.ReportCreateResponse;
 import net.akive.api.report.adapter.webapi.dto.response.ReportFindResponse;
+import net.akive.api.report.adapter.webapi.dto.response.ReportHeaderPageFindResponse;
 import net.akive.api.report.adapter.webapi.dto.response.ReportTypesFindResponse;
 import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.ReportFinder;
+import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.domain.ReportType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static net.akive.api.common.pagination.SortDirection.*;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -30,6 +35,18 @@ public class ReportApi {
     private final ReportCreator reportCreator;
 
     private final CurrentTimeProvider currentTimeProvider;
+
+    @GetMapping
+    public ReportHeaderPageFindResponse findRecentHeaders(
+            @AuthenticatedUserId Long userId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        PageResult<ReportHeaderResult> reportHeaderPage =
+                reportFinder.findHeaderPage(userId, PageCondition.of(page, size, "reportOn", DESC));
+
+        return ReportHeaderPageFindResponse.from(reportHeaderPage);
+    }
 
     @PostMapping
     @ResponseStatus(CREATED)

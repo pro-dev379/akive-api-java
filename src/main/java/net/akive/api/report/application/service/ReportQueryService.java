@@ -2,9 +2,12 @@ package net.akive.api.report.application.service;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.pagination.PageCondition;
+import net.akive.api.common.pagination.PageResult;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.report.application.provided.ReportFinder;
+import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportType;
@@ -25,6 +28,11 @@ class ReportQueryService implements ReportFinder {
 
     private final SessionalPlanFinder sessionalPlanFinder;
     private final ReportRepository reportRepository;
+
+    @Override
+    public PageResult<ReportHeaderResult> findHeaderPage(Long userId, PageCondition pageCondition) {
+        return reportRepository.findHeaderPageByUserId(userId, pageCondition);
+    }
 
     @Override
     public Report find(Long reportId, Long userId) {

@@ -3,6 +3,8 @@ package net.akive.api.report.adapter.webapi;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.pagination.PageCondition;
+import net.akive.api.common.pagination.PageResult;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.report.adapter.webapi.dto.request.ReportCreateRequest;
 import net.akive.api.report.adapter.webapi.dto.request.ReportFeedbackUpdateRequest;
@@ -11,11 +13,14 @@ import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.ReportFinder;
 import net.akive.api.report.application.provided.dto.ReportCreateCommand;
 import net.akive.api.report.application.provided.dto.ReportFeedbackItemsUpdateCommand;
+import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.domain.Report;
 import net.akive.api.support.PrivateApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
@@ -26,6 +31,8 @@ import java.util.stream.Stream;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceConflictError.REPORT_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
+import static net.akive.api.common.pagination.SortDirection.DESC;
+import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
 import static net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture.*;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportCreateCommand;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportFeedbackItemsUpdateCommand;
@@ -34,6 +41,7 @@ import static net.akive.api.report.domain.ReportType.MONTHLY;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
 import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -54,6 +62,59 @@ class ReportApiTest extends PrivateApiTestSupport {
 
     @MockitoBean
     CurrentTimeProvider currentTimeProvider;
+
+    @Test
+    void 리포트_헤더_목록을_리포트_최신_작성일_순으로_페이징_조회한다() {
+        ReportHeaderResult reportHeader = new ReportHeaderResult(REPORT_ID, REPORT_ON, WEEKLY);
+        PageResult<ReportHeaderResult> reportHeaderPage = createPageResult(
+                DEFAULT_PAGE,
+                DEFAULT_SIZE,
+                List.of(reportHeader)
+        );
+        given(reportFinder.findHeaderPage(eq(USER_ID), any(PageCondition.class)))
+                .willReturn(reportHeaderPage);
+
+        MvcTestResultAssert result = get(
+                REPORTS_URL + "?page={page}&size={size}",
+                USER_ID,
+                DEFAULT_PAGE,
+                DEFAULT_SIZE
+        ).hasStatusOk();
+
+        assertReportHeaderFindResponse(result, reportHeaderPage, reportHeader);
+
+        ArgumentCaptor<PageCondition> pageConditionCaptor = ArgumentCaptor.forClass(PageCondition.class);
+        then(reportFinder).should().findHeaderPage(eq(USER_ID), pageConditionCaptor.capture());
+        assertThat(pageConditionCaptor.getValue().getPage()).isEqualTo(DEFAULT_PAGE);
+        assertThat(pageConditionCaptor.getValue().getSize()).isEqualTo(DEFAULT_SIZE);
+        assertThat(pageConditionCaptor.getValue().getSortCondition().property()).isEqualTo("reportOn");
+        assertThat(pageConditionCaptor.getValue().getSortCondition().sortDirection()).isEqualTo(DESC);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "-1, 7, Page must not be negative.",
+            "0, 0, Size must be positive.",
+            "0, 101, Size must not exceed 100."
+    })
+    void 리포트_헤더_목록_조회_시_페이지_요청_파라미터가_올바르지_않으면_400을_응답한다(int page, int size, String message) {
+        MvcTestResultAssert result = get(
+                REPORTS_URL + "?page={page}&size={size}",
+                USER_ID,
+                page,
+                size
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_INPUT_VALUE);
+        result.bodyJson()
+                .extractingPath("$.errors[0].field")
+                .isEqualTo("argument");
+        result.bodyJson()
+                .extractingPath("$.errors[0].message")
+                .isEqualTo(message);
+
+        then(reportFinder).shouldHaveNoInteractions();
+    }
 
     @Test
     void 리포트를_생성한다() {
@@ -320,5 +381,30 @@ class ReportApiTest extends PrivateApiTestSupport {
 
     private static Stream<ReportFeedbackUpdateRequest> invalidUpdateRequests() {
         return ReportRequestFixture.invalidUpdateRequests();
+    }
+
+    private static void assertReportHeaderFindResponse(
+            MvcTestResultAssert result,
+            PageResult<ReportHeaderResult> reportHeaderPage,
+            ReportHeaderResult reportHeader
+    ) {
+        result.bodyJson().extractingPath("$.pageInfo.page")
+                .isEqualTo(reportHeaderPage.pageInfo().page());
+        result.bodyJson().extractingPath("$.pageInfo.size")
+                .isEqualTo(reportHeaderPage.pageInfo().size());
+        result.bodyJson().extractingPath("$.pageInfo.totalElement")
+                .isEqualTo((int) reportHeaderPage.pageInfo().totalElement());
+        result.bodyJson().extractingPath("$.pageInfo.totalPage")
+                .isEqualTo(reportHeaderPage.pageInfo().totalPage());
+        result.bodyJson().extractingPath("$.pageInfo.first")
+                .isEqualTo(reportHeaderPage.pageInfo().first());
+        result.bodyJson().extractingPath("$.pageInfo.last")
+                .isEqualTo(reportHeaderPage.pageInfo().last());
+        result.bodyJson().extractingPath("$.reportHeaders[0].reportId")
+                .isEqualTo(reportHeader.reportId().intValue());
+        result.bodyJson().extractingPath("$.reportHeaders[0].reportOn")
+                .isEqualTo(reportHeader.reportOn().toString());
+        result.bodyJson().extractingPath("$.reportHeaders[0].reportType")
+                .isEqualTo(reportHeader.reportType().name());
     }
 }

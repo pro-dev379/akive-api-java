@@ -1,7 +1,10 @@
 package net.akive.api.report.application.service;
 
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.pagination.PageCondition;
+import net.akive.api.common.pagination.PageResult;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
+import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportType;
@@ -17,6 +20,8 @@ import java.util.Optional;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.REPORT_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.pagination.SortDirection.DESC;
+import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
 import static net.akive.api.report.domain.ReportFixture.*;
 import static net.akive.api.report.domain.ReportType.MONTHLY;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
@@ -37,6 +42,22 @@ class ReportQueryServiceTest {
 
     @InjectMocks
     ReportQueryService reportQueryService;
+
+    @Test
+    void 리포트_헤더_목록을_페이징_조회한다() {
+        PageCondition pageCondition = PageCondition.of(DEFAULT_PAGE, DEFAULT_SIZE, "reportOn", DESC);
+        ReportHeaderResult reportHeader = new ReportHeaderResult(REPORT_ID, REPORT_ON, WEEKLY);
+        PageResult<ReportHeaderResult> reportHeaderPage = createPageResult(List.of(reportHeader));
+        given(reportRepository.findHeaderPageByUserId(USER_ID, pageCondition))
+                .willReturn(reportHeaderPage);
+
+        PageResult<ReportHeaderResult> foundReportHeaderPage =
+                reportQueryService.findHeaderPage(USER_ID, pageCondition);
+
+        assertThat(foundReportHeaderPage).isEqualTo(reportHeaderPage);
+
+        then(reportRepository).should().findHeaderPageByUserId(USER_ID, pageCondition);
+    }
 
     @Test
     void 리포트를_조회한다() {
