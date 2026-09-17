@@ -518,8 +518,8 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         result.bodyJson().extractingPath("$.pageInfo.totalPage").isEqualTo(1);
         result.bodyJson().extractingPath("$.pageInfo.first").isEqualTo(true);
         result.bodyJson().extractingPath("$.pageInfo.last").isEqualTo(true);
-        result.bodyJson().extractingPath("$.contents[0]").isEqualTo(recentLogOn.toString());
-        result.bodyJson().extractingPath("$.contents[1]").isEqualTo(olderLogOn.toString());
+        result.bodyJson().extractingPath("$.logOns[0]").isEqualTo(recentLogOn.toString());
+        result.bodyJson().extractingPath("$.logOns[1]").isEqualTo(olderLogOn.toString());
 
         ArgumentCaptor<PageCondition> pageConditionCaptor = ArgumentCaptor.forClass(PageCondition.class);
         then(dailyLogFinder).should().findLogOns(eq(USER_ID), pageConditionCaptor.capture());

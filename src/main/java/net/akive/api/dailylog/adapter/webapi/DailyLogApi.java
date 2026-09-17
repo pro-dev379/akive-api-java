@@ -8,6 +8,7 @@ import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogUpdateRequest;
 import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogCreateResponse;
+import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogOnsFindResponse;
 import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogTypesFindResponse;
 import net.akive.api.dailylog.adapter.webapi.dto.response.DailyLogsFindResponse;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
@@ -69,12 +70,15 @@ public class DailyLogApi {
     }
 
     @GetMapping("/log-ons")
-    public PageResult<LocalDate> findRecentLogOns(
+    public DailyLogOnsFindResponse findRecentLogOns(
             @AuthenticatedUserId Long userId,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
-        return dailyLogFinder.findLogOns(userId, PageCondition.of(page, size, "logOn", DESC));
+        PageResult<LocalDate> logOns =
+                dailyLogFinder.findLogOns(userId, PageCondition.of(page, size, "logOn", DESC));
+
+        return DailyLogOnsFindResponse.from(logOns);
     }
 
     @GetMapping("/types")
