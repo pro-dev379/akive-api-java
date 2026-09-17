@@ -512,12 +512,12 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 DEFAULT_SIZE
         ).hasStatusOk();
 
-        result.bodyJson().extractingPath("$.page").isEqualTo(DEFAULT_PAGE);
-        result.bodyJson().extractingPath("$.size").isEqualTo(DEFAULT_SIZE);
-        result.bodyJson().extractingPath("$.totalElement").isEqualTo(contents.size());
-        result.bodyJson().extractingPath("$.totalPage").isEqualTo(1);
-        result.bodyJson().extractingPath("$.first").isEqualTo(true);
-        result.bodyJson().extractingPath("$.last").isEqualTo(true);
+        result.bodyJson().extractingPath("$.pageInfo.page").isEqualTo(DEFAULT_PAGE);
+        result.bodyJson().extractingPath("$.pageInfo.size").isEqualTo(DEFAULT_SIZE);
+        result.bodyJson().extractingPath("$.pageInfo.totalElement").isEqualTo(contents.size());
+        result.bodyJson().extractingPath("$.pageInfo.totalPage").isEqualTo(1);
+        result.bodyJson().extractingPath("$.pageInfo.first").isEqualTo(true);
+        result.bodyJson().extractingPath("$.pageInfo.last").isEqualTo(true);
         result.bodyJson().extractingPath("$.contents[0]").isEqualTo(recentLogOn.toString());
         result.bodyJson().extractingPath("$.contents[1]").isEqualTo(olderLogOn.toString());
 

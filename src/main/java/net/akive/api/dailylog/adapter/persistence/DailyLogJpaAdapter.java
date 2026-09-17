@@ -45,7 +45,7 @@ class DailyLogJpaAdapter implements DailyLogRepository {
                 )
         );
 
-        return new PageResult<>(
+        return PageResult.of(
                 logOns.getNumber(),
                 logOns.getSize(),
                 logOns.getTotalElements(),

@@ -27,7 +27,7 @@ public class PaginationFixture {
     public static <T> PageResult<T> createPageResult(int page, int size, List<T> contents) {
         int totalPage = calculateTotalPage(size, contents);
 
-        return new PageResult<>(
+        return PageResult.of(
                 page,
                 size,
                 contents.size(),

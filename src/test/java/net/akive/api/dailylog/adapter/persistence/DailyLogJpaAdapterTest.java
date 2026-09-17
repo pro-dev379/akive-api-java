@@ -61,12 +61,12 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
                 PageCondition.of(0, 1, "logOn", DESC)
         );
 
-        assertThat(foundLogOns.page()).isZero();
-        assertThat(foundLogOns.size()).isEqualTo(1);
-        assertThat(foundLogOns.totalElement()).isEqualTo(2);
-        assertThat(foundLogOns.totalPage()).isEqualTo(2);
-        assertThat(foundLogOns.first()).isTrue();
-        assertThat(foundLogOns.last()).isFalse();
+        assertThat(foundLogOns.pageInfo().page()).isZero();
+        assertThat(foundLogOns.pageInfo().size()).isEqualTo(1);
+        assertThat(foundLogOns.pageInfo().totalElement()).isEqualTo(2);
+        assertThat(foundLogOns.pageInfo().totalPage()).isEqualTo(2);
+        assertThat(foundLogOns.pageInfo().first()).isTrue();
+        assertThat(foundLogOns.pageInfo().last()).isFalse();
         assertThat(foundLogOns.contents()).containsExactly(recentLogOn);
     }
 
