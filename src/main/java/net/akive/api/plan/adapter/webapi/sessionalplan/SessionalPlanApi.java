@@ -27,6 +27,11 @@ public class SessionalPlanApi {
     private final SessionalPlanFinder sessionalPlanFinder;
     private final SessionalPlanCreator sessionalPlanCreator;
 
+    @GetMapping
+    public SessionalPlansFindResponse findAll(@AuthenticatedUserId Long userId) {
+        return SessionalPlansFindResponse.from(sessionalPlanFinder.findAll(userId));
+    }
+
     @PostMapping
     @ResponseStatus(CREATED)
     public SessionalPlanCreateResponse create(
@@ -36,13 +41,8 @@ public class SessionalPlanApi {
         return new SessionalPlanCreateResponse(sessionalPlanCreator.create(request.to(userId)));
     }
 
-    @GetMapping
-    public SessionalPlansFindResponse findAll(@AuthenticatedUserId Long userId) {
-        return SessionalPlansFindResponse.from(sessionalPlanFinder.findAll(userId));
-    }
-
     @GetMapping("/{sessionalPlanId}")
-    public SessionalPlanDetailFindResponse find(
+    public SessionalPlanDetailFindResponse findDetail(
             @AuthenticatedUserId Long userId,
             @PathVariable Long sessionalPlanId
     ) {
