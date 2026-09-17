@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import net.akive.api.report.domain.FeedbackSource;
 import net.akive.api.report.domain.FeedbackType;
 import net.akive.api.report.domain.ReportFeedback;
+import org.hibernate.annotations.OnDelete;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -18,6 +19,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static net.akive.api.report.domain.FeedbackSource.USER;
+import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Entity
 @Table(
@@ -38,6 +40,7 @@ public class ReportFeedbackEntity {
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long reportFeedbackId;
 
+    @OnDelete(action = CASCADE)
     @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "report_id", nullable = false)
     private ReportEntity report;
