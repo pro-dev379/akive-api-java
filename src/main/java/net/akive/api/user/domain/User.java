@@ -34,6 +34,8 @@ public class User {
 
     private Withdrawal withdrawal;
 
+    private LocalDateTime createdAt;
+
     public static User reconstruct(
             Long userId,
             Email email,
@@ -41,7 +43,8 @@ public class User {
             LoginType loginType,
             String passwordHash,
             UserDetail userDetail,
-            Withdrawal withdrawal
+            Withdrawal withdrawal,
+            LocalDateTime createdAt
     ) {
         return User.builder()
                 .userId(userId)
@@ -51,6 +54,7 @@ public class User {
                 .passwordHash(validatePasswordHash(passwordHash))
                 .userDetail(requireNonNull(userDetail))
                 .withdrawal(requireNonNull(withdrawal))
+                .createdAt(requireNonNull(createdAt))
                 .build();
     }
 

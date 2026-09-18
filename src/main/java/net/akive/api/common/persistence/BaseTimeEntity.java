@@ -26,4 +26,8 @@ public abstract class BaseTimeEntity {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    protected void restoreCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

@@ -2,7 +2,6 @@ package net.akive.api.user.adapter.persistence;
 
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
-import net.akive.api.user.domain.UserDetail;
 import net.akive.api.user.domain.Withdrawal;
 import org.junit.jupiter.api.Test;
 
@@ -18,15 +17,8 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 회원을_저장한다() {
-        User user = User.reconstruct(
-                null,
-                EMAIL,
-                ROLE_TYPE,
-                LOGIN_TYPE,
-                PASSWORD_HASH,
-                new UserDetail(NICKNAME, IMG_URL, AIM),
-                Withdrawal.none()
-        );
+        User user = User.signUpByEmail(EMAIL, ROLE_TYPE, PASSWORD_HASH, NICKNAME);
+        user.updateUserDetail(NICKNAME, IMG_URL, AIM);
 
         User savedUser = userRepository.save(user);
         flushAndClear();
@@ -42,6 +34,7 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundUser.getUserDetail().imgUrl()).isEqualTo(IMG_URL);
         assertThat(foundUser.getUserDetail().aim()).isEqualTo(AIM);
         assertThat(foundUser.getWithdrawal()).isEqualTo(Withdrawal.none());
+        assertThat(foundUser.getCreatedAt()).isNotNull();
     }
 
     @Test

@@ -2,11 +2,14 @@ package net.akive.api.user.adapter.webapi.dto.response;
 
 import net.akive.api.user.domain.User;
 
+import java.time.LocalDateTime;
+
 public record UserFindResponse(
         String email,
         String roleType,
         String loginType,
-        UserDetailResponse userDetail
+        UserDetailResponse userDetail,
+        LocalDateTime createdAt
 ) {
 
     public static UserFindResponse from(User user) {
@@ -18,7 +21,8 @@ public record UserFindResponse(
                         user.getUserDetail().nickname(),
                         user.getUserDetail().aim(),
                         user.getUserDetail().imgUrl()
-                )
+                ),
+                user.getCreatedAt()
         );
     }
 

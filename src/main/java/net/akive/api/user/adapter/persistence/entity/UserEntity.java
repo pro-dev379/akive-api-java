@@ -53,7 +53,7 @@ public class UserEntity extends BaseTimeEntity {
     private WithdrawalEntity withdrawal;
 
     public static UserEntity from(User user) {
-        return new UserEntity(
+        UserEntity userEntity = new UserEntity(
                 user.getUserId(),
                 user.getEmail().value(),
                 user.getRoleType(),
@@ -62,6 +62,10 @@ public class UserEntity extends BaseTimeEntity {
                 UserDetailEntity.from(user.getUserDetail()),
                 WithdrawalEntity.from(user.getWithdrawal())
         );
+
+        userEntity.restoreCreatedAt(user.getCreatedAt());
+
+        return userEntity;
     }
 
     public User to() {
@@ -72,7 +76,8 @@ public class UserEntity extends BaseTimeEntity {
                 this.loginType,
                 this.passwordHash,
                 this.userDetail.to(),
-                this.withdrawal == null ? Withdrawal.none() : this.withdrawal.to()
+                this.withdrawal == null ? Withdrawal.none() : this.withdrawal.to(),
+                this.getCreatedAt()
         );
     }
 }

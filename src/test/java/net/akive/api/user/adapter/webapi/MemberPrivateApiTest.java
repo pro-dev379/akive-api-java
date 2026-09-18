@@ -64,6 +64,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
         result.bodyJson().extractingPath("$.email").isEqualTo(EMAIL.value());
         result.bodyJson().extractingPath("$.roleType").isEqualTo(ROLE_TYPE.name());
         result.bodyJson().extractingPath("$.loginType").isEqualTo(LOGIN_TYPE.name());
+        result.bodyJson().extractingPath("$.createdAt").isEqualTo(CREATED_AT.toString());
         result.bodyJson().extractingPath("$.userDetail.nickname").isEqualTo(NICKNAME);
         result.bodyJson().extractingPath("$.userDetail.aim").isNull();
         result.bodyJson().extractingPath("$.userDetail.imgUrl").isNull();

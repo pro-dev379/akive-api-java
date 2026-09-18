@@ -3,6 +3,8 @@ package net.akive.api.user.domain.fixture;
 import net.akive.api.common.domain.Email;
 import net.akive.api.user.domain.*;
 
+import java.time.LocalDateTime;
+
 import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 
@@ -18,6 +20,7 @@ public class UserFixture {
     public static final String PASSWORD_HASH = "password-hash";
     public static final String TARGET_PASSWORD = "targetPassword123!";
     public static final String TARGET_PASSWORD_HASH = "target-password-hash";
+    public static final LocalDateTime CREATED_AT = LocalDateTime.of(2026, 9, 18, 12, 0, 1);
 
     public static User createUser() {
         return createUser(EMAIL, NICKNAME);
@@ -36,15 +39,13 @@ public class UserFixture {
     }
 
     public static User createUser(Email email, String nickname, Withdrawal withdrawal) {
-        return User.reconstruct(
-                null,
-                email,
-                ROLE_TYPE,
-                LOGIN_TYPE,
-                PASSWORD_HASH,
-                UserDetail.initial(nickname),
-                withdrawal
-        );
+        User user = User.signUpByEmail(email, ROLE_TYPE, PASSWORD_HASH, nickname);
+
+        if (withdrawal.isWithdrawn()) {
+            user.withdraw(withdrawal.withdrawnAt(), withdrawal.withdrawalReason());
+        }
+
+        return user;
     }
 
     public static User createUser(Long userId) {
@@ -71,7 +72,8 @@ public class UserFixture {
                 LOGIN_TYPE,
                 passwordHash,
                 UserDetail.initial(NICKNAME),
-                Withdrawal.none()
+                Withdrawal.none(),
+                CREATED_AT
         );
     }
 }

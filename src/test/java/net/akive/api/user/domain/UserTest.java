@@ -20,7 +20,16 @@ class UserTest {
         UserDetail userDetail = createUserDetail();
         Withdrawal withdrawal = Withdrawal.none();
 
-        User user = User.reconstruct(USER_ID, EMAIL, ROLE_TYPE, LOGIN_TYPE, PASSWORD_HASH, userDetail, withdrawal);
+        User user = User.reconstruct(
+                USER_ID,
+                EMAIL,
+                ROLE_TYPE,
+                LOGIN_TYPE,
+                PASSWORD_HASH,
+                userDetail,
+                withdrawal,
+                CREATED_AT
+        );
 
         assertThat(user.getUserId()).isEqualTo(USER_ID);
         assertThat(user.getEmail()).isEqualTo(EMAIL);
@@ -29,6 +38,7 @@ class UserTest {
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
         assertThat(user.getUserDetail()).isEqualTo(userDetail);
         assertThat(user.getWithdrawal()).isEqualTo(withdrawal);
+        assertThat(user.getCreatedAt()).isEqualTo(CREATED_AT);
     }
 
     @Test
@@ -59,7 +69,8 @@ class UserTest {
                 LOGIN_TYPE,
                 null,
                 createUserDetail(),
-                Withdrawal.none()
+                Withdrawal.none(),
+                CREATED_AT
         );
 
         assertThat(anotherUser.hasPassword()).isFalse();
