@@ -11,8 +11,8 @@ public interface ReportCreator {
     Long create(ReportCreateCommand command)
             throws BusinessRuleViolationException, ResourceNotFoundException, ResourceConflictException;
 
+    void delete(Long reportId, Long userId);
+
     void updateFeedbackItems(ReportFeedbackItemsUpdateCommand command)
             throws BusinessRuleViolationException, ResourceNotFoundException;
-
-    void delete(Long reportId, Long userId);
 }

@@ -52,6 +52,7 @@ class ReportApiTest extends PrivateApiTestSupport {
 
     private static final String REPORTS_URL = "/reports";
     private static final String REPORT_URL = "/reports/{reportId}";
+    private static final String REPORT_FEEDBACK_URL = "/reports/{reportId}/feedback";
     private static final String REPORT_HEADERS_URL = "/reports/headers";
     private static final String AVAILABLE_REPORT_TYPES_URL = "/reports/available-types?reportOn={reportOn}";
 
@@ -276,52 +277,6 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 리포트_피드백_목록을_수정한다() {
-        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
-        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(USER_ID);
-
-        putJson(REPORT_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(NO_CONTENT);
-
-        then(reportCreator).should().updateFeedbackItems(command);
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidUpdateRequests")
-    void 리포트_수정_요청값이_올바르지_않으면_400을_응답한다(ReportFeedbackUpdateRequest request) {
-        putJson(REPORT_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(BAD_REQUEST);
-
-        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
-    }
-
-    @Test
-    void 리포트_수정_시_피드백_내용이_하나도_없으면_400을_응답한다() {
-        ReportFeedbackUpdateRequest request = new ReportFeedbackUpdateRequest(createEmptyReportFeedbackRequest());
-
-        MvcTestResultAssert result = putJson(REPORT_URL, USER_ID, toJson(request), REPORT_ID)
-                .hasStatus(BAD_REQUEST);
-
-        assertErrorResponse(result, EMPTY_COLLECTION);
-
-        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
-    }
-
-    @Test
-    void 리포트_수정_시_리포트가_없으면_404를_응답한다() {
-        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
-        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(UNKNOWN_REPORT_ID, USER_ID);
-        willThrow(new ResourceNotFoundException(REPORT_NOT_FOUND))
-                .given(reportCreator)
-                .updateFeedbackItems(command);
-
-        MvcTestResultAssert result = putJson(REPORT_URL, USER_ID, toJson(request), UNKNOWN_REPORT_ID)
-                .hasStatus(NOT_FOUND);
-
-        assertErrorResponse(result, REPORT_NOT_FOUND);
-
-        then(reportCreator).should().updateFeedbackItems(command);
-    }
-
-    @Test
     void 리포트를_삭제한다() {
         delete(REPORT_URL, USER_ID, REPORT_ID).hasStatus(NO_CONTENT);
 
@@ -339,6 +294,52 @@ class ReportApiTest extends PrivateApiTestSupport {
         assertErrorResponse(result, REPORT_NOT_FOUND);
 
         then(reportCreator).should().delete(UNKNOWN_REPORT_ID, USER_ID);
+    }
+
+    @Test
+    void 리포트_피드백을_수정한다() {
+        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
+        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(USER_ID);
+
+        putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(NO_CONTENT);
+
+        then(reportCreator).should().updateFeedbackItems(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUpdateRequests")
+    void 리포트_피드백_수정_요청값이_올바르지_않으면_400을_응답한다(ReportFeedbackUpdateRequest request) {
+        putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(BAD_REQUEST);
+
+        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
+    }
+
+    @Test
+    void 리포트_피드백_수정_시_피드백_내용이_하나도_없으면_400을_응답한다() {
+        ReportFeedbackUpdateRequest request = new ReportFeedbackUpdateRequest(createEmptyReportFeedbackRequest());
+
+        MvcTestResultAssert result = putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), REPORT_ID)
+                .hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, EMPTY_COLLECTION);
+
+        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
+    }
+
+    @Test
+    void 리포트_피드백_수정_시_리포트가_없으면_404를_응답한다() {
+        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
+        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(UNKNOWN_REPORT_ID, USER_ID);
+        willThrow(new ResourceNotFoundException(REPORT_NOT_FOUND))
+                .given(reportCreator)
+                .updateFeedbackItems(command);
+
+        MvcTestResultAssert result = putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), UNKNOWN_REPORT_ID)
+                .hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, REPORT_NOT_FOUND);
+
+        then(reportCreator).should().updateFeedbackItems(command);
     }
 
     @Test

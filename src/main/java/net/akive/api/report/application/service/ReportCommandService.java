@@ -48,6 +48,13 @@ class ReportCommandService implements ReportCreator {
     }
 
     @Override
+    public void delete(Long reportId, Long userId) {
+        Report report = findReportOrThrow(reportId, userId);
+
+        reportRepository.delete(report);
+    }
+
+    @Override
     public void updateFeedbackItems(ReportFeedbackItemsUpdateCommand command)
             throws BusinessRuleViolationException, ResourceNotFoundException {
         Report report = findReportOrThrow(command.reportId(), command.userId());
@@ -55,13 +62,6 @@ class ReportCommandService implements ReportCreator {
         report.updateFeedbackItems(command.targetFeedbackItems());
 
         reportRepository.save(report);
-    }
-
-    @Override
-    public void delete(Long reportId, Long userId) {
-        Report report = findReportOrThrow(reportId, userId);
-
-        reportRepository.delete(report);
     }
 
     private User findUserOrThrow(Long userId) {

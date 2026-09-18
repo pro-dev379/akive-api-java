@@ -52,7 +52,13 @@ public class ReportApi {
         return ReportFindResponse.from(reportFinder.find(reportId, userId));
     }
 
-    @PutMapping("/{reportId}")
+    @DeleteMapping("/{reportId}")
+    @ResponseStatus(NO_CONTENT)
+    public void delete(@AuthenticatedUserId Long userId, @PathVariable Long reportId) {
+        reportCreator.delete(reportId, userId);
+    }
+
+    @PutMapping("/{reportId}/feedback")
     @ResponseStatus(NO_CONTENT)
     public void updateFeedback(
             @AuthenticatedUserId Long userId,
@@ -60,12 +66,6 @@ public class ReportApi {
             @Validated @RequestBody ReportFeedbackUpdateRequest request
     ) {
         reportCreator.updateFeedbackItems(request.to(reportId, userId));
-    }
-
-    @DeleteMapping("/{reportId}")
-    @ResponseStatus(NO_CONTENT)
-    public void delete(@AuthenticatedUserId Long userId, @PathVariable Long reportId) {
-        reportCreator.delete(reportId, userId);
     }
 
     @GetMapping("/headers")
