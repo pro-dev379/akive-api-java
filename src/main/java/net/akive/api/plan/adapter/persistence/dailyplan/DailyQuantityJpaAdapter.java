@@ -19,9 +19,12 @@ public class DailyQuantityJpaAdapter implements DailyQuantityRepository {
     private final DailyQuantityJpaRepository dailyQuantityJpaRepository;
 
     @Override
-    public List<DailyPlanData> findAllDailyPlanDataByUserIdAndDate(Long userId, LocalDate date) {
+    public List<DailyPlanData> findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+            Long userId,
+            LocalDate date
+    ) {
         return dailyQuantityJpaRepository
-                .findAllDailyQuantityByUserIdAndDate(userId, date)
+                .findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(userId, date)
                 .stream()
                 .map(this::toDailyPlanData)
                 .toList();

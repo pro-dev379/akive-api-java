@@ -1,7 +1,6 @@
 package net.akive.api.plan.adapter.persistence.totalquantity;
 
 import net.akive.api.plan.adapter.persistence.entity.TotalQuantityEntity;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,7 +9,7 @@ import java.util.Optional;
 
 public interface TotalQuantityJpaRepository extends JpaRepository<TotalQuantityEntity, Long> {
 
-    List<TotalQuantityEntity> findBySessionalPlan_SessionalPlanId(Long sessionalPlanId, Sort sort);
+    List<TotalQuantityEntity> findBySessionalPlan_SessionalPlanIdOrderByTotalQuantityIdAsc(Long sessionalPlanId);
 
     @Query("""
         select tq

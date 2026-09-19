@@ -40,7 +40,7 @@ public interface WeeklyQuantityJpaRepository extends JpaRepository<WeeklyQuantit
             and wq.weekPeriod = :weekPeriod
         order by tq.totalQuantityId asc, dq.date asc
     """)
-    List<WeeklyQuantityEntity> findWeeklyQuantitiesBySessionalPlanIdAndUserIdAndWeekPeriod(
+    List<WeeklyQuantityEntity> findWeeklyQuantitiesBySessionalPlanIdAndUserIdAndWeekPeriodOrderByPlanHierarchyAsc(
             Long sessionalPlanId,
             Long userId,
             WeekPeriodEntity weekPeriod

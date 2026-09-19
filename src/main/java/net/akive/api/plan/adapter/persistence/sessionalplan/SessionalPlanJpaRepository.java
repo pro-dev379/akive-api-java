@@ -2,7 +2,6 @@ package net.akive.api.plan.adapter.persistence.sessionalplan;
 
 import net.akive.api.plan.adapter.persistence.entity.SessionPeriodEntity;
 import net.akive.api.plan.adapter.persistence.entity.SessionalPlanEntity;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,7 +13,7 @@ public interface SessionalPlanJpaRepository extends JpaRepository<SessionalPlanE
 
     Optional<SessionalPlanEntity> findBySessionalPlanIdAndUser_UserId(Long sessionalPlanId, Long userId);
 
-    List<SessionalPlanEntity> findByUser_UserId(Long userId, Sort sort);
+    List<SessionalPlanEntity> findByUser_UserIdOrderBySessionalPlanIdDesc(Long userId);
 
     @Query("""
         select sp.sessionPeriod

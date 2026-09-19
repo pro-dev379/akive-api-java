@@ -21,10 +21,11 @@ class DailyQuantityJpaAdapterTest extends RepositoryTestSupport {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         flushAndClear();
 
-        List<DailyPlanData> dailyPlans = dailyQuantityRepository.findAllDailyPlanDataByUserIdAndDate(
-                savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
-                QUERY_DATE
-        );
+        List<DailyPlanData> dailyPlans =
+                dailyQuantityRepository.findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+                        savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
+                        QUERY_DATE
+                );
 
         assertThat(dailyPlans).hasSize(1);
         DailyPlanData dailyPlan = dailyPlans.getFirst();
@@ -44,10 +45,11 @@ class DailyQuantityJpaAdapterTest extends RepositoryTestSupport {
         saveTotalQuantity();
         flushAndClear();
 
-        List<DailyPlanData> dailyPlans = dailyQuantityRepository.findAllDailyPlanDataByUserIdAndDate(
-                UNKNOWN_USER_ID,
-                QUERY_DATE
-        );
+        List<DailyPlanData> dailyPlans =
+                dailyQuantityRepository.findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+                        UNKNOWN_USER_ID,
+                        QUERY_DATE
+                );
 
         assertThat(dailyPlans).isEmpty();
     }
@@ -57,10 +59,11 @@ class DailyQuantityJpaAdapterTest extends RepositoryTestSupport {
         TotalQuantity savedTotalQuantity = saveTotalQuantity();
         flushAndClear();
 
-        List<DailyPlanData> dailyPlans = dailyQuantityRepository.findAllDailyPlanDataByUserIdAndDate(
-                savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
-                UNKNOWN_DATE
-        );
+        List<DailyPlanData> dailyPlans =
+                dailyQuantityRepository.findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+                        savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
+                        UNKNOWN_DATE
+                );
 
         assertThat(dailyPlans).isEmpty();
     }

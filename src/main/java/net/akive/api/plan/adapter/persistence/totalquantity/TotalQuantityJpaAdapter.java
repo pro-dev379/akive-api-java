@@ -4,13 +4,10 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.plan.adapter.persistence.entity.TotalQuantityEntity;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.domain.model.TotalQuantity;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
-import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,7 +25,7 @@ class TotalQuantityJpaAdapter implements TotalQuantityRepository {
     @Override
     public List<TotalQuantity> findAllBySessionalPlanIdOrderByTotalQuantityIdAsc(Long sessionalPlanId) {
         return totalQuantityJpaRepository
-                .findBySessionalPlan_SessionalPlanId(sessionalPlanId, Sort.by(ASC, "totalQuantityId"))
+                .findBySessionalPlan_SessionalPlanIdOrderByTotalQuantityIdAsc(sessionalPlanId)
                 .stream()
                 .map(TotalQuantityEntity::to)
                 .toList();

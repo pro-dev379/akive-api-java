@@ -20,23 +20,6 @@ public class WeeklyQuantityJpaAdapter implements WeeklyQuantityRepository {
     private final WeeklyQuantityJpaRepository weeklyQuantityJpaRepository;
 
     @Override
-    public List<WeeklyPlanData> findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
-            Long sessionalPlanId,
-            Long userId,
-            WeekPeriod weekPeriod
-    ) {
-        return weeklyQuantityJpaRepository
-                .findWeeklyQuantitiesBySessionalPlanIdAndUserIdAndWeekPeriod(
-                        sessionalPlanId,
-                        userId,
-                        WeekPeriodEntity.from(weekPeriod)
-                )
-                .stream()
-                .map(this::toWeeklyPlanData)
-                .toList();
-    }
-
-    @Override
     public Optional<WeeklyPlanData> findWeeklyPlanDataBySessionalPlanIdAndUserIdAndTotalQuantityIdAndWeeklyQuantityId(
             Long sessionalPlanId,
             Long userId,
@@ -50,6 +33,23 @@ public class WeeklyQuantityJpaAdapter implements WeeklyQuantityRepository {
                         totalQuantityId,
                         weeklyQuantityId
                 ).map(this::toWeeklyPlanData);
+    }
+
+    @Override
+    public List<WeeklyPlanData> findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriodOrderByPlanHierarchyAsc(
+            Long sessionalPlanId,
+            Long userId,
+            WeekPeriod weekPeriod
+    ) {
+        return weeklyQuantityJpaRepository
+                .findWeeklyQuantitiesBySessionalPlanIdAndUserIdAndWeekPeriodOrderByPlanHierarchyAsc(
+                        sessionalPlanId,
+                        userId,
+                        WeekPeriodEntity.from(weekPeriod)
+                )
+                .stream()
+                .map(this::toWeeklyPlanData)
+                .toList();
     }
 
     private WeeklyPlanData toWeeklyPlanData(WeeklyQuantityEntity weeklyQuantityEntity) {

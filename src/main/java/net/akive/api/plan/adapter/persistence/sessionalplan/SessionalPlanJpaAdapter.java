@@ -6,14 +6,11 @@ import net.akive.api.plan.adapter.persistence.entity.SessionalPlanEntity;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.value.SessionPeriod;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
-import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Repository
 @RequiredArgsConstructor
@@ -36,7 +33,7 @@ class SessionalPlanJpaAdapter implements SessionalPlanRepository {
     @Override
     public List<SessionalPlan> findAllByUserIdOrderBySessionalPlanIdDesc(Long userId) {
         return sessionalPlanJpaRepository
-                .findByUser_UserId(userId, Sort.by(DESC, "sessionalPlanId"))
+                .findByUser_UserIdOrderBySessionalPlanIdDesc(userId)
                 .stream()
                 .map(SessionalPlanEntity::to)
                 .toList();

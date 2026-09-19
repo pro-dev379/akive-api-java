@@ -27,7 +27,7 @@ class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
         flushAndClear();
 
         List<WeeklyPlanData> weeklyPlanItems = weeklyQuantityRepository
-                .findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
+                .findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriodOrderByPlanHierarchyAsc(
                         savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
                         savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
                         weekPeriod
@@ -61,7 +61,7 @@ class WeeklyQuantityJpaAdapterTest extends RepositoryTestSupport {
         flushAndClear();
 
         List<WeeklyPlanData> weeklyPlanItems = weeklyQuantityRepository
-                .findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriod(
+                .findAllWeeklyPlanDataBySessionalPlanIdAndUserIdAndWeekPeriodOrderByPlanHierarchyAsc(
                         savedTotalQuantity.getSessionalPlan().getSessionalPlanId(),
                         UNKNOWN_USER_ID,
                         weekPeriod

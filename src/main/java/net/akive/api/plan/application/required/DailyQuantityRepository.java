@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface DailyQuantityRepository {
 
-    List<DailyPlanData> findAllDailyPlanDataByUserIdAndDate(Long userId, LocalDate date);
+    List<DailyPlanData> findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(Long userId, LocalDate date);
 }
