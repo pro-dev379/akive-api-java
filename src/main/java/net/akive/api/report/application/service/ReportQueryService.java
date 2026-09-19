@@ -49,8 +49,8 @@ class ReportQueryService implements ReportFinder {
         List<Report> reports = reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(
                 query.userId(),
                 query.reportType(),
-                query.from(),
-                query.to()
+                query.startOn(),
+                query.endOn()
         );
 
         return reports.stream()

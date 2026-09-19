@@ -19,8 +19,8 @@ public interface ReportRepository {
     List<Report> findAllByUserIdAndReportTypeAndReportOnBetween(
             Long userId,
             ReportType reportType,
-            LocalDate from,
-            LocalDate to
+            LocalDate startOn,
+            LocalDate endOn
     );
 
     PageResult<ReportHeaderResult> findHeaderPageByUserId(Long userId, PageCondition pageCondition);

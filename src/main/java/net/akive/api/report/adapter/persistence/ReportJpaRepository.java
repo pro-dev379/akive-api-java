@@ -20,14 +20,14 @@ public interface ReportJpaRepository extends JpaRepository<ReportEntity, Long> {
         select r from ReportEntity r
         where r.user.userId = :userId
             and r.reportType = :reportType
-            and r.reportOn >= :from and r.reportOn <= :to
+            and r.reportOn >= :startOn and r.reportOn <= :endOn
         order by r.reportOn asc
     """)
     List<ReportEntity> findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
             Long userId,
             ReportType reportType,
-            LocalDate from,
-            LocalDate to
+            LocalDate startOn,
+            LocalDate endOn
     );
 
     @Query("""

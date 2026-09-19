@@ -92,25 +92,25 @@ class ReportQueryServiceTest {
 
     @Test
     void 리포트_피드백_히스토리를_조회한다() {
-        LocalDate from = REPORT_ON.minusDays(1);
-        LocalDate to = REPORT_ON;
-        ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(USER_ID, WEEKLY, from, to);
+        LocalDate startOn = REPORT_ON.minusDays(1);
+        LocalDate endOn = REPORT_ON;
+        ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(USER_ID, WEEKLY, startOn, endOn);
         List<ReportFeedback> firstFeedbackItems = createReportFeedbackItems();
         List<ReportFeedback> secondFeedbackItems = createReportFeedbackItems();
-        Report firstReport = createReconstructedReport(from, firstFeedbackItems);
-        Report secondReport = createReconstructedReport(to, secondFeedbackItems);
-        given(reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(USER_ID, WEEKLY, from, to))
+        Report firstReport = createReconstructedReport(startOn, firstFeedbackItems);
+        Report secondReport = createReconstructedReport(endOn, secondFeedbackItems);
+        given(reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(USER_ID, WEEKLY, startOn, endOn))
                 .willReturn(List.of(firstReport, secondReport));
 
         List<ReportFeedbackHistoryResult> feedbackHistory = reportQueryService.findFeedbackHistory(query);
 
         assertThat(feedbackHistory)
                 .containsExactly(
-                        new ReportFeedbackHistoryResult(from, firstFeedbackItems),
-                        new ReportFeedbackHistoryResult(to, secondFeedbackItems)
+                        new ReportFeedbackHistoryResult(startOn, firstFeedbackItems),
+                        new ReportFeedbackHistoryResult(endOn, secondFeedbackItems)
                 );
         then(reportRepository).should()
-                .findAllByUserIdAndReportTypeAndReportOnBetween(USER_ID, WEEKLY, from, to);
+                .findAllByUserIdAndReportTypeAndReportOnBetween(USER_ID, WEEKLY, startOn, endOn);
     }
 
     @Test

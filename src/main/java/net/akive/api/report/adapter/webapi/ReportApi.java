@@ -83,10 +83,10 @@ public class ReportApi {
     public ReportFeedbackHistoryFindResponse findFeedbackHistory(
             @AuthenticatedUserId Long userId,
             @RequestParam ReportType reportType,
-            @RequestParam LocalDate from,
-            @RequestParam LocalDate to
+            @RequestParam LocalDate startOn,
+            @RequestParam LocalDate endOn
     ) {
-        ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(userId, reportType, from, to);
+        ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(userId, reportType, startOn, endOn);
 
         return ReportFeedbackHistoryFindResponse.from(reportFinder.findFeedbackHistory(query));
     }

@@ -281,36 +281,36 @@ class ReportApiTest extends PrivateApiTestSupport {
 
     @Test
     void 리포트_피드백_히스토리를_조회한다() {
-        LocalDate from = REPORT_ON.minusDays(1);
-        LocalDate to = REPORT_ON;
-        ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(USER_ID, WEEKLY, from, to);
+        LocalDate startOn = REPORT_ON.minusDays(1);
+        LocalDate endOn = REPORT_ON;
+        ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(USER_ID, WEEKLY, startOn, endOn);
         List<ReportFeedback> firstFeedbackItems = createReportFeedbackItems();
         List<ReportFeedback> secondFeedbackItems = createReportFeedbackItems();
         given(reportFinder.findFeedbackHistory(query))
                 .willReturn(List.of(
-                        new ReportFeedbackHistoryResult(from, firstFeedbackItems),
-                        new ReportFeedbackHistoryResult(to, secondFeedbackItems)
+                        new ReportFeedbackHistoryResult(startOn, firstFeedbackItems),
+                        new ReportFeedbackHistoryResult(endOn, secondFeedbackItems)
                 ));
 
         MvcTestResultAssert result = get(
-                REPORT_FEEDBACK_HISTORY_URL + "?reportType={reportType}&from={from}&to={to}",
+                REPORT_FEEDBACK_HISTORY_URL + "?reportType={reportType}&startOn={startOn}&endOn={endOn}",
                 USER_ID,
                 WEEKLY,
-                from,
-                to
+                startOn,
+                endOn
         ).hasStatusOk();
 
         result.bodyJson()
-                .extractingPath("$.feedbackHistory['" + from + "'].highlights[0]")
+                .extractingPath("$.feedbackHistory['" + startOn + "'].highlights[0]")
                 .isEqualTo(firstFeedbackItems.get(0).content());
         result.bodyJson()
-                .extractingPath("$.feedbackHistory['" + from + "'].improvements[0]")
+                .extractingPath("$.feedbackHistory['" + startOn + "'].improvements[0]")
                 .isEqualTo(firstFeedbackItems.get(1).content());
         result.bodyJson()
-                .extractingPath("$.feedbackHistory['" + to + "'].highlights[0]")
+                .extractingPath("$.feedbackHistory['" + endOn + "'].highlights[0]")
                 .isEqualTo(secondFeedbackItems.get(0).content());
         result.bodyJson()
-                .extractingPath("$.feedbackHistory['" + to + "'].improvements[0]")
+                .extractingPath("$.feedbackHistory['" + endOn + "'].improvements[0]")
                 .isEqualTo(secondFeedbackItems.get(1).content());
 
         then(reportFinder).should().findFeedbackHistory(query);
@@ -324,15 +324,15 @@ class ReportApiTest extends PrivateApiTestSupport {
     })
     void 리포트_피드백_히스토리_조회_요청_파라미터가_올바르지_않으면_400을_응답한다(
             String reportType,
-            String from,
-            String to
+            String startOn,
+            String endOn
     ) {
         get(
-            REPORT_FEEDBACK_HISTORY_URL + "?reportType={reportType}&from={from}&to={to}",
+            REPORT_FEEDBACK_HISTORY_URL + "?reportType={reportType}&startOn={startOn}&endOn={endOn}",
             USER_ID,
             reportType,
-            from,
-            to
+            startOn,
+            endOn
         ).hasStatus(BAD_REQUEST);
 
         then(reportFinder).shouldHaveNoInteractions();

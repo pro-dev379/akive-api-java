@@ -95,23 +95,23 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 회원_식별자와_리포트_타입과_작성일_범위로_리포트를_작성일_오름차순으로_조회한다() {
         User savedUser = saveUser();
-        LocalDate from = REPORT_ON.minusDays(2);
+        LocalDate startOn = REPORT_ON.minusDays(2);
         LocalDate middle = REPORT_ON.minusDays(1);
-        LocalDate to = REPORT_ON;
+        LocalDate endOn = REPORT_ON;
         List<ReportFeedback> feedbackItems = createReportFeedbackItems();
-        Report oldestReport = saveReport(savedUser, from, WEEKLY, feedbackItems);
+        Report oldestReport = saveReport(savedUser, startOn, WEEKLY, feedbackItems);
         Report middleReport = saveReport(savedUser, middle, WEEKLY, feedbackItems);
-        Report latestReport = saveReport(savedUser, to, WEEKLY, feedbackItems);
-        saveReport(savedUser, from.minusDays(1), WEEKLY);
-        saveReport(savedUser, to.plusDays(1), WEEKLY);
+        Report latestReport = saveReport(savedUser, endOn, WEEKLY, feedbackItems);
+        saveReport(savedUser, startOn.minusDays(1), WEEKLY);
+        saveReport(savedUser, endOn.plusDays(1), WEEKLY);
         saveReport(savedUser, middle, DAILY);
         flushAndClear();
 
         List<Report> foundReports = reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(
                 savedUser.getUserId(),
                 WEEKLY,
-                from,
-                to
+                startOn,
+                endOn
         );
 
         assertThat(foundReports)
@@ -123,7 +123,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
                 );
         assertThat(foundReports)
                 .extracting(Report::getReportOn)
-                .containsExactly(from, middle, to);
+                .containsExactly(startOn, middle, endOn);
         assertThat(foundReports)
                 .allSatisfy(report -> {
                     assertThat(report.getUser().getUserId()).isEqualTo(savedUser.getUserId());

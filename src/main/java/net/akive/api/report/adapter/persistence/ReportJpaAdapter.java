@@ -60,11 +60,11 @@ class ReportJpaAdapter implements ReportRepository {
     public List<Report> findAllByUserIdAndReportTypeAndReportOnBetween(
             Long userId,
             ReportType reportType,
-            LocalDate from,
-            LocalDate to
+            LocalDate startOn,
+            LocalDate endOn
     ) {
         return reportJpaRepository
-                .findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(userId, reportType, from, to)
+                .findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(userId, reportType, startOn, endOn)
                 .stream()
                 .map(entity -> entity.to(currentTimeProvider.now()))
                 .toList();

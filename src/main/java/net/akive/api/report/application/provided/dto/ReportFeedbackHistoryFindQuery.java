@@ -9,13 +9,13 @@ import static net.akive.api.common.domain.DomainValidator.*;
 public record ReportFeedbackHistoryFindQuery(
         Long userId,
         ReportType reportType,
-        LocalDate from,
-        LocalDate to
+        LocalDate startOn,
+        LocalDate endOn
 ) {
 
     public ReportFeedbackHistoryFindQuery {
         requirePositive(userId);
         requireNonNull(reportType);
-        requireStartNotAfterEnd(from, to);
+        requireStartNotAfterEnd(startOn, endOn);
     }
 }
