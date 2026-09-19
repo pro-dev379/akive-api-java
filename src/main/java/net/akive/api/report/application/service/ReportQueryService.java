@@ -7,6 +7,8 @@ import net.akive.api.common.pagination.PageResult;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.report.application.provided.ReportFinder;
+import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryFindQuery;
+import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryResult;
 import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
@@ -32,6 +34,23 @@ class ReportQueryService implements ReportFinder {
     @Override
     public Report find(Long reportId, Long userId) {
         return findReportOrThrow(reportId, userId);
+    }
+
+    @Override
+    public List<ReportFeedbackHistoryResult> findFeedbackHistory(ReportFeedbackHistoryFindQuery query) {
+        List<Report> reports = reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(
+                query.userId(),
+                query.reportType(),
+                query.from(),
+                query.to()
+        );
+
+        return reports.stream()
+                .map(report -> new ReportFeedbackHistoryResult(
+                        report.getReportOn(),
+                        report.getFeedbackItems()
+                ))
+                .toList();
     }
 
     @Override

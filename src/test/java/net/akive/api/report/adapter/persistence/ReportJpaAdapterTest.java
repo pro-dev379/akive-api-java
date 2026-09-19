@@ -3,7 +3,6 @@ package net.akive.api.report.adapter.persistence;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.report.application.provided.dto.ReportHeaderResult;
-import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportFeedback;
 import net.akive.api.support.RepositoryTestSupport;
@@ -11,6 +10,7 @@ import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,13 +18,11 @@ import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
 import static net.akive.api.report.domain.FeedbackType.IMPROVEMENT;
 import static net.akive.api.report.domain.ReportFixture.*;
+import static net.akive.api.report.domain.ReportType.DAILY;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ReportJpaAdapterTest extends RepositoryTestSupport {
-
-    @Autowired
-    ReportRepository reportRepository;
 
     @Autowired
     ReportJpaRepository reportJpaRepository;
@@ -58,9 +56,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 저장된_리포트를_다시_저장할_때_피드백_목록을_모두_교체해서_저장한다() {
-        User savedUser = saveUser();
-        Report report = createReport(savedUser);
-        Report savedReport = reportRepository.save(report);
+        Report savedReport = saveReport();
         flushAndClear();
 
         List<ReportFeedback> targetFeedbackItems = createTargetReportFeedbackItems();
@@ -80,8 +76,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 리포트_식별자와_회원_식별자로_리포트를_조회한다() {
         User savedUser = saveUser();
-        Report report = createReport(savedUser);
-        Report savedReport = reportRepository.save(report);
+        Report savedReport = reportRepository.save(createReport(savedUser));
         flushAndClear();
 
         Optional<Report> foundReport = reportRepository.findByReportIdAndUserId(
@@ -95,6 +90,46 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundReport.get().getReportOn()).isEqualTo(savedReport.getReportOn());
         assertThat(foundReport.get().getReportType()).isEqualTo(savedReport.getReportType());
         assertThat(foundReport.get().getFeedbackItems()).containsExactlyElementsOf(savedReport.getFeedbackItems());
+    }
+
+    @Test
+    void 회원_식별자와_리포트_타입과_리포트_작성일_범위로_리포트를_작성일_오름차순으로_조회한다() {
+        User savedUser = saveUser();
+        LocalDate from = REPORT_ON.minusDays(2);
+        LocalDate middle = REPORT_ON.minusDays(1);
+        LocalDate to = REPORT_ON;
+        List<ReportFeedback> feedbackItems = createReportFeedbackItems();
+        Report oldestReport = saveReport(savedUser, from, WEEKLY, feedbackItems);
+        Report middleReport = saveReport(savedUser, middle, WEEKLY, feedbackItems);
+        Report latestReport = saveReport(savedUser, to, WEEKLY, feedbackItems);
+        saveReport(savedUser, from.minusDays(1), WEEKLY);
+        saveReport(savedUser, to.plusDays(1), WEEKLY);
+        saveReport(savedUser, middle, DAILY);
+        flushAndClear();
+
+        List<Report> foundReports = reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(
+                savedUser.getUserId(),
+                WEEKLY,
+                from,
+                to
+        );
+
+        assertThat(foundReports)
+                .extracting(Report::getReportId)
+                .containsExactly(
+                        oldestReport.getReportId(),
+                        middleReport.getReportId(),
+                        latestReport.getReportId()
+                );
+        assertThat(foundReports)
+                .extracting(Report::getReportOn)
+                .containsExactly(from, middle, to);
+        assertThat(foundReports)
+                .allSatisfy(report -> {
+                    assertThat(report.getUser().getUserId()).isEqualTo(savedUser.getUserId());
+                    assertThat(report.getReportType()).isEqualTo(WEEKLY);
+                    assertThat(report.getFeedbackItems()).containsExactlyElementsOf(feedbackItems);
+                });
     }
 
     @Test
@@ -140,8 +175,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 리포트를_삭제한다() {
-        User savedUser = saveUser();
-        Report savedReport = reportRepository.save(createReport(savedUser));
+        Report savedReport = saveReport();
         flushAndClear();
 
         assertThat(countReportFeedbacksByReportId(savedReport.getReportId()))

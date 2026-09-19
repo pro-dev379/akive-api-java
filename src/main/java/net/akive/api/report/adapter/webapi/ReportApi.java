@@ -7,12 +7,10 @@ import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.report.adapter.webapi.dto.request.ReportCreateRequest;
 import net.akive.api.report.adapter.webapi.dto.request.ReportFeedbackUpdateRequest;
-import net.akive.api.report.adapter.webapi.dto.response.ReportCreateResponse;
-import net.akive.api.report.adapter.webapi.dto.response.ReportFindResponse;
-import net.akive.api.report.adapter.webapi.dto.response.ReportHeaderPageFindResponse;
-import net.akive.api.report.adapter.webapi.dto.response.ReportTypesFindResponse;
+import net.akive.api.report.adapter.webapi.dto.response.*;
 import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.ReportFinder;
+import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryFindQuery;
 import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.domain.ReportType;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static net.akive.api.common.pagination.SortDirection.*;
+import static net.akive.api.common.pagination.SortDirection.DESC;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -80,6 +78,17 @@ public class ReportApi {
         return ReportHeaderPageFindResponse.from(reportHeaderPage);
     }
 
+    @GetMapping("/feedback-history")
+    public ReportFeedbackHistoryFindResponse findFeedbackHistory(
+            @AuthenticatedUserId Long userId,
+            @RequestParam ReportType reportType,
+            @RequestParam LocalDate from,
+            @RequestParam LocalDate to
+    ) {
+        ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(userId, reportType, from, to);
+
+        return ReportFeedbackHistoryFindResponse.from(reportFinder.findFeedbackHistory(query));
+    }
 
     @GetMapping("/available-types")
     public ReportTypesFindResponse findAvailableReportTypes(

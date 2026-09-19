@@ -7,6 +7,7 @@ import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportType;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface ReportRepository {
@@ -16,6 +17,13 @@ public interface ReportRepository {
     PageResult<ReportHeaderResult> findHeaderPageByUserId(Long userId, PageCondition pageCondition);
 
     Optional<Report> findByReportIdAndUserId(Long reportId, Long userId);
+
+    List<Report> findAllByUserIdAndReportTypeAndReportOnBetween(
+            Long userId,
+            ReportType reportType,
+            LocalDate from,
+            LocalDate to
+    );
 
     boolean existsByUserIdAndReportOnAndReportType(Long userId, LocalDate reportOn, ReportType reportType);
 

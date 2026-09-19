@@ -17,6 +17,10 @@ import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.application.required.WeeklyQuantityRepository;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
+import net.akive.api.report.application.required.ReportRepository;
+import net.akive.api.report.domain.Report;
+import net.akive.api.report.domain.ReportFeedback;
+import net.akive.api.report.domain.ReportType;
 import net.akive.api.user.application.required.GoalRepository;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.User;
@@ -25,11 +29,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.createDailyLog;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_SUBJECT_NAME;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.createTotalQuantity;
+import static net.akive.api.report.domain.ReportFixture.*;
+import static net.akive.api.report.domain.ReportType.*;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 
 @Transactional
@@ -66,6 +73,9 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
     protected WeeklyQuantityRepository weeklyQuantityRepository;
 
     @Autowired
+    protected ReportRepository reportRepository;
+
+    @Autowired
     protected DailyLogRepository dailyLogRepository;
 
     @Autowired
@@ -79,10 +89,6 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     protected User saveUser() {
         return userRepository.save(createUser());
-    }
-
-    protected User saveUser(User user) {
-        return userRepository.save(user);
     }
 
     protected SessionalPlan saveSessionalPlan() {
@@ -101,8 +107,8 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
         return saveSessionalPlan(saveUser(), sessionName);
     }
 
-    protected SessionalPlan saveSessionalPlan(User user, String sessionName) {
-        SessionalPlan sessionalPlan = createSessionalPlan(saveUser(user), sessionName);
+    protected SessionalPlan saveSessionalPlan(User savedUser, String sessionName) {
+        SessionalPlan sessionalPlan = createSessionalPlan(savedUser, sessionName);
 
         return sessionalPlanRepository.save(sessionalPlan);
     }
@@ -115,24 +121,39 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
         return saveTotalQuantity(saveSessionalPlan(), subjectName);
     }
 
-    protected TotalQuantity saveTotalQuantity(SessionalPlan sessionalPlan, String subjectName) {
-        SessionalPlan savedSessionalPlan = sessionalPlanRepository.save(sessionalPlan);
-
+    protected TotalQuantity saveTotalQuantity(SessionalPlan savedSessionalPlan, String subjectName) {
         return totalQuantityRepository.save(createTotalQuantity(savedSessionalPlan, subjectName));
     }
 
-    protected DailyLog saveDailyLog(User user, LocalDate logOn, int startHour) {
-        return saveDailyLog(createDailyLog(user, logOn, startHour));
+    protected DailyLog saveDailyLog(User savedUser, LocalDate logOn, int startHour) {
+        return saveDailyLog(createDailyLog(savedUser, logOn, startHour));
     }
 
-    protected DailyLog saveDailyLog(User user, FocusTime focusTime) {
-        return saveDailyLog(createDailyLog(user, focusTime));
+    protected DailyLog saveDailyLog(User savedUser, FocusTime focusTime) {
+        return saveDailyLog(createDailyLog(savedUser, focusTime));
+    }
+
+    protected Report saveReport() {
+        return saveReport(saveUser(), REPORT_ON, DAILY);
+    }
+
+    protected Report saveReport(User savedUser, LocalDate reportOn, ReportType reportType) {
+        return saveReport(savedUser, reportOn, reportType, createReportFeedbackItems());
+    }
+
+    protected Report saveReport(
+            User savedUser,
+            LocalDate reportOn,
+            ReportType reportType,
+            List<ReportFeedback> feedbackItems
+    ) {
+        return reportRepository.save(
+                createReport(savedUser, reportOn, reportType, feedbackItems, reportOn.atStartOfDay())
+        );
     }
 
     private DailyLog saveDailyLog(DailyLog dailyLog) {
-        return dailyLogJpaRepository
-                .save(DailyLogEntity.from(dailyLog))
-                .to(currentTimeProvider.now());
+        return dailyLogJpaRepository.save(DailyLogEntity.from(dailyLog)).to(currentTimeProvider.now());
     }
 
     protected void flushAndClear() {

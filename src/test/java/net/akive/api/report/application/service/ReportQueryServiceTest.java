@@ -4,9 +4,12 @@ import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
+import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryFindQuery;
+import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryResult;
 import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
+import net.akive.api.report.domain.ReportFeedback;
 import net.akive.api.report.domain.ReportType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,6 +73,29 @@ class ReportQueryServiceTest {
         assertThat(foundReport).isEqualTo(report);
 
         then(reportRepository).should().findByReportIdAndUserId(REPORT_ID, USER_ID);
+    }
+
+    @Test
+    void 리포트_피드백_히스토리를_조회한다() {
+        LocalDate from = REPORT_ON.minusDays(1);
+        LocalDate to = REPORT_ON;
+        ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(USER_ID, WEEKLY, from, to);
+        List<ReportFeedback> firstFeedbackItems = createReportFeedbackItems();
+        List<ReportFeedback> secondFeedbackItems = createReportFeedbackItems();
+        Report firstReport = createReconstructedReport(from, firstFeedbackItems);
+        Report secondReport = createReconstructedReport(to, secondFeedbackItems);
+        given(reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(USER_ID, WEEKLY, from, to))
+                .willReturn(List.of(firstReport, secondReport));
+
+        List<ReportFeedbackHistoryResult> feedbackHistory = reportQueryService.findFeedbackHistory(query);
+
+        assertThat(feedbackHistory)
+                .containsExactly(
+                        new ReportFeedbackHistoryResult(from, firstFeedbackItems),
+                        new ReportFeedbackHistoryResult(to, secondFeedbackItems)
+                );
+        then(reportRepository).should()
+                .findAllByUserIdAndReportTypeAndReportOnBetween(USER_ID, WEEKLY, from, to);
     }
 
     @Test

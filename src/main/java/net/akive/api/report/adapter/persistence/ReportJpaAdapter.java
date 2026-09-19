@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -74,6 +75,20 @@ class ReportJpaAdapter implements ReportRepository {
     public Optional<Report> findByReportIdAndUserId(Long reportId, Long userId) {
         return reportJpaRepository.findByReportIdAndUser_UserId(reportId, userId)
                 .map(entity -> entity.to(currentTimeProvider.now()));
+    }
+
+    @Override
+    public List<Report> findAllByUserIdAndReportTypeAndReportOnBetween(
+            Long userId,
+            ReportType reportType,
+            LocalDate from,
+            LocalDate to
+    ) {
+        return reportJpaRepository
+                .findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(userId, reportType, from, to)
+                .stream()
+                .map(entity -> entity.to(currentTimeProvider.now()))
+                .toList();
     }
 
     @Override

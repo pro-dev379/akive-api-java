@@ -11,10 +11,9 @@ import net.akive.api.report.adapter.webapi.dto.request.ReportFeedbackUpdateReque
 import net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture;
 import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.ReportFinder;
-import net.akive.api.report.application.provided.dto.ReportCreateCommand;
-import net.akive.api.report.application.provided.dto.ReportFeedbackItemsUpdateCommand;
-import net.akive.api.report.application.provided.dto.ReportHeaderResult;
+import net.akive.api.report.application.provided.dto.*;
 import net.akive.api.report.domain.Report;
+import net.akive.api.report.domain.ReportFeedback;
 import net.akive.api.support.PrivateApiTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -54,6 +54,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     private static final String REPORT_URL = "/reports/{reportId}";
     private static final String REPORT_FEEDBACK_URL = "/reports/{reportId}/feedback";
     private static final String REPORT_HEADERS_URL = "/reports/headers";
+    private static final String REPORT_FEEDBACK_HISTORY_URL = "/reports/feedback-history";
     private static final String AVAILABLE_REPORT_TYPES_URL = "/reports/available-types?reportOn={reportOn}";
 
     @MockitoBean
@@ -274,6 +275,65 @@ class ReportApiTest extends PrivateApiTestSupport {
         assertErrorResponse(result, REPORT_NOT_FOUND);
 
         then(reportFinder).should().find(UNKNOWN_REPORT_ID, USER_ID);
+    }
+
+    @Test
+    void 리포트_피드백_히스토리를_조회한다() {
+        LocalDate from = REPORT_ON.minusDays(1);
+        LocalDate to = REPORT_ON;
+        ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(USER_ID, WEEKLY, from, to);
+        List<ReportFeedback> firstFeedbackItems = createReportFeedbackItems();
+        List<ReportFeedback> secondFeedbackItems = createReportFeedbackItems();
+        given(reportFinder.findFeedbackHistory(query))
+                .willReturn(List.of(
+                        new ReportFeedbackHistoryResult(from, firstFeedbackItems),
+                        new ReportFeedbackHistoryResult(to, secondFeedbackItems)
+                ));
+
+        MvcTestResultAssert result = get(
+                REPORT_FEEDBACK_HISTORY_URL + "?reportType={reportType}&from={from}&to={to}",
+                USER_ID,
+                WEEKLY,
+                from,
+                to
+        ).hasStatusOk();
+
+        result.bodyJson()
+                .extractingPath("$.feedbackHistory['" + from + "'].highlights[0]")
+                .isEqualTo(firstFeedbackItems.get(0).content());
+        result.bodyJson()
+                .extractingPath("$.feedbackHistory['" + from + "'].improvements[0]")
+                .isEqualTo(firstFeedbackItems.get(1).content());
+        result.bodyJson()
+                .extractingPath("$.feedbackHistory['" + to + "'].highlights[0]")
+                .isEqualTo(secondFeedbackItems.get(0).content());
+        result.bodyJson()
+                .extractingPath("$.feedbackHistory['" + to + "'].improvements[0]")
+                .isEqualTo(secondFeedbackItems.get(1).content());
+
+        then(reportFinder).should().findFeedbackHistory(query);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "INVALID, 2026-01-24, 2026-01-25",
+            "WEEKLY, invalid-date, 2026-01-25",
+            "WEEKLY, 2026-01-24, invalid-date"
+    })
+    void 리포트_피드백_히스토리_조회_요청_파라미터가_올바르지_않으면_400을_응답한다(
+            String reportType,
+            String from,
+            String to
+    ) {
+        get(
+            REPORT_FEEDBACK_HISTORY_URL + "?reportType={reportType}&from={from}&to={to}",
+            USER_ID,
+            reportType,
+            from,
+            to
+        ).hasStatus(BAD_REQUEST);
+
+        then(reportFinder).shouldHaveNoInteractions();
     }
 
     @Test
