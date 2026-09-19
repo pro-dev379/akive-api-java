@@ -1,19 +1,22 @@
 package net.akive.api.report.application.service;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.report.application.provided.ReportFinder;
+import net.akive.api.report.application.provided.dto.ReportCoveragePeriodFindQuery;
 import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryFindQuery;
 import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryResult;
 import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
+import net.akive.api.report.domain.ReportCoveragePeriod;
+import net.akive.api.report.domain.ReportSchedule;
 import net.akive.api.report.domain.ReportType;
-import net.akive.api.report.domain.ReportTypePolicy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,11 @@ class ReportQueryService implements ReportFinder {
     }
 
     @Override
+    public PageResult<ReportHeaderResult> findHeaderPage(Long userId, PageCondition pageCondition) {
+        return reportRepository.findHeaderPageByUserId(userId, pageCondition);
+    }
+
+    @Override
     public List<ReportFeedbackHistoryResult> findFeedbackHistory(ReportFeedbackHistoryFindQuery query) {
         List<Report> reports = reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(
                 query.userId(),
@@ -54,8 +62,13 @@ class ReportQueryService implements ReportFinder {
     }
 
     @Override
-    public PageResult<ReportHeaderResult> findHeaderPage(Long userId, PageCondition pageCondition) {
-        return reportRepository.findHeaderPageByUserId(userId, pageCondition);
+    public ReportCoveragePeriod findCoveragePeriod(ReportCoveragePeriodFindQuery query)
+            throws ResourceNotFoundException, BusinessRuleViolationException {
+        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriodsByUserId(query.userId());
+
+        validateReportOnWithinSessionPeriod(query.reportOn(), sessionPeriods);
+
+        return ReportSchedule.from(sessionPeriods).findCoveragePeriod(query.reportOn(), query.reportType());
     }
 
     @Override
@@ -65,7 +78,7 @@ class ReportQueryService implements ReportFinder {
 
         validateReportOnWithinSessionPeriod(reportOn, sessionPeriods);
 
-        return ReportTypePolicy.findAvailableReportTypes(sessionPeriods, reportOn);
+        return ReportSchedule.from(sessionPeriods).findAvailableReportTypes(reportOn);
     }
 
     private void validateReportOnWithinSessionPeriod(LocalDate reportOn, List<SessionPeriod> sessionPeriods) {

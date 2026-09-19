@@ -7,6 +7,7 @@ import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.report.application.required.ReportRepository;
+import net.akive.api.report.domain.ReportSchedule;
 import net.akive.api.report.domain.ReportType;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,6 @@ import java.util.List;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_REPORT_TYPE;
 import static net.akive.api.common.exception.business.ResourceConflictError.REPORT_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
-import static net.akive.api.report.domain.ReportTypePolicy.findAvailableReportTypes;
 
 @Component
 @RequiredArgsConstructor
@@ -52,7 +52,8 @@ class ReportValidationService {
             ReportType reportType,
             List<SessionPeriod> sessionPeriods
     ) {
-        List<ReportType> availableReportTypes = findAvailableReportTypes(sessionPeriods, reportOn);
+        List<ReportType> availableReportTypes =
+                ReportSchedule.from(sessionPeriods).findAvailableReportTypes(reportOn);
 
         if (!availableReportTypes.contains(reportType)) {
             throw new BusinessRuleViolationException(INVALID_REPORT_TYPE);

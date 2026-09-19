@@ -50,6 +50,27 @@ class ReportJpaAdapter implements ReportRepository {
     }
 
     @Override
+    public Optional<Report> findByReportIdAndUserId(Long reportId, Long userId) {
+        return reportJpaRepository.findByReportIdAndUser_UserId(reportId, userId)
+                .map(entity -> entity.to(currentTimeProvider.now()));
+    }
+
+
+    @Override
+    public List<Report> findAllByUserIdAndReportTypeAndReportOnBetween(
+            Long userId,
+            ReportType reportType,
+            LocalDate from,
+            LocalDate to
+    ) {
+        return reportJpaRepository
+                .findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(userId, reportType, from, to)
+                .stream()
+                .map(entity -> entity.to(currentTimeProvider.now()))
+                .toList();
+    }
+
+    @Override
     public PageResult<ReportHeaderResult> findHeaderPageByUserId(Long userId, PageCondition pageCondition) {
         Page<ReportHeaderResult> reportHeaderPage = reportJpaRepository.findHeaderPageByUserId(
                 userId,
@@ -69,26 +90,6 @@ class ReportJpaAdapter implements ReportRepository {
                 reportHeaderPage.isLast(),
                 reportHeaderPage.getContent()
         );
-    }
-
-    @Override
-    public Optional<Report> findByReportIdAndUserId(Long reportId, Long userId) {
-        return reportJpaRepository.findByReportIdAndUser_UserId(reportId, userId)
-                .map(entity -> entity.to(currentTimeProvider.now()));
-    }
-
-    @Override
-    public List<Report> findAllByUserIdAndReportTypeAndReportOnBetween(
-            Long userId,
-            ReportType reportType,
-            LocalDate from,
-            LocalDate to
-    ) {
-        return reportJpaRepository
-                .findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(userId, reportType, from, to)
-                .stream()
-                .map(entity -> entity.to(currentTimeProvider.now()))
-                .toList();
     }
 
     @Override

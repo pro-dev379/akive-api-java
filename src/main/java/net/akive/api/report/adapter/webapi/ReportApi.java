@@ -10,6 +10,7 @@ import net.akive.api.report.adapter.webapi.dto.request.ReportFeedbackUpdateReque
 import net.akive.api.report.adapter.webapi.dto.response.*;
 import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.ReportFinder;
+import net.akive.api.report.application.provided.dto.ReportCoveragePeriodFindQuery;
 import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryFindQuery;
 import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.domain.ReportType;
@@ -88,6 +89,17 @@ public class ReportApi {
         ReportFeedbackHistoryFindQuery query = new ReportFeedbackHistoryFindQuery(userId, reportType, from, to);
 
         return ReportFeedbackHistoryFindResponse.from(reportFinder.findFeedbackHistory(query));
+    }
+
+    @GetMapping("/coverage-period")
+    public ReportCoveragePeriodFindResponse findCoveragePeriod(
+            @AuthenticatedUserId Long userId,
+            @RequestParam LocalDate reportOn,
+            @RequestParam ReportType reportType
+    ) {
+        ReportCoveragePeriodFindQuery query = new ReportCoveragePeriodFindQuery(userId, reportOn, reportType);
+
+        return ReportCoveragePeriodFindResponse.from(reportFinder.findCoveragePeriod(query));
     }
 
     @GetMapping("/available-types")

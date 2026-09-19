@@ -14,17 +14,6 @@ import java.util.Optional;
 
 public interface ReportJpaRepository extends JpaRepository<ReportEntity, Long> {
 
-    @Query("""
-        select new net.akive.api.report.application.provided.dto.ReportHeaderResult(
-            r.reportId,
-            r.reportOn,
-            r.reportType
-        )
-        from ReportEntity r
-        where r.user.userId = :userId
-        """)
-    Page<ReportHeaderResult> findHeaderPageByUserId(Long userId, Pageable pageable);
-
     Optional<ReportEntity> findByReportIdAndUser_UserId(Long reportId, Long userId);
 
     @Query("""
@@ -40,6 +29,17 @@ public interface ReportJpaRepository extends JpaRepository<ReportEntity, Long> {
             LocalDate from,
             LocalDate to
     );
+
+    @Query("""
+        select new net.akive.api.report.application.provided.dto.ReportHeaderResult(
+            r.reportId,
+            r.reportOn,
+            r.reportType
+        )
+        from ReportEntity r
+        where r.user.userId = :userId
+        """)
+    Page<ReportHeaderResult> findHeaderPageByUserId(Long userId, Pageable pageable);
 
     boolean existsByUser_UserIdAndReportOnAndReportType(Long userId, LocalDate reportOn, ReportType reportType);
 }

@@ -93,7 +93,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 회원_식별자와_리포트_타입과_리포트_작성일_범위로_리포트를_작성일_오름차순으로_조회한다() {
+    void 회원_식별자와_리포트_타입과_작성일_범위로_리포트를_작성일_오름차순으로_조회한다() {
         User savedUser = saveUser();
         LocalDate from = REPORT_ON.minusDays(2);
         LocalDate middle = REPORT_ON.minusDays(1);
@@ -159,7 +159,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 회원_식별자와_리포트_작성일과_리포트_타입으로_존재_여부를_조회한다() {
+    void 회원_식별자와_리포트_작성일과_타입으로_존재_여부를_조회한다() {
         User savedUser = saveUser();
         Report savedReport = reportRepository.save(createReport(savedUser));
         flushAndClear();

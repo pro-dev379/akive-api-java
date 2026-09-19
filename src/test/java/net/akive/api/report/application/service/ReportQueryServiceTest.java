@@ -4,11 +4,13 @@ import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
+import net.akive.api.report.application.provided.dto.ReportCoveragePeriodFindQuery;
 import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryFindQuery;
 import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryResult;
 import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
+import net.akive.api.report.domain.ReportCoveragePeriod;
 import net.akive.api.report.domain.ReportFeedback;
 import net.akive.api.report.domain.ReportType;
 import org.junit.jupiter.api.Test;
@@ -47,6 +49,32 @@ class ReportQueryServiceTest {
     ReportQueryService reportQueryService;
 
     @Test
+    void 리포트를_조회한다() {
+        Report report = createReconstructedReport();
+        given(reportRepository.findByReportIdAndUserId(REPORT_ID, USER_ID))
+                .willReturn(Optional.of(report));
+
+        Report foundReport = reportQueryService.find(REPORT_ID, USER_ID);
+
+        assertThat(foundReport).isEqualTo(report);
+
+        then(reportRepository).should().findByReportIdAndUserId(REPORT_ID, USER_ID);
+    }
+
+    @Test
+    void 리포트가_없으면_조회에_실패한다() {
+        given(reportRepository.findByReportIdAndUserId(UNKNOWN_REPORT_ID, USER_ID))
+                .willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> reportQueryService.find(UNKNOWN_REPORT_ID, USER_ID))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(REPORT_NOT_FOUND);
+
+        then(reportRepository).should().findByReportIdAndUserId(UNKNOWN_REPORT_ID, USER_ID);
+    }
+
+    @Test
     void 리포트_헤더_목록을_페이징_조회한다() {
         PageCondition pageCondition = PageCondition.of(DEFAULT_PAGE, DEFAULT_SIZE, "reportOn", DESC);
         ReportHeaderResult reportHeader = new ReportHeaderResult(REPORT_ID, REPORT_ON, WEEKLY);
@@ -60,19 +88,6 @@ class ReportQueryServiceTest {
         assertThat(foundReportHeaderPage).isEqualTo(reportHeaderPage);
 
         then(reportRepository).should().findHeaderPageByUserId(USER_ID, pageCondition);
-    }
-
-    @Test
-    void 리포트를_조회한다() {
-        Report report = createReconstructedReport();
-        given(reportRepository.findByReportIdAndUserId(REPORT_ID, USER_ID))
-                .willReturn(Optional.of(report));
-
-        Report foundReport = reportQueryService.find(REPORT_ID, USER_ID);
-
-        assertThat(foundReport).isEqualTo(report);
-
-        then(reportRepository).should().findByReportIdAndUserId(REPORT_ID, USER_ID);
     }
 
     @Test
@@ -99,20 +114,40 @@ class ReportQueryServiceTest {
     }
 
     @Test
-    void 리포트가_없으면_조회에_실패한다() {
-        given(reportRepository.findByReportIdAndUserId(UNKNOWN_REPORT_ID, USER_ID))
-                .willReturn(Optional.empty());
+    void 리포트_커버_기간을_조회한다() {
+        ReportCoveragePeriodFindQuery query = new ReportCoveragePeriodFindQuery(USER_ID, REPORT_ON, MONTHLY);
+        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+                .willReturn(List.of(createYear2026SessionPeriod()));
 
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> reportQueryService.find(UNKNOWN_REPORT_ID, USER_ID))
-                .extracting(ResourceNotFoundException::getError)
-                .isEqualTo(REPORT_NOT_FOUND);
+        ReportCoveragePeriod coveragePeriod = reportQueryService.findCoveragePeriod(query);
 
-        then(reportRepository).should().findByReportIdAndUserId(UNKNOWN_REPORT_ID, USER_ID);
+        assertThat(coveragePeriod).isEqualTo(new ReportCoveragePeriod(
+                LocalDate.of(2026, 1, 1),
+                REPORT_ON
+        ));
+        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
     }
 
     @Test
-    void 작성_가능한_리포트_타입을_조회한다() {
+    void 리포트_날짜와_관련된_세셔널_플랜이_없으면_리포트_커버_기간_조회에_실패한다() {
+        ReportCoveragePeriodFindQuery query = new ReportCoveragePeriodFindQuery(
+                USER_ID,
+                LocalDate.of(2024, 1, 1),
+                MONTHLY
+        );
+        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+                .willReturn(List.of(createYear2026SessionPeriod()));
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> reportQueryService.findCoveragePeriod(query))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+
+        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+    }
+
+    @Test
+    void 리포트_작성_가능한_리포트_타입을_조회한다() {
         given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
@@ -124,7 +159,7 @@ class ReportQueryServiceTest {
     }
 
     @Test
-    void 리포트_날짜와_관련된_세셔널_플랜이_없으면_작성_가능한_리포트_타입_조회에_실패한다() {
+    void 리포트_날짜와_관련된_세셔널_플랜이_없으면_리포트_작성_가능한_리포트_타입_조회에_실패한다() {
         given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 

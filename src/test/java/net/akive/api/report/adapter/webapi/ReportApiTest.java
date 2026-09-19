@@ -13,6 +13,7 @@ import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.ReportFinder;
 import net.akive.api.report.application.provided.dto.*;
 import net.akive.api.report.domain.Report;
+import net.akive.api.report.domain.ReportCoveragePeriod;
 import net.akive.api.report.domain.ReportFeedback;
 import net.akive.api.support.PrivateApiTestSupport;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     private static final String REPORT_FEEDBACK_URL = "/reports/{reportId}/feedback";
     private static final String REPORT_HEADERS_URL = "/reports/headers";
     private static final String REPORT_FEEDBACK_HISTORY_URL = "/reports/feedback-history";
+    private static final String REPORT_COVERAGE_PERIOD_URL = "/reports/coverage-period";
     private static final String AVAILABLE_REPORT_TYPES_URL = "/reports/available-types?reportOn={reportOn}";
 
     @MockitoBean
@@ -172,7 +174,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 리포트_생성_시_작성할_수_없는_리포트_타입이면_400을_응답한다() {
+    void 리포트_생성_시_리포트_작성일에_맞지_않는_리포트_타입으로_요청하면_400을_응답한다() {
         ReportCreateRequest request = createReportCreateRequest();
         ReportCreateCommand command = createReportCreateCommand(USER_ID);
         given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
@@ -223,7 +225,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 리포트_생성_시_이미_리포트_작성일과_리포트_타입이_같은_리포트가_존재하면_409를_응답한다() {
+    void 리포트_생성_시_이미_리포트_작성일과_타입이_같은_리포트가_존재하면_409를_응답한다() {
         ReportCreateRequest request = createReportCreateRequest();
         ReportCreateCommand command = createReportCreateCommand(USER_ID);
         given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
@@ -337,6 +339,64 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 리포트_커버_기간을_조회한다() {
+        ReportCoveragePeriod coveragePeriod = new ReportCoveragePeriod(LocalDate.of(2026, 1, 1), REPORT_ON);
+        ReportCoveragePeriodFindQuery query = new ReportCoveragePeriodFindQuery(USER_ID, REPORT_ON, MONTHLY);
+        given(reportFinder.findCoveragePeriod(query))
+                .willReturn(coveragePeriod);
+
+        MvcTestResultAssert result = get(
+                REPORT_COVERAGE_PERIOD_URL + "?reportOn={reportOn}&reportType={reportType}",
+                USER_ID,
+                REPORT_ON,
+                MONTHLY
+        ).hasStatusOk();
+
+        result.bodyJson()
+                .extractingPath("$.startOn")
+                .isEqualTo(coveragePeriod.startOn().toString());
+        result.bodyJson()
+                .extractingPath("$.endOn")
+                .isEqualTo(coveragePeriod.endOn().toString());
+
+        then(reportFinder).should().findCoveragePeriod(query);
+    }
+
+    @Test
+    void 리포트_커버_기간_조회_시_리포트_작성일에_맞지_않는_리포트_타입으로_요청하면_400을_응답한다() {
+        ReportCoveragePeriodFindQuery query = new ReportCoveragePeriodFindQuery(USER_ID, REPORT_ON, MONTHLY);
+        given(reportFinder.findCoveragePeriod(query))
+                .willThrow(new BusinessRuleViolationException(INVALID_REPORT_TYPE));
+
+        MvcTestResultAssert result = get(
+                REPORT_COVERAGE_PERIOD_URL + "?reportOn={reportOn}&reportType={reportType}",
+                USER_ID,
+                REPORT_ON,
+                MONTHLY
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_REPORT_TYPE);
+
+        then(reportFinder).should().findCoveragePeriod(query);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "invalid-date, MONTHLY",
+            "2026-01-25, INVALID"
+    })
+    void 리포트_커버_기간_조회_요청_파라미터가_올바르지_않으면_400을_응답한다(String reportOn, String reportType) {
+        get(
+            REPORT_COVERAGE_PERIOD_URL + "?reportOn={reportOn}&reportType={reportType}",
+            USER_ID,
+            reportOn,
+            reportType
+        ).hasStatus(BAD_REQUEST);
+
+        then(reportFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 리포트를_삭제한다() {
         delete(REPORT_URL, USER_ID, REPORT_ID).hasStatus(NO_CONTENT);
 
@@ -403,7 +463,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 작성_가능한_리포트_타입을_조회한다() {
+    void 리포트_작성_가능한_리포트_타입을_조회한다() {
         given(reportFinder.findAvailableReportTypes(USER_ID, REPORT_ON))
                 .willReturn(List.of(WEEKLY, MONTHLY));
 
@@ -426,7 +486,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 작성_가능한_리포트_타입_조회_시_리포트_날짜와_관련된_세셔널_플랜이_없으면_404를_응답한다() {
+    void 리포트_작성_가능한_리포트_타입_조회_시_리포트_날짜와_관련된_세셔널_플랜이_없으면_404를_응답한다() {
         given(reportFinder.findAvailableReportTypes(USER_ID, REPORT_ON))
                 .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 

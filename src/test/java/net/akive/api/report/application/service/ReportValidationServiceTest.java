@@ -68,7 +68,7 @@ class ReportValidationServiceTest {
     }
 
     @Test
-    void 리포트_타입이_작성_가능한_리포트_타입이_아니면_생성_가능_여부_검증에_실패한다() {
+    void 리포트_작성_가능한_리포트_타입이_아니면_생성_가능_여부_검증에_실패한다() {
         given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 

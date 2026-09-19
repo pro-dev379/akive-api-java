@@ -14,8 +14,6 @@ public interface ReportRepository {
 
     Report save(Report report);
 
-    PageResult<ReportHeaderResult> findHeaderPageByUserId(Long userId, PageCondition pageCondition);
-
     Optional<Report> findByReportIdAndUserId(Long reportId, Long userId);
 
     List<Report> findAllByUserIdAndReportTypeAndReportOnBetween(
@@ -24,6 +22,8 @@ public interface ReportRepository {
             LocalDate from,
             LocalDate to
     );
+
+    PageResult<ReportHeaderResult> findHeaderPageByUserId(Long userId, PageCondition pageCondition);
 
     boolean existsByUserIdAndReportOnAndReportType(Long userId, LocalDate reportOn, ReportType reportType);
 
