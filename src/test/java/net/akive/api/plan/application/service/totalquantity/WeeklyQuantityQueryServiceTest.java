@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEKLY_PLAN_ITEM_NOT_FOUND;
-import static net.akive.api.plan.application.fixture.PlanDataFixture.createWeeklyPlanData;
+import static net.akive.api.plan.application.fixture.WeeklyPlanDataFixture.createWeeklyPlanData;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_PLAN_ID;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createReconstructedSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;

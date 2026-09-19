@@ -18,8 +18,8 @@ import java.util.Optional;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEKLY_PLAN_NOT_FOUND;
-import static net.akive.api.plan.application.fixture.PlanDataFixture.createWeeklyPlanData;
-import static net.akive.api.plan.application.fixture.PlanQueryFixture.createWeeklyPlanFindQuery;
+import static net.akive.api.plan.application.fixture.WeeklyPlanDataFixture.createWeeklyPlanData;
+import static net.akive.api.plan.application.fixture.WeeklyPlanQueryFixture.createWeeklyPlanFindQuery;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

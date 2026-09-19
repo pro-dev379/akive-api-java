@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.plan.application.fixture.PlanDataFixture.createDailyPlanData;
+import static net.akive.api.plan.application.fixture.DailyPlanDataFixture.createDailyPlanData;
 import static net.akive.api.plan.domain.fixture.DailyQuantityFixture.FIRST_DATE;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.mockito.BDDMockito.given;

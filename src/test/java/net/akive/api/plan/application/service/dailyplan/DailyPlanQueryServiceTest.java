@@ -12,8 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static net.akive.api.plan.application.fixture.PlanDataFixture.createDailyPlanData;
-import static net.akive.api.plan.application.fixture.PlanQueryFixture.createDailyPlansFindQuery;
+import static net.akive.api.plan.application.fixture.DailyPlanDataFixture.createDailyPlanData;
+import static net.akive.api.plan.application.fixture.DailyPlanQueryFixture.createDailyPlansFindQuery;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
