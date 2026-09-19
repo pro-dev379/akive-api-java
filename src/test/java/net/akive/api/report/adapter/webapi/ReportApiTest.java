@@ -380,6 +380,24 @@ class ReportApiTest extends PrivateApiTestSupport {
         then(reportFinder).should().findCoveragePeriod(query);
     }
 
+    @Test
+    void 리포트_커버_기간_조회_시_리포트_작성일과_관련된_세셔널_플랜이_없으면_404를_응답한다() {
+        ReportCoveragePeriodFindQuery query = new ReportCoveragePeriodFindQuery(USER_ID, REPORT_ON, MONTHLY);
+        given(reportFinder.findCoveragePeriod(query))
+                .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
+
+        MvcTestResultAssert result = get(
+                REPORT_COVERAGE_PERIOD_URL + "?reportOn={reportOn}&reportType={reportType}",
+                USER_ID,
+                REPORT_ON,
+                MONTHLY
+        ).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, SESSIONAL_PLAN_NOT_FOUND);
+
+        then(reportFinder).should().findCoveragePeriod(query);
+    }
+
     @ParameterizedTest
     @CsvSource({
             "invalid-date, MONTHLY",
@@ -486,7 +504,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 리포트_작성_가능한_리포트_타입_조회_시_리포트_날짜와_관련된_세셔널_플랜이_없으면_404를_응답한다() {
+    void 리포트_작성_가능한_리포트_타입_조회_시_리포트_작성일과_관련된_세셔널_플랜이_없으면_404를_응답한다() {
         given(reportFinder.findAvailableReportTypes(USER_ID, REPORT_ON))
                 .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
