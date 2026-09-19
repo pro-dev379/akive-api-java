@@ -9,6 +9,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.TARGET_PASSWORD;
 
 public class PasswordResetRequestFixture {
 
+    private PasswordResetRequestFixture() {
+    }
+
     public static PasswordResetRequest createPasswordResetRequest() {
         return new PasswordResetRequest(EMAIL_ADDRESS, TARGET_PASSWORD);
     }

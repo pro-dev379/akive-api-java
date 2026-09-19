@@ -4,6 +4,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 
 public class MentoringFixture {
 
+    private MentoringFixture() {
+    }
+
     public static MentoringProfile createMentoringProfile() {
         return MentoringProfile.create(createUser());
     }

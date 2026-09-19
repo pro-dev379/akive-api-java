@@ -7,6 +7,9 @@ import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshT
 
 public class IssuedTokenFixture {
 
+    private IssuedTokenFixture() {
+    }
+
     public static IssuedToken createIssuedToken() {
         return createIssuedToken(ACCESS_TOKEN_VALUE, REFRESH_TOKEN_VALUE);
     }

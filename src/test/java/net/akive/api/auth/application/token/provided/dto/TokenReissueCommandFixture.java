@@ -6,6 +6,9 @@ import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshT
 
 public class TokenReissueCommandFixture {
 
+    private TokenReissueCommandFixture() {
+    }
+
     public static TokenReissueCommand createTokenReissueCommand() {
         return createTokenReissueCommand(createRefreshToken());
     }

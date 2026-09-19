@@ -7,6 +7,9 @@ import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENG
 
 public class WeeklyQuantityRequestFixture {
 
+    private WeeklyQuantityRequestFixture() {
+    }
+
     public static String weeklyQuantityReduceRequestJson(Integer targetWeeklyAmount, String targetWeeklyMemo) {
         return """
                 {

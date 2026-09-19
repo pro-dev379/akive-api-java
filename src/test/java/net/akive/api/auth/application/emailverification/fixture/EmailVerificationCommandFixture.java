@@ -10,6 +10,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
 
 public class EmailVerificationCommandFixture {
 
+    private EmailVerificationCommandFixture() {
+    }
+
     public static EmailVerificationIssueCommand createEmailVerificationIssueCommand() {
         return new EmailVerificationIssueCommand(EMAIL, SIGN_UP);
     }

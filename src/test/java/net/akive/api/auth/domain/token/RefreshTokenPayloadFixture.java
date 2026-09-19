@@ -12,6 +12,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class RefreshTokenPayloadFixture {
 
+    private RefreshTokenPayloadFixture() {
+    }
+
     public static RefreshTokenPayload createRefreshTokenPayload() {
         return createRefreshTokenPayload(USER_ID, createClientInstanceId(), MEMBER, EXPIRE_AT);
     }

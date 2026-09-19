@@ -11,6 +11,9 @@ import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 
 public class EmailVerificationCodeVerifyRequestFixture {
 
+    private EmailVerificationCodeVerifyRequestFixture() {
+    }
+
     public static EmailVerificationCodeVerifyRequest createVerifyRequest() {
         return createVerifyRequest(EMAIL_ADDRESS, SIGN_UP, VERIFICATION_CODE.value());
     }

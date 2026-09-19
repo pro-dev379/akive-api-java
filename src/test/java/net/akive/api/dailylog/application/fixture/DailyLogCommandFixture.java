@@ -10,6 +10,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class DailyLogCommandFixture {
 
+    private DailyLogCommandFixture() {
+    }
+
     public static DailyLogCreateCommand createDailyLogCreateCommand() {
         return createDailyLogCreateCommand(USER_ID);
     }

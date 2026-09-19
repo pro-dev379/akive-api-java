@@ -4,6 +4,9 @@ import java.util.List;
 
 public class EmailMessageFixture {
 
+    private EmailMessageFixture() {
+    }
+
     public static final String FROM = "from@test.com";
     public static final List<String> TO = List.of("to@test.com");
     public static final String SUBJECT = "subject";

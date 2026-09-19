@@ -15,6 +15,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedU
 
 public class ReportFixture {
 
+    private ReportFixture() {
+    }
+
 
     public static final Long REPORT_ID = 1L;
     public static final Long UNKNOWN_REPORT_ID = Long.MAX_VALUE;

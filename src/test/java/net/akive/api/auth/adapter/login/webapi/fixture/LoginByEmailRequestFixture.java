@@ -10,6 +10,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.PASSWORD_HASH;
 
 public class LoginByEmailRequestFixture {
 
+    private LoginByEmailRequestFixture() {
+    }
+
     public static LoginByEmailRequest createLoginByEmailRequest() {
         return createLoginByEmailRequest(EMAIL_ADDRESS, PASSWORD_HASH);
     }

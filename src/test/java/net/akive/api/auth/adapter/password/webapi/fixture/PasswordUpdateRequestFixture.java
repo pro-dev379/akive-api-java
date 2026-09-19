@@ -9,6 +9,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.TARGET_PASSWORD;
 
 public class PasswordUpdateRequestFixture {
 
+    private PasswordUpdateRequestFixture() {
+    }
+
     public static PasswordUpdateRequest createPasswordUpdateRequest() {
         return new PasswordUpdateRequest(PASSWORD, TARGET_PASSWORD);
     }

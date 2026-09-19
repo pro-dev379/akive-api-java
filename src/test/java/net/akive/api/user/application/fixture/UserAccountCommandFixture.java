@@ -10,6 +10,9 @@ import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWAL_REA
 
 public class UserAccountCommandFixture {
 
+    private UserAccountCommandFixture() {
+    }
+
     public static UserSignUpByEmailCommand createUserSignUpByEmailCommand() {
         return new UserSignUpByEmailCommand(EMAIL, PASSWORD, NICKNAME);
     }

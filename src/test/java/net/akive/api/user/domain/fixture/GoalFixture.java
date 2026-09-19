@@ -7,6 +7,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 
 public class GoalFixture {
 
+    private GoalFixture() {
+    }
+
     public static Long GOAL_ID = 1L;
     public static Long ANOTHER_GOAL_ID = 2L;
 

@@ -7,6 +7,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
 
 public class EmailVerificationFixture {
 
+    private EmailVerificationFixture() {
+    }
+
     public static final EmailVerificationCode VERIFICATION_CODE = new EmailVerificationCode("123456");
     public static final LocalDateTime REQUESTED_AT = LocalDateTime.of(2025, 5, 21, 10, 0);
 

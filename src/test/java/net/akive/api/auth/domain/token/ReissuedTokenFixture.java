@@ -5,6 +5,9 @@ import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshT
 
 public class ReissuedTokenFixture {
 
+    private ReissuedTokenFixture() {
+    }
+
     public static final String REISSUED_ACCESS_TOKEN_VALUE = "new-access-token";
     public static final String ROTATED_REFRESH_TOKEN_VALUE = "new-refresh-token";
 

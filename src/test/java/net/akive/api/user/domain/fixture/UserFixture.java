@@ -10,6 +10,9 @@ import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 
 public class UserFixture {
 
+    private UserFixture() {
+    }
+
     public static final Long USER_ID = 1L;
     public static final Long ANOTHER_USER_ID = 2L;
     public static final Long UNKNOWN_USER_ID = Long.MAX_VALUE;

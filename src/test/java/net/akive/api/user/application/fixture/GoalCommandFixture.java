@@ -7,6 +7,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class GoalCommandFixture {
 
+    private GoalCommandFixture() {
+    }
+
     public static GoalCreateCommand createGoalCreateCommand() {
         return createGoalCreateCommand(USER_ID);
     }

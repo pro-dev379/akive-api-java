@@ -10,6 +10,9 @@ import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
 
 public class EmailVerificationCodeIssueRequestFixture {
 
+    private EmailVerificationCodeIssueRequestFixture() {
+    }
+
     public static EmailVerificationCodeIssueRequest createIssueRequest() {
         return createIssueRequest(EMAIL_ADDRESS, SIGN_UP);
     }

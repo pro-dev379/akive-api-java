@@ -13,6 +13,9 @@ import static net.akive.api.plan.domain.policy.PlanPolicy.SESSION_NAME_MAX_LENGT
 
 public class SessionalPlanRequestFixture {
 
+    private SessionalPlanRequestFixture() {
+    }
+
     public static SessionalPlanCreateRequest createSessionalPlanCreateRequest() {
         return createSessionalPlanCreateRequest(SESSION_NAME);
     }

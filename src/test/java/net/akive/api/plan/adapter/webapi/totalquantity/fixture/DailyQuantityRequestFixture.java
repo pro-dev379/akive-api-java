@@ -6,6 +6,9 @@ import static net.akive.api.plan.domain.policy.PlanPolicy.QUANTITY_MEMO_MAX_LENG
 
 public class DailyQuantityRequestFixture {
 
+    private DailyQuantityRequestFixture() {
+    }
+
     public static String dailyAmountUpdateRequestJson(Integer targetDailyAmount, String targetDailyMemo) {
         return """
                 {

@@ -11,6 +11,9 @@ import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.startOn;
 
 public class FocusTimeFixture {
 
+    private FocusTimeFixture() {
+    }
+
     public static FocusTime createFocusTime(LocalDate date, int startHour) {
         return createFocusTime(
                 startOn(date, startHour),

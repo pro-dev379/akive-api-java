@@ -13,6 +13,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 
 public class WithdrawalFixture {
 
+    private WithdrawalFixture() {
+    }
+
     public static final Email WITHDRAWN_USER_EMAIL = createEmail("withdrawn-user@test.com");
     public static final String WITHDRAWAL_REASON = "탈퇴 사유";
     public static final LocalDateTime WITHDRAWN_AT = LocalDateTime.of(2026, 9, 9, 12, 0);

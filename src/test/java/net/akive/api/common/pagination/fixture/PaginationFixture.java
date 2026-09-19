@@ -6,6 +6,9 @@ import java.util.List;
 
 public class PaginationFixture {
 
+    private PaginationFixture() {
+    }
+
     public static final int PAGE = 1;
     public static final int SIZE = 20;
     public static final int DEFAULT_PAGE = 0;

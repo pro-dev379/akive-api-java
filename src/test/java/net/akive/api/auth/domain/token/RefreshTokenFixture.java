@@ -5,6 +5,9 @@ import java.time.Instant;
 
 public class RefreshTokenFixture {
 
+    private RefreshTokenFixture() {
+    }
+
     public static final String REFRESH_TOKEN_VALUE = "refresh-token";
     public static final Duration REFRESH_TOKEN_EXPIRATION = Duration.ofDays(14);
     public static final Instant EXPIRE_AT = Instant.parse("2026-07-03T00:01:00Z");

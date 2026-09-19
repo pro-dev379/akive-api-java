@@ -17,6 +17,9 @@ import static net.akive.api.report.domain.ReportType.WEEKLY;
 
 public class ReportRequestFixture {
 
+    private ReportRequestFixture() {
+    }
+
     public static ReportCreateRequest createReportCreateRequest() {
         return createReportCreateRequest(REPORT_ON, WEEKLY, createReportFeedbackRequest());
     }

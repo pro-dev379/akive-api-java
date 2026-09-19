@@ -8,6 +8,9 @@ import static net.akive.api.user.domain.fixture.UserFixture.*;
 
 public class PasswordCommandFixture {
 
+    private PasswordCommandFixture() {
+    }
+
     public static PasswordUpdateCommand createPasswordUpdateCommand() {
         return createPasswordUpdateCommand(USER_ID);
     }

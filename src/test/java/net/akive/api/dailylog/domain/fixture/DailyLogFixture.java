@@ -12,6 +12,9 @@ import static net.akive.api.dailylog.domain.fixture.FocusTimeFixture.createFocus
 
 public class DailyLogFixture {
 
+    private DailyLogFixture() {
+    }
+
     public static final Long DAILY_LOG_ID = 1L;
     public static final Long ANOTHER_DAILY_LOG_ID = 2L;
     public static final Long UNKNOWN_DAILY_LOG_ID = Long.MAX_VALUE;

@@ -15,6 +15,9 @@ import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWAL_REA
 
 public class MemberAccountRequestFixture {
 
+    private MemberAccountRequestFixture() {
+    }
+
     public static UserSignUpByEmailRequest createUserSignUpByEmailRequest() {
         return createUserSignUpByEmailRequest(EMAIL_ADDRESS, PASSWORD, NICKNAME);
     }

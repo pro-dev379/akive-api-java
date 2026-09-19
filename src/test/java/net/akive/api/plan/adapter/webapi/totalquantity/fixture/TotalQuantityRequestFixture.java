@@ -12,6 +12,9 @@ import static net.akive.api.plan.domain.policy.PlanPolicy.*;
 
 public class TotalQuantityRequestFixture {
 
+    private TotalQuantityRequestFixture() {
+    }
+
     public static TotalQuantityCreateRequest createTotalQuantityCreateRequest() {
         return new TotalQuantityCreateRequest(
                 createSubjectRequest(),

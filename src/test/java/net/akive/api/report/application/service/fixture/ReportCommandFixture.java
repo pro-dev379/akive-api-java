@@ -11,6 +11,9 @@ import static net.akive.api.report.domain.ReportType.WEEKLY;
 
 public class ReportCommandFixture {
 
+    private ReportCommandFixture() {
+    }
+
     public static ReportCreateCommand createReportCreateCommand(Long userId) {
         return createReportCreateCommand(userId, createReportFeedbackItems());
     }

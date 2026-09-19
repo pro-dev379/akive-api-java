@@ -7,6 +7,9 @@ import java.time.Instant;
 
 public class JwtProviderFixture {
 
+    private JwtProviderFixture() {
+    }
+
     public static final String ISSUER = "akive";
     public static final Instant EXPIRES_AT = Instant.parse("2026-08-29T12:00:00Z");
     public static final ClientInstanceId CLIENT_INSTANCE_ID =

@@ -8,6 +8,9 @@ import static net.akive.api.user.domain.UserPolicy.*;
 
 public class MemberGoalRequestFixture {
 
+    private MemberGoalRequestFixture() {
+    }
+
     public static GoalCreateRequest createGoalCreateRequest() {
         return new GoalCreateRequest(
                 DEFAULT_GOAL_ATTEND_ON,

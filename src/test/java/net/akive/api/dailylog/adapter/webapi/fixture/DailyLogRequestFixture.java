@@ -14,6 +14,9 @@ import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
 
 public class DailyLogRequestFixture {
 
+    private DailyLogRequestFixture() {
+    }
+
     public static DailyLogCreateRequest createDailyLogCreateRequest() {
         return createDailyLogCreateRequest(createFocusTimeRequest(), FOCUS_TIME_SEC);
     }
