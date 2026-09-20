@@ -16,14 +16,7 @@ public interface ReportJpaRepository extends JpaRepository<ReportEntity, Long> {
 
     Optional<ReportEntity> findByReportIdAndUser_UserId(Long reportId, Long userId);
 
-    @Query("""
-        select r from ReportEntity r
-        where r.user.userId = :userId
-            and r.reportType = :reportType
-            and r.reportOn >= :startOn and r.reportOn <= :endOn
-        order by r.reportOn asc
-    """)
-    List<ReportEntity> findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
+    List<ReportEntity> findAllByUser_UserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
             Long userId,
             ReportType reportType,
             LocalDate startOn,

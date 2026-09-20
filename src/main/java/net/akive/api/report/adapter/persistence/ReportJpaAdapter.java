@@ -64,7 +64,12 @@ class ReportJpaAdapter implements ReportRepository {
             LocalDate endOn
     ) {
         return reportJpaRepository
-                .findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(userId, reportType, startOn, endOn)
+                .findAllByUser_UserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
+                        userId,
+                        reportType,
+                        startOn,
+                        endOn
+                )
                 .stream()
                 .map(entity -> entity.to(currentTimeProvider.now()))
                 .toList();
