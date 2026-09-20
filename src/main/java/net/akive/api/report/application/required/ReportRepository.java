@@ -16,7 +16,7 @@ public interface ReportRepository {
 
     Optional<Report> findByReportIdAndUserId(Long reportId, Long userId);
 
-    List<Report> findAllByUserIdAndReportTypeAndReportOnBetween(
+    List<Report> findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
             Long userId,
             ReportType reportType,
             LocalDate startOn,
@@ -24,6 +24,12 @@ public interface ReportRepository {
     );
 
     PageResult<ReportHeaderResult> findHeaderPageByUserId(Long userId, PageCondition pageCondition);
+
+    List<ReportHeaderResult> findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(
+            Long userId,
+            LocalDate startOn,
+            LocalDate endOn
+    );
 
     boolean existsByUserIdAndReportOnAndReportType(Long userId, LocalDate reportOn, ReportType reportType);
 

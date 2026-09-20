@@ -6,8 +6,8 @@ import net.akive.api.report.domain.ReportFeedback;
 
 import java.util.List;
 
-import static net.akive.api.report.domain.ReportFixture.*;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
+import static net.akive.api.report.domain.fixture.ReportFixture.*;
 
 public class ReportCommandFixture {
 

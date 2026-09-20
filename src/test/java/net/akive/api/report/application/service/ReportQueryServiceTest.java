@@ -4,10 +4,7 @@ import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
-import net.akive.api.report.application.provided.dto.ReportCoveragePeriodFindQuery;
-import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryFindQuery;
-import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryResult;
-import net.akive.api.report.application.provided.dto.ReportHeaderResult;
+import net.akive.api.report.application.provided.dto.*;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportCoveragePeriod;
@@ -27,12 +24,11 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.REPO
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
-import static net.akive.api.report.domain.ReportFixture.*;
-import static net.akive.api.report.domain.ReportType.MONTHLY;
-import static net.akive.api.report.domain.ReportType.WEEKLY;
+import static net.akive.api.report.application.service.fixture.ReportQueryFixture.createWrittenReportHeaders;
+import static net.akive.api.report.domain.ReportType.*;
+import static net.akive.api.report.domain.fixture.ReportFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -99,8 +95,12 @@ class ReportQueryServiceTest {
         List<ReportFeedback> secondFeedbackItems = createReportFeedbackItems();
         Report firstReport = createReconstructedReport(startOn, firstFeedbackItems);
         Report secondReport = createReconstructedReport(endOn, secondFeedbackItems);
-        given(reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(USER_ID, WEEKLY, startOn, endOn))
-                .willReturn(List.of(firstReport, secondReport));
+        given(reportRepository.findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
+                USER_ID,
+                WEEKLY,
+                startOn,
+                endOn
+        )).willReturn(List.of(firstReport, secondReport));
 
         List<ReportFeedbackHistoryResult> feedbackHistory = reportQueryService.findFeedbackHistory(query);
 
@@ -110,7 +110,7 @@ class ReportQueryServiceTest {
                         new ReportFeedbackHistoryResult(endOn, secondFeedbackItems)
                 );
         then(reportRepository).should()
-                .findAllByUserIdAndReportTypeAndReportOnBetween(USER_ID, WEEKLY, startOn, endOn);
+                .findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(USER_ID, WEEKLY, startOn, endOn);
     }
 
     @Test
@@ -147,6 +147,43 @@ class ReportQueryServiceTest {
     }
 
     @Test
+    void 기준일로_리포트_작성_여부를_조회한다() {
+        LocalDate baseDate = LocalDate.of(2026, 1, 20);
+        LocalDate startOn = LocalDate.of(2026, 1, 4);
+        LocalDate endOn = LocalDate.of(2026, 11, 29);
+        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+                .willReturn(List.of(createYear2026SessionPeriod()));
+        given(reportRepository.findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(USER_ID, startOn, endOn))
+                .willReturn(createWrittenReportHeaders());
+
+        List<ReportWritingStatusResult> writingStatuses = reportQueryService.findWritingStatuses(USER_ID, baseDate);
+
+        assertWritingStatusesForBaseDate20260120(writingStatuses);
+
+        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(reportRepository).should().findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(
+                USER_ID,
+                startOn,
+                endOn
+        );
+    }
+
+    @Test
+    void 기준일과_관련된_세셔널_플랜이_없으면_리포트_작성_여부_조회에_실패한다() {
+        LocalDate baseDate = LocalDate.of(2024, 1, 1);
+        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+                .willReturn(List.of(createYear2026SessionPeriod()));
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> reportQueryService.findWritingStatuses(USER_ID, baseDate))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
+
+        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(reportRepository).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
     void 리포트_작성_가능한_리포트_타입을_조회한다() {
         given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
@@ -169,5 +206,36 @@ class ReportQueryServiceTest {
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
         then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+    }
+
+    private static void assertWritingStatusesForBaseDate20260120(List<ReportWritingStatusResult> writingStatuses) {
+        assertThat(writingStatuses).hasSize(19);
+        assertThat(writingStatuses)
+                .extracting(
+                        ReportWritingStatusResult::reportType,
+                        ReportWritingStatusResult::reportOn,
+                        ReportWritingStatusResult::isWritten
+                )
+                .containsExactly(
+                        tuple(DAILY, LocalDate.of(2026, 1, 19), false),
+                        tuple(DAILY, LocalDate.of(2026, 1, 20), true),
+                        tuple(DAILY, LocalDate.of(2026, 1, 21), false),
+                        tuple(DAILY, LocalDate.of(2026, 1, 22), false),
+                        tuple(DAILY, LocalDate.of(2026, 1, 23), false),
+                        tuple(DAILY, LocalDate.of(2026, 1, 24), false),
+                        tuple(WEEKLY, LocalDate.of(2026, 1, 4), false),
+                        tuple(WEEKLY, LocalDate.of(2026, 1, 11), false),
+                        tuple(WEEKLY, LocalDate.of(2026, 1, 18), true),
+                        tuple(WEEKLY, LocalDate.of(2026, 1, 25), false),
+                        tuple(MONTHLY, LocalDate.of(2026, 1, 25), true),
+                        tuple(MONTHLY, LocalDate.of(2026, 2, 22), false),
+                        tuple(MONTHLY, LocalDate.of(2026, 3, 22), false),
+                        tuple(MONTHLY, LocalDate.of(2026, 4, 19), false),
+                        tuple(MONTHLY, LocalDate.of(2026, 5, 17), false),
+                        tuple(MONTHLY, LocalDate.of(2026, 6, 14), false),
+                        tuple(BIANNUALLY, LocalDate.of(2026, 6, 14), false),
+                        tuple(BIANNUALLY, LocalDate.of(2026, 11, 29), false),
+                        tuple(ANNUALLY, LocalDate.of(2026, 11, 29), false)
+                );
     }
 }

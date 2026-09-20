@@ -37,9 +37,10 @@ import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
 import static net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture.*;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportCreateCommand;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportFeedbackItemsUpdateCommand;
-import static net.akive.api.report.domain.ReportFixture.*;
+import static net.akive.api.report.application.service.fixture.ReportQueryFixture.*;
 import static net.akive.api.report.domain.ReportType.MONTHLY;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
+import static net.akive.api.report.domain.fixture.ReportFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,6 +58,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     private static final String REPORT_HEADERS_URL = "/reports/headers";
     private static final String REPORT_FEEDBACK_HISTORY_URL = "/reports/feedback-history";
     private static final String REPORT_COVERAGE_PERIOD_URL = "/reports/coverage-period";
+    private static final String REPORT_WRITING_STATUSES_URL = "/reports/writing-statuses";
     private static final String AVAILABLE_REPORT_TYPES_URL = "/reports/available-types?reportOn={reportOn}";
 
     @MockitoBean
@@ -67,59 +69,6 @@ class ReportApiTest extends PrivateApiTestSupport {
 
     @MockitoBean
     CurrentTimeProvider currentTimeProvider;
-
-    @Test
-    void 리포트_헤더_목록을_리포트_최신_작성일_순으로_페이징_조회한다() {
-        ReportHeaderResult reportHeader = new ReportHeaderResult(REPORT_ID, REPORT_ON, WEEKLY);
-        PageResult<ReportHeaderResult> reportHeaderPage = createPageResult(
-                DEFAULT_PAGE,
-                DEFAULT_SIZE,
-                List.of(reportHeader)
-        );
-        given(reportFinder.findHeaderPage(eq(USER_ID), any(PageCondition.class)))
-                .willReturn(reportHeaderPage);
-
-        MvcTestResultAssert result = get(
-                REPORT_HEADERS_URL + "?page={page}&size={size}",
-                USER_ID,
-                DEFAULT_PAGE,
-                DEFAULT_SIZE
-        ).hasStatusOk();
-
-        assertReportHeaderFindResponse(result, reportHeaderPage, reportHeader);
-
-        ArgumentCaptor<PageCondition> pageConditionCaptor = ArgumentCaptor.forClass(PageCondition.class);
-        then(reportFinder).should().findHeaderPage(eq(USER_ID), pageConditionCaptor.capture());
-        assertThat(pageConditionCaptor.getValue().getPage()).isEqualTo(DEFAULT_PAGE);
-        assertThat(pageConditionCaptor.getValue().getSize()).isEqualTo(DEFAULT_SIZE);
-        assertThat(pageConditionCaptor.getValue().getSortCondition().property()).isEqualTo("reportOn");
-        assertThat(pageConditionCaptor.getValue().getSortCondition().sortDirection()).isEqualTo(DESC);
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "-1, 7, Page must not be negative.",
-            "0, 0, Size must be positive.",
-            "0, 101, Size must not exceed 100."
-    })
-    void 리포트_헤더_목록_조회_시_페이지_요청_파라미터가_올바르지_않으면_400을_응답한다(int page, int size, String message) {
-        MvcTestResultAssert result = get(
-                REPORT_HEADERS_URL + "?page={page}&size={size}",
-                USER_ID,
-                page,
-                size
-        ).hasStatus(BAD_REQUEST);
-
-        assertErrorResponse(result, INVALID_INPUT_VALUE);
-        result.bodyJson()
-                .extractingPath("$.errors[0].field")
-                .isEqualTo("argument");
-        result.bodyJson()
-                .extractingPath("$.errors[0].message")
-                .isEqualTo(message);
-
-        then(reportFinder).shouldHaveNoInteractions();
-    }
 
     @Test
     void 리포트를_생성한다() {
@@ -280,6 +229,125 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 리포트를_삭제한다() {
+        delete(REPORT_URL, USER_ID, REPORT_ID).hasStatus(NO_CONTENT);
+
+        then(reportCreator).should().delete(REPORT_ID, USER_ID);
+    }
+
+    @Test
+    void 리포트_삭제_시_리포트가_없으면_404를_응답한다() {
+        willThrow(new ResourceNotFoundException(REPORT_NOT_FOUND))
+                .given(reportCreator)
+                .delete(UNKNOWN_REPORT_ID, USER_ID);
+
+        MvcTestResultAssert result = delete(REPORT_URL, USER_ID, UNKNOWN_REPORT_ID).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, REPORT_NOT_FOUND);
+
+        then(reportCreator).should().delete(UNKNOWN_REPORT_ID, USER_ID);
+    }
+
+    @Test
+    void 리포트_피드백을_수정한다() {
+        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
+        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(USER_ID);
+
+        putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(NO_CONTENT);
+
+        then(reportCreator).should().updateFeedbackItems(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUpdateRequests")
+    void 리포트_피드백_수정_요청값이_올바르지_않으면_400을_응답한다(ReportFeedbackUpdateRequest request) {
+        putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(BAD_REQUEST);
+
+        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
+    }
+
+    @Test
+    void 리포트_피드백_수정_시_피드백_내용이_하나도_없으면_400을_응답한다() {
+        ReportFeedbackUpdateRequest request = new ReportFeedbackUpdateRequest(createEmptyReportFeedbackRequest());
+
+        MvcTestResultAssert result = putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), REPORT_ID)
+                .hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, EMPTY_COLLECTION);
+
+        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
+    }
+
+    @Test
+    void 리포트_피드백_수정_시_리포트가_없으면_404를_응답한다() {
+        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
+        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(UNKNOWN_REPORT_ID, USER_ID);
+        willThrow(new ResourceNotFoundException(REPORT_NOT_FOUND))
+                .given(reportCreator)
+                .updateFeedbackItems(command);
+
+        MvcTestResultAssert result = putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), UNKNOWN_REPORT_ID)
+                .hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, REPORT_NOT_FOUND);
+
+        then(reportCreator).should().updateFeedbackItems(command);
+    }
+
+    @Test
+    void 리포트_헤더_목록을_리포트_최신_작성일_순으로_페이징_조회한다() {
+        ReportHeaderResult reportHeader = new ReportHeaderResult(REPORT_ID, REPORT_ON, WEEKLY);
+        PageResult<ReportHeaderResult> reportHeaderPage = createPageResult(
+                DEFAULT_PAGE,
+                DEFAULT_SIZE,
+                List.of(reportHeader)
+        );
+        given(reportFinder.findHeaderPage(eq(USER_ID), any(PageCondition.class)))
+                .willReturn(reportHeaderPage);
+
+        MvcTestResultAssert result = get(
+                REPORT_HEADERS_URL + "?page={page}&size={size}",
+                USER_ID,
+                DEFAULT_PAGE,
+                DEFAULT_SIZE
+        ).hasStatusOk();
+
+        assertReportHeaderFindResponse(result, reportHeaderPage, reportHeader);
+
+        ArgumentCaptor<PageCondition> pageConditionCaptor = ArgumentCaptor.forClass(PageCondition.class);
+        then(reportFinder).should().findHeaderPage(eq(USER_ID), pageConditionCaptor.capture());
+        assertThat(pageConditionCaptor.getValue().getPage()).isEqualTo(DEFAULT_PAGE);
+        assertThat(pageConditionCaptor.getValue().getSize()).isEqualTo(DEFAULT_SIZE);
+        assertThat(pageConditionCaptor.getValue().getSortCondition().property()).isEqualTo("reportOn");
+        assertThat(pageConditionCaptor.getValue().getSortCondition().sortDirection()).isEqualTo(DESC);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "-1, 7, Page must not be negative.",
+            "0, 0, Size must be positive.",
+            "0, 101, Size must not exceed 100."
+    })
+    void 리포트_헤더_목록_조회_시_페이지_요청_파라미터가_올바르지_않으면_400을_응답한다(int page, int size, String message) {
+        MvcTestResultAssert result = get(
+                REPORT_HEADERS_URL + "?page={page}&size={size}",
+                USER_ID,
+                page,
+                size
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_INPUT_VALUE);
+        result.bodyJson()
+                .extractingPath("$.errors[0].field")
+                .isEqualTo("argument");
+        result.bodyJson()
+                .extractingPath("$.errors[0].message")
+                .isEqualTo(message);
+
+        then(reportFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 리포트_피드백_히스토리를_조회한다() {
         LocalDate startOn = REPORT_ON.minusDays(1);
         LocalDate endOn = REPORT_ON;
@@ -415,69 +483,41 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 리포트를_삭제한다() {
-        delete(REPORT_URL, USER_ID, REPORT_ID).hasStatus(NO_CONTENT);
+    void 오늘_기준으로_리포트_작성_여부를_조회한다() {
+        LocalDate baseDate = REPORT_ON;
+        ReportWritingStatusResult dailyWritingStatus = createDailyWritingStatus();
+        ReportWritingStatusResult weeklyWritingStatus = createWeeklyWritingStatus();
+        ReportWritingStatusResult monthlyWritingStatus = createMonthlyWritingStatus();
+        given(currentTimeProvider.now()).willReturn(baseDate.atStartOfDay());
+        given(reportFinder.findWritingStatuses(USER_ID, baseDate))
+                .willReturn(List.of(dailyWritingStatus, weeklyWritingStatus, monthlyWritingStatus));
 
-        then(reportCreator).should().delete(REPORT_ID, USER_ID);
+        MvcTestResultAssert result = get(REPORT_WRITING_STATUSES_URL, USER_ID).hasStatusOk();
+
+        assertReportWritingStatusesFindResponse(
+                result,
+                dailyWritingStatus,
+                weeklyWritingStatus,
+                monthlyWritingStatus
+        );
+
+        then(currentTimeProvider).should().now();
+        then(reportFinder).should().findWritingStatuses(USER_ID, baseDate);
     }
 
     @Test
-    void 리포트_삭제_시_리포트가_없으면_404를_응답한다() {
-        willThrow(new ResourceNotFoundException(REPORT_NOT_FOUND))
-                .given(reportCreator)
-                .delete(UNKNOWN_REPORT_ID, USER_ID);
+    void 오늘_기준으로_리포트_작성_여부를_조회_시_오늘과_관련된_세셔널_플랜이_없으면_404를_응답한다() {
+        LocalDate baseDate = REPORT_ON;
+        given(currentTimeProvider.now()).willReturn(baseDate.atStartOfDay());
+        given(reportFinder.findWritingStatuses(USER_ID, baseDate))
+                .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 
-        MvcTestResultAssert result = delete(REPORT_URL, USER_ID, UNKNOWN_REPORT_ID).hasStatus(NOT_FOUND);
+        MvcTestResultAssert result = get(REPORT_WRITING_STATUSES_URL, USER_ID).hasStatus(NOT_FOUND);
 
-        assertErrorResponse(result, REPORT_NOT_FOUND);
+        assertErrorResponse(result, SESSIONAL_PLAN_NOT_FOUND);
 
-        then(reportCreator).should().delete(UNKNOWN_REPORT_ID, USER_ID);
-    }
-
-    @Test
-    void 리포트_피드백을_수정한다() {
-        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
-        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(USER_ID);
-
-        putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(NO_CONTENT);
-
-        then(reportCreator).should().updateFeedbackItems(command);
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidUpdateRequests")
-    void 리포트_피드백_수정_요청값이_올바르지_않으면_400을_응답한다(ReportFeedbackUpdateRequest request) {
-        putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), REPORT_ID).hasStatus(BAD_REQUEST);
-
-        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
-    }
-
-    @Test
-    void 리포트_피드백_수정_시_피드백_내용이_하나도_없으면_400을_응답한다() {
-        ReportFeedbackUpdateRequest request = new ReportFeedbackUpdateRequest(createEmptyReportFeedbackRequest());
-
-        MvcTestResultAssert result = putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), REPORT_ID)
-                .hasStatus(BAD_REQUEST);
-
-        assertErrorResponse(result, EMPTY_COLLECTION);
-
-        then(reportCreator).should(never()).updateFeedbackItems(any(ReportFeedbackItemsUpdateCommand.class));
-    }
-
-    @Test
-    void 리포트_피드백_수정_시_리포트가_없으면_404를_응답한다() {
-        ReportFeedbackUpdateRequest request = createReportFeedbackUpdateRequest();
-        ReportFeedbackItemsUpdateCommand command = createReportFeedbackItemsUpdateCommand(UNKNOWN_REPORT_ID, USER_ID);
-        willThrow(new ResourceNotFoundException(REPORT_NOT_FOUND))
-                .given(reportCreator)
-                .updateFeedbackItems(command);
-
-        MvcTestResultAssert result = putJson(REPORT_FEEDBACK_URL, USER_ID, toJson(request), UNKNOWN_REPORT_ID)
-                .hasStatus(NOT_FOUND);
-
-        assertErrorResponse(result, REPORT_NOT_FOUND);
-
-        then(reportCreator).should().updateFeedbackItems(command);
+        then(currentTimeProvider).should().now();
+        then(reportFinder).should().findWritingStatuses(USER_ID, baseDate);
     }
 
     @Test
@@ -546,5 +586,33 @@ class ReportApiTest extends PrivateApiTestSupport {
                 .isEqualTo(reportHeader.reportOn().toString());
         result.bodyJson().extractingPath("$.reportHeaders[0].reportType")
                 .isEqualTo(reportHeader.reportType().name());
+    }
+
+    private static void assertReportWritingStatusesFindResponse(
+            MvcTestResultAssert result,
+            ReportWritingStatusResult dailyWritingStatus,
+            ReportWritingStatusResult weeklyWritingStatus,
+            ReportWritingStatusResult monthlyWritingStatus
+    ) {
+        result.bodyJson()
+                .extractingPath("$.dailyReports[0].reportOn")
+                .isEqualTo(dailyWritingStatus.reportOn().toString());
+        result.bodyJson()
+                .extractingPath("$.dailyReports[0].isWritten")
+                .isEqualTo(dailyWritingStatus.isWritten());
+        result.bodyJson()
+                .extractingPath("$.weeklyReports[0].reportOn")
+                .isEqualTo(weeklyWritingStatus.reportOn().toString());
+        result.bodyJson()
+                .extractingPath("$.weeklyReports[0].isWritten")
+                .isEqualTo(weeklyWritingStatus.isWritten());
+        result.bodyJson()
+                .extractingPath("$.monthlyReports[0].reportOn")
+                .isEqualTo(monthlyWritingStatus.reportOn().toString());
+        result.bodyJson()
+                .extractingPath("$.monthlyReports[0].isWritten")
+                .isEqualTo(monthlyWritingStatus.isWritten());
+        result.bodyJson().extractingPath("$.biannualReports").asArray().isEmpty();
+        result.bodyJson().extractingPath("$.annualReports").asArray().isEmpty();
     }
 }

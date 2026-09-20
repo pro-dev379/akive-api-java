@@ -8,8 +8,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_REPORT_TYPE;
-import static net.akive.api.report.domain.ReportFixture.createYear2026SessionPeriod;
 import static net.akive.api.report.domain.ReportType.*;
+import static net.akive.api.report.domain.fixture.ReportFixture.createYear2026SessionPeriod;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -151,8 +151,14 @@ class ReportScheduleTest {
     @Test
     void 오버랩되는_세션_기간이_있어도_리포트_작성_가능한_리포트_타입과_커버_기간을_조회할_수_있다() {
         List<SessionPeriod> sessionPeriods = List.of(
-                new SessionPeriod(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31)),
-                new SessionPeriod(LocalDate.of(2026, 10, 5), LocalDate.of(2026, 10, 31))
+                new SessionPeriod(
+                        LocalDate.of(2026, 10, 1),
+                        LocalDate.of(2026, 10, 31)
+                ),
+                new SessionPeriod(
+                        LocalDate.of(2026, 10, 5),
+                        LocalDate.of(2026, 10, 31)
+                )
         );
         LocalDate reportOn = LocalDate.of(2026, 10, 25);
         ReportSchedule reportSchedule = ReportSchedule.from(sessionPeriods);
@@ -168,5 +174,154 @@ class ReportScheduleTest {
                 LocalDate.of(2026, 10, 1),
                 reportOn
         ));
+    }
+
+    @Test
+    void 기준일이_속한_일일_리포트_커버_기간들을_조회한다() {
+        ReportSchedule reportSchedule = ReportSchedule.from(List.of(createYear2026SessionPeriod()));
+        LocalDate baseDate = LocalDate.of(2026, 1, 20);
+
+        List<ReportCoveragePeriod> coveragePeriods = reportSchedule.findReportingCoveragePeriods(
+                baseDate,
+                DAILY
+        );
+
+        assertThat(coveragePeriods)
+                .containsExactly(
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 19),
+                                LocalDate.of(2026, 1, 19)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 20),
+                                LocalDate.of(2026, 1, 20)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 21),
+                                LocalDate.of(2026, 1, 21)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 22),
+                                LocalDate.of(2026, 1, 22)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 23),
+                                LocalDate.of(2026, 1, 23)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 24),
+                                LocalDate.of(2026, 1, 24)
+                        )
+                );
+    }
+
+    @Test
+    void 기준일이_속한_주간_리포트_커버_기간들을_조회한다() {
+        ReportSchedule reportSchedule = ReportSchedule.from(List.of(createYear2026SessionPeriod()));
+        LocalDate baseDate = LocalDate.of(2026, 1, 20);
+
+        List<ReportCoveragePeriod> coveragePeriods = reportSchedule.findReportingCoveragePeriods(
+                baseDate,
+                WEEKLY
+        );
+
+        assertThat(coveragePeriods)
+                .containsExactly(
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 1),
+                                LocalDate.of(2026, 1, 4)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 5),
+                                LocalDate.of(2026, 1, 11)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 12),
+                                LocalDate.of(2026, 1, 18)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 19),
+                                LocalDate.of(2026, 1, 25)
+                        )
+                );
+    }
+
+    @Test
+    void 기준일이_속한_월간_리포트_커버_기간들을_조회한다() {
+        ReportSchedule reportSchedule = ReportSchedule.from(List.of(createYear2026SessionPeriod()));
+        LocalDate baseDate = LocalDate.of(2026, 4, 10);
+
+        List<ReportCoveragePeriod> coveragePeriods = reportSchedule.findReportingCoveragePeriods(
+                baseDate,
+                MONTHLY
+        );
+
+        assertThat(coveragePeriods)
+                .containsExactly(
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 1),
+                                LocalDate.of(2026, 1, 25)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 26),
+                                LocalDate.of(2026, 2, 22)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 2, 23),
+                                LocalDate.of(2026, 3, 22)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 3, 23),
+                                LocalDate.of(2026, 4, 19)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 4, 20),
+                                LocalDate.of(2026, 5, 17)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 5, 18),
+                                LocalDate.of(2026, 6, 14)
+                        )
+                );
+    }
+
+    @Test
+    void 기준일이_속한_반기_리포트_커버_기간들을_조회한다() {
+        ReportSchedule reportSchedule = ReportSchedule.from(List.of(createYear2026SessionPeriod()));
+        LocalDate baseDate = LocalDate.of(2026, 8, 10);
+
+        List<ReportCoveragePeriod> coveragePeriods = reportSchedule.findReportingCoveragePeriods(
+                baseDate,
+                BIANNUALLY
+        );
+
+        assertThat(coveragePeriods)
+                .containsExactly(
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 1, 1),
+                                LocalDate.of(2026, 6, 14)
+                        ),
+                        new ReportCoveragePeriod(
+                                LocalDate.of(2026, 6, 15),
+                                LocalDate.of(2026, 11, 29)
+                        )
+                );
+    }
+
+    @Test
+    void 기준일이_속한_연간_리포트_커버_기간을_조회한다() {
+        ReportSchedule reportSchedule = ReportSchedule.from(List.of(createYear2026SessionPeriod()));
+        LocalDate baseDate = LocalDate.of(2026, 8, 10);
+
+        List<ReportCoveragePeriod> coveragePeriods = reportSchedule.findReportingCoveragePeriods(
+                baseDate,
+                ANNUALLY
+        );
+
+        assertThat(coveragePeriods)
+                .containsExactly(new ReportCoveragePeriod(
+                        LocalDate.of(2026, 1, 1),
+                        LocalDate.of(2026, 11, 29)
+                ));
     }
 }

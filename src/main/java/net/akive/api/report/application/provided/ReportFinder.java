@@ -8,6 +8,7 @@ import net.akive.api.report.application.provided.dto.ReportCoveragePeriodFindQue
 import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryFindQuery;
 import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryResult;
 import net.akive.api.report.application.provided.dto.ReportHeaderResult;
+import net.akive.api.report.application.provided.dto.ReportWritingStatusResult;
 import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportCoveragePeriod;
 import net.akive.api.report.domain.ReportType;
@@ -25,6 +26,9 @@ public interface ReportFinder {
 
     ReportCoveragePeriod findCoveragePeriod(ReportCoveragePeriodFindQuery query)
             throws ResourceNotFoundException, BusinessRuleViolationException;
+
+    List<ReportWritingStatusResult> findWritingStatuses(Long userId, LocalDate baseDate)
+            throws ResourceNotFoundException;
 
     List<ReportType> findAvailableReportTypes(Long userId, LocalDate reportOn) throws ResourceNotFoundException;
 }

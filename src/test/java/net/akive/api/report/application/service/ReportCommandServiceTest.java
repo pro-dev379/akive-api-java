@@ -25,7 +25,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.USER
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportCreateCommand;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportFeedbackItemsUpdateCommand;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
-import static net.akive.api.report.domain.ReportFixture.*;
+import static net.akive.api.report.domain.fixture.ReportFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

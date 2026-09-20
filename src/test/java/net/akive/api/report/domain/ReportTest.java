@@ -11,8 +11,8 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.REPORT_DATE_IN_FUTURE;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
 import static net.akive.api.report.domain.FeedbackType.NOTE;
-import static net.akive.api.report.domain.ReportFixture.*;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
+import static net.akive.api.report.domain.fixture.ReportFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.*;
 

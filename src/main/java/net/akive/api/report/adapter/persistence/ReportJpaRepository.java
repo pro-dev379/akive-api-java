@@ -41,5 +41,22 @@ public interface ReportJpaRepository extends JpaRepository<ReportEntity, Long> {
         """)
     Page<ReportHeaderResult> findHeaderPageByUserId(Long userId, Pageable pageable);
 
+    @Query("""
+        select new net.akive.api.report.application.provided.dto.ReportHeaderResult(
+            r.reportId,
+            r.reportOn,
+            r.reportType
+        )
+        from ReportEntity r
+        where r.user.userId = :userId
+            and r.reportOn >= :startOn and r.reportOn <= :endOn
+        order by r.reportOn asc
+    """)
+    List<ReportHeaderResult> findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(
+            Long userId,
+            LocalDate startOn,
+            LocalDate endOn
+    );
+
     boolean existsByUser_UserIdAndReportOnAndReportType(Long userId, LocalDate reportOn, ReportType reportType);
 }

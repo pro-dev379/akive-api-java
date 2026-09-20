@@ -102,6 +102,13 @@ public class ReportApi {
         return ReportCoveragePeriodFindResponse.from(reportFinder.findCoveragePeriod(query));
     }
 
+    @GetMapping("/writing-statuses")
+    public ReportWritingStatusesFindResponse findWritingStatuses(@AuthenticatedUserId Long userId) {
+        LocalDate baseDate = currentTimeProvider.now().toLocalDate();
+
+        return ReportWritingStatusesFindResponse.from(reportFinder.findWritingStatuses(userId, baseDate));
+    }
+
     @GetMapping("/available-types")
     public ReportTypesFindResponse findAvailableReportTypes(
             @AuthenticatedUserId Long userId,

@@ -8,10 +8,7 @@ import net.akive.api.common.pagination.PageResult;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.report.application.provided.ReportFinder;
-import net.akive.api.report.application.provided.dto.ReportCoveragePeriodFindQuery;
-import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryFindQuery;
-import net.akive.api.report.application.provided.dto.ReportFeedbackHistoryResult;
-import net.akive.api.report.application.provided.dto.ReportHeaderResult;
+import net.akive.api.report.application.provided.dto.*;
 import net.akive.api.report.application.required.ReportRepository;
 import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportCoveragePeriod;
@@ -21,7 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.REPORT_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
@@ -46,7 +46,7 @@ class ReportQueryService implements ReportFinder {
 
     @Override
     public List<ReportFeedbackHistoryResult> findFeedbackHistory(ReportFeedbackHistoryFindQuery query) {
-        List<Report> reports = reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(
+        List<Report> reports = reportRepository.findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
                 query.userId(),
                 query.reportType(),
                 query.startOn(),
@@ -72,6 +72,34 @@ class ReportQueryService implements ReportFinder {
     }
 
     @Override
+    public List<ReportWritingStatusResult> findWritingStatuses(Long userId, LocalDate baseDate)
+            throws ResourceNotFoundException {
+        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriodsByUserId(userId);
+
+        validateReportOnWithinSessionPeriod(baseDate, sessionPeriods);
+
+        ReportSchedule reportSchedule = ReportSchedule.from(sessionPeriods);
+        List<ReportWritingStatusCandidate> writingStatusCandidates = new ArrayList<>();
+
+        for (ReportType reportType : ReportType.values()) {
+            reportSchedule.findReportingCoveragePeriods(baseDate, reportType)
+                    .stream()
+                    .map(coveragePeriod -> new ReportWritingStatusCandidate(reportType, coveragePeriod))
+                    .forEach(writingStatusCandidates::add);
+        }
+
+        Set<ReportKey> writtenReportKeys = findWrittenReportKeys(userId, writingStatusCandidates);
+
+        return writingStatusCandidates.stream()
+                .map(candidate -> toWritingStatus(
+                        candidate.reportType(),
+                        candidate.coveragePeriod(),
+                        writtenReportKeys
+                ))
+                .toList();
+    }
+
+    @Override
     public List<ReportType> findAvailableReportTypes(Long userId, LocalDate reportOn)
             throws ResourceNotFoundException {
         List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriodsByUserId(userId);
@@ -79,6 +107,56 @@ class ReportQueryService implements ReportFinder {
         validateReportOnWithinSessionPeriod(reportOn, sessionPeriods);
 
         return ReportSchedule.from(sessionPeriods).findAvailableReportTypes(reportOn);
+    }
+
+    private Set<ReportKey> findWrittenReportKeys(
+            Long userId,
+            List<ReportWritingStatusCandidate> writingStatusCandidates
+    ) {
+        if (writingStatusCandidates.isEmpty()) {
+            return Set.of();
+        }
+
+        LocalDate startOn = findStartOn(writingStatusCandidates);
+        LocalDate endOn = findEndOn(writingStatusCandidates);
+
+        return reportRepository.findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(
+                        userId,
+                        startOn,
+                        endOn
+                )
+                .stream()
+                .map(reportHeader -> new ReportKey(reportHeader.reportType(), reportHeader.reportOn()))
+                .collect(Collectors.toSet());
+    }
+
+    private LocalDate findStartOn(List<ReportWritingStatusCandidate> writingStatusCandidates) {
+        return writingStatusCandidates.stream()
+                .map(candidate -> candidate.coveragePeriod().endOn())
+                .min(LocalDate::compareTo)
+                .orElseThrow();
+    }
+
+    private LocalDate findEndOn(List<ReportWritingStatusCandidate> writingStatusCandidates) {
+        return writingStatusCandidates.stream()
+                .map(candidate -> candidate.coveragePeriod().endOn())
+                .max(LocalDate::compareTo)
+                .orElseThrow();
+    }
+
+    private ReportWritingStatusResult toWritingStatus(
+            ReportType reportType,
+            ReportCoveragePeriod coveragePeriod,
+            Set<ReportKey> writtenReportKeys
+    ) {
+        ReportKey reportKey = new ReportKey(reportType, coveragePeriod.endOn());
+
+        return new ReportWritingStatusResult(
+                reportType,
+                coveragePeriod.endOn(),
+                coveragePeriod,
+                writtenReportKeys.contains(reportKey)
+        );
     }
 
     private void validateReportOnWithinSessionPeriod(LocalDate reportOn, List<SessionPeriod> sessionPeriods) {
@@ -98,5 +176,11 @@ class ReportQueryService implements ReportFinder {
     private Report findReportOrThrow(Long reportId, Long userId) {
         return reportRepository.findByReportIdAndUserId(reportId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(REPORT_NOT_FOUND));
+    }
+
+    private record ReportKey(ReportType reportType, LocalDate reportOn) {
+    }
+
+    private record ReportWritingStatusCandidate(ReportType reportType, ReportCoveragePeriod coveragePeriod) {
     }
 }

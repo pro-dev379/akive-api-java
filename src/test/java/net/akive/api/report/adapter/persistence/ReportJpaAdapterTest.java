@@ -17,9 +17,8 @@ import java.util.Optional;
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
 import static net.akive.api.report.domain.FeedbackType.IMPROVEMENT;
-import static net.akive.api.report.domain.ReportFixture.*;
-import static net.akive.api.report.domain.ReportType.DAILY;
-import static net.akive.api.report.domain.ReportType.WEEKLY;
+import static net.akive.api.report.domain.ReportType.*;
+import static net.akive.api.report.domain.fixture.ReportFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ReportJpaAdapterTest extends RepositoryTestSupport {
@@ -107,7 +106,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
         saveReport(savedUser, middle, DAILY);
         flushAndClear();
 
-        List<Report> foundReports = reportRepository.findAllByUserIdAndReportTypeAndReportOnBetween(
+        List<Report> foundReports = reportRepository.findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
                 savedUser.getUserId(),
                 WEEKLY,
                 startOn,
@@ -156,6 +155,44 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
                         recentReport.getReportOn(),
                         recentReport.getReportType()
                 ));
+    }
+
+    @Test
+    void 회원_식별자와_리포트_작성일_범위로_리포트_헤더_목록을_조회한다() {
+        User savedUser = saveUser();
+        LocalDate startOn = REPORT_ON.minusDays(1);
+        LocalDate endOn = REPORT_ON.plusDays(1);
+        Report dailyReport = saveReport(savedUser, startOn, DAILY);
+        Report weeklyReport = saveReport(savedUser, REPORT_ON, WEEKLY);
+        Report monthlyReport = saveReport(savedUser, REPORT_ON.plusDays(1), MONTHLY);
+        saveReport(savedUser, startOn.minusDays(1), WEEKLY);
+        flushAndClear();
+
+        List<ReportHeaderResult> reportHeaders =
+                reportRepository.findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(
+                        savedUser.getUserId(),
+                        startOn,
+                        endOn
+                );
+
+        assertThat(reportHeaders)
+                .containsExactly(
+                        new ReportHeaderResult(
+                                dailyReport.getReportId(),
+                                dailyReport.getReportOn(),
+                                dailyReport.getReportType()
+                        ),
+                        new ReportHeaderResult(
+                                weeklyReport.getReportId(),
+                                weeklyReport.getReportOn(),
+                                weeklyReport.getReportType()
+                        ),
+                        new ReportHeaderResult(
+                                monthlyReport.getReportId(),
+                                monthlyReport.getReportOn(),
+                                monthlyReport.getReportType()
+                        )
+                );
     }
 
     @Test

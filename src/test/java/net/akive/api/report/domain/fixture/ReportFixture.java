@@ -1,6 +1,10 @@
-package net.akive.api.report.domain;
+package net.akive.api.report.domain.fixture;
 
 import net.akive.api.plan.domain.value.SessionPeriod;
+import net.akive.api.report.domain.FeedbackType;
+import net.akive.api.report.domain.Report;
+import net.akive.api.report.domain.ReportFeedback;
+import net.akive.api.report.domain.ReportType;
 import net.akive.api.user.domain.User;
 
 import java.time.LocalDate;

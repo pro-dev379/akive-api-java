@@ -12,8 +12,8 @@ import java.util.stream.Stream;
 
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
 import static net.akive.api.report.domain.FeedbackType.IMPROVEMENT;
-import static net.akive.api.report.domain.ReportFixture.*;
 import static net.akive.api.report.domain.ReportType.WEEKLY;
+import static net.akive.api.report.domain.fixture.ReportFixture.*;
 
 public class ReportRequestFixture {
 

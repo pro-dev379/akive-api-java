@@ -57,7 +57,7 @@ class ReportJpaAdapter implements ReportRepository {
 
 
     @Override
-    public List<Report> findAllByUserIdAndReportTypeAndReportOnBetween(
+    public List<Report> findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
             Long userId,
             ReportType reportType,
             LocalDate startOn,
@@ -89,6 +89,19 @@ class ReportJpaAdapter implements ReportRepository {
                 reportHeaderPage.isFirst(),
                 reportHeaderPage.isLast(),
                 reportHeaderPage.getContent()
+        );
+    }
+
+    @Override
+    public List<ReportHeaderResult> findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(
+            Long userId,
+            LocalDate startOn,
+            LocalDate endOn
+    ) {
+        return reportJpaRepository.findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(
+                userId,
+                startOn,
+                endOn
         );
     }
 

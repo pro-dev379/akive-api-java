@@ -58,6 +58,31 @@ public final class ReportSchedule {
         return findCoveragePeriodEndingOn(getCoveragePeriods(reportType), reportOn);
     }
 
+    public List<ReportCoveragePeriod> findReportingCoveragePeriods(LocalDate baseDate, ReportType reportType) {
+        requireNonNull(baseDate);
+        requireNonNull(reportType);
+
+        return switch (reportType) {
+            case DAILY -> findDailyReportingCoveragePeriods(baseDate);
+            case WEEKLY -> findCoveragePeriodGroup(
+                    getCoveragePeriods(WEEKLY),
+                    WEEKLY_REPORT_COUNT_PER_MONTHLY_REPORT,
+                    baseDate
+            );
+            case MONTHLY -> findCoveragePeriodGroup(
+                    getCoveragePeriods(MONTHLY),
+                    MONTHLY_REPORT_COUNT_PER_BIANNUAL_REPORT,
+                    baseDate
+            );
+            case BIANNUALLY -> findCoveragePeriodGroup(
+                    getCoveragePeriods(BIANNUALLY),
+                    BIANNUAL_REPORT_COUNT_PER_ANNUAL_REPORT,
+                    baseDate
+            );
+            case ANNUALLY -> findAnnualReportingCoveragePeriods(baseDate);
+        };
+    }
+
     private boolean hasReportOn(LocalDate reportOn, ReportType reportType) {
         if (reportType == DAILY) {
             return isDailyReportOn(reportOn);
@@ -98,12 +123,12 @@ public final class ReportSchedule {
             List<SessionPeriod> sessionPeriods
     ) {
         List<ReportCoveragePeriod> weeklyCoveragePeriods = findWeeklyCoveragePeriods(sessionPeriods);
-        List<ReportCoveragePeriod> monthlyCoveragePeriod = findGroupedCoveragePeriods(
+        List<ReportCoveragePeriod> monthlyCoveragePeriods = findGroupedCoveragePeriods(
                 weeklyCoveragePeriods,
                 WEEKLY_REPORT_COUNT_PER_MONTHLY_REPORT
         );
         List<ReportCoveragePeriod> biannualCoveragePeriods = findGroupedCoveragePeriods(
-                monthlyCoveragePeriod,
+                monthlyCoveragePeriods,
                 MONTHLY_REPORT_COUNT_PER_BIANNUAL_REPORT
         );
         List<ReportCoveragePeriod> annualCoveragePeriods = findGroupedCoveragePeriods(
@@ -113,7 +138,7 @@ public final class ReportSchedule {
 
         Map<ReportType, List<ReportCoveragePeriod>> coveragePeriodsByType = new EnumMap<>(ReportType.class);
         coveragePeriodsByType.put(WEEKLY, weeklyCoveragePeriods);
-        coveragePeriodsByType.put(MONTHLY, monthlyCoveragePeriod);
+        coveragePeriodsByType.put(MONTHLY, monthlyCoveragePeriods);
         coveragePeriodsByType.put(BIANNUALLY, biannualCoveragePeriods);
         coveragePeriodsByType.put(ANNUALLY, annualCoveragePeriods);
 
@@ -154,6 +179,48 @@ public final class ReportSchedule {
         return List.copyOf(groupedPeriods);
     }
 
+    private static List<ReportCoveragePeriod> findCoveragePeriodGroup(
+            List<ReportCoveragePeriod> coveragePeriods,
+            int groupSize,
+            LocalDate baseDate
+    ) {
+        for (int startIndex = 0; startIndex < coveragePeriods.size(); startIndex += groupSize) {
+            int endIndex = Math.min(startIndex + groupSize, coveragePeriods.size());
+            List<ReportCoveragePeriod> coveragePeriodGroup = coveragePeriods.subList(startIndex, endIndex);
+            ReportCoveragePeriod lastCoveragePeriod = coveragePeriodGroup.getLast();
+
+            if (!lastCoveragePeriod.endOn().isBefore(baseDate)) {
+                return List.copyOf(coveragePeriodGroup);
+            }
+        }
+
+        return List.of();
+    }
+
+    private List<ReportCoveragePeriod> findDailyReportingCoveragePeriods(LocalDate baseDate) {
+        return getCoveragePeriods(WEEKLY).stream()
+                .filter(coveragePeriod -> !coveragePeriod.startOn().isAfter(baseDate)
+                        && !coveragePeriod.endOn().isBefore(baseDate))
+                .findFirst()
+                .map(this::findDailyCoveragePeriods)
+                .orElseGet(List::of);
+    }
+
+    private List<ReportCoveragePeriod> findDailyCoveragePeriods(ReportCoveragePeriod weeklyCoveragePeriod) {
+        List<ReportCoveragePeriod> dailyCoveragePeriods = new ArrayList<>();
+        LocalDate dailyReportOn = weeklyCoveragePeriod.startOn();
+
+        while (!dailyReportOn.isAfter(weeklyCoveragePeriod.endOn())) {
+            if (isDailyReportOn(dailyReportOn)) {
+                dailyCoveragePeriods.add(new ReportCoveragePeriod(dailyReportOn, dailyReportOn));
+            }
+
+            dailyReportOn = dailyReportOn.plusDays(1);
+        }
+
+        return List.copyOf(dailyCoveragePeriods);
+    }
+
     private static List<ReportCoveragePeriod> findWeeklyCoveragePeriods(List<SessionPeriod> sessionPeriods) {
         TreeMap<LocalDate, ReportCoveragePeriod> reportPeriodByEndOn = new TreeMap<>();
 
@@ -177,6 +244,14 @@ public final class ReportSchedule {
         }
 
         return List.copyOf(coveragePeriods);
+    }
+
+    private List<ReportCoveragePeriod> findAnnualReportingCoveragePeriods(LocalDate baseDate) {
+        return getCoveragePeriods(ANNUALLY).stream()
+                .filter(coveragePeriod -> !coveragePeriod.endOn().isBefore(baseDate))
+                .findFirst()
+                .map(List::of)
+                .orElseGet(List::of);
     }
 
     private static RuntimeException invalidReportType() {
