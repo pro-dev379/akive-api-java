@@ -1,5 +1,6 @@
 package net.akive.api.dailylog.adapter.webapi;
 
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.pagination.PageCondition;
@@ -7,6 +8,7 @@ import net.akive.api.common.pagination.PageResult;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogUpdateRequest;
+import net.akive.api.dailylog.adapter.webapi.dto.request.FocusTimeRequest;
 import net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
@@ -39,7 +41,6 @@ import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
 import static net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture.*;
 import static net.akive.api.dailylog.domain.DailyLogType.*;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
-import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.CONTENTS;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -92,52 +93,6 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         postJson(DAILY_LOGS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         then(currentTimeProvider).shouldHaveNoInteractions();
-        then(dailyLogCreator).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void 일일_로그_생성_요청의_날짜_형식이_올바르지_않으면_400을_응답한다() {
-        String body = """
-                {
-                  "logOn": "invalid-date",
-                  "focusTime": {
-                    "startOn": "%s",
-                    "endOn": "%s",
-                    "focusTimeSec": %d,
-                    "focusRateExcluded": false
-                  },
-                  "dailyLogType": "%s",
-                  "contents": "%s"
-                }
-                """.formatted(
-                START_ON.format(ISO_LOCAL_DATE_TIME),
-                END_ON.format(ISO_LOCAL_DATE_TIME),
-                FOCUS_TIME_SEC,
-                STUDY.name(),
-                CONTENTS
-        );
-
-        postJson(DAILY_LOGS_URL, USER_ID, body).hasStatus(BAD_REQUEST);
-
-        then(currentTimeProvider).shouldHaveNoInteractions();
-        then(dailyLogCreator).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void 일일_로그_생성_시_미래_로그_날짜로_요청하면_400을_응답한다() {
-        DailyLogCreateRequest request = createDailyLogCreateRequest(NOW.toLocalDate().plusDays(1));
-
-        given(currentTimeProvider.now()).willReturn(NOW);
-
-        MvcTestResultAssert result = postJson(
-                DAILY_LOGS_URL,
-                USER_ID,
-                toJson(request)
-        ).hasStatus(BAD_REQUEST);
-
-        assertErrorResponse(result, DAILY_LOG_DATE_IN_FUTURE);
-
-        then(currentTimeProvider).should().now();
         then(dailyLogCreator).shouldHaveNoInteractions();
     }
 
@@ -207,6 +162,46 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
         then(currentTimeProvider).should().now();
         then(dailyLogCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 일일_로그_생성_시_수면_시간이_2시간_미만이면_400을_응답한다() {
+        DailyLogCreateRequest request = new DailyLogCreateRequest(
+                new FocusTimeRequest(START_ON, START_ON.plusHours(1), null, false),
+                SLEEP,
+                "수면"
+        );
+        DailyLogCreateCommand command = request.to(USER_ID, NOW);
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+        willThrow(new BusinessRuleViolationException(DAILY_LOG_SLEEP_TIME_TOO_SHORT))
+                .given(dailyLogCreator)
+                .create(command);
+
+        MvcTestResultAssert result = postJson(DAILY_LOGS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_SLEEP_TIME_TOO_SHORT);
+        then(dailyLogCreator).should().create(command);
+    }
+
+    @Test
+    void 일일_로그_생성_시_비학습_로그에_집중_시간이_있으면_400을_응답한다() {
+        DailyLogCreateRequest request = new DailyLogCreateRequest(
+                new FocusTimeRequest(START_ON, END_ON, FOCUS_TIME_SEC, false),
+                REST,
+                "휴식"
+        );
+        DailyLogCreateCommand command = request.to(USER_ID, NOW);
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+        willThrow(new BusinessRuleViolationException(DAILY_LOG_FOCUS_TIME_NOT_ALLOWED))
+                .given(dailyLogCreator)
+                .create(command);
+
+        MvcTestResultAssert result = postJson(DAILY_LOGS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_FOCUS_TIME_NOT_ALLOWED);
+        then(dailyLogCreator).should().create(command);
     }
 
     @Test
@@ -281,53 +276,6 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 일일_로그_수정_요청의_날짜_형식이_올바르지_않으면_400을_응답한다() {
-        String body = """
-                {
-                  "targetLogOn": "invalid-date",
-                  "targetFocusTime": {
-                    "startOn": "%s",
-                    "endOn": "%s",
-                    "focusTimeSec": %d,
-                    "focusRateExcluded": false
-                  },
-                  "targetDailyLogType": "%s",
-                  "targetContents": "%s"
-                }
-                """.formatted(
-                TARGET_START_ON.format(ISO_LOCAL_DATE_TIME),
-                TARGET_END_ON.format(ISO_LOCAL_DATE_TIME),
-                FOCUS_TIME_SEC,
-                STUDY.name(),
-                TARGET_CONTENTS
-        );
-
-        putJson(DAILY_LOG_URL, USER_ID, body, DAILY_LOG_ID).hasStatus(BAD_REQUEST);
-
-        then(currentTimeProvider).shouldHaveNoInteractions();
-        then(dailyLogCreator).should(never()).update(any(DailyLogUpdateCommand.class));
-    }
-
-    @Test
-    void 일일_로그_수정_시_미래_로그_날짜로_요청하면_400을_응답한다() {
-        DailyLogUpdateRequest request = createDailyLogUpdateRequest(NOW.toLocalDate().plusDays(1));
-
-        given(currentTimeProvider.now()).willReturn(NOW);
-
-        MvcTestResultAssert result = putJson(
-                DAILY_LOG_URL,
-                USER_ID,
-                toJson(request),
-                DAILY_LOG_ID
-        ).hasStatus(BAD_REQUEST);
-
-        assertErrorResponse(result, DAILY_LOG_DATE_IN_FUTURE);
-
-        then(currentTimeProvider).should().now();
-        then(dailyLogCreator).shouldHaveNoInteractions();
-    }
-
-    @Test
     void 일일_로그_수정_시_미래_시간_범위로_요청하면_400을_응답한다() {
         DailyLogUpdateRequest request = createDailyLogUpdateRequest(
                 createFocusTimeRequest(
@@ -395,6 +343,50 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
         then(currentTimeProvider).should().now();
         then(dailyLogCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 일일_로그_수정_시_수면_시간이_2시간_미만이면_400을_응답한다() {
+        DailyLogUpdateRequest request = new DailyLogUpdateRequest(
+                new FocusTimeRequest(TARGET_START_ON, TARGET_START_ON.plusHours(1), null, false),
+                SLEEP,
+                "수면"
+        );
+        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, NOW);
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+        willThrow(new BusinessRuleViolationException(DAILY_LOG_SLEEP_TIME_TOO_SHORT))
+                .given(dailyLogCreator)
+                .update(command);
+
+        MvcTestResultAssert result = putJson(
+                DAILY_LOG_URL, USER_ID, toJson(request), DAILY_LOG_ID
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_SLEEP_TIME_TOO_SHORT);
+        then(dailyLogCreator).should().update(command);
+    }
+
+    @Test
+    void 일일_로그_수정_시_비학습_로그에_집중_시간이_있으면_400을_응답한다() {
+        DailyLogUpdateRequest request = new DailyLogUpdateRequest(
+                new FocusTimeRequest(TARGET_START_ON, TARGET_END_ON, FOCUS_TIME_SEC, false),
+                REST,
+                "휴식"
+        );
+        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, NOW);
+
+        given(currentTimeProvider.now()).willReturn(NOW);
+        willThrow(new BusinessRuleViolationException(DAILY_LOG_FOCUS_TIME_NOT_ALLOWED))
+                .given(dailyLogCreator)
+                .update(command);
+
+        MvcTestResultAssert result = putJson(
+                DAILY_LOG_URL, USER_ID, toJson(request), DAILY_LOG_ID
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, DAILY_LOG_FOCUS_TIME_NOT_ALLOWED);
+        then(dailyLogCreator).should().update(command);
     }
 
     @Test
@@ -556,20 +548,22 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
     @Test
     void 일일_로그_타입_목록을_조회한다() {
-        given(dailyLogFinder.findDailyLogTypes()).willReturn(List.of(STUDY, REST, MEAL, ATTENDANCE, ETC));
+        given(dailyLogFinder.findDailyLogTypes()).willReturn(List.of(STUDY, SLEEP, REST, MEAL, ATTENDANCE, ETC));
 
         MvcTestResultAssert result = get("/daily-logs/types", USER_ID).hasStatusOk();
 
         result.bodyJson().extractingPath("$.dailyLogTypes[0].code").isEqualTo(STUDY.name());
         result.bodyJson().extractingPath("$.dailyLogTypes[0].label").isEqualTo(STUDY.getLabel());
-        result.bodyJson().extractingPath("$.dailyLogTypes[1].code").isEqualTo(REST.name());
-        result.bodyJson().extractingPath("$.dailyLogTypes[1].label").isEqualTo(REST.getLabel());
-        result.bodyJson().extractingPath("$.dailyLogTypes[2].code").isEqualTo(MEAL.name());
-        result.bodyJson().extractingPath("$.dailyLogTypes[2].label").isEqualTo(MEAL.getLabel());
-        result.bodyJson().extractingPath("$.dailyLogTypes[3].code").isEqualTo(ATTENDANCE.name());
-        result.bodyJson().extractingPath("$.dailyLogTypes[3].label").isEqualTo(ATTENDANCE.getLabel());
-        result.bodyJson().extractingPath("$.dailyLogTypes[4].code").isEqualTo(ETC.name());
-        result.bodyJson().extractingPath("$.dailyLogTypes[4].label").isEqualTo(ETC.getLabel());
+        result.bodyJson().extractingPath("$.dailyLogTypes[1].code").isEqualTo(SLEEP.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[1].label").isEqualTo(SLEEP.getLabel());
+        result.bodyJson().extractingPath("$.dailyLogTypes[2].code").isEqualTo(REST.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[2].label").isEqualTo(REST.getLabel());
+        result.bodyJson().extractingPath("$.dailyLogTypes[3].code").isEqualTo(MEAL.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[3].label").isEqualTo(MEAL.getLabel());
+        result.bodyJson().extractingPath("$.dailyLogTypes[4].code").isEqualTo(ATTENDANCE.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[4].label").isEqualTo(ATTENDANCE.getLabel());
+        result.bodyJson().extractingPath("$.dailyLogTypes[5].code").isEqualTo(ETC.name());
+        result.bodyJson().extractingPath("$.dailyLogTypes[5].label").isEqualTo(ETC.getLabel());
 
         then(dailyLogFinder).should().findDailyLogTypes();
     }

@@ -52,7 +52,7 @@ class DailyLogCommandServiceTest {
         DailyLog savedDailyLog = DailyLog.reconstruct(
                 DAILY_LOG_ID,
                 user,
-                command.logOn(),
+                command.focusTime().getStartOn().toLocalDate(),
                 command.focusTime(),
                 command.dailyLogType(),
                 command.contents(),
@@ -76,7 +76,7 @@ class DailyLogCommandServiceTest {
 
         DailyLog dailyLog = dailyLogCaptor.getValue();
         assertThat(dailyLog.getUser()).isEqualTo(user);
-        assertThat(dailyLog.getLogOn()).isEqualTo(command.logOn());
+        assertThat(dailyLog.getLogOn()).isEqualTo(command.focusTime().getStartOn().toLocalDate());
         assertThat(dailyLog.getFocusTime()).isEqualTo(command.focusTime());
         assertThat(dailyLog.getDailyLogType()).isEqualTo(command.dailyLogType());
         assertThat(dailyLog.getContents()).isEqualTo(command.contents());
@@ -141,7 +141,7 @@ class DailyLogCommandServiceTest {
         );
         then(dailyLogRepository).should().save(dailyLog);
 
-        assertThat(dailyLog.getLogOn()).isEqualTo(command.targetLogOn());
+        assertThat(dailyLog.getLogOn()).isEqualTo(command.targetFocusTime().getStartOn().toLocalDate());
         assertThat(dailyLog.getFocusTime()).isEqualTo(command.targetFocusTime());
         assertThat(dailyLog.getDailyLogType()).isEqualTo(command.targetDailyLogType());
         assertThat(dailyLog.getContents()).isEqualTo(command.targetContents());

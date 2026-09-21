@@ -37,7 +37,6 @@ class DailyLogCommandService implements DailyLogCreator {
 
         DailyLog dailyLog = DailyLog.create(
                 user,
-                command.logOn(),
                 command.focusTime(),
                 command.dailyLogType(),
                 command.contents(),
@@ -57,7 +56,6 @@ class DailyLogCommandService implements DailyLogCreator {
         validateTimeNotOverlappingExcludingSelf(command.userId(), command.targetFocusTime(), command.dailyLogId());
 
         dailyLog.update(
-                command.targetLogOn(),
                 command.targetFocusTime(),
                 command.targetDailyLogType(),
                 command.targetContents(),

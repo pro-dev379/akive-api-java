@@ -53,7 +53,15 @@ public final class FocusTime {
     }
 
     public long durationSec() {
-        return Duration.between(startOn, endOn).toSeconds();
+        return Duration.between(this.startOn, this.endOn).toSeconds();
+    }
+
+    public FocusTime excludingFromFocusRate() {
+        if (this.focusRateExcluded) {
+            return this;
+        }
+
+        return new FocusTime(this.startOn, this.endOn, this.focusTimeSec, true, this.endOn);
     }
 
     private static void validateMaxPeriod(LocalDateTime startOn, LocalDateTime endOn) {

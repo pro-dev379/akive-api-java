@@ -6,11 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
 import net.akive.api.dailylog.domain.DailyLogType;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record DailyLogCreateRequest(
-        @NotNull LocalDate logOn,
         @NotNull @Valid FocusTimeRequest focusTime,
         @NotNull DailyLogType dailyLogType,
         @NotBlank String contents
@@ -19,7 +17,6 @@ public record DailyLogCreateRequest(
     public DailyLogCreateCommand to(Long userId, LocalDateTime requestedAt) {
         return new DailyLogCreateCommand(
                 userId,
-                this.logOn,
                 this.focusTime.to(requestedAt),
                 this.dailyLogType,
                 this.contents,

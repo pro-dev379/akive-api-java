@@ -51,17 +51,12 @@ public class DailyLogFixture {
     }
 
     public static DailyLog createDailyLog(User user, LocalDate logOn, int startHour) {
-        return createDailyLog(user, logOn, createFocusTime(logOn, startHour));
+        return createDailyLog(user, createFocusTime(logOn, startHour));
     }
 
     public static DailyLog createDailyLog(User user, FocusTime focusTime) {
-        return createDailyLog(user, LOG_ON, focusTime);
-    }
-
-    public static DailyLog createDailyLog(User user, LocalDate logOn, FocusTime focusTime) {
         return DailyLog.create(
                 user,
-                logOn,
                 focusTime,
                 STUDY,
                 CONTENTS,

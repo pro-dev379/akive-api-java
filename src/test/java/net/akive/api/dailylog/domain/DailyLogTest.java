@@ -3,21 +3,24 @@ package net.akive.api.dailylog.domain;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_LOG_DATE_IN_FUTURE;
-import static net.akive.api.dailylog.domain.DailyLogType.ATTENDANCE;
-import static net.akive.api.dailylog.domain.DailyLogType.STUDY;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_LOG_FOCUS_TIME_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_LOG_SLEEP_TIME_TOO_SHORT;
+import static net.akive.api.dailylog.domain.DailyLogType.*;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
-import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 class DailyLogTest {
 
     @Test
     void 저장된_일일_로그를_복원한다() {
-        User user = createUser(USER_ID);
+        User user = createUser();
         DailyLog dailyLog = DailyLog.reconstruct(
                 DAILY_LOG_ID,
                 user,
@@ -39,11 +42,46 @@ class DailyLogTest {
     }
 
     @Test
+    void 저장된_수면_일일_로그가_2시간_미만이면_복원할_수_없다() {
+        FocusTime focusTime = FocusTime.of(START_ON, START_ON.plusHours(2).minusSeconds(1), null, true, NOW);
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> DailyLog.reconstruct(
+                        DAILY_LOG_ID,
+                        createUser(),
+                        LOG_ON,
+                        focusTime,
+                        SLEEP,
+                        CONTENTS,
+                        NOW
+                ))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(DAILY_LOG_SLEEP_TIME_TOO_SHORT);
+    }
+
+    @Test
+    void 저장된_비학습_일일_로그에_집중_시간이_있으면_복원할_수_없다() {
+        FocusTime focusTime = FocusTime.of(START_ON, START_ON.plusHours(3), 0L, true, NOW);
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> DailyLog.reconstruct(
+                        DAILY_LOG_ID,
+                        createUser(),
+                        LOG_ON,
+                        focusTime,
+                        ATTENDANCE,
+                        CONTENTS,
+                        NOW
+                ))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(DAILY_LOG_FOCUS_TIME_NOT_ALLOWED);
+    }
+
+    @Test
     void 일일_로그를_생성한다() {
-        User user = createUser(USER_ID);
+        User user = createUser();
         DailyLog dailyLog = DailyLog.create(
                 user,
-                LOG_ON,
                 FOCUS_TIME,
                 STUDY,
                 CONTENTS,
@@ -60,10 +98,71 @@ class DailyLogTest {
     }
 
     @Test
+    void 시작_시간이_새벽_5시_이전인_일일_로그는_전날에_귀속되어_생성된다() {
+        LocalDateTime startOn = LocalDateTime.of(2026, 9, 13, 4, 0);
+        FocusTime focusTime = FocusTime.of(startOn, startOn.plusHours(4), 10_800L, false, NOW);
+
+        DailyLog dailyLog = DailyLog.create(createUser(), focusTime, STUDY, CONTENTS, NOW);
+
+        assertThat(dailyLog.getLogOn()).isEqualTo(LocalDate.of(2026, 9, 12));
+    }
+
+    @Test
+    void 시작_시간이_새벽_5시인_일일_로그는_당일에_귀속되어_생성된다() {
+        LocalDateTime startOn = LocalDateTime.of(2026, 9, 13, 5, 0);
+        FocusTime focusTime = FocusTime.of(startOn, startOn.plusHours(1), null, false, NOW);
+
+        DailyLog dailyLog = DailyLog.create(createUser(), focusTime, STUDY, CONTENTS, NOW);
+
+        assertThat(dailyLog.getLogOn()).isEqualTo(startOn.toLocalDate());
+    }
+
+    @Test
+    void 수면은_수면_종료일에_귀속되고_집중도_계산에서_제외되어_생성된다() {
+        LocalDateTime startOn = LocalDateTime.of(2026, 9, 12, 21, 0);
+        FocusTime focusTime = FocusTime.of(startOn, startOn.plusHours(6), null, false, NOW);
+
+        DailyLog dailyLog = DailyLog.create(createUser(), focusTime, SLEEP, CONTENTS, NOW);
+
+        assertThat(dailyLog.getLogOn()).isEqualTo(LocalDate.of(2026, 9, 13));
+        assertThat(dailyLog.isFocusRateExcluded()).isTrue();
+    }
+
+    @Test
+    void 수면_시간이_2시간인_일일_로그를_생성한다() {
+        LocalDateTime startOn = LocalDateTime.of(2026, 9, 12, 23, 0);
+        FocusTime focusTime = FocusTime.of(startOn, startOn.plusHours(2), null, false, NOW);
+
+        assertThatCode(() -> DailyLog.create(createUser(), focusTime, SLEEP, CONTENTS, NOW))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 수면_시간이_2시간_미만이면_일일_로그를_생성할_수_없다() {
+        LocalDateTime startOn = LocalDateTime.of(2026, 9, 12, 21, 0);
+        FocusTime focusTime = FocusTime.of(startOn, startOn.plusHours(2).minusSeconds(1), null, false, NOW);
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> DailyLog.create(createUser(), focusTime, SLEEP, CONTENTS, NOW))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(DAILY_LOG_SLEEP_TIME_TOO_SHORT);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = DailyLogType.class, names = "STUDY", mode = EnumSource.Mode.EXCLUDE)
+    void 비학습_일일_로그에_집중_시간을_입력해서_생성할_수_없다(DailyLogType dailyLogType) {
+        FocusTime focusTime = FocusTime.of(START_ON, START_ON.plusHours(3), 0L, false, NOW);
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> DailyLog.create(createUser(), focusTime, dailyLogType, CONTENTS, NOW))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(DAILY_LOG_FOCUS_TIME_NOT_ALLOWED);
+    }
+
+    @Test
     void 일일_로그를_수정한다() {
         DailyLog dailyLog = DailyLog.create(
-                createUser(USER_ID),
-                LOG_ON,
+                createUser(),
                 FOCUS_TIME,
                 STUDY,
                 CONTENTS,
@@ -71,14 +170,13 @@ class DailyLogTest {
         );
 
         dailyLog.update(
-                TARGET_LOG_ON,
                 TARGET_FOCUS_TIME,
                 ATTENDANCE,
                 TARGET_CONTENTS,
                 NOW
         );
 
-        assertThat(dailyLog.getLogOn()).isEqualTo(TARGET_LOG_ON);
+        assertThat(dailyLog.getLogOn()).isEqualTo(TARGET_START_ON.toLocalDate());
         assertThat(dailyLog.getFocusTime()).isEqualTo(TARGET_FOCUS_TIME);
         assertThat(dailyLog.getDailyLogType()).isEqualTo(ATTENDANCE);
         assertThat(dailyLog.getFocusTimeSec()).isNull();
@@ -87,25 +185,50 @@ class DailyLogTest {
     }
 
     @Test
-    void 로그_날짜가_미래이면_일일_로그를_생성할_수_없다() {
-        User user = createUser(USER_ID);
+    void 일일_로그_타입을_수면으로_수정하면_수면_종료일에_귀속되고_집중도에서_제외된다() {
+        DailyLog dailyLog = DailyLog.create(createUser(), FOCUS_TIME, STUDY, CONTENTS, NOW);
+        LocalDateTime startOn = LocalDateTime.of(2026, 9, 12, 23, 0);
+        FocusTime sleepTime = FocusTime.of(startOn, startOn.plusHours(3), null, false, NOW);
+
+        dailyLog.update(sleepTime, SLEEP, TARGET_CONTENTS, NOW);
+
+        assertThat(dailyLog.getLogOn()).isEqualTo(LocalDate.of(2026, 9, 13));
+        assertThat(dailyLog.isFocusRateExcluded()).isTrue();
+    }
+
+    @Test
+    void 수면_시간이_2시간_미만이면_일일_로그를_수정할_수_없다() {
+        DailyLog dailyLog = DailyLog.create(createUser(), FOCUS_TIME, STUDY, CONTENTS, NOW);
+        LocalDateTime startOn = LocalDateTime.of(2026, 9, 12, 23, 0);
+        FocusTime sleepTime = FocusTime.of(startOn, startOn.plusHours(1), null, false, NOW);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> DailyLog.create(
-                        user,
-                        NOW.toLocalDate().plusDays(1),
-                        FOCUS_TIME,
-                        STUDY,
-                        CONTENTS,
-                        NOW
-                ))
+                .isThrownBy(() -> dailyLog.update(sleepTime, SLEEP, TARGET_CONTENTS, NOW))
                 .extracting(BusinessRuleViolationException::getError)
-                .isEqualTo(DAILY_LOG_DATE_IN_FUTURE);
+                .isEqualTo(DAILY_LOG_SLEEP_TIME_TOO_SHORT);
+
+        assertThat(dailyLog.getDailyLogType()).isEqualTo(STUDY);
+        assertThat(dailyLog.getLogOn()).isEqualTo(LOG_ON);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = DailyLogType.class, names = "STUDY", mode = EnumSource.Mode.EXCLUDE)
+    void 비학습_일일_로그에_집중_시간을_입력해서_수정할_수_없다(DailyLogType dailyLogType) {
+        DailyLog dailyLog = DailyLog.create(createUser(), FOCUS_TIME, STUDY, CONTENTS, NOW);
+        FocusTime focusTime = FocusTime.of(START_ON, START_ON.plusHours(3), 0L, false, NOW);
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> dailyLog.update(focusTime, dailyLogType, TARGET_CONTENTS, NOW))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(DAILY_LOG_FOCUS_TIME_NOT_ALLOWED);
+
+        assertThat(dailyLog.getDailyLogType()).isEqualTo(STUDY);
+        assertThat(dailyLog.getFocusTime()).isEqualTo(FOCUS_TIME);
     }
 
     @Test
     void 같은_식별자를_가진_일일_로그는_같게_취급한다() {
-        User user = createUser(USER_ID);
+        User user = createUser();
         DailyLog dailyLog = DailyLog.reconstruct(
                 DAILY_LOG_ID,
                 user,
@@ -131,7 +254,7 @@ class DailyLogTest {
 
     @Test
     void 식별자가_다른_일일_로그는_다르게_취급한다() {
-        User user = createUser(USER_ID);
+        User user = createUser();
         DailyLog dailyLog = DailyLog.reconstruct(
                 DAILY_LOG_ID,
                 user,
@@ -156,9 +279,9 @@ class DailyLogTest {
 
     @Test
     void 식별자가_없는_일일_로그끼리는_나머지_값이_같더라도_다른_것으로_취급한다() {
-        User user = createUser(USER_ID);
-        DailyLog dailyLog = DailyLog.create(user, LOG_ON, FOCUS_TIME, STUDY, CONTENTS, NOW);
-        DailyLog anotherDailyLog = DailyLog.create(user, LOG_ON, FOCUS_TIME, STUDY, CONTENTS, NOW);
+        User user = createUser();
+        DailyLog dailyLog = DailyLog.create(user, FOCUS_TIME, STUDY, CONTENTS, NOW);
+        DailyLog anotherDailyLog = DailyLog.create(user, FOCUS_TIME, STUDY, CONTENTS, NOW);
 
         assertThat(dailyLog).isNotEqualTo(anotherDailyLog);
     }

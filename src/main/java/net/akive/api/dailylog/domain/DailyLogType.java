@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum DailyLogType {
 
     STUDY("공부"),
+    SLEEP("수면"),
     REST("휴식"),
     MEAL("식사"),
     ATTENDANCE("출석"),
