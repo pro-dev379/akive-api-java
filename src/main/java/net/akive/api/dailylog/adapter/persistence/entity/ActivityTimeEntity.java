@@ -5,7 +5,7 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.akive.api.dailylog.domain.FocusTime;
+import net.akive.api.dailylog.domain.ActivityTime;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +16,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Embeddable
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
-public class FocusTimeEntity {
+public class ActivityTimeEntity {
 
     @Column(nullable = false)
     private LocalDateTime startOn;
@@ -33,17 +33,17 @@ public class FocusTimeEntity {
     )
     private byte focusRateExcluded = 0;
 
-    public static FocusTimeEntity from(FocusTime focusTime) {
-        return new FocusTimeEntity(
-                focusTime.getStartOn(),
-                focusTime.getEndOn(),
-                focusTime.getFocusTimeSec(),
-                focusRateExcludedValue(focusTime.isFocusRateExcluded())
+    public static ActivityTimeEntity from(ActivityTime activityTime) {
+        return new ActivityTimeEntity(
+                activityTime.getStartOn(),
+                activityTime.getEndOn(),
+                activityTime.getFocusTimeSec(),
+                focusRateExcludedValue(activityTime.isFocusRateExcluded())
         );
     }
 
-    public FocusTime to(LocalDateTime reconstructedAt) {
-        return FocusTime.of(
+    public ActivityTime to(LocalDateTime reconstructedAt) {
+        return ActivityTime.of(
                 this.startOn,
                 this.endOn,
                 this.focusTimeSec,
@@ -53,11 +53,11 @@ public class FocusTimeEntity {
     }
 
     private boolean isFocusRateExcluded() {
-        if (focusRateExcluded != 0 && focusRateExcluded != 1) {
-            throw new IllegalStateException("Invalid focusRateExcluded value: " + focusRateExcluded);
+        if (this.focusRateExcluded != 0 && this.focusRateExcluded != 1) {
+            throw new IllegalStateException("Invalid focusRateExcluded value: " + this.focusRateExcluded);
         }
 
-        return focusRateExcluded == 1;
+        return this.focusRateExcluded == 1;
     }
 
     private static byte focusRateExcludedValue(boolean focusRateExcluded) {

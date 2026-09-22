@@ -9,7 +9,7 @@ import net.akive.api.dailylog.domain.DailyLogType;
 import java.time.LocalDateTime;
 
 public record DailyLogCreateRequest(
-        @NotNull @Valid FocusTimeRequest focusTime,
+        @NotNull @Valid ActivityTimeRequest activityTime,
         @NotNull DailyLogType dailyLogType,
         @NotBlank String contents
 ) {
@@ -17,7 +17,7 @@ public record DailyLogCreateRequest(
     public DailyLogCreateCommand to(Long userId, LocalDateTime requestedAt) {
         return new DailyLogCreateCommand(
                 userId,
-                this.focusTime.to(requestedAt),
+                this.activityTime.to(requestedAt),
                 this.dailyLogType,
                 this.contents,
                 requestedAt

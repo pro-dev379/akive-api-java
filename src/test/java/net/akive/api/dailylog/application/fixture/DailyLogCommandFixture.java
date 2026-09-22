@@ -20,7 +20,7 @@ public class DailyLogCommandFixture {
     public static DailyLogCreateCommand createDailyLogCreateCommand(Long userId) {
         return new DailyLogCreateCommand(
                 userId,
-                FOCUS_TIME,
+                ACTIVITY_TIME,
                 STUDY,
                 CONTENTS,
                 NOW
@@ -31,7 +31,7 @@ public class DailyLogCommandFixture {
         return new DailyLogUpdateCommand(
                 DAILY_LOG_ID,
                 USER_ID,
-                TARGET_FOCUS_TIME,
+                TARGET_ACTIVITY_TIME,
                 ATTENDANCE,
                 TARGET_CONTENTS,
                 NOW

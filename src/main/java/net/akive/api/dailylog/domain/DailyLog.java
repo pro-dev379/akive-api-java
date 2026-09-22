@@ -31,7 +31,7 @@ public class DailyLog {
 
     private LocalDate logOn;
 
-    private FocusTime focusTime;
+    private ActivityTime activityTime;
 
     private DailyLogType dailyLogType;
 
@@ -41,22 +41,22 @@ public class DailyLog {
             Long dailyLogId,
             User user,
             LocalDate logOn,
-            FocusTime focusTime,
+            ActivityTime activityTime,
             DailyLogType dailyLogType,
             String contents,
             LocalDateTime reconstructedAt
     ) {
-        requireNonNull(focusTime);
+        requireNonNull(activityTime);
         requireNonNull(dailyLogType);
         validateLogOnNotFuture(logOn, reconstructedAt);
-        validateSleepTime(focusTime, dailyLogType);
-        validateFocusTime(focusTime, dailyLogType);
+        validateSleepTime(activityTime, dailyLogType);
+        validateFocusTime(activityTime, dailyLogType);
 
         return DailyLog.builder()
                 .dailyLogId(requirePositive(dailyLogId))
                 .user(requireNonNull(user))
                 .logOn(requireNonNull(logOn))
-                .focusTime(normalizeFocusTime(focusTime, dailyLogType))
+                .activityTime(normalizeActivityTime(activityTime, dailyLogType))
                 .dailyLogType(dailyLogType)
                 .contents(requireNotBlank(contents))
                 .build();
@@ -64,60 +64,60 @@ public class DailyLog {
 
     public static DailyLog create(
             User user,
-            FocusTime focusTime,
+            ActivityTime activityTime,
             DailyLogType dailyLogType,
             String contents,
             LocalDateTime requestedAt
     ) {
-        requireNonNull(focusTime);
+        requireNonNull(activityTime);
         requireNonNull(dailyLogType);
-        LocalDate logOn = resolveLogOn(focusTime, dailyLogType);
+        LocalDate logOn = resolveLogOn(activityTime, dailyLogType);
         validateLogOnNotFuture(logOn, requestedAt);
-        validateSleepTime(focusTime, dailyLogType);
-        validateFocusTime(focusTime, dailyLogType);
+        validateSleepTime(activityTime, dailyLogType);
+        validateFocusTime(activityTime, dailyLogType);
 
         return DailyLog.builder()
                 .user(requireNonNull(user))
                 .logOn(logOn)
-                .focusTime(normalizeFocusTime(focusTime, dailyLogType))
+                .activityTime(normalizeActivityTime(activityTime, dailyLogType))
                 .dailyLogType(dailyLogType)
                 .contents(requireNotBlank(contents))
                 .build();
     }
 
     public void update(
-            FocusTime targetFocusTime,
+            ActivityTime targetActivityTime,
             DailyLogType targetDailyLogType,
             String targetContents,
             LocalDateTime requestedAt
     ) {
-        requireNonNull(targetFocusTime);
+        requireNonNull(targetActivityTime);
         requireNonNull(targetDailyLogType);
-        LocalDate targetLogOn = resolveLogOn(targetFocusTime, targetDailyLogType);
+        LocalDate targetLogOn = resolveLogOn(targetActivityTime, targetDailyLogType);
         validateLogOnNotFuture(targetLogOn, requestedAt);
-        validateSleepTime(targetFocusTime, targetDailyLogType);
-        validateFocusTime(targetFocusTime, targetDailyLogType);
+        validateSleepTime(targetActivityTime, targetDailyLogType);
+        validateFocusTime(targetActivityTime, targetDailyLogType);
 
         this.logOn = targetLogOn;
-        this.focusTime = normalizeFocusTime(targetFocusTime, targetDailyLogType);
+        this.activityTime = normalizeActivityTime(targetActivityTime, targetDailyLogType);
         this.dailyLogType = targetDailyLogType;
         this.contents = requireNotBlank(targetContents);
     }
 
     public LocalDateTime getStartOn() {
-        return focusTime.getStartOn();
+        return activityTime.getStartOn();
     }
 
     public LocalDateTime getEndOn() {
-        return focusTime.getEndOn();
+        return activityTime.getEndOn();
     }
 
     public Long getFocusTimeSec() {
-        return focusTime.getFocusTimeSec();
+        return activityTime.getFocusTimeSec();
     }
 
     public boolean isFocusRateExcluded() {
-        return focusTime.isFocusRateExcluded();
+        return activityTime.isFocusRateExcluded();
     }
 
     @Override
@@ -144,27 +144,27 @@ public class DailyLog {
         }
     }
 
-    private static LocalDate resolveLogOn(FocusTime focusTime, DailyLogType dailyLogType) {
+    private static LocalDate resolveLogOn(ActivityTime activityTime, DailyLogType dailyLogType) {
         if (dailyLogType == SLEEP) {
-            return focusTime.getEndOn().toLocalDate();
+            return activityTime.getEndOn().toLocalDate();
         }
 
-        return focusTime.getStartOn().minusHours(DAY_START_HOUR).toLocalDate();
+        return activityTime.getStartOn().minusHours(DAY_START_HOUR).toLocalDate();
     }
 
-    private static void validateSleepTime(FocusTime focusTime, DailyLogType dailyLogType) {
-        if (dailyLogType == SLEEP && focusTime.durationSec() < MIN_SLEEP_DURATION_SEC) {
+    private static void validateSleepTime(ActivityTime activityTime, DailyLogType dailyLogType) {
+        if (dailyLogType == SLEEP && activityTime.durationSec() < MIN_SLEEP_DURATION_SEC) {
             throw new BusinessRuleViolationException(DAILY_LOG_SLEEP_TIME_TOO_SHORT);
         }
     }
 
-    private static void validateFocusTime(FocusTime focusTime, DailyLogType dailyLogType) {
-        if (dailyLogType != STUDY && focusTime.getFocusTimeSec() != null) {
+    private static void validateFocusTime(ActivityTime activityTime, DailyLogType dailyLogType) {
+        if (dailyLogType != STUDY && activityTime.getFocusTimeSec() != null) {
             throw new BusinessRuleViolationException(DAILY_LOG_FOCUS_TIME_NOT_ALLOWED);
         }
     }
 
-    private static FocusTime normalizeFocusTime(FocusTime focusTime, DailyLogType dailyLogType) {
-        return dailyLogType == SLEEP ? focusTime.excludingFromFocusRate() : focusTime;
+    private static ActivityTime normalizeActivityTime(ActivityTime activityTime, DailyLogType dailyLogType) {
+        return dailyLogType == SLEEP ? activityTime.excludingFromFocusRate() : activityTime;
     }
 }

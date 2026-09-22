@@ -12,7 +12,7 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 
 @Getter
 @EqualsAndHashCode
-public final class FocusTime {
+public final class ActivityTime {
 
     private static final int MAX_TIME_RANGE_HOURS = 24;
 
@@ -24,7 +24,7 @@ public final class FocusTime {
 
     private final boolean focusRateExcluded;
 
-    private FocusTime(
+    private ActivityTime(
             LocalDateTime startOn,
             LocalDateTime endOn,
             Long focusTimeSec,
@@ -42,26 +42,26 @@ public final class FocusTime {
         this.focusRateExcluded = focusRateExcluded;
     }
 
-    public static FocusTime of(
+    public static ActivityTime of(
             LocalDateTime startOn,
             LocalDateTime endOn,
             Long focusTimeSec,
             boolean focusRateExcluded,
             LocalDateTime baseTime
     ) {
-        return new FocusTime(startOn, endOn, focusTimeSec, focusRateExcluded, baseTime);
+        return new ActivityTime(startOn, endOn, focusTimeSec, focusRateExcluded, baseTime);
     }
 
     public long durationSec() {
         return Duration.between(this.startOn, this.endOn).toSeconds();
     }
 
-    public FocusTime excludingFromFocusRate() {
+    public ActivityTime excludingFromFocusRate() {
         if (this.focusRateExcluded) {
             return this;
         }
 
-        return new FocusTime(this.startOn, this.endOn, this.focusTimeSec, true, this.endOn);
+        return new ActivityTime(this.startOn, this.endOn, this.focusTimeSec, true, this.endOn);
     }
 
     private static void validateMaxPeriod(LocalDateTime startOn, LocalDateTime endOn) {

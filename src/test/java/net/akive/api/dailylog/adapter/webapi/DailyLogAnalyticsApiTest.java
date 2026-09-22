@@ -1,0 +1,91 @@
+package net.akive.api.dailylog.adapter.webapi;
+
+import net.akive.api.dailylog.application.provided.DailyLogFinder;
+import net.akive.api.dailylog.application.provided.dto.TimeUsageRatesFindQuery;
+import net.akive.api.dailylog.domain.ActivityTime;
+import net.akive.api.dailylog.domain.DailyLog;
+import net.akive.api.dailylog.domain.TimeUsageRates;
+import net.akive.api.support.PrivateApiTestSupport;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_DATE_RANGE;
+import static net.akive.api.dailylog.domain.DailyLogType.ETC;
+import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
+@WebMvcTest(DailyLogAnalyticsApi.class)
+class DailyLogAnalyticsApiTest extends PrivateApiTestSupport {
+
+    private static final String TIME_USAGE_RATES_URL = "/daily-logs/analytics/analytics/time-usage-rates";
+
+    @MockitoBean
+    DailyLogFinder dailyLogFinder;
+
+    @Test
+    void 조회_기간_전체의_일일_로그_타입별_시간_사용률을_조회한다() {
+        LocalDate startOn = LOG_ON;
+        LocalDate endOn = LOG_ON.plusDays(1);
+        DailyLog etcLog = DailyLog.create(
+                createReconstructedUser(USER_ID),
+                ActivityTime.of(START_ON, END_ON, null, false, NOW),
+                ETC,
+                "기타",
+                NOW
+        );
+        TimeUsageRatesFindQuery query = new TimeUsageRatesFindQuery(USER_ID, startOn, endOn);
+        given(dailyLogFinder.findTimeUsageRates(query))
+                .willReturn(TimeUsageRates.calculate(startOn, endOn, List.of(etcLog)));
+
+        MvcTestResultAssert result = get(
+                TIME_USAGE_RATES_URL + "?startOn={startOn}&endOn={endOn}",
+                USER_ID,
+                startOn,
+                endOn
+        ).hasStatusOk();
+
+        result.bodyJson().extractingPath("$.timeUsageRates[0].code").isEqualTo("STUDY");
+        result.bodyJson().extractingPath("$.timeUsageRates[0].usageRate").isEqualTo(0.0);
+        result.bodyJson().extractingPath("$.timeUsageRates[5].code").isEqualTo("ETC");
+        result.bodyJson().extractingPath("$.timeUsageRates[5].usageRate")
+                .isEqualTo(2.1);
+        result.bodyJson().extractingPath("$.timeUsageRates[6].code")
+                .isEqualTo("UNRECORDED");
+        result.bodyJson().extractingPath("$.timeUsageRates[6].label")
+                .isEqualTo("미기록");
+        result.bodyJson().extractingPath("$.timeUsageRates[6].usageRate")
+                .isEqualTo(97.9);
+
+        then(dailyLogFinder).should().findTimeUsageRates(query);
+    }
+
+    @Test
+    void 일일_로그_타입별_시간_사용률_조회_시_시작일이_종료일보다_늦으면_400을_응답한다() {
+        MvcTestResultAssert result = get(
+                TIME_USAGE_RATES_URL + "?startOn={startOn}&endOn={endOn}",
+                USER_ID,
+                LOG_ON.plusDays(1),
+                LOG_ON
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_DATE_RANGE);
+        then(dailyLogFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 일일_로그_타입별_시간_사용률_조회_시_날짜_형식이_올바르지_않으면_400을_응답한다() {
+        get(TIME_USAGE_RATES_URL + "?startOn={startOn}&endOn={endOn}", USER_ID, "invalid-date", LOG_ON)
+                .hasStatus(BAD_REQUEST);
+
+        then(dailyLogFinder).shouldHaveNoInteractions();
+    }
+}

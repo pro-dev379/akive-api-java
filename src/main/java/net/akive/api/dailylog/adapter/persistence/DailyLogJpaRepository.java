@@ -35,28 +35,42 @@ public interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Lon
         from DailyLogEntity d
         where d.user.userId = :userId
           and d.logOn = :logOn
-        order by d.focusTime.startOn
+        order by d.activityTime.startOn asc
     """)
-    List<DailyLogEntity> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn);
+    List<DailyLogEntity> findAllByUserIdAndLogOnOrderByStartOnAsc(Long userId, LocalDate logOn);
 
     @Query("""
-        select count(d) > 0
+        select d
         from DailyLogEntity d
         where d.user.userId = :userId
-          and d.focusTime.startOn < :endOn
-          and d.focusTime.endOn > :startOn
+          and d.activityTime.startOn < :endOn
+          and d.activityTime.endOn > :startOn
+        order by d.activityTime.startOn asc
     """)
-    boolean existsOverlappingTimeByUserIdAndFocusTime(Long userId, LocalDateTime startOn, LocalDateTime endOn);
+    List<DailyLogEntity> findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
+            Long userId,
+            LocalDateTime startOn,
+            LocalDateTime endOn
+    );
 
     @Query("""
-        select count(d) > 0
+        select count(d.activityTime) > 0
+        from DailyLogEntity d
+        where d.user.userId = :userId
+          and d.activityTime.startOn < :endOn
+          and d.activityTime.endOn > :startOn
+    """)
+    boolean existsOverlappingTimeByUserIdAndActivityTime(Long userId, LocalDateTime startOn, LocalDateTime endOn);
+
+    @Query("""
+        select count(d.activityTime) > 0
         from DailyLogEntity d
         where d.user.userId = :userId
           and d.dailyLogId <> :excludedDailyLogId
-          and d.focusTime.startOn < :endOn
-          and d.focusTime.endOn > :startOn
+          and d.activityTime.startOn < :endOn
+          and d.activityTime.endOn > :startOn
     """)
-    boolean existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+    boolean existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(
             Long userId,
             LocalDateTime startOn,
             LocalDateTime endOn,

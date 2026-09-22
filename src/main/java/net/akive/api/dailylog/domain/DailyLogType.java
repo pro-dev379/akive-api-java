@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum DailyLogType {
 
-    STUDY("공부"),
+    STUDY("학습"),
     SLEEP("수면"),
     REST("휴식"),
     MEAL("식사"),

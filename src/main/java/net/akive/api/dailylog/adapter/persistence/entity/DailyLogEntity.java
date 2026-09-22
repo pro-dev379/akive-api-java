@@ -49,7 +49,7 @@ public class DailyLogEntity extends BaseTimeEntity {
     private LocalDate logOn;
 
     @Embedded
-    private FocusTimeEntity focusTime;
+    private ActivityTimeEntity activityTime;
 
     @Enumerated(STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20)")
@@ -63,7 +63,7 @@ public class DailyLogEntity extends BaseTimeEntity {
                 dailyLog.getDailyLogId(),
                 UserEntity.from(dailyLog.getUser()),
                 dailyLog.getLogOn(),
-                FocusTimeEntity.from(dailyLog.getFocusTime()),
+                ActivityTimeEntity.from(dailyLog.getActivityTime()),
                 dailyLog.getDailyLogType(),
                 dailyLog.getContents()
         );
@@ -74,7 +74,7 @@ public class DailyLogEntity extends BaseTimeEntity {
                 this.dailyLogId,
                 this.user.to(),
                 this.logOn,
-                this.focusTime.to(reconstructedAt),
+                this.activityTime.to(reconstructedAt),
                 this.dailyLogType,
                 this.contents,
                 reconstructedAt

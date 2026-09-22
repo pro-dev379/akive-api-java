@@ -8,7 +8,7 @@ import net.akive.api.common.pagination.PageResult;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogUpdateRequest;
-import net.akive.api.dailylog.adapter.webapi.dto.request.FocusTimeRequest;
+import net.akive.api.dailylog.adapter.webapi.dto.request.ActivityTimeRequest;
 import net.akive.api.dailylog.adapter.webapi.fixture.DailyLogRequestFixture;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
@@ -99,7 +99,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_미래_시간_범위로_요청하면_400을_응답한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest(
-                createFocusTimeRequest(
+                createActivityTimeRequest(
                         NOW.plusHours(1),
                         NOW.plusHours(2)
                 )
@@ -122,7 +122,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_시간_범위가_24시간을_초과하면_400을_응답한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest(
-                createFocusTimeRequest(
+                createActivityTimeRequest(
                         startOn(LOG_ON, 9),
                         endOn(LOG_ON.plusDays(1), 10)
                 )
@@ -146,7 +146,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_실제_집중_시간이_시간_범위보다_크면_400을_응답한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest(
-                createFocusTimeRequest(startOn(LOG_ON, 9), endOn(LOG_ON, 10)),
+                createActivityTimeRequest(startOn(LOG_ON, 9), endOn(LOG_ON, 10)),
                 3601L
         );
 
@@ -167,7 +167,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_수면_시간이_2시간_미만이면_400을_응답한다() {
         DailyLogCreateRequest request = new DailyLogCreateRequest(
-                new FocusTimeRequest(START_ON, START_ON.plusHours(1), null, false),
+                new ActivityTimeRequest(START_ON, START_ON.plusHours(1), null, false),
                 SLEEP,
                 "수면"
         );
@@ -185,9 +185,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 일일_로그_생성_시_비학습_로그에_집중_시간이_있으면_400을_응답한다() {
+    void 비학습_일일_로그_생성_시_집중_시간이_있으면_400을_응답한다() {
         DailyLogCreateRequest request = new DailyLogCreateRequest(
-                new FocusTimeRequest(START_ON, END_ON, FOCUS_TIME_SEC, false),
+                new ActivityTimeRequest(START_ON, END_ON, FOCUS_TIME_SEC, false),
                 REST,
                 "휴식"
         );
@@ -278,7 +278,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_수정_시_미래_시간_범위로_요청하면_400을_응답한다() {
         DailyLogUpdateRequest request = createDailyLogUpdateRequest(
-                createFocusTimeRequest(
+                createActivityTimeRequest(
                         NOW.plusHours(1),
                         NOW.plusHours(2)
                 )
@@ -302,7 +302,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_수정_시_시간_범위가_24시간을_초과하면_400을_응답한다() {
         DailyLogUpdateRequest request = createDailyLogUpdateRequest(
-                createFocusTimeRequest(
+                createActivityTimeRequest(
                         startOn(LOG_ON, 9),
                         endOn(LOG_ON.plusDays(1), 10)
                 )
@@ -326,7 +326,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_수정_시_실제_집중_시간이_시간_범위보다_크면_400을_응답한다() {
         DailyLogUpdateRequest request = createDailyLogUpdateRequest(
-                createFocusTimeRequest(startOn(LOG_ON, 9), endOn(LOG_ON, 10)),
+                createActivityTimeRequest(startOn(LOG_ON, 9), endOn(LOG_ON, 10)),
                 3601L
         );
 
@@ -348,7 +348,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_수정_시_수면_시간이_2시간_미만이면_400을_응답한다() {
         DailyLogUpdateRequest request = new DailyLogUpdateRequest(
-                new FocusTimeRequest(TARGET_START_ON, TARGET_START_ON.plusHours(1), null, false),
+                new ActivityTimeRequest(TARGET_START_ON, TARGET_START_ON.plusHours(1), null, false),
                 SLEEP,
                 "수면"
         );
@@ -370,7 +370,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_수정_시_비학습_로그에_집중_시간이_있으면_400을_응답한다() {
         DailyLogUpdateRequest request = new DailyLogUpdateRequest(
-                new FocusTimeRequest(TARGET_START_ON, TARGET_END_ON, FOCUS_TIME_SEC, false),
+                new ActivityTimeRequest(TARGET_START_ON, TARGET_END_ON, FOCUS_TIME_SEC, false),
                 REST,
                 "휴식"
         );
@@ -577,19 +577,19 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.dailyLogs[0].logOn")
                 .isEqualTo(dailyLog.getLogOn().toString());
         result.bodyJson()
-                .extractingPath("$.dailyLogs[0].focusTime.startOn")
+                .extractingPath("$.dailyLogs[0].activityTime.startOn")
                 .isEqualTo(dailyLog.getStartOn().format(ISO_LOCAL_DATE_TIME));
         result.bodyJson()
-                .extractingPath("$.dailyLogs[0].focusTime.endOn")
+                .extractingPath("$.dailyLogs[0].activityTime.endOn")
                 .isEqualTo(dailyLog.getEndOn().format(ISO_LOCAL_DATE_TIME));
         result.bodyJson()
                 .extractingPath("$.dailyLogs[0].dailyLogType")
                 .isEqualTo(dailyLog.getDailyLogType().name());
         result.bodyJson()
-                .extractingPath("$.dailyLogs[0].focusTime.focusTimeSec")
+                .extractingPath("$.dailyLogs[0].activityTime.focusTimeSec")
                 .isEqualTo(dailyLog.getFocusTimeSec().intValue());
         result.bodyJson()
-                .extractingPath("$.dailyLogs[0].focusTime.focusRateExcluded")
+                .extractingPath("$.dailyLogs[0].activityTime.focusRateExcluded")
                 .isEqualTo(dailyLog.isFocusRateExcluded());
         result.bodyJson()
                 .extractingPath("$.dailyLogs[0].contents")

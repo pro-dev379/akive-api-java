@@ -8,7 +8,7 @@ import net.akive.api.dailylog.adapter.persistence.DailyLogJpaRepository;
 import net.akive.api.dailylog.adapter.persistence.entity.DailyLogEntity;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
-import net.akive.api.dailylog.domain.FocusTime;
+import net.akive.api.dailylog.domain.ActivityTime;
 import net.akive.api.mentoring.adapter.persistence.MentoringProfileJpaRepository;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.plan.application.required.DailyQuantityRepository;
@@ -129,8 +129,8 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
         return saveDailyLog(createDailyLog(savedUser, logOn, startHour));
     }
 
-    protected DailyLog saveDailyLog(User savedUser, FocusTime focusTime) {
-        return saveDailyLog(createDailyLog(savedUser, focusTime));
+    protected DailyLog saveDailyLog(User savedUser, ActivityTime activityTime) {
+        return saveDailyLog(createDailyLog(savedUser, activityTime));
     }
 
     protected Report saveReport() {

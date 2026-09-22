@@ -52,15 +52,15 @@ class DailyLogCommandServiceTest {
         DailyLog savedDailyLog = DailyLog.reconstruct(
                 DAILY_LOG_ID,
                 user,
-                command.focusTime().getStartOn().toLocalDate(),
-                command.focusTime(),
+                command.activityTime().getStartOn().toLocalDate(),
+                command.activityTime(),
                 command.dailyLogType(),
                 command.contents(),
                 command.requestedAt()
         );
 
         given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
-        given(dailyLogRepository.existsOverlappingTimeByUserIdAndFocusTime(command.userId(), command.focusTime()))
+        given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTime(command.userId(), command.activityTime()))
                 .willReturn(false);
         given(dailyLogRepository.save(any(DailyLog.class))).willReturn(savedDailyLog);
 
@@ -71,13 +71,13 @@ class DailyLogCommandServiceTest {
         ArgumentCaptor<DailyLog> dailyLogCaptor = ArgumentCaptor.forClass(DailyLog.class);
         then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
         then(dailyLogRepository).should()
-                .existsOverlappingTimeByUserIdAndFocusTime(command.userId(), command.focusTime());
+                .existsOverlappingTimeByUserIdAndActivityTime(command.userId(), command.activityTime());
         then(dailyLogRepository).should().save(dailyLogCaptor.capture());
 
         DailyLog dailyLog = dailyLogCaptor.getValue();
         assertThat(dailyLog.getUser()).isEqualTo(user);
-        assertThat(dailyLog.getLogOn()).isEqualTo(command.focusTime().getStartOn().toLocalDate());
-        assertThat(dailyLog.getFocusTime()).isEqualTo(command.focusTime());
+        assertThat(dailyLog.getLogOn()).isEqualTo(command.activityTime().getStartOn().toLocalDate());
+        assertThat(dailyLog.getActivityTime()).isEqualTo(command.activityTime());
         assertThat(dailyLog.getDailyLogType()).isEqualTo(command.dailyLogType());
         assertThat(dailyLog.getContents()).isEqualTo(command.contents());
     }
@@ -93,7 +93,7 @@ class DailyLogCommandServiceTest {
                 .isEqualTo(USER_NOT_FOUND);
 
         then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
-        then(dailyLogRepository).should(never()).existsOverlappingTimeByUserIdAndFocusTime(any(), any());
+        then(dailyLogRepository).should(never()).existsOverlappingTimeByUserIdAndActivityTime(any(), any());
         then(dailyLogRepository).should(never()).save(any());
     }
 
@@ -103,7 +103,7 @@ class DailyLogCommandServiceTest {
         DailyLogCreateCommand command = createDailyLogCreateCommand();
 
         given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
-        given(dailyLogRepository.existsOverlappingTimeByUserIdAndFocusTime(command.userId(), command.focusTime()))
+        given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTime(command.userId(), command.activityTime()))
                 .willReturn(true);
 
         assertThatExceptionOfType(ResourceConflictException.class)
@@ -113,7 +113,7 @@ class DailyLogCommandServiceTest {
 
         then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
         then(dailyLogRepository).should()
-                .existsOverlappingTimeByUserIdAndFocusTime(command.userId(), command.focusTime());
+                .existsOverlappingTimeByUserIdAndActivityTime(command.userId(), command.activityTime());
         then(dailyLogRepository).should(never()).save(any());
     }
 
@@ -125,24 +125,24 @@ class DailyLogCommandServiceTest {
 
         given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
                 .willReturn(Optional.of(dailyLog));
-        given(dailyLogRepository.existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+        given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(
                 command.userId(),
-                command.targetFocusTime(),
+                command.targetActivityTime(),
                 command.dailyLogId()
         )).willReturn(false);
 
         dailyLogCommandService.update(command);
 
         then(dailyLogRepository).should().findByDailyLogIdAndUserId(command.dailyLogId(), command.userId());
-        then(dailyLogRepository).should().existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+        then(dailyLogRepository).should().existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(
                 command.userId(),
-                command.targetFocusTime(),
+                command.targetActivityTime(),
                 command.dailyLogId()
         );
         then(dailyLogRepository).should().save(dailyLog);
 
-        assertThat(dailyLog.getLogOn()).isEqualTo(command.targetFocusTime().getStartOn().toLocalDate());
-        assertThat(dailyLog.getFocusTime()).isEqualTo(command.targetFocusTime());
+        assertThat(dailyLog.getLogOn()).isEqualTo(command.targetActivityTime().getStartOn().toLocalDate());
+        assertThat(dailyLog.getActivityTime()).isEqualTo(command.targetActivityTime());
         assertThat(dailyLog.getDailyLogType()).isEqualTo(command.targetDailyLogType());
         assertThat(dailyLog.getContents()).isEqualTo(command.targetContents());
     }
@@ -161,7 +161,7 @@ class DailyLogCommandServiceTest {
 
         then(dailyLogRepository).should().findByDailyLogIdAndUserId(command.dailyLogId(), command.userId());
         then(dailyLogRepository).should(never())
-                .existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(any(), any(), any());
+                .existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(any(), any(), any());
         then(dailyLogRepository).should(never()).save(any());
     }
 
@@ -173,9 +173,9 @@ class DailyLogCommandServiceTest {
 
         given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
                 .willReturn(Optional.of(dailyLog));
-        given(dailyLogRepository.existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+        given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(
                 command.userId(),
-                command.targetFocusTime(),
+                command.targetActivityTime(),
                 command.dailyLogId()
         )).willReturn(true);
 
@@ -185,9 +185,9 @@ class DailyLogCommandServiceTest {
                 .isEqualTo(DAILY_LOG_TIME_OVERLAPS);
 
         then(dailyLogRepository).should().findByDailyLogIdAndUserId(command.dailyLogId(), command.userId());
-        then(dailyLogRepository).should().existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+        then(dailyLogRepository).should().existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(
                 command.userId(),
-                command.targetFocusTime(),
+                command.targetActivityTime(),
                 command.dailyLogId()
         );
         then(dailyLogRepository).should(never()).save(any());

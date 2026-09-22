@@ -8,8 +8,8 @@ import net.akive.api.common.pagination.SortDirection;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.adapter.persistence.entity.DailyLogEntity;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
+import net.akive.api.dailylog.domain.ActivityTime;
 import net.akive.api.dailylog.domain.DailyLog;
-import net.akive.api.dailylog.domain.FocusTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -69,31 +69,46 @@ class DailyLogJpaAdapter implements DailyLogRepository {
         LocalDateTime reconstructedAt = currentTimeProvider.now();
 
         return dailyLogJpaRepository
-                .findAllByUserIdAndLogOnOrderByStartOn(userId, logOn)
+                .findAllByUserIdAndLogOnOrderByStartOnAsc(userId, logOn)
                 .stream()
                 .map(entity -> entity.to(reconstructedAt))
                 .toList();
     }
 
     @Override
-    public boolean existsOverlappingTimeByUserIdAndFocusTime(Long userId, FocusTime focusTime) {
-        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndFocusTime(
+    public List<DailyLog> findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
+            Long userId,
+            LocalDateTime startOn,
+            LocalDateTime endOn
+    ) {
+        LocalDateTime reconstructedAt = currentTimeProvider.now();
+
+        return dailyLogJpaRepository
+                .findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(userId, startOn, endOn)
+                .stream()
+                .map(entity -> entity.to(reconstructedAt))
+                .toList();
+    }
+
+    @Override
+    public boolean existsOverlappingTimeByUserIdAndActivityTime(Long userId, ActivityTime activityTime) {
+        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndActivityTime(
                 userId,
-                focusTime.getStartOn(),
-                focusTime.getEndOn()
+                activityTime.getStartOn(),
+                activityTime.getEndOn()
         );
     }
 
     @Override
-    public boolean existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+    public boolean existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(
             Long userId,
-            FocusTime focusTime,
+            ActivityTime activityTime,
             Long dailyLogId
     ) {
-        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndFocusTimeAndDailyLogIdNot(
+        return dailyLogJpaRepository.existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(
                 userId,
-                focusTime.getStartOn(),
-                focusTime.getEndOn(),
+                activityTime.getStartOn(),
+                activityTime.getEndOn(),
                 dailyLogId
         );
     }
@@ -118,8 +133,8 @@ class DailyLogJpaAdapter implements DailyLogRepository {
         return switch (property) {
             case "dailyLogId" -> "dailyLogId";
             case "logOn" -> "logOn";
-            case "startOn" -> "focusTime.startOn";
-            case "endOn" -> "focusTime.endOn";
+            case "startOn" -> "activityTime.startOn";
+            case "endOn" -> "activityTime.endOn";
             default -> throw new IllegalArgumentException("Unsupported daily log sort property: " + property);
         };
     }

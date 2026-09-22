@@ -1,7 +1,7 @@
 package net.akive.api.dailylog.application.provided.dto;
 
+import net.akive.api.dailylog.domain.ActivityTime;
 import net.akive.api.dailylog.domain.DailyLogType;
-import net.akive.api.dailylog.domain.FocusTime;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +10,7 @@ import static net.akive.api.common.domain.DomainValidator.*;
 public record DailyLogUpdateCommand(
         Long dailyLogId,
         Long userId,
-        FocusTime targetFocusTime,
+        ActivityTime targetActivityTime,
         DailyLogType targetDailyLogType,
         String targetContents,
         LocalDateTime requestedAt
@@ -19,7 +19,7 @@ public record DailyLogUpdateCommand(
     public DailyLogUpdateCommand {
         requirePositive(dailyLogId);
         requirePositive(userId);
-        requireNonNull(targetFocusTime);
+        requireNonNull(targetActivityTime);
         requireNonNull(targetDailyLogType);
         requireNotBlank(targetContents);
         requireNonNull(requestedAt);

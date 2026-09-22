@@ -1,14 +1,14 @@
 package net.akive.api.dailylog.domain.fixture;
 
+import net.akive.api.dailylog.domain.ActivityTime;
 import net.akive.api.dailylog.domain.DailyLog;
-import net.akive.api.dailylog.domain.FocusTime;
 import net.akive.api.user.domain.User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static net.akive.api.dailylog.domain.DailyLogType.STUDY;
-import static net.akive.api.dailylog.domain.fixture.FocusTimeFixture.createFocusTime;
+import static net.akive.api.dailylog.domain.fixture.ActivityTimeFixture.createActivityTime;
 
 public class DailyLogFixture {
 
@@ -24,12 +24,12 @@ public class DailyLogFixture {
     public static final LocalDateTime END_ON = LocalDateTime.of(2026, 9, 12, 10, 0);
     public static final LocalDateTime NOW = LocalDateTime.of(2026, 9, 14, 23, 59);
     public static final Long FOCUS_TIME_SEC = 3_000L;
-    public static final FocusTime FOCUS_TIME = FocusTime.of(START_ON, END_ON, FOCUS_TIME_SEC, false, NOW);
+    public static final ActivityTime ACTIVITY_TIME = ActivityTime.of(START_ON, END_ON, FOCUS_TIME_SEC, false, NOW);
     public static final String CONTENTS = "오늘의 학습 기록";
     public static final LocalDate TARGET_LOG_ON = LocalDate.of(2026, 9, 14);
     public static final LocalDateTime TARGET_START_ON = LocalDateTime.of(2026, 9, 13, 11, 0);
     public static final LocalDateTime TARGET_END_ON = LocalDateTime.of(2026, 9, 13, 12, 0);
-    public static final FocusTime TARGET_FOCUS_TIME = FocusTime.of(
+    public static final ActivityTime TARGET_ACTIVITY_TIME = ActivityTime.of(
             TARGET_START_ON,
             TARGET_END_ON,
             null,
@@ -43,7 +43,7 @@ public class DailyLogFixture {
                 DAILY_LOG_ID,
                 user,
                 LOG_ON,
-                FOCUS_TIME,
+                ACTIVITY_TIME,
                 STUDY,
                 CONTENTS,
                 NOW
@@ -51,13 +51,13 @@ public class DailyLogFixture {
     }
 
     public static DailyLog createDailyLog(User user, LocalDate logOn, int startHour) {
-        return createDailyLog(user, createFocusTime(logOn, startHour));
+        return createDailyLog(user, createActivityTime(logOn, startHour));
     }
 
-    public static DailyLog createDailyLog(User user, FocusTime focusTime) {
+    public static DailyLog createDailyLog(User user, ActivityTime activityTime) {
         return DailyLog.create(
                 user,
-                focusTime,
+                activityTime,
                 STUDY,
                 CONTENTS,
                 NOW
