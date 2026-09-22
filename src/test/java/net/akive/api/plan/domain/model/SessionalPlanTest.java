@@ -51,20 +51,6 @@ class SessionalPlanTest {
     }
 
     @Test
-    void 세셔널_플랜을_수정한다() {
-        SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
-
-        sessionalPlan.update(
-                "  " + TARGET_SESSION_NAME + "  ",
-                TARGET_SESSION_PERIOD,
-                REQUESTED_AT
-        );
-
-        assertThat(sessionalPlan.getSessionName()).isEqualTo(TARGET_SESSION_NAME);
-        assertThat(sessionalPlan.getSessionPeriod()).isEqualTo(TARGET_SESSION_PERIOD);
-    }
-
-    @Test
     void 세셔널_플랜_생성_시_세션_시작일이_생성_요청일보다_과거일_수_없다() {
         SessionPeriod sessionPeriod = new SessionPeriod(
                 REQUESTED_AT.toLocalDate().minusDays(1),
@@ -78,20 +64,6 @@ class SessionalPlanTest {
                         sessionPeriod,
                         REQUESTED_AT
                 ))
-                .extracting(BusinessRuleViolationException::getError)
-                .isEqualTo(INVALID_SESSION_PERIOD);
-    }
-
-    @Test
-    void 세셔널_플랜_수정_시_세션_시작일이_수정_요청일보다_과거일_수_없다() {
-        SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
-        SessionPeriod targetSessionPeriod = new SessionPeriod(
-                REQUESTED_AT.toLocalDate().minusDays(1),
-                REQUESTED_AT.toLocalDate().plusDays(1)
-        );
-
-        assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> sessionalPlan.update(SESSION_NAME, targetSessionPeriod, REQUESTED_AT))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
@@ -116,21 +88,6 @@ class SessionalPlanTest {
     }
 
     @Test
-    void 세셔널_플랜_수정_시_세션_종료일이_수정_요청일과_같을_수_없다() {
-        SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
-        LocalDateTime requestedAt = REQUESTED_AT.plusDays(1);
-        SessionPeriod targetSessionPeriod = new SessionPeriod(
-                requestedAt.toLocalDate().minusDays(1),
-                requestedAt.toLocalDate()
-        );
-
-        assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> sessionalPlan.update(SESSION_NAME, targetSessionPeriod, requestedAt))
-                .extracting(BusinessRuleViolationException::getError)
-                .isEqualTo(INVALID_SESSION_PERIOD);
-    }
-
-    @Test
     void 세셔널_플랜_생성_시_세션_이름은_공백일_수_없다() {
         String sessionName = "   ";
 
@@ -146,17 +103,6 @@ class SessionalPlanTest {
     }
 
     @Test
-    void 세셔널_플랜_수정_시_세션_이름은_공백일_수_없다() {
-        SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
-        String targetSessionName = "   ";
-
-        assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> sessionalPlan.update(targetSessionName, SESSION_PERIOD, REQUESTED_AT))
-                .extracting(BusinessRuleViolationException::getError)
-                .isEqualTo(BLANK_VALUE);
-    }
-
-    @Test
     void 세셔널_플랜_생성_시_세션_이름은_최대_길이를_초과할_수_없다() {
         User user = createReconstructedUser();
         String sessionName = "a".repeat(SESSION_NAME_MAX_LENGTH + 1);
@@ -165,6 +111,60 @@ class SessionalPlanTest {
                 .isThrownBy(() -> SessionalPlan.create(user, sessionName, SESSION_PERIOD, REQUESTED_AT))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
+    }
+
+    @Test
+    void 세셔널_플랜을_수정한다() {
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
+
+        sessionalPlan.update(
+                "  " + TARGET_SESSION_NAME + "  ",
+                TARGET_SESSION_PERIOD,
+                REQUESTED_AT
+        );
+
+        assertThat(sessionalPlan.getSessionName()).isEqualTo(TARGET_SESSION_NAME);
+        assertThat(sessionalPlan.getSessionPeriod()).isEqualTo(TARGET_SESSION_PERIOD);
+    }
+
+    @Test
+    void 세셔널_플랜_수정_시_세션_시작일이_수정_요청일보다_과거일_수_없다() {
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
+        SessionPeriod targetSessionPeriod = new SessionPeriod(
+                REQUESTED_AT.toLocalDate().minusDays(1),
+                REQUESTED_AT.toLocalDate().plusDays(1)
+        );
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> sessionalPlan.update(SESSION_NAME, targetSessionPeriod, REQUESTED_AT))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(INVALID_SESSION_PERIOD);
+    }
+
+    @Test
+    void 세셔널_플랜_수정_시_세션_종료일이_수정_요청일과_같을_수_없다() {
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
+        LocalDateTime requestedAt = REQUESTED_AT.plusDays(1);
+        SessionPeriod targetSessionPeriod = new SessionPeriod(
+                requestedAt.toLocalDate().minusDays(1),
+                requestedAt.toLocalDate()
+        );
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> sessionalPlan.update(SESSION_NAME, targetSessionPeriod, requestedAt))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(INVALID_SESSION_PERIOD);
+    }
+
+    @Test
+    void 세셔널_플랜_수정_시_세션_이름은_공백일_수_없다() {
+        SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
+        String targetSessionName = "   ";
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> sessionalPlan.update(targetSessionName, SESSION_PERIOD, REQUESTED_AT))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(BLANK_VALUE);
     }
 
     @Test
