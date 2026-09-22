@@ -407,6 +407,20 @@ class ReportApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 리포트_피드백_히스토리_조회_시_시작일이_종료일보다_늦으면_400을_응답한다() {
+        MvcTestResultAssert result = get(
+                REPORT_FEEDBACK_HISTORY_URL + "?reportType={reportType}&startOn={startOn}&endOn={endOn}",
+                USER_ID,
+                WEEKLY,
+                REPORT_ON.plusDays(1),
+                REPORT_ON
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_DATE_RANGE);
+        then(reportFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 리포트_커버_기간을_조회한다() {
         ReportCoveragePeriod coveragePeriod = new ReportCoveragePeriod(LocalDate.of(2026, 1, 1), REPORT_ON);
         ReportCoveragePeriodFindQuery query = new ReportCoveragePeriodFindQuery(USER_ID, REPORT_ON, MONTHLY);

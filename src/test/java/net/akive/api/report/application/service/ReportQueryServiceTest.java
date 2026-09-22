@@ -1,5 +1,6 @@
 package net.akive.api.report.application.service;
 
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_DATE_RANGE;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.REPORT_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.pagination.SortDirection.DESC;
@@ -111,6 +113,18 @@ class ReportQueryServiceTest {
                 );
         then(reportRepository).should()
                 .findAllByUserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(USER_ID, WEEKLY, startOn, endOn);
+    }
+
+    @Test
+    void 조회_시작일이_종료일보다_늦으면_예외가_발생한다() {
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> new ReportFeedbackHistoryFindQuery(
+                        USER_ID, WEEKLY, REPORT_ON.plusDays(1), REPORT_ON
+                ))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(INVALID_DATE_RANGE);
+
+        then(reportRepository).shouldHaveNoInteractions();
     }
 
     @Test
