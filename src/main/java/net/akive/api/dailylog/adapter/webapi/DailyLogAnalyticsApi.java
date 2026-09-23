@@ -3,8 +3,10 @@ package net.akive.api.dailylog.adapter.webapi;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.dailylog.adapter.webapi.dto.response.TimeUsageRatesFindResponse;
+import net.akive.api.dailylog.adapter.webapi.dto.response.FocusMetricsFindResponse;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
 import net.akive.api.dailylog.application.provided.dto.TimeUsageRatesFindQuery;
+import net.akive.api.dailylog.application.provided.dto.FocusMetricsFindQuery;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,5 +30,16 @@ public class DailyLogAnalyticsApi {
         TimeUsageRatesFindQuery query = new TimeUsageRatesFindQuery(userId, startOn, endOn);
 
         return TimeUsageRatesFindResponse.from(dailyLogFinder.findTimeUsageRates(query));
+    }
+
+    @GetMapping("/focus/metrics")
+    public FocusMetricsFindResponse findFocusMetrics(
+            @AuthenticatedUserId Long userId,
+            @RequestParam LocalDate startOn,
+            @RequestParam LocalDate endOn
+    ) {
+        FocusMetricsFindQuery query = new FocusMetricsFindQuery(userId, startOn, endOn);
+
+        return FocusMetricsFindResponse.from(dailyLogFinder.findFocusMetrics(query));
     }
 }

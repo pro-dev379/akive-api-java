@@ -1,7 +1,6 @@
 package net.akive.api.dailylog.domain;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,8 +8,9 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.math.RoundingMode.HALF_UP;
 import static net.akive.api.common.domain.DomainValidator.requireStartNotAfterEnd;
-import static net.akive.api.dailylog.domain.DailyLogPolicy.DAY_START_HOUR;
+import static net.akive.api.dailylog.domain.DailyLogPolicy.DAILY_BOUNDARY_HOUR;
 
 public record TimeUsageRates(
         Map<DailyLogType, BigDecimal> ratesByType,
@@ -19,8 +19,8 @@ public record TimeUsageRates(
 
     public static TimeUsageRates calculate(LocalDate startOn, LocalDate endOn, List<DailyLog> dailyLogs) {
         requireStartNotAfterEnd(startOn, endOn);
-        LocalDateTime periodStart = startOn.atTime(DAY_START_HOUR, 0);
-        LocalDateTime periodEnd = endOn.plusDays(1).atTime(DAY_START_HOUR, 0);
+        LocalDateTime periodStart = startOn.atTime(DAILY_BOUNDARY_HOUR, 0);
+        LocalDateTime periodEnd = endOn.plusDays(1).atTime(DAILY_BOUNDARY_HOUR, 0);
         long totalSeconds = Duration.between(periodStart, periodEnd).toSeconds();
         Map<DailyLogType, Long> secondsByType = new EnumMap<>(DailyLogType.class);
 
@@ -55,6 +55,6 @@ public record TimeUsageRates(
     private static BigDecimal toRate(long seconds, long totalSeconds) {
         return BigDecimal.valueOf(seconds)
                 .multiply(BigDecimal.valueOf(100))
-                .divide(BigDecimal.valueOf(totalSeconds), 1, RoundingMode.HALF_UP);
+                .divide(BigDecimal.valueOf(totalSeconds), 1, HALF_UP);
     }
 }

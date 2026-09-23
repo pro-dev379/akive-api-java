@@ -98,7 +98,7 @@ class DailyLogTest {
     }
 
     @Test
-    void 시작_시간이_새벽_5시_이전인_일일_로그는_전날에_귀속되어_생성된다() {
+    void 시작_시간이_일간_경계_시간_이전인_일일_로그는_전날에_귀속되어_생성된다() {
         LocalDateTime startOn = LocalDateTime.of(2026, 9, 13, 4, 0);
         ActivityTime activityTime = ActivityTime.of(startOn, startOn.plusHours(4), 10_800L, false, NOW);
 
@@ -108,7 +108,7 @@ class DailyLogTest {
     }
 
     @Test
-    void 시작_시간이_새벽_5시인_일일_로그는_당일에_귀속되어_생성된다() {
+    void 시작_시간이_일간_경계_시간인_일일_로그는_당일에_귀속되어_생성된다() {
         LocalDateTime startOn = LocalDateTime.of(2026, 9, 13, 5, 0);
         ActivityTime activityTime = ActivityTime.of(startOn, startOn.plusHours(1), null, false, NOW);
 

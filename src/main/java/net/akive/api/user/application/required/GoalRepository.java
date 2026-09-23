@@ -1,7 +1,10 @@
 package net.akive.api.user.application.required;
 
 import net.akive.api.user.domain.Goal;
+import net.akive.api.user.domain.GoalVersion;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface GoalRepository {
@@ -11,4 +14,6 @@ public interface GoalRepository {
     Optional<Goal> findByGoalId(Long goalId);
 
     Optional<Goal> findLatestByUserIdAndUserNotWithdrawn(Long userId);
+
+    List<GoalVersion> findVersionsForPeriod(Long userId, LocalDate startOn, LocalDate endOn);
 }

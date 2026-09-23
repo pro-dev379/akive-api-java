@@ -4,14 +4,22 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.user.adapter.persistence.entity.GoalEntity;
 import net.akive.api.user.application.required.GoalRepository;
 import net.akive.api.user.domain.Goal;
+import net.akive.api.user.domain.GoalVersion;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 class GoalJpaAdapter implements GoalRepository {
 
+    private static final ZoneId GOAL_DATE_ZONE = ZoneId.of("Asia/Seoul");
     private final GoalJpaRepository goalJpaRepository;
 
     @Override
@@ -26,8 +34,41 @@ class GoalJpaAdapter implements GoalRepository {
 
     @Override
     public Optional<Goal> findLatestByUserIdAndUserNotWithdrawn(Long userId) {
-        return goalJpaRepository
-                .findFirstByUser_UserIdAndUser_Withdrawal_WithdrawnAtIsNullOrderByGoalIdDesc(userId)
-                .map(GoalEntity::to);
+        return goalJpaRepository.findLatestByUserIdAndUserNotWithdrawn(userId).map(GoalEntity::to);
+    }
+
+    @Override
+    public List<GoalVersion> findVersionsForPeriod(Long userId, LocalDate startOn, LocalDate endOn) {
+        LocalDateTime afterStartDate = koreanDateStartAsUtc(startOn.plusDays(1));
+        LocalDateTime afterEndDate = koreanDateStartAsUtc(endOn.plusDays(1));
+        List<GoalVersion> goalVersions = new ArrayList<>();
+
+        goalJpaRepository
+                .findLatestByUserIdAndCreatedAtBefore(userId, afterStartDate)
+                .map(this::toVersion)
+                .ifPresent(goalVersions::add);
+
+        if (startOn.isBefore(endOn)) {
+            goalJpaRepository
+                    .findAllByUserIdAndCreatedAtInRange(userId, afterStartDate, afterEndDate)
+                    .stream()
+                    .map(this::toVersion)
+                    .forEach(goalVersions::add);
+        }
+
+        return List.copyOf(goalVersions);
+    }
+
+    private LocalDateTime koreanDateStartAsUtc(LocalDate date) {
+        return date.atStartOfDay(GOAL_DATE_ZONE).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+    }
+
+    private GoalVersion toVersion(GoalEntity entity) {
+        return new GoalVersion(
+                entity.getRest10MinSec(),
+                entity.getMealNum(),
+                entity.getMeal1TimeSec(),
+                entity.getCreatedAt()
+        );
     }
 }

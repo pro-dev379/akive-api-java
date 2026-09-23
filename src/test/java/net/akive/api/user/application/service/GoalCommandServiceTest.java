@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static net.akive.api.common.exception.business.ResourceNotFoundError.GOAL_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.application.fixture.GoalCommandFixture.createGoalCreateCommand;
 import static net.akive.api.user.domain.fixture.GoalFixture.GOAL_ID;
@@ -24,11 +23,12 @@ import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
-class GoalServiceTest {
+class GoalCommandServiceTest {
 
     @Mock
     UserRepository userRepository;
@@ -37,7 +37,7 @@ class GoalServiceTest {
     GoalRepository goalRepository;
 
     @InjectMocks
-    GoalService goalService;
+    GoalCommandService goalCommandService;
 
     @Test
     void 탈퇴하지_않은_회원의_최신_목표를_추가한다() {
@@ -48,7 +48,7 @@ class GoalServiceTest {
         given(userRepository.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.of(user));
         given(goalRepository.save(any(Goal.class))).willReturn(savedGoal);
 
-        Goal result = goalService.create(command);
+        Goal result = goalCommandService.create(command);
 
         assertThat(result).isEqualTo(savedGoal);
         then(userRepository).should().findByUserIdAndNotWithdrawn(USER_ID);
@@ -70,35 +70,11 @@ class GoalServiceTest {
         given(userRepository.findByUserIdAndNotWithdrawn(UNKNOWN_USER_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> goalService.create(command))
+                .isThrownBy(() -> goalCommandService.create(command))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
         then(userRepository).should().findByUserIdAndNotWithdrawn(UNKNOWN_USER_ID);
         then(goalRepository).should(never()).save(any(Goal.class));
-    }
-
-    @Test
-    void 회원_식별자로_탈퇴하지_않은_회원의_최신_목표를_조회한다() {
-        Goal goal = createReconstructedGoal(GOAL_ID);
-        given(goalRepository.findLatestByUserIdAndUserNotWithdrawn(USER_ID)).willReturn(Optional.of(goal));
-
-        Goal foundGoal = goalService.findLatestByUserIdAndUserNotWithdrawn(USER_ID);
-
-        assertThat(foundGoal).isEqualTo(goal);
-        then(goalRepository).should().findLatestByUserIdAndUserNotWithdrawn(USER_ID);
-    }
-
-    @Test
-    void 회원_식별자로_탈퇴하지_않은_회원의_최신_목표를_조회할_수_없으면_예외가_발생한다() {
-        given(goalRepository.findLatestByUserIdAndUserNotWithdrawn(UNKNOWN_USER_ID))
-                .willReturn(Optional.empty());
-
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> goalService.findLatestByUserIdAndUserNotWithdrawn(UNKNOWN_USER_ID))
-                .extracting(ResourceNotFoundException::getError)
-                .isEqualTo(GOAL_NOT_FOUND);
-
-        then(goalRepository).should().findLatestByUserIdAndUserNotWithdrawn(UNKNOWN_USER_ID);
     }
 }

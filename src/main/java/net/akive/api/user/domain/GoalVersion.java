@@ -1,0 +1,21 @@
+package net.akive.api.user.domain;
+
+import java.time.LocalDateTime;
+
+import static net.akive.api.common.domain.DomainValidator.requireNonNegative;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
+
+public record GoalVersion(
+        long rest10MinSec,
+        int mealNum,
+        long meal1TimeSec,
+        LocalDateTime createdAt
+) {
+
+    public GoalVersion {
+        requireNonNegative(rest10MinSec);
+        requireNonNegative(mealNum);
+        requireNonNegative(meal1TimeSec);
+        requireNonNull(createdAt);
+    }
+}

@@ -14,7 +14,7 @@ import java.util.Objects;
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
-import static net.akive.api.dailylog.domain.DailyLogPolicy.DAY_START_HOUR;
+import static net.akive.api.dailylog.domain.DailyLogPolicy.DAILY_BOUNDARY_HOUR;
 import static net.akive.api.dailylog.domain.DailyLogPolicy.MIN_SLEEP_DURATION_SEC;
 import static net.akive.api.dailylog.domain.DailyLogType.SLEEP;
 import static net.akive.api.dailylog.domain.DailyLogType.STUDY;
@@ -149,7 +149,7 @@ public class DailyLog {
             return activityTime.getEndOn().toLocalDate();
         }
 
-        return activityTime.getStartOn().minusHours(DAY_START_HOUR).toLocalDate();
+        return activityTime.getStartOn().minusHours(DAILY_BOUNDARY_HOUR).toLocalDate();
     }
 
     private static void validateSleepTime(ActivityTime activityTime, DailyLogType dailyLogType) {
