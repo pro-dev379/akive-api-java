@@ -19,5 +19,32 @@ public interface DailyQuantityJpaRepository extends JpaRepository<DailyQuantityE
             and dq.date = :date
         order by sp.sessionalPlanId asc, tq.totalQuantityId asc, wq.weeklyQuantityId asc
     """)
-    List<DailyQuantityEntity> findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(Long userId, LocalDate date);
+    List<DailyQuantityEntity> findAllByUserIdAndDateOrderByPlanHierarchyAsc(Long userId, LocalDate date);
+
+    @Query("""
+        select
+            sum(dq.dailyQuantityAmount.quantityAmount) as quantityAmount,
+            sum(dq.dailyQuantityAmount.completedQuantityAmount) as completedQuantityAmount
+        from DailyQuantityEntity dq
+        join dq.weeklyQuantity wq
+        join wq.totalQuantity tq
+        join tq.sessionalPlan sp
+        where sp.user.userId = :userId
+            and dq.date between :startOn and :endOn
+            and dq.dailyQuantityAmount.quantityAmount <> 0
+        group by tq.totalQuantityId
+        order by tq.totalQuantityId asc
+    """)
+    List<QuantityCompletionAmountsProjection> findTotalQuantityCompletionAmountsByUserIdAndDateBetween(
+            Long userId,
+            LocalDate startOn,
+            LocalDate endOn
+    );
+
+    interface QuantityCompletionAmountsProjection {
+
+        long getQuantityAmount();
+
+        long getCompletedQuantityAmount();
+    }
 }

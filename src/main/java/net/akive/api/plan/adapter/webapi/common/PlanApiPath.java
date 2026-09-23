@@ -9,6 +9,7 @@ public final class PlanApiPath {
 
     public static final String SESSIONAL_PLANS = "/sessional-plans";
     public static final String SESSIONAL_PLAN = SESSIONAL_PLANS + "/{sessionalPlanId}";
+    public static final String SESSIONAL_PLAN_ANALYTICS = SESSIONAL_PLANS + "/analytics";
 
     public static final String DAILY_PLANS = SESSIONAL_PLANS + "/daily-plans";
     public static final String DAILY_PLAN = DAILY_PLANS + "/{date}";

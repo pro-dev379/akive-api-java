@@ -31,7 +31,7 @@ class DailyPlanQueryServiceTest {
     void 회원_식별자와_날짜로_일일_계획을_조회한다() {
         DailyPlansFindQuery query = createDailyPlansFindQuery();
         DailyPlanData dailyPlanData = createDailyPlanData(query.date());
-        given(dailyQuantityRepository.findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+        given(dailyQuantityRepository.findDailyPlansByUserIdAndDateOrderByPlanHierarchyAsc(
                 query.userId(),
                 query.date()
         )).willReturn(List.of(dailyPlanData));
@@ -48,7 +48,7 @@ class DailyPlanQueryServiceTest {
         assertThat(dailyPlan.quantityUnit()).isEqualTo(dailyPlanData.quantityUnit());
 
         then(dailyQuantityRepository).should()
-                .findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+                .findDailyPlansByUserIdAndDateOrderByPlanHierarchyAsc(
                         query.userId(),
                         query.date()
                 );

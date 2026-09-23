@@ -1,13 +1,17 @@
 package net.akive.api.plan.application.service.sessionalplan;
 
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.plan.application.provided.sessionalplan.dto.CompletionRateFindQuery;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDetailFindQuery;
+import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
 import net.akive.api.plan.application.result.SessionalPlanDetail;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
+import net.akive.api.plan.domain.value.CompletionRate;
+import net.akive.api.plan.domain.value.QuantityCompletionAmount;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
@@ -16,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +44,9 @@ class SessionalPlanQueryServiceTest {
 
     @Mock
     TotalQuantityRepository totalQuantityRepository;
+
+    @Mock
+    DailyQuantityRepository dailyQuantityRepository;
 
     @InjectMocks
     SessionalPlanQueryService sessionalPlanQueryService;
@@ -113,5 +121,25 @@ class SessionalPlanQueryServiceTest {
         assertThat(sessionPeriods).containsExactly(SESSION_PERIOD);
 
         then(sessionalPlanRepository).should().findSessionPeriodsByUserId(USER_ID);
+    }
+
+    @Test
+    void 조회_기간의_세션_총량별_계획량과_완료량으로_달성률을_조회한다() {
+        LocalDate startOn = LocalDate.of(2026, 9, 14);
+        LocalDate endOn = LocalDate.of(2026, 9, 20);
+        CompletionRateFindQuery query = new CompletionRateFindQuery(USER_ID, startOn, endOn);
+        List<QuantityCompletionAmount> completionAmounts =
+                List.of(new QuantityCompletionAmount(100, 75));
+        given(dailyQuantityRepository.findTotalQuantityCompletionAmountsByUserIdAndDateBetween(
+                USER_ID,
+                startOn,
+                endOn
+        )).willReturn(completionAmounts);
+
+        CompletionRate completionRate = sessionalPlanQueryService.findCompletionRate(query);
+
+        assertThat(completionRate.value()).isEqualByComparingTo("75.0");
+        then(dailyQuantityRepository).should()
+                .findTotalQuantityCompletionAmountsByUserIdAndDateBetween(USER_ID, startOn, endOn);
     }
 }

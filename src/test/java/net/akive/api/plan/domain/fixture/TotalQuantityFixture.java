@@ -59,10 +59,18 @@ public class TotalQuantityFixture {
     }
 
     public static TotalQuantity createTotalQuantity(SessionalPlan sessionalPlan, String subjectName) {
+        return createTotalQuantity(sessionalPlan, subjectName, TOTAL_AMOUNT);
+    }
+
+    public static TotalQuantity createTotalQuantity(
+            SessionalPlan sessionalPlan,
+            String subjectName,
+            int totalAmount
+    ) {
         return TotalQuantity.create(
                 sessionalPlan,
                 createSubject(subjectName),
-                createTotalQuantityAmount()
+                createTotalQuantityAmount(totalAmount)
         );
     }
 

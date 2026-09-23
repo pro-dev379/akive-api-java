@@ -125,6 +125,14 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
         return totalQuantityRepository.save(createTotalQuantity(savedSessionalPlan, subjectName));
     }
 
+    protected TotalQuantity saveTotalQuantity(
+            SessionalPlan savedSessionalPlan,
+            String subjectName,
+            int totalAmount
+    ) {
+        return totalQuantityRepository.save(createTotalQuantity(savedSessionalPlan, subjectName, totalAmount));
+    }
+
     protected DailyLog saveDailyLog(User savedUser, LocalDate logOn, int startHour) {
         return saveDailyLog(createDailyLog(savedUser, logOn, startHour));
     }

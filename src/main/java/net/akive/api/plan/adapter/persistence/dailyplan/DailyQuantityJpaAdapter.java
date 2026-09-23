@@ -6,6 +6,7 @@ import net.akive.api.plan.adapter.persistence.entity.TotalQuantityEntity;
 import net.akive.api.plan.adapter.persistence.entity.WeeklyQuantityEntity;
 import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.data.DailyPlanData;
+import net.akive.api.plan.domain.value.QuantityCompletionAmount;
 import net.akive.api.plan.domain.value.QuantityUnit;
 import org.springframework.stereotype.Repository;
 
@@ -19,14 +20,30 @@ public class DailyQuantityJpaAdapter implements DailyQuantityRepository {
     private final DailyQuantityJpaRepository dailyQuantityJpaRepository;
 
     @Override
-    public List<DailyPlanData> findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+    public List<DailyPlanData> findDailyPlansByUserIdAndDateOrderByPlanHierarchyAsc(
             Long userId,
             LocalDate date
     ) {
         return dailyQuantityJpaRepository
-                .findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(userId, date)
+                .findAllByUserIdAndDateOrderByPlanHierarchyAsc(userId, date)
                 .stream()
                 .map(this::toDailyPlanData)
+                .toList();
+    }
+
+    @Override
+    public List<QuantityCompletionAmount> findTotalQuantityCompletionAmountsByUserIdAndDateBetween(
+            Long userId,
+            LocalDate startOn,
+            LocalDate endOn
+    ) {
+        return dailyQuantityJpaRepository
+                .findTotalQuantityCompletionAmountsByUserIdAndDateBetween(userId, startOn, endOn)
+                .stream()
+                .map(projection -> new QuantityCompletionAmount(
+                        Math.toIntExact(projection.getQuantityAmount()),
+                        Math.toIntExact(projection.getCompletedQuantityAmount())
+                ))
                 .toList();
     }
 

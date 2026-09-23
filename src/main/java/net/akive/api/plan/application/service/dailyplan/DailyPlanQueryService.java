@@ -21,7 +21,7 @@ class DailyPlanQueryService implements DailyPlanFinder {
     @Override
     public List<DailyPlan> findAll(DailyPlansFindQuery query) {
         return dailyQuantityRepository
-                .findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(query.userId(), query.date())
+                .findDailyPlansByUserIdAndDateOrderByPlanHierarchyAsc(query.userId(), query.date())
                 .stream()
                 .map(this::toDailyPlan)
                 .toList();

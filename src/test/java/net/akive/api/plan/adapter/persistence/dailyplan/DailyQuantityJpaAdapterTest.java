@@ -1,13 +1,21 @@
 package net.akive.api.plan.adapter.persistence.dailyplan;
 
 import net.akive.api.plan.application.required.data.DailyPlanData;
+import net.akive.api.plan.domain.model.DailyQuantity;
+import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
+import net.akive.api.plan.domain.model.WeeklyQuantity;
+import net.akive.api.plan.domain.value.QuantityAmount;
+import net.akive.api.plan.domain.value.QuantityCompletionAmount;
 import net.akive.api.support.RepositoryTestSupport;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_SUBJECT_NAME;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.SECOND_SUBJECT_NAME;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.TOTAL_AMOUNT;
 import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +30,7 @@ class DailyQuantityJpaAdapterTest extends RepositoryTestSupport {
         flushAndClear();
 
         List<DailyPlanData> dailyPlans =
-                dailyQuantityRepository.findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+                dailyQuantityRepository.findDailyPlansByUserIdAndDateOrderByPlanHierarchyAsc(
                         savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
                         QUERY_DATE
                 );
@@ -46,7 +54,7 @@ class DailyQuantityJpaAdapterTest extends RepositoryTestSupport {
         flushAndClear();
 
         List<DailyPlanData> dailyPlans =
-                dailyQuantityRepository.findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+                dailyQuantityRepository.findDailyPlansByUserIdAndDateOrderByPlanHierarchyAsc(
                         UNKNOWN_USER_ID,
                         QUERY_DATE
                 );
@@ -60,11 +68,51 @@ class DailyQuantityJpaAdapterTest extends RepositoryTestSupport {
         flushAndClear();
 
         List<DailyPlanData> dailyPlans =
-                dailyQuantityRepository.findAllDailyQuantityByUserIdAndDateOrderByPlanHierarchyAsc(
+                dailyQuantityRepository.findDailyPlansByUserIdAndDateOrderByPlanHierarchyAsc(
                         savedTotalQuantity.getSessionalPlan().getUser().getUserId(),
                         UNKNOWN_DATE
                 );
 
         assertThat(dailyPlans).isEmpty();
+    }
+
+    @Test
+    void 조회_기간에_해당하는_계획량과_완료량_각각을_세션_총량별로_합산한다() {
+        int firstCompletedAmount = 40;
+        int secondCompletedAmount = 80;
+        SessionalPlan sessionalPlan = saveSessionalPlan();
+        completeFirstDailyQuantity(
+                saveTotalQuantity(sessionalPlan, FIRST_SUBJECT_NAME, TOTAL_AMOUNT),
+                firstCompletedAmount
+        );
+        completeFirstDailyQuantity(
+                saveTotalQuantity(sessionalPlan, SECOND_SUBJECT_NAME, TOTAL_AMOUNT),
+                secondCompletedAmount
+        );
+        flushAndClear();
+
+        List<QuantityCompletionAmount> completionAmounts =
+                dailyQuantityRepository.findTotalQuantityCompletionAmountsByUserIdAndDateBetween(
+                        sessionalPlan.getUser().getUserId(),
+                        QUERY_DATE,
+                        QUERY_DATE
+                );
+
+        assertThat(completionAmounts).containsExactly(
+                new QuantityCompletionAmount(TOTAL_AMOUNT, firstCompletedAmount),
+                new QuantityCompletionAmount(TOTAL_AMOUNT, secondCompletedAmount)
+        );
+    }
+
+    private TotalQuantity completeFirstDailyQuantity(TotalQuantity totalQuantity, int completedAmount) {
+        WeeklyQuantity firstWeeklyQuantity = totalQuantity.getWeeklyQuantities().getFirst();
+        DailyQuantity firstDailyQuantity = firstWeeklyQuantity.getDailyQuantities().getFirst();
+        totalQuantity.updateDailyCompletedAmount(
+                firstWeeklyQuantity.getWeeklyQuantityId(),
+                firstDailyQuantity.getDailyQuantityId(),
+                new QuantityAmount(completedAmount)
+        );
+
+        return totalQuantityRepository.save(totalQuantity);
     }
 }

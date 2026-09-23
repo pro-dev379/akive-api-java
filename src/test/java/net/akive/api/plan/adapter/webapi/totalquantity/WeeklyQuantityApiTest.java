@@ -28,7 +28,8 @@ import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
-import static net.akive.api.plan.adapter.webapi.totalquantity.fixture.WeeklyQuantityRequestFixture.*;
+import static net.akive.api.plan.adapter.webapi.totalquantity.fixture.WeeklyQuantityRequestFixture.weeklyQuantityDelayRequestJson;
+import static net.akive.api.plan.adapter.webapi.totalquantity.fixture.WeeklyQuantityRequestFixture.weeklyQuantityReduceRequestJson;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.SESSIONAL_PLAN_ID;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createReconstructedSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.*;
