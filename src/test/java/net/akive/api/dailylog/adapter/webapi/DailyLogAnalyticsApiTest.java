@@ -30,7 +30,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 class DailyLogAnalyticsApiTest extends PrivateApiTestSupport {
 
     private static final String TIME_USAGE_RATES_URL = "/daily-logs/analytics/analytics/time-usage-rates";
-    private static final String FOCUS_METRICS_URL = "/daily-logs/analytics/focus/focusMetrics";
+    private static final String FOCUS_METRICS_URL = "/daily-logs/analytics/focus/metrics";
     private static final String FOCUS_METRICS_SERIES_URL = "/daily-logs/analytics/focus/series";
 
     @MockitoBean

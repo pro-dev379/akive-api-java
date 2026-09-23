@@ -6,23 +6,23 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public record FocusMetricsSeriesFindResponse(List<PeriodMetricsResponse> focusMetrics) {
+public record FocusMetricsSeriesFindResponse(List<PeriodFocusMetricsResponse> periodFocusMetrics) {
 
     public static FocusMetricsSeriesFindResponse from(FocusMetricsSeries series) {
         return new FocusMetricsSeriesFindResponse(series.periodFocusMetrics().stream()
-                .map(PeriodMetricsResponse::from)
+                .map(PeriodFocusMetricsResponse::from)
                 .toList());
     }
 
-    public record PeriodMetricsResponse(
+    public record PeriodFocusMetricsResponse(
             LocalDate startOn,
             LocalDate endOn,
             long focusTimeSec,
             BigDecimal focusRate
     ) {
 
-        private static PeriodMetricsResponse from(FocusMetricsSeries.PeriodFocusMetrics periodFocusMetrics) {
-            return new PeriodMetricsResponse(
+        private static PeriodFocusMetricsResponse from(FocusMetricsSeries.PeriodFocusMetrics periodFocusMetrics) {
+            return new PeriodFocusMetricsResponse(
                     periodFocusMetrics.startOn(),
                     periodFocusMetrics.endOn(),
                     periodFocusMetrics.focusMetrics().focusTimeSec(),
