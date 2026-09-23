@@ -81,6 +81,14 @@ class DailyLogAnalyticsApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 일일_로그_타입별_시간_사용률_조회_시_날짜_형식이_올바르지_않으면_400을_응답한다() {
+        get(TIME_USAGE_RATES_URL + "?startOn={startOn}&endOn={endOn}", USER_ID, "invalid-date", LOG_ON)
+                .hasStatus(BAD_REQUEST);
+
+        then(dailyLogFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 조회_기간의_집중_시간과_집중도를_조회한다() {
         LocalDate endOn = LOG_ON.plusDays(1);
         FocusMetricsFindQuery query = new FocusMetricsFindQuery(USER_ID, LOG_ON, endOn);
@@ -187,9 +195,13 @@ class DailyLogAnalyticsApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 일일_로그_타입별_시간_사용률_조회_시_날짜_형식이_올바르지_않으면_400을_응답한다() {
-        get(TIME_USAGE_RATES_URL + "?startOn={startOn}&endOn={endOn}", USER_ID, "invalid-date", LOG_ON)
-                .hasStatus(BAD_REQUEST);
+    void 날짜별로_집중_시간과_집중도_조회_시_날짜_형식이_올바르지_않으면_400을_응답한다() {
+        get(FOCUS_METRICS_SERIES_URL + "?startOn={startOn}&endOn={endOn}&unit={unit}",
+                USER_ID,
+                "invalid-date",
+                LOG_ON,
+                DAY
+        ).hasStatus(BAD_REQUEST);
 
         then(dailyLogFinder).shouldHaveNoInteractions();
     }
