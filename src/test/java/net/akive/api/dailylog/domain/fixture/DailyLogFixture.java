@@ -31,13 +31,6 @@ public class DailyLogFixture {
     public static final LocalDate TARGET_LOG_ON = LocalDate.of(2026, 9, 14);
     public static final LocalDateTime TARGET_START_ON = LocalDateTime.of(2026, 9, 13, 11, 0);
     public static final LocalDateTime TARGET_END_ON = LocalDateTime.of(2026, 9, 13, 12, 0);
-    public static final ActivityTime TARGET_ACTIVITY_TIME = ActivityTime.of(
-            TARGET_START_ON,
-            TARGET_END_ON,
-            null,
-            true,
-            NOW
-    );
     public static final String TARGET_CONTENTS = "수정된 학습 기록";
     private static final long MINUTE_SECONDS = 60L;
     private static final long HOUR_SECONDS = 60 * MINUTE_SECONDS;

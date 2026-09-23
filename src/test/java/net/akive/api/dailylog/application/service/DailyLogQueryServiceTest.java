@@ -4,10 +4,12 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.dailylog.application.provided.dto.FocusMetricsFindQuery;
+import net.akive.api.dailylog.application.provided.dto.FocusMetricsSeriesFindQuery;
 import net.akive.api.dailylog.application.provided.dto.TimeUsageRatesFindQuery;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.FocusMetrics;
+import net.akive.api.dailylog.domain.FocusMetricsSeries;
 import net.akive.api.dailylog.domain.TimeUsageRates;
 import net.akive.api.user.application.provided.GoalFinder;
 import net.akive.api.user.application.provided.dto.GoalVersionsFindQuery;
@@ -20,15 +22,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_DATE_RANGE;
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
 import static net.akive.api.dailylog.domain.DailyLogPolicy.DAILY_BOUNDARY_HOUR;
+import static net.akive.api.dailylog.domain.FocusMetricsUnit.DAY;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
-import static net.akive.api.user.domain.fixture.GoalFixture.goalVersionWithoutBreakAllowance;
+import static net.akive.api.user.domain.fixture.GoalFixture.goalVersionWithoutMealAndRestAllowance;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,6 +61,7 @@ class DailyLogQueryServiceTest {
         PageResult<LocalDate> foundLogOnPage = dailyLogQueryService.findLogOnPage(USER_ID, pageCondition);
 
         assertThat(foundLogOnPage).isEqualTo(logOnPage);
+
         then(dailyLogRepository).should().findLogOnPageByUserId(USER_ID, pageCondition);
     }
 
@@ -76,51 +79,52 @@ class DailyLogQueryServiceTest {
         List<DailyLog> foundDailyLogs = dailyLogQueryService.findAll(USER_ID, LOG_ON);
 
         assertThat(foundDailyLogs).isEqualTo(dailyLogs);
+
         then(dailyLogRepository).should().findAllByUserIdAndLogOnOrderByStartOn(USER_ID, LOG_ON);
     }
 
     @Test
     void 조회_기간_전체의_일일_로그_타입별_시간_사용률을_조회한다() {
         LocalDate endOn = LOG_ON.plusDays(1);
-        given(dailyLogRepository.findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
-                USER_ID, LOG_ON.atTime(5, 0),
-                endOn.plusDays(1).atTime(5, 0)
-        )).willReturn(List.of());
+        givenDailyLogsForPeriod(LOG_ON, endOn);
 
         TimeUsageRates rates =
                 dailyLogQueryService.findTimeUsageRates(new TimeUsageRatesFindQuery(USER_ID, LOG_ON, endOn));
 
         assertThat(rates.unrecordedRate()).isEqualByComparingTo("100.0");
-        then(dailyLogRepository).should().findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
-                USER_ID, LOG_ON.atTime(5, 0),
-                endOn.plusDays(1).atTime(5, 0)
-        );
+        thenDailyLogsForPeriodShouldBeFound(LOG_ON, endOn);
     }
 
     @Test
     void 조회_기간의_일일_로그와_목표_목록으로_집중도와_집중_시간을_조회한다() {
         DailyLog dailyLog = study(LOG_ON, 9, 10, hours(1));
-        GoalVersion goal = goalVersionWithoutBreakAllowance(LOG_ON.minusDays(1).atStartOfDay());
+        GoalVersion goal = goalVersionWithoutMealAndRestAllowance(LOG_ON.minusDays(1).atStartOfDay());
         FocusMetricsFindQuery query = new FocusMetricsFindQuery(USER_ID, LOG_ON, LOG_ON);
-        GoalVersionsFindQuery goalQuery = new GoalVersionsFindQuery(USER_ID, LOG_ON, LOG_ON);
-        LocalDateTime periodStart = LOG_ON.atTime(DAILY_BOUNDARY_HOUR, 0);
-        LocalDateTime periodEnd = periodStart.plusDays(1);
-        given(dailyLogRepository.findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
-                USER_ID,
-                periodStart,
-                periodEnd
-        )).willReturn(List.of(dailyLog));
-        given(goalFinder.findVersionsForPeriod(goalQuery)).willReturn(List.of(goal));
+        givenDailyLogsForPeriod(LOG_ON, LOG_ON, dailyLog);
+        givenGoalVersionsForPeriod(LOG_ON, LOG_ON, goal);
 
         FocusMetrics metrics = dailyLogQueryService.findFocusMetrics(query);
 
         assertThat(metrics.focusTimeSec()).isEqualTo(dailyLog.getFocusTimeSec());
-        then(goalFinder).should().findVersionsForPeriod(goalQuery);
-        then(dailyLogRepository).should().findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
-                USER_ID,
-                periodStart,
-                periodEnd
-        );
+        thenDailyLogsForPeriodShouldBeFound(LOG_ON, LOG_ON);
+        thenGoalVersionsForPeriodShouldBeFound(LOG_ON, LOG_ON);
+    }
+
+    @Test
+    void 조회_기간의_일일_로그와_목표_목록으로_날짜별_집중도와_집중_시간을_계산한다() {
+        LocalDate endOn = LOG_ON.plusDays(1);
+        DailyLog dailyLog = study(LOG_ON, 9, 10, hours(1));
+        GoalVersion goalVersion = goalVersionWithoutMealAndRestAllowance(LOG_ON.minusDays(1).atStartOfDay());
+        FocusMetricsSeriesFindQuery query = new FocusMetricsSeriesFindQuery(USER_ID, LOG_ON, endOn, DAY);
+        givenDailyLogsForPeriod(LOG_ON, endOn, dailyLog);
+        givenGoalVersionsForPeriod(LOG_ON, endOn, goalVersion);
+
+        FocusMetricsSeries series = dailyLogQueryService.findFocusMetricsSeries(query);
+
+        assertThat(series.periodFocusMetrics()).hasSize(2);
+        assertThat(series.periodFocusMetrics().getFirst().focusMetrics().focusTimeSec()).isEqualTo(hours(1));
+        thenDailyLogsForPeriodShouldBeFound(LOG_ON, endOn);
+        thenGoalVersionsForPeriodShouldBeFound(LOG_ON, endOn);
     }
 
     @Test
@@ -130,5 +134,30 @@ class DailyLogQueryServiceTest {
                 .hasMessage(INVALID_DATE_RANGE.getMessage());
 
         then(dailyLogRepository).shouldHaveNoInteractions();
+    }
+
+    private void givenDailyLogsForPeriod(LocalDate startOn, LocalDate endOn, DailyLog... dailyLogs) {
+        given(dailyLogRepository.findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
+                USER_ID,
+                startOn.atTime(DAILY_BOUNDARY_HOUR, 0),
+                endOn.plusDays(1).atTime(DAILY_BOUNDARY_HOUR, 0)
+        )).willReturn(List.of(dailyLogs));
+    }
+
+    private void givenGoalVersionsForPeriod(LocalDate startOn, LocalDate endOn, GoalVersion... goalVersions) {
+        given(goalFinder.findVersionsForPeriod(new GoalVersionsFindQuery(USER_ID, startOn, endOn)))
+                .willReturn(List.of(goalVersions));
+    }
+
+    private void thenDailyLogsForPeriodShouldBeFound(LocalDate startOn, LocalDate endOn) {
+        then(dailyLogRepository).should().findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
+                USER_ID,
+                startOn.atTime(DAILY_BOUNDARY_HOUR, 0),
+                endOn.plusDays(1).atTime(DAILY_BOUNDARY_HOUR, 0)
+        );
+    }
+
+    private void thenGoalVersionsForPeriodShouldBeFound(LocalDate startOn, LocalDate endOn) {
+        then(goalFinder).should().findVersionsForPeriod(new GoalVersionsFindQuery(USER_ID, startOn, endOn));
     }
 }

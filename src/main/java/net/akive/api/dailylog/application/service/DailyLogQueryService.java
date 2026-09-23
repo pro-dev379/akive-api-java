@@ -5,12 +5,10 @@ import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
 import net.akive.api.dailylog.application.provided.dto.FocusMetricsFindQuery;
+import net.akive.api.dailylog.application.provided.dto.FocusMetricsSeriesFindQuery;
 import net.akive.api.dailylog.application.provided.dto.TimeUsageRatesFindQuery;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
-import net.akive.api.dailylog.domain.DailyLog;
-import net.akive.api.dailylog.domain.DailyLogType;
-import net.akive.api.dailylog.domain.FocusMetrics;
-import net.akive.api.dailylog.domain.TimeUsageRates;
+import net.akive.api.dailylog.domain.*;
 import net.akive.api.user.application.provided.GoalFinder;
 import net.akive.api.user.application.provided.dto.GoalVersionsFindQuery;
 import net.akive.api.user.domain.GoalVersion;
@@ -48,10 +46,10 @@ class DailyLogQueryService implements DailyLogFinder {
 
     @Override
     public TimeUsageRates findTimeUsageRates(TimeUsageRatesFindQuery query) {
-        List<DailyLog> dailyLogs = dailyLogRepository.findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
+        List<DailyLog> dailyLogs = findDailyLogsOverlappingDailyBoundaryPeriod(
                 query.userId(),
-                query.startOn().atTime(DAILY_BOUNDARY_HOUR, 0),
-                query.endOn().plusDays(1).atTime(DAILY_BOUNDARY_HOUR, 0)
+                query.startOn(),
+                query.endOn()
         );
 
         return TimeUsageRates.calculate(query.startOn(), query.endOn(), dailyLogs);
@@ -59,18 +57,47 @@ class DailyLogQueryService implements DailyLogFinder {
 
     @Override
     public FocusMetrics findFocusMetrics(FocusMetricsFindQuery query) {
-        List<DailyLog> dailyLogs = dailyLogRepository.findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
-                query.userId(),
-                query.startOn().atTime(DAILY_BOUNDARY_HOUR, 0),
-                query.endOn().plusDays(1).atTime(DAILY_BOUNDARY_HOUR, 0)
-        );
-
-        List<GoalVersion> goalVersions = goalFinder.findVersionsForPeriod(new GoalVersionsFindQuery(
+        List<DailyLog> dailyLogs = findDailyLogsOverlappingDailyBoundaryPeriod(
                 query.userId(),
                 query.startOn(),
                 query.endOn()
-        ));
+        );
+        List<GoalVersion> goalVersions = findGoalVersionsForPeriod(query.userId(), query.startOn(), query.endOn());
 
         return FocusMetrics.calculate(query.startOn(), query.endOn(), dailyLogs, goalVersions);
+    }
+
+    @Override
+    public FocusMetricsSeries findFocusMetricsSeries(FocusMetricsSeriesFindQuery query) {
+        List<DailyLog> dailyLogs = findDailyLogsOverlappingDailyBoundaryPeriod(
+                query.userId(),
+                query.startOn(),
+                query.endOn()
+        );
+        List<GoalVersion> goalVersions = findGoalVersionsForPeriod(query.userId(), query.startOn(), query.endOn());
+
+        return FocusMetricsSeries.calculate(
+                query.startOn(),
+                query.endOn(),
+                query.unit(),
+                dailyLogs,
+                goalVersions
+        );
+    }
+
+    private List<DailyLog> findDailyLogsOverlappingDailyBoundaryPeriod(
+            Long userId,
+            LocalDate startOn,
+            LocalDate endOn
+    ) {
+        return dailyLogRepository.findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(
+                userId,
+                startOn.atTime(DAILY_BOUNDARY_HOUR, 0),
+                endOn.plusDays(1).atTime(DAILY_BOUNDARY_HOUR, 0)
+        );
+    }
+
+    private List<GoalVersion> findGoalVersionsForPeriod(Long userId, LocalDate startOn, LocalDate endOn) {
+        return goalFinder.findVersionsForPeriod(new GoalVersionsFindQuery(userId, startOn, endOn));
     }
 }

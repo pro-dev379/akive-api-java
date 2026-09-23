@@ -2,9 +2,11 @@ package net.akive.api.dailylog.adapter.webapi;
 
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
 import net.akive.api.dailylog.application.provided.dto.FocusMetricsFindQuery;
+import net.akive.api.dailylog.application.provided.dto.FocusMetricsSeriesFindQuery;
 import net.akive.api.dailylog.application.provided.dto.TimeUsageRatesFindQuery;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.FocusMetrics;
+import net.akive.api.dailylog.domain.FocusMetricsSeries;
 import net.akive.api.dailylog.domain.TimeUsageRates;
 import net.akive.api.support.PrivateApiTestSupport;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import java.util.List;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_DATE_RANGE;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
+import static net.akive.api.dailylog.domain.FocusMetricsUnit.DAY;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -27,7 +30,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 class DailyLogAnalyticsApiTest extends PrivateApiTestSupport {
 
     private static final String TIME_USAGE_RATES_URL = "/daily-logs/analytics/analytics/time-usage-rates";
-    private static final String FOCUS_METRICS_URL = "/daily-logs/analytics/focus/metrics";
+    private static final String FOCUS_METRICS_URL = "/daily-logs/analytics/focus/focusMetrics";
+    private static final String FOCUS_METRICS_SERIES_URL = "/daily-logs/analytics/focus/series";
 
     @MockitoBean
     DailyLogFinder dailyLogFinder;
@@ -114,6 +118,69 @@ class DailyLogAnalyticsApiTest extends PrivateApiTestSupport {
                 USER_ID,
                 "invalid-date",
                 LOG_ON
+        ).hasStatus(BAD_REQUEST);
+
+        then(dailyLogFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 날짜별로_조회_기간의_집중_시간과_집중도를_조회한다() {
+        LocalDate endOn = LOG_ON.plusDays(1);
+        FocusMetricsSeriesFindQuery query = new FocusMetricsSeriesFindQuery(USER_ID, LOG_ON, endOn, DAY);
+        FocusMetricsSeries series = new FocusMetricsSeries(List.of(
+                new FocusMetricsSeries.PeriodFocusMetrics(
+                        LOG_ON,
+                        LOG_ON,
+                        new FocusMetrics(3600, new BigDecimal("50.0"))
+                ),
+                new FocusMetricsSeries.PeriodFocusMetrics(
+                        endOn,
+                        endOn,
+                        new FocusMetrics(7200, new BigDecimal("75.0"))
+                )
+        ));
+        given(dailyLogFinder.findFocusMetricsSeries(query)).willReturn(series);
+
+        MvcTestResultAssert result = get(
+                FOCUS_METRICS_SERIES_URL + "?startOn={startOn}&endOn={endOn}&unit={unit}",
+                USER_ID,
+                LOG_ON,
+                endOn,
+                DAY
+        ).hasStatusOk();
+
+        result.bodyJson().extractingPath("$.periodFocusMetrics[0].startOn").isEqualTo(LOG_ON.toString());
+        result.bodyJson().extractingPath("$.periodFocusMetrics[0].endOn").isEqualTo(LOG_ON.toString());
+        result.bodyJson().extractingPath("$.periodFocusMetrics[0].focusTimeSec").isEqualTo(3600);
+        result.bodyJson().extractingPath("$.periodFocusMetrics[0].focusRate").isEqualTo(50.0);
+        result.bodyJson().extractingPath("$.periodFocusMetrics[1].startOn").isEqualTo(endOn.toString());
+        result.bodyJson().extractingPath("$.periodFocusMetrics[1].focusTimeSec").isEqualTo(7200);
+        result.bodyJson().extractingPath("$.periodFocusMetrics[1].focusRate").isEqualTo(75.0);
+        then(dailyLogFinder).should().findFocusMetricsSeries(query);
+    }
+
+    @Test
+    void 날짜별로_집중_시간과_집중도_조회_시_시작일이_종료일보다_늦으면_400을_응답한다() {
+        MvcTestResultAssert result = get(
+                FOCUS_METRICS_SERIES_URL + "?startOn={startOn}&endOn={endOn}&unit={unit}",
+                USER_ID,
+                LOG_ON.plusDays(1),
+                LOG_ON,
+                DAY
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_DATE_RANGE);
+        then(dailyLogFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 날짜별로_집중_시간과_집중도_조회_시_지원하지_않는_조회_단위이면_400을_응답한다() {
+        get(
+            FOCUS_METRICS_SERIES_URL + "?startOn={startOn}&endOn={endOn}&unit={unit}",
+            USER_ID,
+            LOG_ON,
+            LOG_ON,
+            "invalid-unit"
         ).hasStatus(BAD_REQUEST);
 
         then(dailyLogFinder).shouldHaveNoInteractions();

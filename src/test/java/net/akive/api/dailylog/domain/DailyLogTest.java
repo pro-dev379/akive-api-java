@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_LOG_FOCUS_TIME_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.DAILY_LOG_SLEEP_TIME_TOO_SHORT;
 import static net.akive.api.dailylog.domain.DailyLogType.*;
+import static net.akive.api.dailylog.domain.fixture.ActivityTimeFixture.createActivityTime;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.*;
@@ -161,6 +162,7 @@ class DailyLogTest {
 
     @Test
     void 일일_로그를_수정한다() {
+        ActivityTime targetActivityTime = createActivityTime(TARGET_START_ON, TARGET_END_ON, null, true);
         DailyLog dailyLog = DailyLog.create(
                 createUser(),
                 ACTIVITY_TIME,
@@ -170,14 +172,14 @@ class DailyLogTest {
         );
 
         dailyLog.update(
-                TARGET_ACTIVITY_TIME,
+                targetActivityTime,
                 ATTENDANCE,
                 TARGET_CONTENTS,
                 NOW
         );
 
         assertThat(dailyLog.getLogOn()).isEqualTo(TARGET_START_ON.toLocalDate());
-        assertThat(dailyLog.getActivityTime()).isEqualTo(TARGET_ACTIVITY_TIME);
+        assertThat(dailyLog.getActivityTime()).isEqualTo(targetActivityTime);
         assertThat(dailyLog.getDailyLogType()).isEqualTo(ATTENDANCE);
         assertThat(dailyLog.getFocusTimeSec()).isNull();
         assertThat(dailyLog.isFocusRateExcluded()).isTrue();
@@ -229,6 +231,7 @@ class DailyLogTest {
     @Test
     void 같은_식별자를_가진_일일_로그는_같게_취급한다() {
         User user = createUser();
+        ActivityTime targetActivityTime = createActivityTime(TARGET_START_ON, TARGET_END_ON, null, true);
         DailyLog dailyLog = DailyLog.reconstruct(
                 DAILY_LOG_ID,
                 user,
@@ -242,7 +245,7 @@ class DailyLogTest {
                 DAILY_LOG_ID,
                 user,
                 TARGET_LOG_ON,
-                TARGET_ACTIVITY_TIME,
+                targetActivityTime,
                 ATTENDANCE,
                 TARGET_CONTENTS,
                 NOW

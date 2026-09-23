@@ -27,7 +27,7 @@ public class GoalFixture {
         );
     }
 
-    public static GoalVersion goalVersionWithoutBreakAllowance(LocalDateTime createdAt) {
+    public static GoalVersion goalVersionWithoutMealAndRestAllowance(LocalDateTime createdAt) {
         return createGoalVersion(0, 0, 0, createdAt);
     }
 

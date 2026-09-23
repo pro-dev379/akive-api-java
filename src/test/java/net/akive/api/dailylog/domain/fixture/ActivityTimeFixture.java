@@ -22,11 +22,25 @@ public class ActivityTimeFixture {
     }
 
     public static ActivityTime createActivityTime(LocalDateTime startOn, LocalDateTime endOn) {
-        return ActivityTime.of(
+        return createActivityTime(
                 startOn,
                 endOn,
                 between(startOn, endOn).toSeconds(),
-                false,
+                false
+        );
+    }
+
+    public static ActivityTime createActivityTime(
+            LocalDateTime startOn,
+            LocalDateTime endOn,
+            Long focusTimeSec,
+            boolean focusRateExcluded
+    ) {
+        return ActivityTime.of(
+                startOn,
+                endOn,
+                focusTimeSec,
+                focusRateExcluded,
                 NOW
         );
     }

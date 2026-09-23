@@ -8,7 +8,7 @@ import java.util.List;
 
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
 import static net.akive.api.user.domain.fixture.GoalFixture.createGoalVersion;
-import static net.akive.api.user.domain.fixture.GoalFixture.goalVersionWithoutBreakAllowance;
+import static net.akive.api.user.domain.fixture.GoalFixture.goalVersionWithoutMealAndRestAllowance;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FocusMetricsTest {
@@ -133,7 +133,8 @@ class FocusMetricsTest {
                 meal(targetOn, 10, 11),
                 study(targetOn, 11, 12, hours(1))
         );
-        GoalVersion goalWithoutMealAllowance = goalVersionWithoutBreakAllowance(targetOn.minusDays(2).atStartOfDay());
+        GoalVersion goalWithoutMealAllowance =
+                goalVersionWithoutMealAndRestAllowance(targetOn.minusDays(2).atStartOfDay());
         GoalVersion latestGoalWithMealAllowance = createGoalVersion(targetOn.minusDays(1).atTime(20, 0));
 
         FocusMetrics metrics = FocusMetrics.calculate(
@@ -159,7 +160,7 @@ class FocusMetricsTest {
                 meal(nextOn, 10, 11),
                 study(nextOn, 11, 12, hours(1))
         );
-        GoalVersion currentGoalWithoutMealAllowance = goalVersionWithoutBreakAllowance(
+        GoalVersion currentGoalWithoutMealAllowance = goalVersionWithoutMealAndRestAllowance(
                 LOG_ON.minusDays(1).atStartOfDay()
         );
         GoalVersion goalCreatedAtNextDayInKorea = createGoalVersion(LOG_ON.atTime(16, 0));
