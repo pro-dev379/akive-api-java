@@ -149,7 +149,7 @@ class SessionalPlanQueryServiceTest {
                         FIRST_TOTAL_QUANTITY_ID,
                         START_ON,
                         100,
-                        100
+                        75
                 )
         );
         given(dailyQuantityRepository.findTotalQuantityDailyCompletionAmountsByUserIdAndDateBetween(
