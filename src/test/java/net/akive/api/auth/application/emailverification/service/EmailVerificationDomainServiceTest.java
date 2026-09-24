@@ -13,9 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.VERIFICATION_CODE;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.createEmailVerification;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
@@ -30,7 +31,7 @@ import static org.mockito.BDDMockito.*;
 @ExtendWith(MockitoExtension.class)
 class EmailVerificationDomainServiceTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.of(2025, 5, 21, 10, 0);
+    private static final Instant NOW = Instant.parse("2025-05-21T01:00:00Z");
 
     @Mock
     EmailVerificationValidationService emailVerificationValidationService;
@@ -49,7 +50,7 @@ class EmailVerificationDomainServiceTest {
 
     @Test
     void 새로운_이메일_인증번호를_발급한다() {
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.instant()).willReturn(NOW);
         given(emailVerificationCodeGenerator.generate()).willReturn(VERIFICATION_CODE);
         given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.empty());
@@ -69,13 +70,13 @@ class EmailVerificationDomainServiceTest {
 
     @Test
     void 기존_인증정보가_존재하면_새_인증번호로_갱신한다() {
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.instant()).willReturn(NOW);
 
         EmailVerificationCode newVerificationCode = new EmailVerificationCode("654321");
         EmailVerification previous = createEmailVerification(
                 VERIFICATION_CODE,
                 SIGN_UP,
-                NOW.minusMinutes(5)
+                NOW.minus(5, MINUTES)
         );
 
         given(emailVerificationCodeGenerator.generate()).willReturn(newVerificationCode);
@@ -99,16 +100,20 @@ class EmailVerificationDomainServiceTest {
 
         assertThatThrownBy(() -> emailVerificationDomainService.issue(EMAIL, SIGN_UP)).isSameAs(exception);
 
-        then(currentTimeProvider).should(never()).now();
+        then(currentTimeProvider).should(never()).instant();
         then(emailVerificationCodeGenerator).should(never()).generate();
         then(emailVerificationStore).should(never()).findByEmailAndVerificationPurpose(any(), any());
     }
 
     @Test
     void 이메일_인증을_완료한다() {
-        EmailVerification emailVerification = createEmailVerification(VERIFICATION_CODE, SIGN_UP, NOW.minusMinutes(1));
+        EmailVerification emailVerification = createEmailVerification(
+                VERIFICATION_CODE,
+                SIGN_UP,
+                NOW.minus(1, MINUTES)
+        );
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.instant()).willReturn(NOW);
         given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 
@@ -135,7 +140,7 @@ class EmailVerificationDomainServiceTest {
     @Test
     void 인증_완료_확인한다() {
         EmailVerification emailVerification = createEmailVerification(VERIFICATION_CODE, SIGN_UP, NOW);
-        emailVerification.verify(VERIFICATION_CODE, NOW.plusMinutes(1));
+        emailVerification.verify(VERIFICATION_CODE, NOW.plus(1, MINUTES));
 
         given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
@@ -158,7 +163,11 @@ class EmailVerificationDomainServiceTest {
 
     @Test
     void 인증이_완료되지_않은_인증정보이면_인증_완료_확인에_실패한다() {
-        EmailVerification emailVerification = createEmailVerification(VERIFICATION_CODE, SIGN_UP, NOW.minusMinutes(1));
+        EmailVerification emailVerification = createEmailVerification(
+                VERIFICATION_CODE,
+                SIGN_UP,
+                NOW.minus(1, MINUTES)
+        );
 
         given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.of(emailVerification));

@@ -12,7 +12,7 @@ import net.akive.api.common.exception.business.RateLimitExceededException;
 import net.akive.api.common.exception.business.AuthenticationException;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -41,19 +41,19 @@ public class EmailVerification {
     @JsonProperty("verified")
     private boolean isVerified;
 
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 
-    private LocalDateTime lastSentAt;
+    private Instant lastSentAt;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public static EmailVerification create(
             Email email,
             EmailVerificationPurpose verificationPurpose,
             EmailVerificationCode verificationCode,
-            LocalDateTime requestedAt
+            Instant requestedAt
     ) {
-        LocalDateTime validatedRequestedAt = requireNonNull(requestedAt);
+        Instant validatedRequestedAt = requireNonNull(requestedAt);
 
         return EmailVerification.builder()
                 .email(requireNonNull(email))
@@ -67,7 +67,7 @@ public class EmailVerification {
                 .build();
     }
 
-    public void renew(EmailVerificationCode verificationCode, LocalDateTime requestedAt) {
+    public void renew(EmailVerificationCode verificationCode, Instant requestedAt) {
         requireNonNull(requestedAt);
         validateRenewable(requestedAt);
 
@@ -78,7 +78,7 @@ public class EmailVerification {
         this.lastSentAt = requestedAt;
     }
 
-    public void verify(EmailVerificationCode inputVerificationCode, LocalDateTime requestedAt) {
+    public void verify(EmailVerificationCode inputVerificationCode, Instant requestedAt) {
         EmailVerificationCode validatedInputVerificationCode = requireNonNull(inputVerificationCode);
         requireNonNull(requestedAt);
 
@@ -97,7 +97,7 @@ public class EmailVerification {
         this.isVerified = true;
     }
 
-    private void validateRenewable(LocalDateTime requestedAt) {
+    private void validateRenewable(Instant requestedAt) {
         if (this.renewalCount >= EMAIL_VERIFICATION_RENEWAL_MAX_COUNT) {
             throw new RateLimitExceededException(EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED);
         }
@@ -107,7 +107,7 @@ public class EmailVerification {
         }
     }
 
-    private boolean isRenewalRequestedTooFrequently(LocalDateTime requestedAt) {
+    private boolean isRenewalRequestedTooFrequently(Instant requestedAt) {
         return Duration.between(this.lastSentAt, requestedAt)
                 .compareTo(EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL) < 0;
     }

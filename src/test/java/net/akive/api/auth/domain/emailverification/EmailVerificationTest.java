@@ -6,8 +6,9 @@ import net.akive.api.common.exception.business.RateLimitExceededException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationFixture.*;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.VERIFICATION_CODE_EXPIRATION_DURATION;
@@ -47,7 +48,7 @@ class EmailVerificationTest {
     void 새_인증정보로_갱신한다() {
         EmailVerification emailVerification = createEmailVerification();
 
-        LocalDateTime secondRequestedAt = REQUESTED_AT.plus(EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL);
+        Instant secondRequestedAt = REQUESTED_AT.plus(EMAIL_VERIFICATION_RENEWAL_MIN_INTERVAL);
         EmailVerificationCode newCode = new EmailVerificationCode("111111");
 
         emailVerification.renew(newCode, secondRequestedAt);
@@ -77,14 +78,14 @@ class EmailVerificationTest {
     void 갱신_횟수를_초과하면_갱신이_거부된다() {
         EmailVerification emailVerification = createEmailVerification();
 
-        emailVerification.renew(new EmailVerificationCode("111111"), REQUESTED_AT.plusMinutes(1));
-        emailVerification.renew(new EmailVerificationCode("222222"), REQUESTED_AT.plusMinutes(2));
-        emailVerification.renew(new EmailVerificationCode("333333"), REQUESTED_AT.plusMinutes(3));
+        emailVerification.renew(new EmailVerificationCode("111111"), REQUESTED_AT.plus(1, MINUTES));
+        emailVerification.renew(new EmailVerificationCode("222222"), REQUESTED_AT.plus(2, MINUTES));
+        emailVerification.renew(new EmailVerificationCode("333333"), REQUESTED_AT.plus(3, MINUTES));
 
         assertThatExceptionOfType(RateLimitExceededException.class)
                 .isThrownBy(() -> emailVerification.renew(
                         new EmailVerificationCode("444444"),
-                        REQUESTED_AT.plusMinutes(4)
+                        REQUESTED_AT.plus(4, MINUTES)
                 ))
                 .extracting(RateLimitExceededException::getError)
                 .isEqualTo(EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED);
@@ -94,7 +95,7 @@ class EmailVerificationTest {
     void 이메일_인증한다() {
         EmailVerification emailVerification = createEmailVerification();
 
-        emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plusMinutes(1));
+        emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plus(1, MINUTES));
 
         assertThat(emailVerification.isVerified()).isTrue();
     }
@@ -112,12 +113,12 @@ class EmailVerificationTest {
     void 이미_인증이_완료된_경우_인증에_실패한다() {
         EmailVerification emailVerification = createEmailVerification();
 
-        emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plusMinutes(1));
+        emailVerification.verify(VERIFICATION_CODE, REQUESTED_AT.plus(1, MINUTES));
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> emailVerification.verify(
                         VERIFICATION_CODE,
-                        REQUESTED_AT.plusMinutes(2)
+                        REQUESTED_AT.plus(2, MINUTES)
                 ))
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(EMAIL_ALREADY_VERIFIED);
@@ -130,7 +131,7 @@ class EmailVerificationTest {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> emailVerification.verify(
                         new EmailVerificationCode("000000"),
-                        REQUESTED_AT.plusMinutes(1)
+                        REQUESTED_AT.plus(1, MINUTES)
                 ))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(EMAIL_VERIFICATION_CODE_MISMATCH);

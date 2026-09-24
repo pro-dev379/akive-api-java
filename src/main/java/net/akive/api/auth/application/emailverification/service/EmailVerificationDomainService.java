@@ -12,7 +12,7 @@ import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.EMAIL_VERIFICATION_NOT_FOUND;
@@ -30,7 +30,7 @@ class EmailVerificationDomainService {
     EmailVerification issue(Email email, EmailVerificationPurpose verificationPurpose) {
         emailVerificationValidationService.validateIssuable(email, verificationPurpose);
 
-        LocalDateTime requestedAt = currentTimeProvider.now();
+        Instant requestedAt = currentTimeProvider.instant();
         EmailVerificationCode verificationCode = emailVerificationCodeGenerator.generate();
 
         return emailVerificationStore
@@ -52,7 +52,7 @@ class EmailVerificationDomainService {
                 .findByEmailAndVerificationPurpose(email, verificationPurpose)
                 .orElseThrow(() -> new ResourceNotFoundException(EMAIL_VERIFICATION_NOT_FOUND));
 
-        emailVerification.verify(verificationCode, currentTimeProvider.now());
+        emailVerification.verify(verificationCode, currentTimeProvider.instant());
 
         return emailVerification;
     }
