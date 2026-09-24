@@ -1,15 +1,14 @@
 package net.akive.api.auth.domain.emailverification;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.domain.Email;
-import net.akive.api.common.exception.business.BusinessRuleViolationException;
-import net.akive.api.common.exception.business.ResourceConflictException;
-import net.akive.api.common.exception.business.RateLimitExceededException;
 import net.akive.api.common.exception.business.AuthenticationException;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.RateLimitExceededException;
+import net.akive.api.common.exception.business.ResourceConflictException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -18,11 +17,11 @@ import java.util.Objects;
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.auth.domain.emailverification.EmailVerificationPolicy.*;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
+import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_VERIFICATION_CODE_MISMATCH;
-import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_VERIFIED;
 import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.RateLimitError.EMAIL_VERIFICATION_RENEWAL_TOO_FREQUENT;
-import static net.akive.api.common.exception.business.AuthenticationError.EMAIL_VERIFICATION_CODE_EXPIRED;
+import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_VERIFIED;
 
 @Getter
 @Builder(access = PRIVATE)
@@ -38,8 +37,7 @@ public class EmailVerification {
 
     private int renewalCount;
 
-    @JsonProperty("verified")
-    private boolean isVerified;
+    private boolean verified;
 
     private Instant expiresAt;
 
@@ -60,7 +58,7 @@ public class EmailVerification {
                 .verificationPurpose(requireNonNull(verificationPurpose))
                 .verificationCode(requireNonNull(verificationCode))
                 .renewalCount(0)
-                .isVerified(false)
+                .verified(false)
                 .expiresAt(validatedRequestedAt.plus(VERIFICATION_CODE_EXPIRATION_DURATION))
                 .lastSentAt(validatedRequestedAt)
                 .createdAt(validatedRequestedAt)
@@ -73,7 +71,7 @@ public class EmailVerification {
 
         this.verificationCode = requireNonNull(verificationCode);
         this.renewalCount++;
-        this.isVerified = false;
+        this.verified = false;
         this.expiresAt = requestedAt.plus(VERIFICATION_CODE_EXPIRATION_DURATION);
         this.lastSentAt = requestedAt;
     }
@@ -82,7 +80,7 @@ public class EmailVerification {
         EmailVerificationCode validatedInputVerificationCode = requireNonNull(inputVerificationCode);
         requireNonNull(requestedAt);
 
-        if (this.isVerified) {
+        if (this.verified) {
             throw new ResourceConflictException(EMAIL_ALREADY_VERIFIED);
         }
 
@@ -94,7 +92,7 @@ public class EmailVerification {
             throw new BusinessRuleViolationException(EMAIL_VERIFICATION_CODE_MISMATCH);
         }
 
-        this.isVerified = true;
+        this.verified = true;
     }
 
     private void validateRenewable(Instant requestedAt) {
