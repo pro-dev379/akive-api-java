@@ -2,6 +2,7 @@ package net.akive.api.plan.application.service.sessionalplan;
 
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.sessionalplan.dto.CompletionRateFindQuery;
+import net.akive.api.plan.application.provided.sessionalplan.dto.CompletionRateSeriesFindQuery;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDetailFindQuery;
 import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
@@ -10,9 +11,7 @@ import net.akive.api.plan.application.result.SessionalPlanDetail;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
-import net.akive.api.plan.domain.value.CompletionRate;
-import net.akive.api.plan.domain.value.QuantityCompletionAmount;
-import net.akive.api.plan.domain.value.SessionPeriod;
+import net.akive.api.plan.domain.value.*;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,11 +19,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static net.akive.api.common.analytics.TimeSeriesUnit.DAY;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.plan.domain.fixture.CompletionRateFixture.*;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_TOTAL_QUANTITY_ID;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.createReconstructedTotalQuantity;
@@ -124,22 +124,46 @@ class SessionalPlanQueryServiceTest {
     }
 
     @Test
-    void 조회_기간의_세션_총량별_계획량과_완료량으로_달성률을_조회한다() {
-        LocalDate startOn = LocalDate.of(2026, 9, 14);
-        LocalDate endOn = LocalDate.of(2026, 9, 20);
-        CompletionRateFindQuery query = new CompletionRateFindQuery(USER_ID, startOn, endOn);
+    void 조회_기간의_달성률을_조회한다() {
+        CompletionRateFindQuery query = new CompletionRateFindQuery(USER_ID, START_ON, END_ON);
         List<QuantityCompletionAmount> completionAmounts =
                 List.of(new QuantityCompletionAmount(100, 75));
         given(dailyQuantityRepository.findTotalQuantityCompletionAmountsByUserIdAndDateBetween(
                 USER_ID,
-                startOn,
-                endOn
+                START_ON,
+                END_ON
         )).willReturn(completionAmounts);
 
         CompletionRate completionRate = sessionalPlanQueryService.findCompletionRate(query);
 
         assertThat(completionRate.value()).isEqualByComparingTo("75.0");
         then(dailyQuantityRepository).should()
-                .findTotalQuantityCompletionAmountsByUserIdAndDateBetween(USER_ID, startOn, endOn);
+                .findTotalQuantityCompletionAmountsByUserIdAndDateBetween(USER_ID, START_ON, END_ON);
+    }
+
+    @Test
+    void 조회_기간의_달성률을_일_단위로_조회한다() {
+        CompletionRateSeriesFindQuery query = new CompletionRateSeriesFindQuery(USER_ID, START_ON, END_ON, DAY);
+        List<TotalQuantityDailyCompletionAmount> dailyCompletionAmounts = List.of(
+                createDailyCompletionAmount(
+                        FIRST_TOTAL_QUANTITY_ID,
+                        START_ON,
+                        100,
+                        100
+                )
+        );
+        given(dailyQuantityRepository.findTotalQuantityDailyCompletionAmountsByUserIdAndDateBetween(
+                USER_ID,
+                START_ON,
+                END_ON
+        )).willReturn(dailyCompletionAmounts);
+
+        CompletionRateSeries completionRateSeries = sessionalPlanQueryService.findCompletionRateSeries(query);
+
+        assertThat(completionRateSeries.periodCompletionRates()).hasSize(7);
+        assertThat(completionRateSeries.periodCompletionRates().getFirst().completionRate().value())
+                .isEqualByComparingTo("75.0");
+        then(dailyQuantityRepository).should()
+                .findTotalQuantityDailyCompletionAmountsByUserIdAndDateBetween(USER_ID, START_ON, END_ON);
     }
 }

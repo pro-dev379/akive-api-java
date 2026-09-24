@@ -20,7 +20,7 @@ import java.util.List;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_DATE_RANGE;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
-import static net.akive.api.dailylog.domain.FocusMetricsUnit.DAY;
+import static net.akive.api.common.analytics.TimeSeriesUnit.DAY;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;

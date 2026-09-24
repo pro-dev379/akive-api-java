@@ -1,6 +1,6 @@
 package net.akive.api.dailylog.application.provided.dto;
 
-import net.akive.api.dailylog.domain.FocusMetricsUnit;
+import net.akive.api.common.analytics.TimeSeriesUnit;
 
 import java.time.LocalDate;
 
@@ -10,7 +10,7 @@ public record FocusMetricsSeriesFindQuery(
         Long userId,
         LocalDate startOn,
         LocalDate endOn,
-        FocusMetricsUnit unit
+        TimeSeriesUnit unit
 ) {
 
     public FocusMetricsSeriesFindQuery {

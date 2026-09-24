@@ -8,6 +8,7 @@ import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.data.DailyPlanData;
 import net.akive.api.plan.domain.value.QuantityCompletionAmount;
 import net.akive.api.plan.domain.value.QuantityUnit;
+import net.akive.api.plan.domain.value.TotalQuantityDailyCompletionAmount;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -43,6 +44,26 @@ public class DailyQuantityJpaAdapter implements DailyQuantityRepository {
                 .map(projection -> new QuantityCompletionAmount(
                         Math.toIntExact(projection.getQuantityAmount()),
                         Math.toIntExact(projection.getCompletedQuantityAmount())
+                ))
+                .toList();
+    }
+
+    @Override
+    public List<TotalQuantityDailyCompletionAmount> findTotalQuantityDailyCompletionAmountsByUserIdAndDateBetween(
+            Long userId,
+            LocalDate startOn,
+            LocalDate endOn
+    ) {
+        return dailyQuantityJpaRepository
+                .findTotalQuantityDailyCompletionAmountsByUserIdAndDateBetween(userId, startOn, endOn)
+                .stream()
+                .map(projection -> new TotalQuantityDailyCompletionAmount(
+                        projection.getTotalQuantityId(),
+                        projection.getDate(),
+                        new QuantityCompletionAmount(
+                                Math.toIntExact(projection.getQuantityAmount()),
+                                Math.toIntExact(projection.getCompletedQuantityAmount())
+                        )
                 ))
                 .toList();
     }

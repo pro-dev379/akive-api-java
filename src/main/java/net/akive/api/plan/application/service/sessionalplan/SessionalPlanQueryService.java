@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.application.provided.sessionalplan.dto.CompletionRateFindQuery;
+import net.akive.api.plan.application.provided.sessionalplan.dto.CompletionRateSeriesFindQuery;
 import net.akive.api.plan.application.provided.sessionalplan.dto.SessionalPlanDetailFindQuery;
 import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
@@ -12,10 +13,7 @@ import net.akive.api.plan.application.result.SessionalPlanDetail;
 import net.akive.api.plan.application.result.TotalQuantityProgress;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.model.TotalQuantity;
-import net.akive.api.plan.domain.value.CompletionRate;
-import net.akive.api.plan.domain.value.QuantityCompletionAmount;
-import net.akive.api.plan.domain.value.SessionPeriod;
-import net.akive.api.plan.domain.value.SessionWeek;
+import net.akive.api.plan.domain.value.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,6 +66,23 @@ class SessionalPlanQueryService implements SessionalPlanFinder {
                 );
 
         return CompletionRate.calculate(completionAmounts);
+    }
+
+    @Override
+    public CompletionRateSeries findCompletionRateSeries(CompletionRateSeriesFindQuery query) {
+        List<TotalQuantityDailyCompletionAmount> dailyCompletionAmounts =
+                dailyQuantityRepository.findTotalQuantityDailyCompletionAmountsByUserIdAndDateBetween(
+                        query.userId(),
+                        query.startOn(),
+                        query.endOn()
+                );
+
+        return CompletionRateSeries.calculate(
+                query.startOn(),
+                query.endOn(),
+                query.unit(),
+                dailyCompletionAmounts
+        );
     }
 
     private SessionalPlan findSessionalPlanOrThrow(Long sessionalPlanId, Long userId) {

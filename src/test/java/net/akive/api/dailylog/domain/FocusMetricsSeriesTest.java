@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.dailylog.domain.FocusMetricsUnit.DAY;
-import static net.akive.api.dailylog.domain.FocusMetricsUnit.MONTH;
-import static net.akive.api.dailylog.domain.FocusMetricsUnit.WEEK;
+import static net.akive.api.common.analytics.TimeSeriesUnit.DAY;
+import static net.akive.api.common.analytics.TimeSeriesUnit.MONTH;
+import static net.akive.api.common.analytics.TimeSeriesUnit.WEEK;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.LOG_ON;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.hours;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.study;

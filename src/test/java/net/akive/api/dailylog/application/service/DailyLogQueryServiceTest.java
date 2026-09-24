@@ -28,7 +28,7 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
 import static net.akive.api.dailylog.domain.DailyLogPolicy.DAILY_BOUNDARY_HOUR;
-import static net.akive.api.dailylog.domain.FocusMetricsUnit.DAY;
+import static net.akive.api.common.analytics.TimeSeriesUnit.DAY;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
 import static net.akive.api.user.domain.fixture.GoalFixture.goalVersionWithoutMealAndRestAllowance;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;

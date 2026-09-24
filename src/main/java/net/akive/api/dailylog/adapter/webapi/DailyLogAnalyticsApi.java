@@ -9,7 +9,7 @@ import net.akive.api.dailylog.application.provided.DailyLogFinder;
 import net.akive.api.dailylog.application.provided.dto.FocusMetricsFindQuery;
 import net.akive.api.dailylog.application.provided.dto.FocusMetricsSeriesFindQuery;
 import net.akive.api.dailylog.application.provided.dto.TimeUsageRatesFindQuery;
-import net.akive.api.dailylog.domain.FocusMetricsUnit;
+import net.akive.api.common.analytics.TimeSeriesUnit;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,7 +51,7 @@ public class DailyLogAnalyticsApi {
             @AuthenticatedUserId Long userId,
             @RequestParam LocalDate startOn,
             @RequestParam LocalDate endOn,
-            @RequestParam FocusMetricsUnit unit
+            @RequestParam TimeSeriesUnit unit
     ) {
         FocusMetricsSeriesFindQuery query = new FocusMetricsSeriesFindQuery(userId, startOn, endOn, unit);
 

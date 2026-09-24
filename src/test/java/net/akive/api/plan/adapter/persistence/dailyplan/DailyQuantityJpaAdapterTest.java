@@ -7,15 +7,14 @@ import net.akive.api.plan.domain.model.TotalQuantity;
 import net.akive.api.plan.domain.model.WeeklyQuantity;
 import net.akive.api.plan.domain.value.QuantityAmount;
 import net.akive.api.plan.domain.value.QuantityCompletionAmount;
+import net.akive.api.plan.domain.value.TotalQuantityDailyCompletionAmount;
 import net.akive.api.support.RepositoryTestSupport;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_SUBJECT_NAME;
-import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.SECOND_SUBJECT_NAME;
-import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.TOTAL_AMOUNT;
+import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -102,6 +101,30 @@ class DailyQuantityJpaAdapterTest extends RepositoryTestSupport {
                 new QuantityCompletionAmount(TOTAL_AMOUNT, firstCompletedAmount),
                 new QuantityCompletionAmount(TOTAL_AMOUNT, secondCompletedAmount)
         );
+    }
+
+    @Test
+    void 조회_기간에_해당하는_계획량과_완료량을_날짜와_세션_총량별로_합산한다() {
+        int completedAmount = 40;
+        SessionalPlan sessionalPlan = saveSessionalPlan();
+        TotalQuantity totalQuantity = completeFirstDailyQuantity(
+                saveTotalQuantity(sessionalPlan, FIRST_SUBJECT_NAME, TOTAL_AMOUNT),
+                completedAmount
+        );
+        flushAndClear();
+
+        List<TotalQuantityDailyCompletionAmount> dailyCompletionAmounts =
+                dailyQuantityRepository.findTotalQuantityDailyCompletionAmountsByUserIdAndDateBetween(
+                        sessionalPlan.getUser().getUserId(),
+                        QUERY_DATE,
+                        QUERY_DATE
+                );
+
+        assertThat(dailyCompletionAmounts).containsExactly(new TotalQuantityDailyCompletionAmount(
+                totalQuantity.getTotalQuantityId(),
+                QUERY_DATE,
+                new QuantityCompletionAmount(TOTAL_AMOUNT, completedAmount)
+        ));
     }
 
     private TotalQuantity completeFirstDailyQuantity(TotalQuantity totalQuantity, int completedAmount) {

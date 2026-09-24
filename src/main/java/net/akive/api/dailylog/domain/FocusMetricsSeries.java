@@ -1,6 +1,7 @@
 package net.akive.api.dailylog.domain;
 
 import net.akive.api.user.domain.GoalVersion;
+import net.akive.api.common.analytics.TimeSeriesUnit;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public record FocusMetricsSeries(List<PeriodFocusMetrics> periodFocusMetrics) {
     public static FocusMetricsSeries calculate(
             LocalDate startOn,
             LocalDate endOn,
-            FocusMetricsUnit unit,
+            TimeSeriesUnit unit,
             List<DailyLog> dailyLogs,
             List<GoalVersion> goals
     ) {
