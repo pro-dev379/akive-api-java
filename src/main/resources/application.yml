@@ -4,10 +4,8 @@ spring:
 
   cloud:
     aws:
-      secretsmanager:
-        region: ap-northeast-2
-      ses:
-        region: ap-northeast-2
+      region:
+        static: ap-northeast-2
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -34,3 +32,9 @@ email:
     verification: no-reply@akive.net
     welcome: no-reply@akive.net
     support: support@akive.net
+
+file:
+  storage:
+    s3:
+      bucket-name: akive-user
+      key-prefix: dev

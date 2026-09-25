@@ -28,3 +28,8 @@ jwt:
     secret: ${accessTokenSecret}
   refresh-token:
     secret: ${refreshTokenSecret}
+
+file:
+  storage:
+    s3:
+      key-prefix: prod

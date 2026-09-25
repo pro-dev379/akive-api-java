@@ -70,7 +70,10 @@ public enum BusinessRuleViolationError implements ApplicationError {
     DAILY_LOG_TIME_RANGE_IN_FUTURE("Daily log time range must not be in the future."),
 
     REPORT_DATE_IN_FUTURE("Report date must not be in future."),
-    INVALID_REPORT_TYPE("Invalid report type.")
+    INVALID_REPORT_TYPE("Invalid report type."),
+
+    FILE_SIZE_EXCEEDED("File is too large."),
+    FILE_CONTENT_TYPE_NOT_ALLOWED("File content type is not allowed."),
     ;
 
     private final String message;
