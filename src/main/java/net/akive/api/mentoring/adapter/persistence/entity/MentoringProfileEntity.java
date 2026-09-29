@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.mentoring.domain.MentoringProfile;
 import net.akive.api.user.adapter.persistence.entity.UserEntity;
@@ -48,10 +50,17 @@ public class MentoringProfileEntity extends BaseTimeEntity {
     }
 
     public MentoringProfile to() {
-        return MentoringProfile.reconstruct(
-                this.mentoringProfileId,
-                this.user.to(),
-                this.detail != null ? this.detail.to() : null
-        );
+        try {
+            return MentoringProfile.reconstruct(
+                    this.mentoringProfileId,
+                    this.user.to(),
+                    this.detail != null ? this.detail.to() : null
+            );
+        } catch (BusinessRuleViolationException e) {
+            throw new InvalidPersistedDataException(
+                    "Failed to reconstruct MentoringProfile: " + this.mentoringProfileId,
+                    e
+            );
+        }
     }
 }

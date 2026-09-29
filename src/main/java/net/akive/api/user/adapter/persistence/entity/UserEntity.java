@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.domain.Email;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.user.domain.LoginType;
 import net.akive.api.user.domain.RoleType;
@@ -69,15 +71,19 @@ public class UserEntity extends BaseTimeEntity {
     }
 
     public User to() {
-        return User.reconstruct(
-                this.userId,
-                new Email(this.email),
-                this.roleType,
-                this.loginType,
-                this.passwordHash,
-                this.userDetail.to(),
-                this.withdrawal == null ? Withdrawal.none() : this.withdrawal.to(),
-                this.getCreatedAt()
-        );
+        try {
+            return User.reconstruct(
+                    this.userId,
+                    new Email(this.email),
+                    this.roleType,
+                    this.loginType,
+                    this.passwordHash,
+                    this.userDetail.to(),
+                    this.withdrawal == null ? Withdrawal.none() : this.withdrawal.to(),
+                    this.getCreatedAt()
+            );
+        } catch (BusinessRuleViolationException e) {
+            throw new InvalidPersistedDataException("Failed to reconstruct User: " + this.userId, e);
+        }
     }
 }

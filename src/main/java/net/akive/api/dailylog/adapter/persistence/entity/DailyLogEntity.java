@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.DailyLogType;
@@ -70,14 +72,18 @@ public class DailyLogEntity extends BaseTimeEntity {
     }
 
     public DailyLog to(LocalDateTime reconstructedAt) {
-        return DailyLog.reconstruct(
-                this.dailyLogId,
-                this.user.to(),
-                this.logOn,
-                this.activityTime.to(reconstructedAt),
-                this.dailyLogType,
-                this.contents,
-                reconstructedAt
-        );
+        try {
+            return DailyLog.reconstruct(
+                    this.dailyLogId,
+                    this.user.to(),
+                    this.logOn,
+                    this.activityTime.to(reconstructedAt),
+                    this.dailyLogType,
+                    this.contents,
+                    reconstructedAt
+            );
+        } catch (BusinessRuleViolationException e) {
+            throw new InvalidPersistedDataException("Failed to reconstruct DailyLog: " + this.dailyLogId, e);
+        }
     }
 }

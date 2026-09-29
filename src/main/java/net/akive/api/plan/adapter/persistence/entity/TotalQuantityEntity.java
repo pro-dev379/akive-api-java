@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.plan.domain.model.TotalQuantity;
 import org.hibernate.annotations.OnDelete;
@@ -71,13 +73,20 @@ public class TotalQuantityEntity extends BaseTimeEntity {
     }
 
     public TotalQuantity to() {
-        return TotalQuantity.reconstruct(
-                this.totalQuantityId,
-                this.sessionalPlan.to(),
-                this.subject.to(),
-                this.totalQuantityAmount.to(),
-                this.weeklyQuantities.stream().map(WeeklyQuantityEntity::to).collect(Collectors.toList())
-        );
+        try {
+            return TotalQuantity.reconstruct(
+                    this.totalQuantityId,
+                    this.sessionalPlan.to(),
+                    this.subject.to(),
+                    this.totalQuantityAmount.to(),
+                    this.weeklyQuantities.stream().map(WeeklyQuantityEntity::to).collect(Collectors.toList())
+            );
+        } catch (BusinessRuleViolationException e) {
+            throw new InvalidPersistedDataException(
+                    "Failed to reconstruct TotalQuantity: " + this.totalQuantityId,
+                    e
+            );
+        }
     }
 
     private void addWeeklyQuantity(WeeklyQuantityEntity weeklyQuantity) {

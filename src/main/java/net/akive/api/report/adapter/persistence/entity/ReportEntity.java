@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.report.domain.Report;
 import net.akive.api.report.domain.ReportFeedback;
@@ -74,14 +76,18 @@ public class ReportEntity extends BaseTimeEntity {
     }
 
     public Report to(LocalDateTime reconstructedAt) {
-        return Report.reconstruct(
-                this.reportId,
-                this.user.to(),
-                this.reportOn,
-                this.reportType,
-                this.feedbackItems.stream().map(ReportFeedbackEntity::to).collect(Collectors.toList()),
-                reconstructedAt
-        );
+        try {
+            return Report.reconstruct(
+                    this.reportId,
+                    this.user.to(),
+                    this.reportOn,
+                    this.reportType,
+                    this.feedbackItems.stream().map(ReportFeedbackEntity::to).collect(Collectors.toList()),
+                    reconstructedAt
+            );
+        } catch (BusinessRuleViolationException e) {
+            throw new InvalidPersistedDataException("Failed to reconstruct Report: " + this.reportId, e);
+        }
     }
 
     private void addReportFeedback(ReportFeedbackEntity reportFeedback) {

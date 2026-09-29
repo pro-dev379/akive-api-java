@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.auth.domain.login.LegacyUserPassword;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.user.adapter.persistence.entity.UserEntity;
 
@@ -47,6 +49,13 @@ public class LegacyUserPasswordEntity extends BaseTimeEntity {
     }
 
     public LegacyUserPassword to() {
-        return new LegacyUserPassword(user.to(), passwordHash.to());
+        try {
+            return new LegacyUserPassword(this.user.to(), this.passwordHash.to());
+        } catch (BusinessRuleViolationException e) {
+            throw new InvalidPersistedDataException(
+                    "Failed to reconstruct LegacyUserPassword: " + this.legacyUserPasswordId,
+                    e
+            );
+        }
     }
 }

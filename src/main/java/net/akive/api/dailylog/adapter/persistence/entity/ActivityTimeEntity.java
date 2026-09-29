@@ -5,6 +5,7 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.dailylog.domain.ActivityTime;
 
 import java.time.LocalDateTime;
@@ -54,7 +55,7 @@ public class ActivityTimeEntity {
 
     private boolean isFocusRateExcluded() {
         if (this.focusRateExcluded != 0 && this.focusRateExcluded != 1) {
-            throw new IllegalStateException("Invalid focusRateExcluded value: " + this.focusRateExcluded);
+            throw new InvalidPersistedDataException("Invalid focusRateExcluded value: " + this.focusRateExcluded);
         }
 
         return this.focusRateExcluded == 1;

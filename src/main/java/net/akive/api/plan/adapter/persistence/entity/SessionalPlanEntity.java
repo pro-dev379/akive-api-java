@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.user.adapter.persistence.entity.UserEntity;
@@ -52,11 +54,18 @@ public class SessionalPlanEntity extends BaseTimeEntity {
     }
 
     public SessionalPlan to() {
-        return SessionalPlan.reconstruct(
-                this.sessionalPlanId,
-                this.user.to(),
-                this.sessionName,
-                this.sessionPeriod.to()
-        );
+        try {
+            return SessionalPlan.reconstruct(
+                    this.sessionalPlanId,
+                    this.user.to(),
+                    this.sessionName,
+                    this.sessionPeriod.to()
+            );
+        } catch (BusinessRuleViolationException e) {
+            throw new InvalidPersistedDataException(
+                    "Failed to reconstruct SessionalPlan: " + this.sessionalPlanId,
+                    e
+            );
+        }
     }
 }

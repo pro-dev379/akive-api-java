@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.user.domain.Goal;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -61,13 +63,17 @@ public class GoalEntity {
     }
 
     public Goal to() {
-        return Goal.reconstruct(
-                this.goalId,
-                this.user.to(),
-                this.attendOn,
-                this.rest10MinSec,
-                this.mealNum,
-                this.meal1TimeSec
-        );
+        try {
+            return Goal.reconstruct(
+                    this.goalId,
+                    this.user.to(),
+                    this.attendOn,
+                    this.rest10MinSec,
+                    this.mealNum,
+                    this.meal1TimeSec
+            );
+        } catch (BusinessRuleViolationException e) {
+            throw new InvalidPersistedDataException("Failed to reconstruct Goal: " + this.goalId, e);
+        }
     }
 }
