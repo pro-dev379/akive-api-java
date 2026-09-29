@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface DailyQuantityJpaRepository extends JpaRepository<DailyQuantityEntity, Long> {
+interface DailyQuantityJpaRepository extends JpaRepository<DailyQuantityEntity, Long> {
 
     @Query("""
         select dq

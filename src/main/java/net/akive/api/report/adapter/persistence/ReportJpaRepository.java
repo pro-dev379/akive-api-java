@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface ReportJpaRepository extends JpaRepository<ReportEntity, Long> {
+interface ReportJpaRepository extends JpaRepository<ReportEntity, Long> {
 
     Optional<ReportEntity> findByReportIdAndUser_UserId(Long reportId, Long userId);
 

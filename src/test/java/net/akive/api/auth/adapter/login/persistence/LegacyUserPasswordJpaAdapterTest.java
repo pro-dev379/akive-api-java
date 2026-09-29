@@ -19,7 +19,7 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
     void 회원_식별자로_레거시_패스워드를_조회한다() {
         User savedUser = userRepository.save(createUser());
         LegacyUserPassword legacyUserPassword = createLegacyUserPassword(savedUser);
-        legacyUserPasswordJpaRepository.save(LegacyUserPasswordEntity.from(legacyUserPassword));
+        entityManager.persist(LegacyUserPasswordEntity.from(legacyUserPassword));
         flushAndClear();
 
         Optional<LegacyUserPassword> foundLegacyUserPassword =
@@ -40,7 +40,7 @@ class LegacyUserPasswordJpaAdapterTest extends RepositoryTestSupport {
     void 회원_식별자로_레거시_패스워드를_삭제한다() {
         User savedUser = userRepository.save(createUser());
         LegacyUserPassword legacyUserPassword = createLegacyUserPassword(savedUser);
-        legacyUserPasswordJpaRepository.save(LegacyUserPasswordEntity.from(legacyUserPassword));
+        entityManager.persist(LegacyUserPasswordEntity.from(legacyUserPassword));
         flushAndClear();
 
         legacyUserPasswordRepository.deleteByUserId(savedUser.getUserId());

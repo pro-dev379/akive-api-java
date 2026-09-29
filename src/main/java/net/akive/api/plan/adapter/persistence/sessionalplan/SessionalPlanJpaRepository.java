@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface SessionalPlanJpaRepository extends JpaRepository<SessionalPlanEntity, Long> {
+interface SessionalPlanJpaRepository extends JpaRepository<SessionalPlanEntity, Long> {
 
     Optional<SessionalPlanEntity> findBySessionalPlanIdAndUser_UserId(Long sessionalPlanId, Long userId);
 

@@ -2,6 +2,7 @@ package net.akive.api.dailylog.adapter.persistence;
 
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
+import net.akive.api.dailylog.adapter.persistence.entity.DailyLogEntity;
 import net.akive.api.dailylog.domain.ActivityTime;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.support.RepositoryTestSupport;
@@ -32,8 +33,7 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
         DailyLog savedDailyLog = dailyLogRepository.save(dailyLog);
         flushAndClear();
 
-        DailyLog foundDailyLog = dailyLogJpaRepository.findById(savedDailyLog.getDailyLogId())
-                .orElseThrow()
+        DailyLog foundDailyLog = entityManager.find(DailyLogEntity.class, savedDailyLog.getDailyLogId())
                 .to(currentTimeProvider.now());
 
         assertThat(foundDailyLog.getDailyLogId()).isNotNull();
@@ -199,7 +199,7 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
         dailyLogRepository.delete(savedDailyLog);
         flushAndClear();
 
-        assertThat(dailyLogJpaRepository.findById(savedDailyLog.getDailyLogId())).isEmpty();
+        assertThat(entityManager.find(DailyLogEntity.class, savedDailyLog.getDailyLogId())).isNull();
     }
 
     private DailyLog saveLog(User user, LocalDate date, int startHour, int endHour) {

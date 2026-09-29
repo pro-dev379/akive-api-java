@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface GoalJpaRepository extends JpaRepository<GoalEntity, Long> {
+interface GoalJpaRepository extends JpaRepository<GoalEntity, Long> {
 
     @Query("""
         select g

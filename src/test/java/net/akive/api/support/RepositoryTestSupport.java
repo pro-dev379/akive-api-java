@@ -1,15 +1,11 @@
 package net.akive.api.support;
 
 import jakarta.persistence.EntityManager;
-import net.akive.api.auth.adapter.login.persistence.LegacyUserPasswordJpaRepository;
 import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
 import net.akive.api.common.time.CurrentTimeProvider;
-import net.akive.api.dailylog.adapter.persistence.DailyLogJpaRepository;
-import net.akive.api.dailylog.adapter.persistence.entity.DailyLogEntity;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
-import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.ActivityTime;
-import net.akive.api.mentoring.adapter.persistence.MentoringProfileJpaRepository;
+import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
@@ -52,13 +48,7 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
     protected LegacyUserPasswordRepository legacyUserPasswordRepository;
 
     @Autowired
-    protected LegacyUserPasswordJpaRepository legacyUserPasswordJpaRepository;
-
-    @Autowired
     protected MentoringProfileRepository mentoringProfileRepository;
-
-    @Autowired
-    protected MentoringProfileJpaRepository mentoringProfileJpaRepository;
 
     @Autowired
     protected SessionalPlanRepository sessionalPlanRepository;
@@ -77,9 +67,6 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     @Autowired
     protected DailyLogRepository dailyLogRepository;
-
-    @Autowired
-    protected DailyLogJpaRepository dailyLogJpaRepository;
 
     @Autowired
     protected CurrentTimeProvider currentTimeProvider;
@@ -161,7 +148,7 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
     }
 
     private DailyLog saveDailyLog(DailyLog dailyLog) {
-        return dailyLogJpaRepository.save(DailyLogEntity.from(dailyLog)).to(currentTimeProvider.now());
+        return dailyLogRepository.save(dailyLog);
     }
 
     protected void flushAndClear() {

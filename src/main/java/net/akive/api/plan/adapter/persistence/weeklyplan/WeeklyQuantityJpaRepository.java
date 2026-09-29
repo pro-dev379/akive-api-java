@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface WeeklyQuantityJpaRepository extends JpaRepository<WeeklyQuantityEntity, Long> {
+interface WeeklyQuantityJpaRepository extends JpaRepository<WeeklyQuantityEntity, Long> {
 
     @Query("""
         select distinct wq

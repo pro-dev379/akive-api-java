@@ -19,8 +19,10 @@ class MentoringProfileJpaAdapterTest extends RepositoryTestSupport {
         MentoringProfile savedMentoringProfile = mentoringProfileRepository.save(mentoringProfile);
         flushAndClear();
 
-        MentoringProfileEntity foundMentoringProfileEntity =
-                mentoringProfileJpaRepository.findById(savedMentoringProfile.getMentoringProfileId()).orElseThrow();
+        MentoringProfileEntity foundMentoringProfileEntity = entityManager.find(
+                MentoringProfileEntity.class,
+                savedMentoringProfile.getMentoringProfileId()
+        );
         MentoringProfile foundMentoringProfile = foundMentoringProfileEntity.to();
 
         assertThat(foundMentoringProfile.getMentoringProfileId())
