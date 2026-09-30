@@ -1,12 +1,12 @@
 package net.akive.api.file.adapter.webapi.fixture;
 
 import net.akive.api.file.adapter.webapi.request.UploadUrlCreateRequest;
-import net.akive.api.file.domain.UploadPurpose;
+import net.akive.api.file.domain.ImageType;
 
 import java.util.stream.Stream;
 
 import static net.akive.api.file.application.fixture.FileCommandFixture.FILE_SIZE;
-import static net.akive.api.file.domain.UploadPurpose.PROFILE_IMAGE;
+import static net.akive.api.file.domain.ImageType.PROFILE_IMAGE;
 import static net.akive.api.file.domain.fixture.FileFixture.CONTENT_TYPE;
 
 public class FileRequestFixture {
@@ -19,11 +19,11 @@ public class FileRequestFixture {
     }
 
     public static UploadUrlCreateRequest createUploadUrlCreateRequest(
-            UploadPurpose uploadPurpose,
+            ImageType imageType,
             String contentType,
             Long fileSize
     ) {
-        return new UploadUrlCreateRequest(uploadPurpose, contentType, fileSize);
+        return new UploadUrlCreateRequest(imageType, contentType, fileSize);
     }
 
     public static Stream<UploadUrlCreateRequest> invalidUploadUrlCreateRequests() {

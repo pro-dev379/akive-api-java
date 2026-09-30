@@ -19,8 +19,8 @@ import java.util.stream.Stream;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.FILE_CONTENT_TYPE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.FILE_SIZE_EXCEEDED;
 import static net.akive.api.file.adapter.webapi.fixture.FileRequestFixture.createUploadUrlCreateRequest;
-import static net.akive.api.file.domain.FileUploadPolicy.PROFILE_IMAGE_MAX_SIZE_BYTES;
-import static net.akive.api.file.domain.UploadPurpose.PROFILE_IMAGE;
+import static net.akive.api.file.domain.FilePolicy.PROFILE_IMAGE_MAX_SIZE_BYTES;
+import static net.akive.api.file.domain.ImageType.PROFILE_IMAGE;
 import static net.akive.api.file.domain.fixture.FileFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.mockito.BDDMockito.*;
@@ -63,13 +63,13 @@ class FileApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 업로드_목적_형식이_올바르지_않으면_400을_응답한다() {
+    void 이미지_타입이_올바르지_않으면_400을_응답한다() {
         postJson(
                 UPLOAD_URLS_URL,
                 USER_ID,
                 """
                 {
-                    "uploadPurpose": "INVALID",
+                    "imageType": "INVALID",
                     "contentType": "image/jpeg",
                     "fileSize": 1024
                 }

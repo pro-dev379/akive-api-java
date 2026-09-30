@@ -74,6 +74,7 @@ public enum BusinessRuleViolationError implements ApplicationError {
 
     FILE_SIZE_EXCEEDED("File is too large."),
     FILE_CONTENT_TYPE_NOT_ALLOWED("File content type is not allowed."),
+    INVALID_IMAGE_ASSET_STATE("Image asset state is invalid."),
     ;
 
     private final String message;

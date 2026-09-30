@@ -9,14 +9,15 @@ import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.FILE_SIZE_EXCEEDED;
 
 @NoArgsConstructor(access = PRIVATE)
-public final class FileUploadPolicy {
+public final class FilePolicy {
 
+    public static final int OBJECT_KEY_MAX_LENGTH = 512;
     public static final Duration UPLOAD_URL_EXPIRATION_DURATION = Duration.ofMinutes(10);
     public static final long PROFILE_IMAGE_MAX_SIZE_BYTES = 5L * 1024 * 1024;
     public static final long ATTENDANCE_PROOF_MAX_SIZE_BYTES = 10L * 1024 * 1024;
 
-    public static void validateMaxFileSize(UploadPurpose uploadPurpose, long fileSize) {
-        long maxSize = switch (uploadPurpose) {
+    public static void validateMaxFileSize(ImageType imageType, long fileSize) {
+        long maxSize = switch (imageType) {
             case PROFILE_IMAGE -> PROFILE_IMAGE_MAX_SIZE_BYTES;
             case ATTENDANCE_PROOF -> ATTENDANCE_PROOF_MAX_SIZE_BYTES;
         };

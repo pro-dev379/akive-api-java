@@ -1,15 +1,15 @@
 package net.akive.api.file.application.fixture;
 
 import net.akive.api.file.application.provided.dto.UploadUrlCreateCommand;
-import net.akive.api.file.domain.UploadPurpose;
+import net.akive.api.file.domain.ImageType;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.stream.Stream;
 
-import static net.akive.api.file.domain.FileUploadPolicy.ATTENDANCE_PROOF_MAX_SIZE_BYTES;
-import static net.akive.api.file.domain.FileUploadPolicy.PROFILE_IMAGE_MAX_SIZE_BYTES;
-import static net.akive.api.file.domain.UploadPurpose.ATTENDANCE_PROOF;
-import static net.akive.api.file.domain.UploadPurpose.PROFILE_IMAGE;
+import static net.akive.api.file.domain.FilePolicy.ATTENDANCE_PROOF_MAX_SIZE_BYTES;
+import static net.akive.api.file.domain.FilePolicy.PROFILE_IMAGE_MAX_SIZE_BYTES;
+import static net.akive.api.file.domain.ImageType.ATTENDANCE_PROOF;
+import static net.akive.api.file.domain.ImageType.PROFILE_IMAGE;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class FileCommandFixture {
@@ -24,11 +24,11 @@ public class FileCommandFixture {
     }
 
     public static UploadUrlCreateCommand createUploadUrlCreateCommand(
-            UploadPurpose uploadPurpose,
+            ImageType imageType,
             String contentType,
             long fileSize
     ) {
-        return new UploadUrlCreateCommand(USER_ID, uploadPurpose, contentType, fileSize);
+        return new UploadUrlCreateCommand(USER_ID, imageType, contentType, fileSize);
     }
 
     public static Stream<Arguments> allowedUploadFiles() {

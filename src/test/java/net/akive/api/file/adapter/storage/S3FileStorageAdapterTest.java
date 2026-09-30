@@ -16,7 +16,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequ
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import static net.akive.api.file.application.fixture.FileCommandFixture.FILE_SIZE;
-import static net.akive.api.file.domain.FileUploadPolicy.UPLOAD_URL_EXPIRATION_DURATION;
+import static net.akive.api.file.domain.FilePolicy.UPLOAD_URL_EXPIRATION_DURATION;
 import static net.akive.api.file.domain.fixture.FileFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

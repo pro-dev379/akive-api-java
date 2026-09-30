@@ -8,15 +8,15 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-class FileUploadPolicyTest {
+class FilePolicyTest {
 
     @ParameterizedTest
     @CsvSource({
             "PROFILE_IMAGE, 5242880",
             "ATTENDANCE_PROOF, 10485760"
     })
-    void 업로드_목적별_최대_파일_크기까지_허용한다(UploadPurpose uploadPurpose, long maxFileSize) {
-        assertThatCode(() -> FileUploadPolicy.validateMaxFileSize(uploadPurpose, maxFileSize))
+    void 이미지_타입별_최대_파일_크기까지_허용한다(ImageType imageType, long maxFileSize) {
+        assertThatCode(() -> FilePolicy.validateMaxFileSize(imageType, maxFileSize))
                 .doesNotThrowAnyException();
     }
 
@@ -25,9 +25,9 @@ class FileUploadPolicyTest {
             "PROFILE_IMAGE, 5242880",
             "ATTENDANCE_PROOF, 10485760"
     })
-    void 업로드_목적별_최대_파일_크기를_초과하면_예외를_던진다(UploadPurpose uploadPurpose, long maxFileSize) {
+    void 이미지_타입별_최대_파일_크기를_초과하면_예외를_던진다(ImageType imageType, long maxFileSize) {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> FileUploadPolicy.validateMaxFileSize(uploadPurpose, maxFileSize + 1))
+                .isThrownBy(() -> FilePolicy.validateMaxFileSize(imageType, maxFileSize + 1))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(FILE_SIZE_EXCEEDED);
     }
