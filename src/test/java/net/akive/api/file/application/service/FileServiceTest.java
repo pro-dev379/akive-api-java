@@ -199,11 +199,11 @@ class FileServiceTest {
         given(imageAssetRepository.findByImageAssetId(UNKNOWN_IMAGE_ASSET_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> fileService.deleteImageAsset(IMAGE_ASSET_ID))
+                .isThrownBy(() -> fileService.deleteImageAsset(UNKNOWN_IMAGE_ASSET_ID))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(IMAGE_ASSET_NOT_FOUND);
 
-        then(imageAssetRepository).should().findByImageAssetId(IMAGE_ASSET_ID);
+        then(imageAssetRepository).should().findByImageAssetId(UNKNOWN_IMAGE_ASSET_ID);
         then(fileStorage).shouldHaveNoInteractions();
         then(imageAssetRepository).should(never()).delete(any(ImageAsset.class));
     }

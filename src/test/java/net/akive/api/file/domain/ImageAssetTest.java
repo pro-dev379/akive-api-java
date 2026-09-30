@@ -99,7 +99,7 @@ class ImageAssetTest {
     void 변환_규칙_버전과_변환본_유형이_중복된_변환본이_있으면_복원할_수_없다() {
         assertInvalidState(() -> readyImageAsset(
                 thumbnailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION),
-                detailImageVariant(SECOND_IMAGE_VARIANT_ID, RECIPE_VERSION)
+                thumbnailImageVariant(SECOND_IMAGE_VARIANT_ID, RECIPE_VERSION)
         ));
     }
 
