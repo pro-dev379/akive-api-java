@@ -4,6 +4,7 @@ import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserSignUpByEmailRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
 
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static net.akive.api.common.domain.EmailFixture.EMAIL_ADDRESS;
@@ -48,16 +49,16 @@ public class MemberAccountRequestFixture {
     }
 
     public static UserDetailUpdateRequest createUserDetailUpdateRequest() {
-        return createUserDetailUpdateRequest(NICKNAME, IMG_URL, AIM);
+        return createUserDetailUpdateRequest(NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
     }
 
     public static UserDetailUpdateRequest createUserDetailUpdateRequest(
             String nickname,
-            String imgUrl,
+            UUID profileImageAssetId,
             String aim
     ) {
         UserDetailUpdateRequest.UserDetailRequest targetUserDetail =
-                new UserDetailUpdateRequest.UserDetailRequest(nickname, imgUrl, aim);
+                new UserDetailUpdateRequest.UserDetailRequest(nickname, profileImageAssetId, aim);
 
         return new UserDetailUpdateRequest(targetUserDetail);
     }
@@ -65,11 +66,19 @@ public class MemberAccountRequestFixture {
     public static Stream<UserDetailUpdateRequest> invalidDetailUpdateRequests() {
         return Stream.of(
                 new UserDetailUpdateRequest(null),
-                createUserDetailUpdateRequest(null, IMG_URL, AIM),
-                createUserDetailUpdateRequest("", IMG_URL, AIM),
-                createUserDetailUpdateRequest(" ", IMG_URL, AIM),
-                createUserDetailUpdateRequest("a".repeat(NICKNAME_MAX_LENGTH + 1), IMG_URL, AIM),
-                createUserDetailUpdateRequest(NICKNAME, IMG_URL, "a".repeat(AIM_MAX_LENGTH + 1))
+                createUserDetailUpdateRequest(null, PROFILE_IMAGE_ASSET_ID, AIM),
+                createUserDetailUpdateRequest("", PROFILE_IMAGE_ASSET_ID, AIM),
+                createUserDetailUpdateRequest(" ", PROFILE_IMAGE_ASSET_ID, AIM),
+                createUserDetailUpdateRequest(
+                        "a".repeat(NICKNAME_MAX_LENGTH + 1),
+                        PROFILE_IMAGE_ASSET_ID,
+                        AIM
+                ),
+                createUserDetailUpdateRequest(
+                        NICKNAME,
+                        PROFILE_IMAGE_ASSET_ID,
+                        "a".repeat(AIM_MAX_LENGTH + 1)
+                )
         );
     }
 

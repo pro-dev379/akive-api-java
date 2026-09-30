@@ -5,9 +5,9 @@ import net.akive.api.file.domain.ImageType;
 
 import java.util.stream.Stream;
 
+import static net.akive.api.file.adapter.storage.fixture.S3FileStorageFixture.CONTENT_TYPE;
 import static net.akive.api.file.application.fixture.FileCommandFixture.FILE_SIZE;
 import static net.akive.api.file.domain.ImageType.PROFILE_IMAGE;
-import static net.akive.api.file.domain.fixture.FileFixture.CONTENT_TYPE;
 
 public class FileRequestFixture {
 

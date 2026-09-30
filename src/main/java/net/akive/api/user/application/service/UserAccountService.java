@@ -6,6 +6,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
+import net.akive.api.file.application.provided.FileManager;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.event.UserWithdrawnEvent;
 import net.akive.api.user.application.provided.UserAccountManager;
@@ -21,6 +22,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+import java.util.UUID;
+
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 
 @Service
@@ -29,6 +33,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.USER
 public class UserAccountService implements UserAccountManager {
 
     private final UserValidator userValidator;
+    private final FileManager fileManager;
 
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
@@ -66,9 +71,20 @@ public class UserAccountService implements UserAccountManager {
 
         userValidator.validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
 
-        user.updateUserDetail(command.targetNickname(), command.targetImgUrl(), command.targetAim());
+        UUID existingProfileImageAssetId = user.getUserDetail().profileImageAssetId();
+
+        user.updateUserDetail(
+                command.targetNickname(),
+                command.targetProfileImageAssetId(),
+                command.targetAim()
+        );
 
         userRepository.save(user);
+
+        if (existingProfileImageAssetId != null
+                && !Objects.equals(existingProfileImageAssetId, command.targetProfileImageAssetId())) {
+            fileManager.deleteImageAsset(existingProfileImageAssetId);
+        }
     }
 
     @Override

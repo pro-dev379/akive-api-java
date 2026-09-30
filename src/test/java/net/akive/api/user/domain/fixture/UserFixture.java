@@ -67,14 +67,22 @@ public class UserFixture {
         return createReconstructedUser(userId, PASSWORD_HASH);
     }
 
+    public static User createReconstructedUser(Long userId, UserDetail userDetail) {
+        return createReconstructedUser(userId, PASSWORD_HASH, userDetail);
+    }
+
     public static User createReconstructedUser(Long userId, String passwordHash) {
+        return createReconstructedUser(userId, passwordHash, UserDetail.initial(NICKNAME));
+    }
+
+    public static User createReconstructedUser(Long userId, String passwordHash, UserDetail userDetail) {
         return User.reconstruct(
                 userId,
                 EMAIL,
                 ROLE_TYPE,
                 LOGIN_TYPE,
                 passwordHash,
-                UserDetail.initial(NICKNAME),
+                userDetail,
                 Withdrawal.none(),
                 CREATED_AT
         );

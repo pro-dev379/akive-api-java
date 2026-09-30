@@ -34,6 +34,8 @@ email:
     support: support@akive.net
 
 file:
+  cdn:
+    base-url: https://dev-cdn.akive.net
   storage:
     s3:
       bucket-name: akive-bucket-dev

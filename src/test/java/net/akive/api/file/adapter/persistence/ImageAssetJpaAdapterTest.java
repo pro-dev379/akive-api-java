@@ -1,13 +1,12 @@
 package net.akive.api.file.adapter.persistence;
 
-import net.akive.api.file.adapter.persistence.entity.ImageAssetEntity;
 import net.akive.api.file.application.required.ImageAssetRepository;
 import net.akive.api.file.domain.ImageAsset;
 import net.akive.api.support.RepositoryTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.UUID;
+import java.util.Optional;
 
 import static net.akive.api.file.domain.ImageType.ATTENDANCE_PROOF;
 import static net.akive.api.file.domain.ProcessingStatus.UPLOADING;
@@ -26,7 +25,7 @@ class ImageAssetJpaAdapterTest extends RepositoryTestSupport {
         ImageAsset savedImageAsset = imageAssetRepository.save(imageAsset);
         flushAndClear();
 
-        ImageAsset foundImageAsset = findImageAsset(IMAGE_ASSET_ID);
+        ImageAsset foundImageAsset = imageAssetRepository.findByImageAssetId(IMAGE_ASSET_ID).orElseThrow();
 
         assertThat(foundImageAsset.getImageAssetId()).isEqualTo(IMAGE_ASSET_ID);
         assertThat(foundImageAsset.getImageType()).isEqualTo(ATTENDANCE_PROOF);
@@ -44,12 +43,12 @@ class ImageAssetJpaAdapterTest extends RepositoryTestSupport {
         imageAssetRepository.save(ImageAsset.create(IMAGE_ASSET_ID, ATTENDANCE_PROOF));
         flushAndClear();
 
-        ImageAsset persistedImageAsset = findImageAsset(IMAGE_ASSET_ID);
+        ImageAsset persistedImageAsset = imageAssetRepository.findByImageAssetId(IMAGE_ASSET_ID).orElseThrow();
 
         ImageAsset resavedImageAsset = imageAssetRepository.save(persistedImageAsset);
         flushAndClear();
 
-        ImageAsset foundImageAsset = findImageAsset(IMAGE_ASSET_ID);
+        ImageAsset foundImageAsset = imageAssetRepository.findByImageAssetId(IMAGE_ASSET_ID).orElseThrow();
 
         assertThat(resavedImageAsset.getImageAssetId()).isEqualTo(IMAGE_ASSET_ID);
         assertThat(resavedImageAsset.getCreatedAt()).isEqualTo(persistedImageAsset.getCreatedAt());
@@ -57,7 +56,27 @@ class ImageAssetJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundImageAsset.getCreatedAt()).isEqualTo(persistedImageAsset.getCreatedAt());
     }
 
-    private ImageAsset findImageAsset(UUID imageAssetId) {
-        return entityManager.find(ImageAssetEntity.class, imageAssetId).to();
+    @Test
+    void 식별자로_이미지_에셋을_조회한다() {
+        ImageAsset savedImageAsset = imageAssetRepository.save(ImageAsset.create(IMAGE_ASSET_ID, ATTENDANCE_PROOF));
+        flushAndClear();
+
+        assertThat(imageAssetRepository.findByImageAssetId(IMAGE_ASSET_ID))
+                .get()
+                .extracting(ImageAsset::getImageAssetId)
+                .isEqualTo(savedImageAsset.getImageAssetId());
+    }
+
+    @Test
+    void 이미지_에셋을_삭제한다() {
+        ImageAsset savedImageAsset = imageAssetRepository.save(ImageAsset.create(IMAGE_ASSET_ID, ATTENDANCE_PROOF));
+        flushAndClear();
+
+        imageAssetRepository.delete(savedImageAsset);
+        flushAndClear();
+
+        Optional<ImageAsset> foundImageAsset = imageAssetRepository.findByImageAssetId(IMAGE_ASSET_ID);
+
+        assertThat(foundImageAsset).isEmpty();
     }
 }

@@ -6,6 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.user.domain.UserDetail;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.UUID;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -19,15 +23,21 @@ public class UserDetailEntity {
     @Column(nullable = false)
     private String nickname;
 
-    private String imgUrl;
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(name = "image_asset_id", columnDefinition = "BINARY(16)")
+    private UUID profileImageAssetId;
 
     private String aim;
 
     public static UserDetailEntity from(UserDetail userDetail) {
-        return new UserDetailEntity(userDetail.nickname(), userDetail.imgUrl(), userDetail.aim());
+        return new UserDetailEntity(
+                userDetail.nickname(),
+                userDetail.profileImageAssetId(),
+                userDetail.aim()
+        );
     }
 
     public UserDetail to() {
-        return new UserDetail(this.nickname, this.imgUrl, this.aim);
+        return new UserDetail(this.nickname, this.profileImageAssetId, this.aim);
     }
 }

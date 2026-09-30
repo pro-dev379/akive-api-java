@@ -3,6 +3,7 @@ package net.akive.api.user.adapter.webapi;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.file.application.provided.FileManager;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
@@ -13,6 +14,7 @@ import net.akive.api.user.application.provided.UserNicknameChecker;
 import net.akive.api.user.application.provided.dto.UserDetailUpdateCommand;
 import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.domain.User;
+import net.akive.api.user.domain.UserDetail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,12 +23,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
+import java.net.URI;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.file.domain.VariantType.DETAIL;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserDetailUpdateRequest;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserWithdrawRequest;
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
@@ -44,6 +49,8 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     private static final String MEMBER_ME_URL = "/members/me";
     private static final String MEMBER_WITHDRAW_URL = "/members/me/withdraw";
     private static final String MEMBER_CHECK_NICKNAME_URL = "/members/me/check-nickname";
+    private static final URI PROFILE_IMAGE_URL =
+            URI.create("https://dev-cdn.akive.net/variants/profile-images/1/detail.webp");
 
     @MockitoBean
     UserAccountManager userAccountManager;
@@ -54,10 +61,17 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     @MockitoBean
     UserNicknameChecker userNicknameChecker;
 
+    @MockitoBean
+    FileManager fileManager;
+
     @Test
     void 개인_정보를_조회한다() {
-        User user = createReconstructedUser(USER_ID);
+        UserDetail userDetail = createUserDetail();
+        User user = createReconstructedUser(USER_ID, userDetail);
+
         given(userFinder.findOrThrowByUserIdAndNotWithdrawn(USER_ID)).willReturn(user);
+        given(fileManager.findImageUrl(userDetail.profileImageAssetId(), DETAIL))
+                .willReturn(Optional.of(PROFILE_IMAGE_URL));
 
         MvcTestResultAssert result = get(MEMBER_ME_URL, USER_ID).hasStatus(OK);
 
@@ -66,10 +80,27 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
         result.bodyJson().extractingPath("$.loginType").isEqualTo(LOGIN_TYPE.name());
         result.bodyJson().extractingPath("$.createdAt").isEqualTo(CREATED_AT.toString());
         result.bodyJson().extractingPath("$.userDetail.nickname").isEqualTo(NICKNAME);
-        result.bodyJson().extractingPath("$.userDetail.aim").isNull();
-        result.bodyJson().extractingPath("$.userDetail.imgUrl").isNull();
+        result.bodyJson().extractingPath("$.userDetail.aim").isEqualTo(AIM);
+        result.bodyJson().extractingPath("$.userDetail.profileImage.assetId")
+                .isEqualTo(userDetail.profileImageAssetId().toString());
+        result.bodyJson().extractingPath("$.userDetail.profileImage.url")
+                .isEqualTo(PROFILE_IMAGE_URL.toString());
 
         then(userFinder).should().findOrThrowByUserIdAndNotWithdrawn(USER_ID);
+        then(fileManager).should().findImageUrl(userDetail.profileImageAssetId(), DETAIL);
+    }
+
+    @Test
+    void 프로필_이미지가_없는_개인_정보를_조회한다() {
+        User user = createReconstructedUser(USER_ID);
+
+        given(userFinder.findOrThrowByUserIdAndNotWithdrawn(USER_ID)).willReturn(user);
+
+        MvcTestResultAssert result = get(MEMBER_ME_URL, USER_ID).hasStatus(OK);
+
+        result.bodyJson().extractingPath("$.userDetail.profileImage").isNull();
+        then(userFinder).should().findOrThrowByUserIdAndNotWithdrawn(USER_ID);
+        then(fileManager).shouldHaveNoInteractions();
     }
 
     @Test
@@ -86,7 +117,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     @Test
     void 개인_상세_정보를_수정한다() {
         UserDetailUpdateRequest request = createUserDetailUpdateRequest();
-        UserDetailUpdateCommand command = new UserDetailUpdateCommand(USER_ID, NICKNAME, IMG_URL, AIM);
+        UserDetailUpdateCommand command = new UserDetailUpdateCommand(USER_ID, NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
 
         patchJson(MEMBER_ME_URL, USER_ID, toJson(request)).hasStatus(NO_CONTENT);
 
@@ -104,7 +135,8 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     @Test
     void 개인_상세_정보_수정_시_멤버를_조회할_수_없으면_404를_응답한다() {
         UserDetailUpdateRequest request = createUserDetailUpdateRequest();
-        UserDetailUpdateCommand command = new UserDetailUpdateCommand(UNKNOWN_USER_ID, NICKNAME, IMG_URL, AIM);
+        UserDetailUpdateCommand command =
+                new UserDetailUpdateCommand(UNKNOWN_USER_ID, NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
         willThrow(new ResourceNotFoundException(USER_NOT_FOUND))
                 .given(userAccountManager)
                 .updateUserDetail(command);
@@ -119,7 +151,8 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     @Test
     void 개인_상세_정보_수정_시_이미_존재하는_닉네임이면_409를_응답한다() {
         UserDetailUpdateRequest request = createUserDetailUpdateRequest();
-        UserDetailUpdateCommand command = new UserDetailUpdateCommand(USER_ID, NICKNAME, IMG_URL, AIM);
+        UserDetailUpdateCommand command =
+                new UserDetailUpdateCommand(USER_ID, NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
         willThrow(new ResourceConflictException(NICKNAME_ALREADY_EXISTS))
                 .given(userAccountManager)
                 .updateUserDetail(command);

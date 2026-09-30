@@ -17,22 +17,22 @@ class UserDetailTest {
         UserDetail userDetail = UserDetail.initial(NICKNAME);
 
         assertThat(userDetail.nickname()).isEqualTo(NICKNAME);
-        assertThat(userDetail.imgUrl()).isNull();
+        assertThat(userDetail.profileImageAssetId()).isNull();
         assertThat(userDetail.aim()).isNull();
     }
 
     @Test
     void 회원_상세_정보를_생성한다() {
-        UserDetail userDetail = new UserDetail(NICKNAME, IMG_URL, AIM);
+        UserDetail userDetail = new UserDetail(NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
 
         assertThat(userDetail.nickname()).isEqualTo(NICKNAME);
-        assertThat(userDetail.imgUrl()).isEqualTo(IMG_URL);
+        assertThat(userDetail.profileImageAssetId()).isEqualTo(PROFILE_IMAGE_ASSET_ID);
         assertThat(userDetail.aim()).isEqualTo(AIM);
     }
 
     @Test
     void 닉네임_앞뒤에_공백이_있으면_제거된다() {
-        UserDetail userDetail = new UserDetail("  akive  ", IMG_URL, AIM);
+        UserDetail userDetail = new UserDetail("  akive  ", PROFILE_IMAGE_ASSET_ID, AIM);
 
         assertThat(userDetail.nickname()).isEqualTo("akive");
     }
@@ -41,7 +41,7 @@ class UserDetailTest {
     void 닉네임은_최대_글자_수일_수_있다() {
         String nickname = "a".repeat(NICKNAME_MAX_LENGTH);
 
-        UserDetail userDetail = new UserDetail(nickname, IMG_URL, AIM);
+        UserDetail userDetail = new UserDetail(nickname, PROFILE_IMAGE_ASSET_ID, AIM);
 
         assertThat(userDetail.nickname()).isEqualTo(nickname);
     }
@@ -51,7 +51,7 @@ class UserDetailTest {
         String nickname = "a".repeat(NICKNAME_MAX_LENGTH + 1);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> new UserDetail(nickname, IMG_URL, AIM))
+                .isThrownBy(() -> new UserDetail(nickname, PROFILE_IMAGE_ASSET_ID, AIM))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
@@ -59,12 +59,12 @@ class UserDetailTest {
     @Test
     void 닉네임이_없으면_생성에_실패한다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> new UserDetail(null, IMG_URL, AIM))
+                .isThrownBy(() -> new UserDetail(null, PROFILE_IMAGE_ASSET_ID, AIM))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> new UserDetail("   ", IMG_URL, AIM))
+                .isThrownBy(() -> new UserDetail("   ", PROFILE_IMAGE_ASSET_ID, AIM))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
@@ -73,7 +73,7 @@ class UserDetailTest {
     void 목표는_최대_글자_수일_수_있다() {
         String aim = "a".repeat(AIM_MAX_LENGTH);
 
-        UserDetail userDetail = new UserDetail(NICKNAME, IMG_URL, aim);
+        UserDetail userDetail = new UserDetail(NICKNAME, PROFILE_IMAGE_ASSET_ID, aim);
 
         assertThat(userDetail.aim()).isEqualTo(aim);
     }
@@ -83,7 +83,7 @@ class UserDetailTest {
         String aim = "a".repeat(AIM_MAX_LENGTH + 1);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> new UserDetail(NICKNAME, IMG_URL, aim))
+                .isThrownBy(() -> new UserDetail(NICKNAME, PROFILE_IMAGE_ASSET_ID, aim))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }

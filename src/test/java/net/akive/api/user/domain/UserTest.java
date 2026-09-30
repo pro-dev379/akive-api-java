@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.BLANK_VALUE;
 import static net.akive.api.user.domain.RoleType.MEMBER;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.PROFILE_IMAGE_ASSET_ID;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.createUserDetail;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWAL_REASON;
@@ -50,7 +51,7 @@ class UserTest {
         assertThat(user.getLoginType()).isEqualTo(LOGIN_TYPE);
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
         assertThat(user.getUserDetail().nickname()).isEqualTo(NICKNAME);
-        assertThat(user.getUserDetail().imgUrl()).isNull();
+        assertThat(user.getUserDetail().profileImageAssetId()).isNull();
         assertThat(user.getUserDetail().aim()).isNull();
         assertThat(user.getWithdrawal().withdrawnAt()).isNull();
         assertThat(user.getWithdrawal().withdrawalReason()).isNull();
@@ -99,10 +100,10 @@ class UserTest {
     void 회원_상세_정보를_변경한다() {
         User user = createUser();
 
-        user.updateUserDetail("  akive  ", "https://example.com/image.png", "목표");
+        user.updateUserDetail("  akive  ", PROFILE_IMAGE_ASSET_ID, "목표");
 
         assertThat(user.getUserDetail().nickname()).isEqualTo("akive");
-        assertThat(user.getUserDetail().imgUrl()).isEqualTo("https://example.com/image.png");
+        assertThat(user.getUserDetail().profileImageAssetId()).isEqualTo(PROFILE_IMAGE_ASSET_ID);
         assertThat(user.getUserDetail().aim()).isEqualTo("목표");
     }
 

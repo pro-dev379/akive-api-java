@@ -28,6 +28,8 @@ public enum ResourceNotFoundError implements ApplicationError {
     DAILY_LOG_NOT_FOUND("Daily log not found."),
 
     REPORT_NOT_FOUND("Report not found."),
+
+    IMAGE_ASSET_NOT_FOUND("Image asset not found."),
     ;
 
     private final String message;

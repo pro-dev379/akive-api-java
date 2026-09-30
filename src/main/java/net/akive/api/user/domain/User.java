@@ -8,6 +8,7 @@ import net.akive.api.common.domain.Email;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
@@ -77,8 +78,8 @@ public class User {
         this.passwordHash = validateRequiredPasswordHash(targetPasswordHash);
     }
 
-    public void updateUserDetail(String targetNickname, String targetImgUrl, String targetAim) {
-        this.userDetail = new UserDetail(targetNickname, targetImgUrl, targetAim);
+    public void updateUserDetail(String targetNickname, UUID targetProfileImageAssetId, String targetAim) {
+        this.userDetail = new UserDetail(targetNickname, targetProfileImageAssetId, targetAim);
     }
 
     public void withdraw(LocalDateTime withdrawnAt, String reason) {

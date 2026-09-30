@@ -2,6 +2,8 @@ package net.akive.api.file.application.service;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.core.config.file.CdnProperties;
 import net.akive.api.file.application.provided.FileManager;
 import net.akive.api.file.application.provided.dto.UploadUrlCreateCommand;
 import net.akive.api.file.application.provided.dto.UploadUrlCreateResult;
@@ -11,10 +13,16 @@ import net.akive.api.file.application.required.ImageAssetRepository;
 import net.akive.api.file.domain.ImageAsset;
 import net.akive.api.file.domain.ImageType;
 import net.akive.api.file.domain.UploadUrl;
+import net.akive.api.file.domain.VariantType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.util.Optional;
+import java.util.UUID;
+
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.FILE_CONTENT_TYPE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
 import static net.akive.api.file.domain.FilePolicy.UPLOAD_URL_EXPIRATION_DURATION;
 import static net.akive.api.file.domain.FilePolicy.validateMaxFileSize;
 
@@ -26,6 +34,7 @@ class FileService implements FileManager {
     private final FileStorage fileStorage;
     private final ImageAssetRepository imageAssetRepository;
     private final ImageAssetIdGenerator imageAssetIdGenerator;
+    private final CdnProperties cdnProperties;
 
     @Override
     public UploadUrlCreateResult createUploadUrl(UploadUrlCreateCommand command)
@@ -48,6 +57,29 @@ class FileService implements FileManager {
                 uploadUrl.value(),
                 uploadUrl.expiresAt()
         );
+    }
+
+    @Override
+    public Optional<URI> findImageUrl(UUID imageAssetId, VariantType variantType) throws ResourceNotFoundException {
+        ImageAsset imageAsset = findImageAssetOrThrow(imageAssetId);
+
+        return imageAsset.getVariants().stream()
+                .filter(variant -> variant.getRecipeVersion().equals(imageAsset.getActiveRecipeVersion()))
+                .filter(variant -> variant.getVariantType() == variantType)
+                .findFirst()
+                .map(variant -> cdnProperties.resolve(variant.getObjectKey()));
+    }
+
+    @Override
+    public void deleteImageAsset(UUID imageAssetId) throws ResourceNotFoundException {
+        ImageAsset imageAsset = findImageAssetOrThrow(imageAssetId);
+
+        if (imageAsset.getMasterObjectKey() != null) {
+            fileStorage.delete(imageAsset.getMasterObjectKey());
+        }
+        imageAsset.getVariants().forEach(variant -> fileStorage.delete(variant.getObjectKey()));
+
+        imageAssetRepository.delete(imageAsset);
     }
 
     private ImageAsset registerImageAsset(ImageType imageType) {
@@ -78,5 +110,10 @@ class FileService implements FileManager {
                 default -> throw new BusinessRuleViolationException(FILE_CONTENT_TYPE_NOT_ALLOWED);
             };
         };
+    }
+
+    private ImageAsset findImageAssetOrThrow(UUID imageAssetId) {
+        return imageAssetRepository.findByImageAssetId(imageAssetId)
+                .orElseThrow(() -> new ResourceNotFoundException(IMAGE_ASSET_NOT_FOUND));
     }
 }

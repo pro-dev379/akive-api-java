@@ -30,6 +30,8 @@ jwt:
     secret: ${refreshTokenSecret}
 
 file:
+  cdn:
+    base-url: https://cdn.akive.net
   storage:
     s3:
       bucket-name: akive-bucket-prod

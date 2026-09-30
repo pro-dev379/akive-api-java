@@ -18,10 +18,10 @@ import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.FILE_CONTENT_TYPE_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.FILE_SIZE_EXCEEDED;
+import static net.akive.api.file.adapter.storage.fixture.S3FileStorageFixture.*;
 import static net.akive.api.file.adapter.webapi.fixture.FileRequestFixture.createUploadUrlCreateRequest;
 import static net.akive.api.file.domain.FilePolicy.PROFILE_IMAGE_MAX_SIZE_BYTES;
 import static net.akive.api.file.domain.ImageType.PROFILE_IMAGE;
-import static net.akive.api.file.domain.fixture.FileFixture.*;
 import static net.akive.api.file.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.mockito.BDDMockito.*;

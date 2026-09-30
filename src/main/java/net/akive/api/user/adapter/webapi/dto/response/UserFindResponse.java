@@ -2,7 +2,9 @@ package net.akive.api.user.adapter.webapi.dto.response;
 
 import net.akive.api.user.domain.User;
 
+import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record UserFindResponse(
         String email,
@@ -12,7 +14,7 @@ public record UserFindResponse(
         LocalDateTime createdAt
 ) {
 
-    public static UserFindResponse from(User user) {
+    public static UserFindResponse from(User user, ProfileImageResponse profileImage) {
         return new UserFindResponse(
                 user.getEmail().value(),
                 user.getRoleType().name(),
@@ -20,11 +22,13 @@ public record UserFindResponse(
                 new UserDetailResponse(
                         user.getUserDetail().nickname(),
                         user.getUserDetail().aim(),
-                        user.getUserDetail().imgUrl()
+                        profileImage
                 ),
                 user.getCreatedAt()
         );
     }
 
-    public record UserDetailResponse(String nickname, String aim, String imgUrl) {}
+    public record UserDetailResponse(String nickname, String aim, ProfileImageResponse profileImage) {}
+
+    public record ProfileImageResponse(UUID assetId, URI url) {}
 }

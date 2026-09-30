@@ -6,15 +6,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.BLANK_VALUE;
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_IMAGE_ASSET_STATE;
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.file.domain.FilePolicy.OBJECT_KEY_MAX_LENGTH;
 import static net.akive.api.file.domain.ImageType.ATTENDANCE_PROOF;
 import static net.akive.api.file.domain.ProcessingStatus.*;
-import static net.akive.api.file.domain.VariantType.DETAIL;
-import static net.akive.api.file.domain.VariantType.THUMBNAIL;
 import static net.akive.api.file.domain.fixture.ImageAssetFixture.*;
+import static net.akive.api.file.domain.fixture.ImageVariantFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -22,16 +19,8 @@ class ImageAssetTest {
 
     @Test
     void 저장된_이미지_에셋을_복원한다() {
-        ImageVariant imageVariant = reconstructImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION, THUMBNAIL);
-
-        ImageAsset imageAsset = reconstructImageAsset(
-                MASTER_OBJECT_KEY,
-                RECIPE_VERSION,
-                READY,
-                null,
-                PROCESSED_AT,
-                List.of(imageVariant)
-        );
+        ImageVariant imageVariant = thumbnailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION);
+        ImageAsset imageAsset = readyImageAsset(imageVariant);
 
         assertThat(imageAsset.getProcessingStatus()).isEqualTo(READY);
         assertThat(imageAsset.getActiveRecipeVersion()).isEqualTo(RECIPE_VERSION);
@@ -53,8 +42,8 @@ class ImageAssetTest {
     }
 
     @Test
-    void 이미지_변환_상태에서_원본_객체_키와_부분_생성된_변환본이_존재할_수_있다() {
-        ImageVariant imageVariant = reconstructImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION, THUMBNAIL);
+    void 이미지_변환_상태에서_마스터_객체_키와_부분_생성된_변환본이_존재할_수_있다() {
+        ImageVariant imageVariant = thumbnailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION);
 
         ImageAsset imageAsset = reconstructImageAsset(
                 MASTER_OBJECT_KEY,
@@ -71,7 +60,7 @@ class ImageAssetTest {
     }
 
     @Test
-    void 이미지_변환_중_상태에서_원본_객체_키가_없으면_복원할_수_없다() {
+    void 이미지_변환_중_상태에서_마스터_객체_키가_없으면_복원할_수_없다() {
         assertInvalidState(() -> reconstructImageAsset(
                 null,
                 null,
@@ -83,7 +72,7 @@ class ImageAssetTest {
     }
 
     @Test
-    void 이미지_변환_완료_상태에서_활성회된_이미지_버전과_변환본이_없으면_복원할_수_없다() {
+    void 이미지_변환_완료_상태에서_활성화된_변환_규칙_버전과_변환본이_없으면_복원할_수_없다() {
         assertInvalidState(() -> reconstructImageAsset(
                 MASTER_OBJECT_KEY,
                 null,
@@ -107,22 +96,15 @@ class ImageAssetTest {
     }
 
     @Test
-    void 이미지_변환_규칙_버전과_변환본_유형이_중복된_변환본이_있으면_복원할_수_없다() {
-        assertInvalidState(() -> reconstructImageAsset(
-                MASTER_OBJECT_KEY,
-                RECIPE_VERSION,
-                READY,
-                null,
-                PROCESSED_AT,
-                List.of(
-                        reconstructImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION, DETAIL),
-                        reconstructImageVariant(SECOND_IMAGE_VARIANT_ID, RECIPE_VERSION, DETAIL)
-                )
+    void 변환_규칙_버전과_변환본_유형이_중복된_변환본이_있으면_복원할_수_없다() {
+        assertInvalidState(() -> readyImageAsset(
+                thumbnailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION),
+                detailImageVariant(SECOND_IMAGE_VARIANT_ID, RECIPE_VERSION)
         ));
     }
 
     @Test
-    void 원본_객체_키가_공백이면_복원할_수_없다() {
+    void 마스터_객체_키가_공백이면_복원할_수_없다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> reconstructImageAsset(
                         " ",
@@ -137,7 +119,7 @@ class ImageAssetTest {
     }
 
     @Test
-    void 원본_객체_키가_512자를_초과하면_복원할_수_없다() {
+    void 마스터_객체_키가_512자를_초과하면_복원할_수_없다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> reconstructImageAsset(
                         "a".repeat(OBJECT_KEY_MAX_LENGTH + 1),

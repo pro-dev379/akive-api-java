@@ -1,11 +1,11 @@
-package net.akive.api.file.domain.fixture;
+package net.akive.api.file.adapter.storage.fixture;
 
 import java.net.URI;
 import java.time.Instant;
 
 import static net.akive.api.file.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
 
-public class FileFixture {
+public class S3FileStorageFixture {
 
     public static final String BUCKET_NAME = "akive-bucket-dev";
     public static final String FILE_KEY = "uploads/profile-images/" + IMAGE_ASSET_ID + "/original.jpg";
@@ -16,6 +16,7 @@ public class FileFixture {
     );
     public static final Instant EXPIRES_AT = Instant.parse("2026-09-25T00:10:00Z");
 
-    private FileFixture() {
+    private S3FileStorageFixture() {
+
     }
 }

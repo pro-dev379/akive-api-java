@@ -10,7 +10,8 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.file.domain.FilePolicy.OBJECT_KEY_MAX_LENGTH;
 import static net.akive.api.file.domain.ImageFormat.WEBP;
 import static net.akive.api.file.domain.VariantType.THUMBNAIL;
-import static net.akive.api.file.domain.fixture.ImageAssetFixture.*;
+import static net.akive.api.file.domain.fixture.ImageAssetFixture.RECIPE_VERSION;
+import static net.akive.api.file.domain.fixture.ImageVariantFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

@@ -4,6 +4,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
+import net.akive.api.file.application.provided.FileManager;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.event.UserWithdrawnEvent;
 import net.akive.api.user.application.provided.UserValidator;
@@ -14,6 +15,7 @@ import net.akive.api.user.application.required.GoalRepository;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
+import net.akive.api.user.domain.UserDetail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,12 +25,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.application.fixture.UserAccountCommandFixture.*;
 import static net.akive.api.user.domain.UserPolicy.*;
+import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWN_AT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +49,9 @@ class UserAccountServiceTest {
 
     @Mock
     GoalRepository goalRepository;
+
+    @Mock
+    FileManager fileManager;
 
     @Mock
     UserSignUpDomainService userSignUpDomainService;
@@ -113,7 +120,7 @@ class UserAccountServiceTest {
     }
 
     @Test
-    void 회원_상세_정보를_변경한다() {
+    void 회원_상세_정보를_수정한다() {
         UserDetailUpdateCommand command = createUserDetailUpdateCommand();
         User user = createReconstructedUser(command.userId());
 
@@ -122,17 +129,54 @@ class UserAccountServiceTest {
         userAccountService.updateUserDetail(command);
 
         assertThat(user.getUserDetail().nickname()).isEqualTo(command.targetNickname());
-        assertThat(user.getUserDetail().imgUrl()).isEqualTo(command.targetImgUrl());
+        assertThat(user.getUserDetail().profileImageAssetId())
+                .isEqualTo(command.targetProfileImageAssetId());
         assertThat(user.getUserDetail().aim()).isEqualTo(command.targetAim());
 
         then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
         then(userValidator).should()
                 .validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
         then(userRepository).should().save(user);
+        then(fileManager).shouldHaveNoInteractions();
     }
 
     @Test
-    void 상세_정보를_변경할_회원이_없으면_회원_상세_정보를_저장하지_않는다() {
+    void 회원_상세_정보_수정_시_프로필_이미지_에셋이_변경되면_기존_이미지_에셋을_삭제한다() {
+        UUID existingProfileImageAssetId = PROFILE_IMAGE_ASSET_ID;
+        UUID targetProfileImageAssetId = ANOTHER_PROFILE_IMAGE_ASSET_ID;
+        UserDetailUpdateCommand command = new UserDetailUpdateCommand(
+                USER_ID,
+                NICKNAME,
+                targetProfileImageAssetId,
+                AIM
+        );
+        User user = createReconstructedUser(command.userId(), createUserDetail(existingProfileImageAssetId));
+
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+
+        userAccountService.updateUserDetail(command);
+
+        assertThat(user.getUserDetail().profileImageAssetId()).isEqualTo(targetProfileImageAssetId);
+        then(userRepository).should().save(user);
+        then(fileManager).should().deleteImageAsset(existingProfileImageAssetId);
+    }
+
+    @Test
+    void 회원_상세_정보_수정_시_프로필_이미지_에셋이_기존과_동일하면_기존_이미지_에셋을_삭제하지_않는다() {
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand();
+        UserDetail existingUserDetail = createUserDetail(command.targetProfileImageAssetId());
+        User user = createReconstructedUser(command.userId(), existingUserDetail);
+
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+
+        userAccountService.updateUserDetail(command);
+
+        then(userRepository).should().save(user);
+        then(fileManager).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 상세_정보를_수정할_회원이_없으면_회원_상세_정보를_저장하지_않는다() {
         UserDetailUpdateCommand command = createUserDetailUpdateCommand(UNKNOWN_USER_ID);
 
         given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.empty());
@@ -148,7 +192,7 @@ class UserAccountServiceTest {
     }
 
     @Test
-    void 자기_자신을_제외하고도_이미_존재하는_닉네임이면_회원_상세_정보를_변경하지_않고_저장하지_않는다() {
+    void 자기_자신을_제외하고도_이미_존재하는_닉네임이면_회원_상세_정보를_수정하지_않고_저장하지_않는다() {
         UserDetailUpdateCommand command = createUserDetailUpdateCommand();
         User user = createReconstructedUser(command.userId());
 
