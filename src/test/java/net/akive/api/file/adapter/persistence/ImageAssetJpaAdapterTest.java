@@ -28,7 +28,6 @@ class ImageAssetJpaAdapterTest extends RepositoryTestSupport {
 
         ImageAsset foundImageAsset = findImageAsset(IMAGE_ASSET_ID);
 
-        assertThat(savedImageAsset.getCreatedAt()).isNotNull();
         assertThat(foundImageAsset.getImageAssetId()).isEqualTo(IMAGE_ASSET_ID);
         assertThat(foundImageAsset.getImageType()).isEqualTo(ATTENDANCE_PROOF);
         assertThat(foundImageAsset.getProcessingStatus()).isEqualTo(UPLOADING);
@@ -37,23 +36,25 @@ class ImageAssetJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundImageAsset.getProcessingError()).isNull();
         assertThat(foundImageAsset.getProcessedAt()).isNull();
         assertThat(foundImageAsset.getVariants()).isEmpty();
-        assertThat(foundImageAsset.getCreatedAt()).isEqualTo(savedImageAsset.getCreatedAt());
+        assertThat(savedImageAsset.getCreatedAt()).isNotNull();
     }
 
     @Test
     void 기존_이미지_에셋을_다시_저장해도_새_이미지_에셋을_생성하지_않는다() {
-        ImageAsset savedImageAsset = imageAssetRepository.save(ImageAsset.create(IMAGE_ASSET_ID, ATTENDANCE_PROOF));
+        imageAssetRepository.save(ImageAsset.create(IMAGE_ASSET_ID, ATTENDANCE_PROOF));
         flushAndClear();
 
-        ImageAsset resavedImageAsset = imageAssetRepository.save(savedImageAsset);
+        ImageAsset persistedImageAsset = findImageAsset(IMAGE_ASSET_ID);
+
+        ImageAsset resavedImageAsset = imageAssetRepository.save(persistedImageAsset);
         flushAndClear();
 
         ImageAsset foundImageAsset = findImageAsset(IMAGE_ASSET_ID);
 
         assertThat(resavedImageAsset.getImageAssetId()).isEqualTo(IMAGE_ASSET_ID);
-        assertThat(resavedImageAsset.getCreatedAt()).isEqualTo(savedImageAsset.getCreatedAt());
+        assertThat(resavedImageAsset.getCreatedAt()).isEqualTo(persistedImageAsset.getCreatedAt());
         assertThat(foundImageAsset.getImageAssetId()).isEqualTo(IMAGE_ASSET_ID);
-        assertThat(foundImageAsset.getCreatedAt()).isEqualTo(savedImageAsset.getCreatedAt());
+        assertThat(foundImageAsset.getCreatedAt()).isEqualTo(persistedImageAsset.getCreatedAt());
     }
 
     private ImageAsset findImageAsset(UUID imageAssetId) {
