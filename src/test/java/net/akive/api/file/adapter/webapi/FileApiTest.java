@@ -22,6 +22,7 @@ import static net.akive.api.file.adapter.webapi.fixture.FileRequestFixture.creat
 import static net.akive.api.file.domain.FilePolicy.PROFILE_IMAGE_MAX_SIZE_BYTES;
 import static net.akive.api.file.domain.ImageType.PROFILE_IMAGE;
 import static net.akive.api.file.domain.fixture.FileFixture.*;
+import static net.akive.api.file.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -39,12 +40,12 @@ class FileApiTest extends PrivateApiTestSupport {
     void 파일_업로드_URL을_생성한다() {
         UploadUrlCreateRequest request = createUploadUrlCreateRequest();
         UploadUrlCreateCommand command = request.to(USER_ID);
-        UploadUrlCreateResult result = new UploadUrlCreateResult(FILE_KEY, UPLOAD_URL, EXPIRES_AT);
+        UploadUrlCreateResult result = new UploadUrlCreateResult(IMAGE_ASSET_ID, UPLOAD_URL, EXPIRES_AT);
         given(fileManager.createUploadUrl(command)).willReturn(result);
 
         MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(OK);
 
-        response.bodyJson().extractingPath("$.fileKey").isEqualTo(FILE_KEY);
+        response.bodyJson().extractingPath("$.imageAssetId").isEqualTo(IMAGE_ASSET_ID.toString());
         response.bodyJson().extractingPath("$.uploadUrl").isEqualTo(UPLOAD_URL.toString());
         response.bodyJson().extractingPath("$.expiresAt").isEqualTo(EXPIRES_AT.toString());
         then(fileManager).should().createUploadUrl(command);

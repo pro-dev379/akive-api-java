@@ -96,7 +96,7 @@ class FileServiceTest {
         String fileKey = fileKeyCaptor.getValue();
         assertThat(fileKey)
                 .isEqualTo("uploads/%s/%s/original.%s".formatted(imageTypePath, IMAGE_ASSET_ID, extension));
-        assertThat(result.fileKey()).isEqualTo(fileKey);
+        assertThat(result.imageAssetId()).isEqualTo(IMAGE_ASSET_ID);
         assertThat(result.uploadUrl()).isEqualTo(UPLOAD_URL);
         assertThat(result.expiresAt()).isEqualTo(EXPIRES_AT);
     }

@@ -43,7 +43,11 @@ class FileService implements FileManager {
                 UPLOAD_URL_EXPIRATION_DURATION
         );
 
-        return new UploadUrlCreateResult(fileKey, uploadUrl.value(), uploadUrl.expiresAt());
+        return new UploadUrlCreateResult(
+                imageAsset.getImageAssetId(),
+                uploadUrl.value(),
+                uploadUrl.expiresAt()
+        );
     }
 
     private ImageAsset registerImageAsset(ImageType imageType) {
