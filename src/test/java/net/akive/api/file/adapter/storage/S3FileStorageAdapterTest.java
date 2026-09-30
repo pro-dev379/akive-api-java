@@ -26,10 +26,6 @@ import static org.mockito.BDDMockito.then;
 @ExtendWith(MockitoExtension.class)
 class S3FileStorageAdapterTest {
 
-    private static final String BUCKET_NAME = "akive-user";
-    private static final String KEY_PREFIX = "dev";
-    private static final String OBJECT_KEY = KEY_PREFIX + "/" + FILE_KEY;
-
     @Mock
     S3Client s3Client;
 
@@ -46,7 +42,7 @@ class S3FileStorageAdapterTest {
         fileStorage = new S3FileStorageAdapter(
                 s3Client,
                 s3Presigner,
-                new S3Properties(BUCKET_NAME, KEY_PREFIX)
+                new S3Properties(BUCKET_NAME)
         );
     }
 
@@ -71,7 +67,7 @@ class S3FileStorageAdapterTest {
         PutObjectPresignRequest presignRequest = requestCaptor.getValue();
         PutObjectRequest objectRequest = presignRequest.putObjectRequest();
         assertThat(objectRequest.bucket()).isEqualTo(BUCKET_NAME);
-        assertThat(objectRequest.key()).isEqualTo(OBJECT_KEY);
+        assertThat(objectRequest.key()).isEqualTo(FILE_KEY);
         assertThat(objectRequest.contentType()).isEqualTo(CONTENT_TYPE);
         assertThat(objectRequest.contentLength()).isEqualTo(FILE_SIZE);
         assertThat(presignRequest.signatureDuration()).isEqualTo(UPLOAD_URL_EXPIRATION_DURATION);
@@ -89,6 +85,6 @@ class S3FileStorageAdapterTest {
 
         DeleteObjectRequest deleteRequest = requestCaptor.getValue();
         assertThat(deleteRequest.bucket()).isEqualTo(BUCKET_NAME);
-        assertThat(deleteRequest.key()).isEqualTo(OBJECT_KEY);
+        assertThat(deleteRequest.key()).isEqualTo(FILE_KEY);
     }
 }

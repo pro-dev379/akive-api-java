@@ -32,4 +32,4 @@ jwt:
 file:
   storage:
     s3:
-      key-prefix: prod
+      bucket-name: akive-bucket-prod

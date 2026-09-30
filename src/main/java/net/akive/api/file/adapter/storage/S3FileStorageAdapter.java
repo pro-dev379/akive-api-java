@@ -25,11 +25,9 @@ class S3FileStorageAdapter implements FileStorage {
 
     @Override
     public UploadUrl createUploadUrl(String fileKey, String contentType, long fileSize, Duration expiration) {
-        String objectKey = createObjectKey(fileKey);
-
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(s3Properties.bucketName())
-                .key(objectKey)
+                .key(fileKey)
                 .contentType(contentType)
                 .contentLength(fileSize)
                 .build();
@@ -50,13 +48,9 @@ class S3FileStorageAdapter implements FileStorage {
     public void delete(String fileKey) {
         DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                 .bucket(s3Properties.bucketName())
-                .key(createObjectKey(fileKey))
+                .key(fileKey)
                 .build();
 
         s3Client.deleteObject(deleteRequest);
-    }
-
-    private String createObjectKey(String fileKey) {
-        return s3Properties.keyPrefix() + "/" + fileKey;
     }
 }

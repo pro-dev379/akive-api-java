@@ -36,5 +36,4 @@ email:
 file:
   storage:
     s3:
-      bucket-name: akive-user
-      key-prefix: dev
+      bucket-name: akive-bucket-dev

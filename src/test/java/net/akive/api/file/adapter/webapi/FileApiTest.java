@@ -42,11 +42,7 @@ class FileApiTest extends PrivateApiTestSupport {
         UploadUrlCreateResult result = new UploadUrlCreateResult(FILE_KEY, UPLOAD_URL, EXPIRES_AT);
         given(fileManager.createUploadUrl(command)).willReturn(result);
 
-        MvcTestResultAssert response = postJson(
-                UPLOAD_URLS_URL,
-                USER_ID,
-                toJson(request)
-        ).hasStatus(OK);
+        MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(OK);
 
         response.bodyJson().extractingPath("$.fileKey").isEqualTo(FILE_KEY);
         response.bodyJson().extractingPath("$.uploadUrl").isEqualTo(UPLOAD_URL.toString());
@@ -87,15 +83,9 @@ class FileApiTest extends PrivateApiTestSupport {
                 PROFILE_IMAGE_MAX_SIZE_BYTES + 1
         );
         UploadUrlCreateCommand command = request.to(USER_ID);
-        willThrow(new BusinessRuleViolationException(FILE_SIZE_EXCEEDED))
-                .given(fileManager)
-                .createUploadUrl(command);
+        willThrow(new BusinessRuleViolationException(FILE_SIZE_EXCEEDED)).given(fileManager).createUploadUrl(command);
 
-        MvcTestResultAssert response = postJson(
-                UPLOAD_URLS_URL,
-                USER_ID,
-                toJson(request)
-        ).hasStatus(BAD_REQUEST);
+        MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         assertErrorResponse(response, FILE_SIZE_EXCEEDED);
         then(fileManager).should().createUploadUrl(command);
@@ -103,21 +93,13 @@ class FileApiTest extends PrivateApiTestSupport {
 
     @Test
     void 콘텐츠_타입이_허용되지_않으면_400을_응답한다() {
-        UploadUrlCreateRequest request = createUploadUrlCreateRequest(
-                PROFILE_IMAGE,
-                "image/svg+xml",
-                1024L
-        );
+        UploadUrlCreateRequest request = createUploadUrlCreateRequest(PROFILE_IMAGE, "image/svg+xml", 1024L);
         UploadUrlCreateCommand command = request.to(USER_ID);
         willThrow(new BusinessRuleViolationException(FILE_CONTENT_TYPE_NOT_ALLOWED))
                 .given(fileManager)
                 .createUploadUrl(command);
 
-        MvcTestResultAssert response = postJson(
-                UPLOAD_URLS_URL,
-                USER_ID,
-                toJson(request)
-        ).hasStatus(BAD_REQUEST);
+        MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         assertErrorResponse(response, FILE_CONTENT_TYPE_NOT_ALLOWED);
         then(fileManager).should().createUploadUrl(command);
