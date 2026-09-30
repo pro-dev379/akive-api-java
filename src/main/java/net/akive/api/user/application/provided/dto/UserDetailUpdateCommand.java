@@ -8,8 +8,8 @@ import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 public record UserDetailUpdateCommand(
         Long userId,
         String targetNickname,
-        UUID targetProfileImageAssetId,
-        String targetAim
+        String targetAim,
+        UUID targetProfileImageAssetId
 ) {
 
     public UserDetailUpdateCommand {

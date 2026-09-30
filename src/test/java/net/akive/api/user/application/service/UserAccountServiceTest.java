@@ -147,8 +147,8 @@ class UserAccountServiceTest {
         UserDetailUpdateCommand command = new UserDetailUpdateCommand(
                 USER_ID,
                 NICKNAME,
-                targetProfileImageAssetId,
-                AIM
+                AIM,
+                targetProfileImageAssetId
         );
         User user = createReconstructedUser(command.userId(), createUserDetail(existingProfileImageAssetId));
 

@@ -22,7 +22,7 @@ public class UserAccountCommandFixture {
     }
 
     public static UserDetailUpdateCommand createUserDetailUpdateCommand(Long userId) {
-        return new UserDetailUpdateCommand(userId, NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
+        return new UserDetailUpdateCommand(userId, NICKNAME, AIM, PROFILE_IMAGE_ASSET_ID);
     }
 
     public static UserWithdrawCommand createUserWithdrawCommand() {

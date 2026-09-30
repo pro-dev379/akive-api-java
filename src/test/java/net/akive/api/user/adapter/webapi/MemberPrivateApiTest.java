@@ -117,7 +117,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     @Test
     void 개인_상세_정보를_수정한다() {
         UserDetailUpdateRequest request = createUserDetailUpdateRequest();
-        UserDetailUpdateCommand command = new UserDetailUpdateCommand(USER_ID, NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
+        UserDetailUpdateCommand command = new UserDetailUpdateCommand(USER_ID, NICKNAME, AIM, PROFILE_IMAGE_ASSET_ID);
 
         patchJson(MEMBER_ME_URL, USER_ID, toJson(request)).hasStatus(NO_CONTENT);
 
@@ -136,7 +136,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     void 개인_상세_정보_수정_시_멤버를_조회할_수_없으면_404를_응답한다() {
         UserDetailUpdateRequest request = createUserDetailUpdateRequest();
         UserDetailUpdateCommand command =
-                new UserDetailUpdateCommand(UNKNOWN_USER_ID, NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
+                new UserDetailUpdateCommand(UNKNOWN_USER_ID, NICKNAME, AIM, PROFILE_IMAGE_ASSET_ID);
         willThrow(new ResourceNotFoundException(USER_NOT_FOUND))
                 .given(userAccountManager)
                 .updateUserDetail(command);
@@ -152,7 +152,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     void 개인_상세_정보_수정_시_이미_존재하는_닉네임이면_409를_응답한다() {
         UserDetailUpdateRequest request = createUserDetailUpdateRequest();
         UserDetailUpdateCommand command =
-                new UserDetailUpdateCommand(USER_ID, NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
+                new UserDetailUpdateCommand(USER_ID, NICKNAME, AIM, PROFILE_IMAGE_ASSET_ID);
         willThrow(new ResourceConflictException(NICKNAME_ALREADY_EXISTS))
                 .given(userAccountManager)
                 .updateUserDetail(command);

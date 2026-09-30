@@ -58,7 +58,7 @@ public class MemberAccountRequestFixture {
             String aim
     ) {
         UserDetailUpdateRequest.UserDetailRequest targetUserDetail =
-                new UserDetailUpdateRequest.UserDetailRequest(nickname, profileImageAssetId, aim);
+                new UserDetailUpdateRequest.UserDetailRequest(nickname, aim, profileImageAssetId);
 
         return new UserDetailUpdateRequest(targetUserDetail);
     }

@@ -17,14 +17,14 @@ public record UserDetailUpdateRequest(@NotNull @Valid UserDetailRequest targetUs
         return new UserDetailUpdateCommand(
                 userId,
                 this.targetUserDetail.nickname(),
-                this.targetUserDetail.profileImageAssetId(),
-                this.targetUserDetail.aim()
+                this.targetUserDetail.aim(),
+                this.targetUserDetail.profileImageAssetId()
         );
     }
 
     public record UserDetailRequest(
             @NotBlank @Size(max = NICKNAME_MAX_LENGTH) String nickname,
-            UUID profileImageAssetId,
-            @Size(max = AIM_MAX_LENGTH) String aim
+            @Size(max = AIM_MAX_LENGTH) String aim,
+            UUID profileImageAssetId
     ) {}
 }
