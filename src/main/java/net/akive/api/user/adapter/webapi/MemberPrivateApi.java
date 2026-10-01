@@ -3,7 +3,7 @@ package net.akive.api.user.adapter.webapi;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
-import net.akive.api.file.application.provided.FileManager;
+import net.akive.api.file.application.provided.ImageUrlFinder;
 import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
 import net.akive.api.user.adapter.webapi.dto.response.UserFindResponse;
@@ -31,7 +31,7 @@ public class MemberPrivateApi {
     private final UserFinder userFinder;
     private final UserNicknameChecker userNicknameChecker;
     private final UserAccountManager userAccountManager;
-    private final FileManager fileManager;
+    private final ImageUrlFinder imageUrlFinder;
 
     @GetMapping
     public UserFindResponse find(@AuthenticatedUserId Long userId) {
@@ -78,7 +78,7 @@ public class MemberPrivateApi {
 
         return new ProfileImageResponse(
                 imageAssetId,
-                fileManager.findImageUrl(imageAssetId, DETAIL).orElse(null)
+                imageUrlFinder.findImageUrl(imageAssetId, DETAIL).orElse(null)
         );
     }
 }

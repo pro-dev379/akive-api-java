@@ -5,6 +5,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.core.config.file.CdnProperties;
 import net.akive.api.file.application.provided.FileManager;
+import net.akive.api.file.application.provided.ImageUrlFinder;
 import net.akive.api.file.application.provided.dto.UploadUrlCreateCommand;
 import net.akive.api.file.application.provided.dto.UploadUrlCreateResult;
 import net.akive.api.file.application.required.FileStorage;
@@ -29,7 +30,7 @@ import static net.akive.api.file.domain.FilePolicy.validateMaxFileSize;
 @Service
 @Transactional
 @RequiredArgsConstructor
-class FileService implements FileManager {
+class FileService implements FileManager, ImageUrlFinder {
 
     private final FileStorage fileStorage;
     private final ImageAssetRepository imageAssetRepository;
@@ -60,6 +61,7 @@ class FileService implements FileManager {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<URI> findImageUrl(UUID imageAssetId, VariantType variantType) throws ResourceNotFoundException {
         ImageAsset imageAsset = findImageAssetOrThrow(imageAssetId);
 
