@@ -59,7 +59,7 @@ public class ImageVariantEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer height;
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, length = 20)
     @Convert(converter = ImageFormatConverter.class)
     private ImageFormat format;
 
