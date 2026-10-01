@@ -47,15 +47,17 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 조회_시작일까지_생성된_최신_목표와_그_이후_조회_종료일까지_생성된_목표를_조회한다() {
+    void 조회_시작_서비스일에_적용할_최신_목표와_기간_내_변경_목표를_조회한다() {
         User savedUser = saveUser();
         LocalDate startOn = LocalDate.of(2026, 9, 14);
         LocalDate endOn = LocalDate.of(2026, 9, 20);
         saveGoalAt(savedUser, 100, LocalDateTime.of(2026, 9, 10, 0, 0));
-        saveGoalAt(savedUser, 200, LocalDateTime.of(2026, 9, 13, 20, 0));
-        saveGoalAt(savedUser, 210, LocalDateTime.of(2026, 9, 13, 20, 0));
-        saveGoalAt(savedUser, 300, LocalDateTime.of(2026, 9, 16, 20, 0));
-        saveGoalAt(savedUser, 400, LocalDateTime.of(2026, 9, 20, 16, 0));
+        saveGoalAt(savedUser, 200, LocalDateTime.of(2026, 9, 13, 19, 59));
+        saveGoalAt(savedUser, 210, LocalDateTime.of(2026, 9, 13, 19, 59));
+        saveGoalAt(savedUser, 300, LocalDateTime.of(2026, 9, 13, 20, 0));
+        saveGoalAt(savedUser, 400, LocalDateTime.of(2026, 9, 16, 20, 0));
+        saveGoalAt(savedUser, 500, LocalDateTime.of(2026, 9, 19, 19, 59));
+        saveGoalAt(savedUser, 600, LocalDateTime.of(2026, 9, 19, 20, 0));
 
         List<GoalVersion> goalVersions = goalRepository.findVersionsForPeriod(
                 savedUser.getUserId(),
@@ -63,8 +65,8 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
                 endOn
         );
 
-        assertThat(goalVersions).hasSize(2);
-        assertThat(goalVersions).extracting(GoalVersion::rest10MinSec).containsExactly(210L, 300L);
+        assertThat(goalVersions).hasSize(4);
+        assertThat(goalVersions).extracting(GoalVersion::rest10MinSec).containsExactly(210L, 300L, 400L, 500L);
         assertThat(goalVersions).allSatisfy(version -> assertThat(version.createdAt()).isNotNull());
 
         List<GoalVersion> singleDayVersions = goalRepository.findVersionsForPeriod(

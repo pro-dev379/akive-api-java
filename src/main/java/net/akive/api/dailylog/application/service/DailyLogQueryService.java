@@ -19,7 +19,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import static net.akive.api.dailylog.domain.DailyLogPolicy.DAILY_BOUNDARY_HOUR;
+import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
 
 @Service
 @Transactional(readOnly = true)

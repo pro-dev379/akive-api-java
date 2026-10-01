@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
+
 @Repository
 @RequiredArgsConstructor
 class GoalJpaAdapter implements GoalRepository {
@@ -39,18 +41,18 @@ class GoalJpaAdapter implements GoalRepository {
 
     @Override
     public List<GoalVersion> findVersionsForPeriod(Long userId, LocalDate startOn, LocalDate endOn) {
-        LocalDateTime afterStartDate = koreanDateStartAsUtc(startOn.plusDays(1));
-        LocalDateTime afterEndDate = koreanDateStartAsUtc(endOn.plusDays(1));
+        LocalDateTime periodStart = koreanServiceDayStartAsUtc(startOn);
+        LocalDateTime periodEnd = koreanServiceDayStartAsUtc(endOn);
         List<GoalVersion> goalVersions = new ArrayList<>();
 
         goalJpaRepository
-                .findLatestByUserIdAndCreatedAtBefore(userId, afterStartDate)
+                .findLatestByUserIdAndCreatedAtBefore(userId, periodStart)
                 .map(this::toVersion)
                 .ifPresent(goalVersions::add);
 
         if (startOn.isBefore(endOn)) {
             goalJpaRepository
-                    .findAllByUserIdAndCreatedAtInRange(userId, afterStartDate, afterEndDate)
+                    .findAllByUserIdAndCreatedAtInRange(userId, periodStart, periodEnd)
                     .stream()
                     .map(this::toVersion)
                     .forEach(goalVersions::add);
@@ -59,8 +61,11 @@ class GoalJpaAdapter implements GoalRepository {
         return List.copyOf(goalVersions);
     }
 
-    private LocalDateTime koreanDateStartAsUtc(LocalDate date) {
-        return date.atStartOfDay(GOAL_DATE_ZONE).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+    private LocalDateTime koreanServiceDayStartAsUtc(LocalDate date) {
+        return date.atTime(DAILY_BOUNDARY_HOUR, 0)
+                .atZone(GOAL_DATE_ZONE)
+                .withZoneSameInstant(ZoneOffset.UTC)
+                .toLocalDateTime();
     }
 
     private GoalVersion toVersion(GoalEntity entity) {

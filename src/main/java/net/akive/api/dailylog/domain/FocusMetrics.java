@@ -8,9 +8,10 @@ import java.time.*;
 import java.util.List;
 
 import static java.math.RoundingMode.HALF_UP;
+import static java.time.ZoneOffset.UTC;
 import static net.akive.api.common.domain.DomainValidator.requireStartNotAfterEnd;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.GOAL_NOT_FOUND;
-import static net.akive.api.dailylog.domain.DailyLogPolicy.DAILY_BOUNDARY_HOUR;
+import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
 import static net.akive.api.dailylog.domain.DailyLogType.*;
 
 public record FocusMetrics(long focusTimeSec, BigDecimal focusRate) {
@@ -116,12 +117,15 @@ public record FocusMetrics(long focusTimeSec, BigDecimal focusRate) {
 
     private static GoalVersion findEffectiveGoalOn(LocalDate date, List<GoalVersion> goals) {
         GoalVersion latest = null;
+        Instant serviceDayStartedAt = date
+                .atTime(DAILY_BOUNDARY_HOUR, 0)
+                .atZone(GOAL_DATE_ZONE)
+                .toInstant();
 
         for (GoalVersion goal : goals) {
-            LocalDate effectiveOn =
-                    goal.createdAt().atOffset(ZoneOffset.UTC).atZoneSameInstant(GOAL_DATE_ZONE).toLocalDate();
+            Instant goalCreatedAt = goal.createdAt().toInstant(UTC);
 
-            if (!effectiveOn.isAfter(date)
+            if (goalCreatedAt.isBefore(serviceDayStartedAt)
                     && (latest == null || !goal.createdAt().isBefore(latest.createdAt()))) {
                 latest = goal;
             }

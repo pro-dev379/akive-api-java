@@ -27,7 +27,7 @@ import java.util.List;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_DATE_RANGE;
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
-import static net.akive.api.dailylog.domain.DailyLogPolicy.DAILY_BOUNDARY_HOUR;
+import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
 import static net.akive.api.common.analytics.TimeSeriesUnit.DAY;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
 import static net.akive.api.user.domain.fixture.GoalFixture.goalVersionWithoutMealAndRestAllowance;

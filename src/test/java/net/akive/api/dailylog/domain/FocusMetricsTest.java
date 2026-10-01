@@ -54,7 +54,7 @@ class FocusMetricsTest {
                 150,
                 1,
                 minutes(30),
-                LOG_ON.atStartOfDay()
+                LOG_ON.minusDays(1).atStartOfDay()
         );
 
         FocusMetrics metrics = FocusMetrics.calculate(
@@ -126,7 +126,7 @@ class FocusMetricsTest {
     }
 
     @Test
-    void 각_날짜의_집중_시간과_집중도를_계산할_때_각_날짜_기준의_가장_최근_목표를_적용한다() {
+    void 서비스일별_집중도에_해당_서비스일_오전_5시_전에_생성된_최신_목표를_적용한다() {
         LocalDate targetOn = LOG_ON.plusDays(1);
         List<DailyLog> dailyLogs = List.of(
                 study(targetOn, 9, 10, hours(1)),
@@ -135,7 +135,7 @@ class FocusMetricsTest {
         );
         GoalVersion goalWithoutMealAllowance =
                 goalVersionWithoutMealAndRestAllowance(targetOn.minusDays(2).atStartOfDay());
-        GoalVersion latestGoalWithMealAllowance = createGoalVersion(targetOn.minusDays(1).atTime(20, 0));
+        GoalVersion latestGoalWithMealAllowance = createGoalVersion(targetOn.minusDays(1).atTime(19, 59));
 
         FocusMetrics metrics = FocusMetrics.calculate(
                 targetOn,
@@ -150,40 +150,42 @@ class FocusMetricsTest {
     }
 
     @Test
-    void 목표의_UTC_생성_시각을_한국_시각으로_변환해_목표_적용일을_결정한다() {
+    void 목표는_생성_후_다음_서비스일_오전_5시부터_적용한다() {
         LocalDate nextOn = LOG_ON.plusDays(1);
+        LocalDate dayAfterNextOn = nextOn.plusDays(1);
         List<DailyLog> dailyLogs = List.of(
-                study(LOG_ON, 9, 10, hours(1)),
-                meal(LOG_ON, 10, 11),
-                study(LOG_ON, 11, 12, hours(1)),
                 study(nextOn, 9, 10, hours(1)),
                 meal(nextOn, 10, 11),
-                study(nextOn, 11, 12, hours(1))
+                study(nextOn, 11, 12, hours(1)),
+                study(dayAfterNextOn, 9, 10, hours(1)),
+                meal(dayAfterNextOn, 10, 11),
+                study(dayAfterNextOn, 11, 12, hours(1))
         );
         GoalVersion currentGoalWithoutMealAllowance = goalVersionWithoutMealAndRestAllowance(
                 LOG_ON.minusDays(1).atStartOfDay()
         );
-        GoalVersion goalCreatedAtNextDayInKorea = createGoalVersion(LOG_ON.atTime(16, 0));
+        GoalVersion goalCreatedBeforeBoundary = createGoalVersion(LOG_ON.atTime(19, 59));
+        GoalVersion goalCreatedAtBoundary = goalVersionWithoutMealAndRestAllowance(LOG_ON.atTime(20, 0));
 
-        FocusMetrics beforeGoalEffectiveDate = FocusMetrics.calculate(
-                LOG_ON,
-                LOG_ON,
-                dailyLogs,
-                List.of(currentGoalWithoutMealAllowance, goalCreatedAtNextDayInKorea)
-        );
-        FocusMetrics onGoalEffectiveDate = FocusMetrics.calculate(
+        FocusMetrics beforeBoundaryGoalMetrics = FocusMetrics.calculate(
                 nextOn,
                 nextOn,
                 dailyLogs,
-                List.of(currentGoalWithoutMealAllowance, goalCreatedAtNextDayInKorea)
+                List.of(currentGoalWithoutMealAllowance, goalCreatedBeforeBoundary, goalCreatedAtBoundary)
+        );
+        FocusMetrics atBoundaryGoalMetrics = FocusMetrics.calculate(
+                dayAfterNextOn,
+                dayAfterNextOn,
+                dailyLogs,
+                List.of(currentGoalWithoutMealAllowance, goalCreatedBeforeBoundary, goalCreatedAtBoundary)
         );
 
-        assertThat(beforeGoalEffectiveDate.focusRate())
-                .as("UTC 16시는 한국 시각으로 다음 날이므로 기존 목표를 적용한다")
-                .isEqualByComparingTo("66.7");
-        assertThat(onGoalEffectiveDate.focusRate())
-                .as("한국 날짜가 바뀐 뒤에는 새 목표의 식사 허용 시간을 적용한다")
+        assertThat(beforeBoundaryGoalMetrics.focusRate())
+                .as("KST 2026-09-13 04:59에 생성한 목표는 2026-09-13 서비스일부터 적용한다")
                 .isEqualByComparingTo("100.0");
+        assertThat(atBoundaryGoalMetrics.focusRate())
+                .as("KST 2026-09-13 05:00에 생성한 목표는 2026-09-14 서비스일부터 적용한다")
+                .isEqualByComparingTo("66.7");
     }
 
 }

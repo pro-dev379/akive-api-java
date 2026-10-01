@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static java.math.RoundingMode.HALF_UP;
 import static net.akive.api.common.domain.DomainValidator.requireStartNotAfterEnd;
-import static net.akive.api.dailylog.domain.DailyLogPolicy.DAILY_BOUNDARY_HOUR;
+import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
 
 public record TimeUsageRates(
         Map<DailyLogType, BigDecimal> ratesByType,
