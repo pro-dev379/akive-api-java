@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.user.domain.User;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -16,7 +15,6 @@ import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
-import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 import static net.akive.api.dailylog.domain.DailyLogPolicy.MIN_SLEEP_DURATION_SEC;
 import static net.akive.api.dailylog.domain.DailyLogType.SLEEP;
 import static net.akive.api.dailylog.domain.DailyLogType.STUDY;
@@ -46,11 +44,11 @@ public class DailyLog {
             ActivityTime activityTime,
             DailyLogType dailyLogType,
             String contents,
-            Instant reconstructedAt
+            LocalDate currentDate
     ) {
         requireNonNull(activityTime);
         requireNonNull(dailyLogType);
-        validateLogOnNotFuture(logOn, reconstructedAt);
+        validateLogOnNotFuture(logOn, currentDate);
         validateSleepTime(activityTime, dailyLogType);
         validateFocusTime(activityTime, dailyLogType);
 
@@ -69,12 +67,12 @@ public class DailyLog {
             ActivityTime activityTime,
             DailyLogType dailyLogType,
             String contents,
-            Instant requestedAt
+            LocalDate currentDate
     ) {
         requireNonNull(activityTime);
         requireNonNull(dailyLogType);
         LocalDate logOn = resolveLogOn(activityTime, dailyLogType);
-        validateLogOnNotFuture(logOn, requestedAt);
+        validateLogOnNotFuture(logOn, currentDate);
         validateSleepTime(activityTime, dailyLogType);
         validateFocusTime(activityTime, dailyLogType);
 
@@ -91,12 +89,12 @@ public class DailyLog {
             ActivityTime targetActivityTime,
             DailyLogType targetDailyLogType,
             String targetContents,
-            Instant requestedAt
+            LocalDate currentDate
     ) {
         requireNonNull(targetActivityTime);
         requireNonNull(targetDailyLogType);
         LocalDate targetLogOn = resolveLogOn(targetActivityTime, targetDailyLogType);
-        validateLogOnNotFuture(targetLogOn, requestedAt);
+        validateLogOnNotFuture(targetLogOn, currentDate);
         validateSleepTime(targetActivityTime, targetDailyLogType);
         validateFocusTime(targetActivityTime, targetDailyLogType);
 
@@ -137,11 +135,11 @@ public class DailyLog {
         return getClass().hashCode();
     }
 
-    private static void validateLogOnNotFuture(LocalDate logOn, Instant baseTime) {
+    private static void validateLogOnNotFuture(LocalDate logOn, LocalDate currentDate) {
         requireNonNull(logOn);
-        requireNonNull(baseTime);
+        requireNonNull(currentDate);
 
-        if (logOn.isAfter(toKoreanDate(baseTime))) {
+        if (logOn.isAfter(currentDate)) {
             throw new BusinessRuleViolationException(DAILY_LOG_DATE_IN_FUTURE);
         }
     }

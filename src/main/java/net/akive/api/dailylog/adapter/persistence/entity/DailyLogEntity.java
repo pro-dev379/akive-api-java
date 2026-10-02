@@ -19,6 +19,7 @@ import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
+import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 
 @Entity
 @Table(
@@ -80,7 +81,7 @@ public class DailyLogEntity extends BaseTimeEntity {
                     this.activityTime.to(reconstructedAt),
                     this.dailyLogType,
                     this.contents,
-                    reconstructedAt
+                    toKoreanDate(reconstructedAt)
             );
         } catch (BusinessRuleViolationException e) {
             throw new InvalidPersistedDataException("Failed to reconstruct DailyLog: " + this.dailyLogId, e);

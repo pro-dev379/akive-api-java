@@ -68,7 +68,7 @@ class DailyLogCommandServiceTest {
                 activityTime,
                 command.dailyLogType(),
                 command.contents(),
-                CURRENT_INSTANT
+                CURRENT_KOREAN_DATE
         );
 
         given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));

@@ -18,10 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import static net.akive.api.common.exception.business.ResourceConflictError.DAILY_LOG_TIME_OVERLAPS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.DAILY_LOG_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 
 @Service
 @Transactional
@@ -37,6 +39,7 @@ class DailyLogCommandService implements DailyLogCreator {
     public Long create(DailyLogCreateCommand command)
             throws BusinessRuleViolationException, ResourceNotFoundException, ResourceConflictException {
         Instant requestedAt = currentTimeProvider.now();
+        LocalDate currentDate = toKoreanDate(requestedAt);
         ActivityTime activityTime = command.activityTime().to(requestedAt);
         User user = findUserOrThrow(command.userId());
 
@@ -47,7 +50,7 @@ class DailyLogCommandService implements DailyLogCreator {
                 activityTime,
                 command.dailyLogType(),
                 command.contents(),
-                requestedAt
+                currentDate
         );
 
         DailyLog savedDailyLog = dailyLogRepository.save(dailyLog);
@@ -59,6 +62,7 @@ class DailyLogCommandService implements DailyLogCreator {
     public void update(DailyLogUpdateCommand command)
             throws BusinessRuleViolationException, ResourceNotFoundException, ResourceConflictException {
         Instant requestedAt = currentTimeProvider.now();
+        LocalDate currentDate = toKoreanDate(requestedAt);
         ActivityTime targetActivityTime = command.targetActivityTime().to(requestedAt);
         DailyLog dailyLog = findDailyLogOrThrow(command.dailyLogId(), command.userId());
 
@@ -72,7 +76,7 @@ class DailyLogCommandService implements DailyLogCreator {
                 targetActivityTime,
                 command.targetDailyLogType(),
                 command.targetContents(),
-                requestedAt
+                currentDate
         );
 
         dailyLogRepository.save(dailyLog);

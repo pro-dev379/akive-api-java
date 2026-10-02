@@ -28,6 +28,7 @@ public class DailyLogFixture {
     public static final LocalDateTime END_ON = LocalDateTime.of(2026, 9, 12, 10, 0);
     public static final LocalDateTime CURRENT_KOREAN_DATE_TIME = LocalDateTime.of(2026, 9, 14, 23, 59);
     public static final Instant CURRENT_INSTANT = toInstantAtServiceZone(CURRENT_KOREAN_DATE_TIME);
+    public static final LocalDate CURRENT_KOREAN_DATE = CURRENT_KOREAN_DATE_TIME.toLocalDate();
     public static final Long FOCUS_TIME_SEC = 3_000L;
     public static final ActivityTime ACTIVITY_TIME =
             ActivityTime.of(START_ON, END_ON, FOCUS_TIME_SEC, false, CURRENT_INSTANT);
@@ -47,7 +48,7 @@ public class DailyLogFixture {
                 ACTIVITY_TIME,
                 STUDY,
                 CONTENTS,
-                CURRENT_INSTANT
+                CURRENT_KOREAN_DATE
         );
     }
 
@@ -105,7 +106,7 @@ public class DailyLogFixture {
                 activityTime,
                 dailyLogType,
                 contents,
-                CURRENT_INSTANT
+                CURRENT_KOREAN_DATE
         );
     }
 
