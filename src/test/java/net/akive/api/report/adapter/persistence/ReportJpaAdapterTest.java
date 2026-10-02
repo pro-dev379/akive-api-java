@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static net.akive.api.common.pagination.SortDirection.DESC;
+import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
 import static net.akive.api.report.domain.FeedbackType.IMPROVEMENT;
 import static net.akive.api.report.domain.ReportType.*;
@@ -33,14 +34,14 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
                 REPORT_ON,
                 WEEKLY,
                 List.of(firstFeedback, secondFeedback),
-                currentTimeProvider.now()
+                toKoreanDate(currentTimeProvider.now())
         );
 
         Report savedReport = reportRepository.save(report);
         flushAndClear();
 
         Report foundReport = entityManager.find(ReportEntity.class, savedReport.getReportId())
-                .to(currentTimeProvider.now());
+                .to(toKoreanDate(currentTimeProvider.now()));
 
         assertThat(foundReport.getReportId()).isEqualTo(savedReport.getReportId());
         assertThat(foundReport.getUser().getUserId()).isEqualTo(savedUser.getUserId());
@@ -61,7 +62,7 @@ class ReportJpaAdapterTest extends RepositoryTestSupport {
         flushAndClear();
 
         Report foundReport = entityManager.find(ReportEntity.class, savedReport.getReportId())
-                .to(currentTimeProvider.now());
+                .to(toKoreanDate(currentTimeProvider.now()));
 
         assertThat(foundReport.getFeedbackItems())
                 .containsExactlyElementsOf(targetFeedbackItems);

@@ -5,7 +5,6 @@ import net.akive.api.report.domain.ReportFeedback;
 import net.akive.api.report.domain.ReportType;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static net.akive.api.common.domain.DomainValidator.*;
@@ -16,7 +15,7 @@ public record ReportCreateCommand(
         LocalDate reportOn,
         ReportType reportType,
         List<ReportFeedback> feedbackItems,
-        LocalDateTime requestedAt
+        LocalDate currentDate
 ) {
 
     public ReportCreateCommand {
@@ -24,9 +23,9 @@ public record ReportCreateCommand(
         requireNonNull(reportOn);
         requireNonNull(reportType);
         requireNotEmpty(feedbackItems);
-        requireNonNull(requestedAt);
+        requireNonNull(currentDate);
 
-        if (reportOn.isAfter(requestedAt.toLocalDate())) {
+        if (reportOn.isAfter(currentDate)) {
             throw new BusinessRuleViolationException(REPORT_DATE_IN_FUTURE);
         }
     }

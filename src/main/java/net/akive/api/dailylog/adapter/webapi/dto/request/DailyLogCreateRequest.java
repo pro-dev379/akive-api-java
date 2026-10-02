@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
 import net.akive.api.dailylog.domain.DailyLogType;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record DailyLogCreateRequest(
         @NotNull @Valid ActivityTimeRequest activityTime,
@@ -14,7 +14,7 @@ public record DailyLogCreateRequest(
         @NotBlank String contents
 ) {
 
-    public DailyLogCreateCommand to(Long userId, LocalDateTime requestedAt) {
+    public DailyLogCreateCommand to(Long userId, Instant requestedAt) {
         return new DailyLogCreateCommand(
                 userId,
                 this.activityTime.to(requestedAt),

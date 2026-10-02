@@ -27,7 +27,7 @@ class RefreshTokenRotationPolicyTest {
     @ValueSource(longs = {1, 60})
     void 리프레시_토큰의_남은_유효시간이_60초_이하이면_교체가_필요하다(long remainingSeconds) {
         Instant expiresAt = NOW.plusSeconds(remainingSeconds);
-        given(currentTimeProvider.instant()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(NOW);
 
         boolean result = refreshTokenRotationPolicy.requiresRotation(expiresAt);
 
@@ -38,7 +38,7 @@ class RefreshTokenRotationPolicyTest {
     @ValueSource(longs = {-1, 0, 61})
     void 리프레시_토큰이_만료됐거나_남은_유효시간이_60초를_초과하면_교체가_필요하지_않다(long remainingSeconds) {
         Instant expiresAt = NOW.plusSeconds(remainingSeconds);
-        given(currentTimeProvider.instant()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(NOW);
 
         boolean result = refreshTokenRotationPolicy.requiresRotation(expiresAt);
 

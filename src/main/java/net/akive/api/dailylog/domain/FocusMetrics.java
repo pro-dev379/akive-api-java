@@ -4,7 +4,10 @@ import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.domain.GoalVersion;
 
 import java.math.BigDecimal;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.math.RoundingMode.HALF_UP;
@@ -12,11 +15,10 @@ import static java.time.ZoneOffset.UTC;
 import static net.akive.api.common.domain.DomainValidator.requireStartNotAfterEnd;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.GOAL_NOT_FOUND;
 import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
+import static net.akive.api.common.time.ServiceDayPolicy.toServiceDayStart;
 import static net.akive.api.dailylog.domain.DailyLogType.*;
 
 public record FocusMetrics(long focusTimeSec, BigDecimal focusRate) {
-
-    private static final ZoneId GOAL_DATE_ZONE = ZoneId.of("Asia/Seoul");
 
     public static FocusMetrics calculate(
             LocalDate startOn,
@@ -117,10 +119,7 @@ public record FocusMetrics(long focusTimeSec, BigDecimal focusRate) {
 
     private static GoalVersion findEffectiveGoalOn(LocalDate date, List<GoalVersion> goals) {
         GoalVersion latest = null;
-        Instant serviceDayStartedAt = date
-                .atTime(DAILY_BOUNDARY_HOUR, 0)
-                .atZone(GOAL_DATE_ZONE)
-                .toInstant();
+        Instant serviceDayStartedAt = toServiceDayStart(date);
 
         for (GoalVersion goal : goals) {
             Instant goalCreatedAt = goal.createdAt().toInstant(UTC);

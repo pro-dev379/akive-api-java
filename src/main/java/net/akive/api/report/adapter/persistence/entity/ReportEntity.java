@@ -13,7 +13,6 @@ import net.akive.api.report.domain.ReportType;
 import net.akive.api.user.adapter.persistence.entity.UserEntity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,7 +74,7 @@ public class ReportEntity extends BaseTimeEntity {
         return reportEntity;
     }
 
-    public Report to(LocalDateTime reconstructedAt) {
+    public Report to(LocalDate currentDate) {
         try {
             return Report.reconstruct(
                     this.reportId,
@@ -83,7 +82,7 @@ public class ReportEntity extends BaseTimeEntity {
                     this.reportOn,
                     this.reportType,
                     this.feedbackItems.stream().map(ReportFeedbackEntity::to).collect(Collectors.toList()),
-                    reconstructedAt
+                    currentDate
             );
         } catch (BusinessRuleViolationException e) {
             throw new InvalidPersistedDataException("Failed to reconstruct Report: " + this.reportId, e);

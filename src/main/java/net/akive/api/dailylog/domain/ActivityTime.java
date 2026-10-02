@@ -5,10 +5,12 @@ import lombok.Getter;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
+import static net.akive.api.common.time.ServiceDayPolicy.toInstantAtServiceZone;
 
 @Getter
 @EqualsAndHashCode
@@ -29,7 +31,7 @@ public final class ActivityTime {
             LocalDateTime endOn,
             Long focusTimeSec,
             boolean focusRateExcluded,
-            LocalDateTime baseTime
+            Instant baseTime
     ) {
         requireStartNotAfterEnd(startOn, endOn);
         validateMaxPeriod(startOn, endOn);
@@ -47,7 +49,7 @@ public final class ActivityTime {
             LocalDateTime endOn,
             Long focusTimeSec,
             boolean focusRateExcluded,
-            LocalDateTime baseTime
+            Instant baseTime
     ) {
         return new ActivityTime(startOn, endOn, focusTimeSec, focusRateExcluded, baseTime);
     }
@@ -61,7 +63,13 @@ public final class ActivityTime {
             return this;
         }
 
-        return new ActivityTime(this.startOn, this.endOn, this.focusTimeSec, true, this.endOn);
+        return new ActivityTime(
+                this.startOn,
+                this.endOn,
+                this.focusTimeSec,
+                true,
+                toInstantAtServiceZone(this.endOn)
+        );
     }
 
     private static void validateMaxPeriod(LocalDateTime startOn, LocalDateTime endOn) {
@@ -73,10 +81,10 @@ public final class ActivityTime {
         }
     }
 
-    private static void validateNotFuture(LocalDateTime endOn, LocalDateTime baseTime) {
+    private static void validateNotFuture(LocalDateTime endOn, Instant baseTime) {
         requireNonNull(baseTime);
 
-        if (endOn.isAfter(baseTime)) {
+        if (toInstantAtServiceZone(endOn).isAfter(baseTime)) {
             throw new BusinessRuleViolationException(DAILY_LOG_TIME_RANGE_IN_FUTURE);
         }
     }

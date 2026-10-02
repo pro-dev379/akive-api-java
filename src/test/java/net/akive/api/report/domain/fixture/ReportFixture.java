@@ -28,6 +28,7 @@ public class ReportFixture {
     public static final Long ANOTHER_REPORT_ID = 2L;
     public static final LocalDate REPORT_ON = LocalDate.of(2026, 1, 25);
     public static final LocalDateTime REQUESTED_AT = LocalDateTime.of(2026, 1, 25, 10, 0);
+    public static final LocalDate CURRENT_DATE = REQUESTED_AT.toLocalDate();
     public static final String FEEDBACK_CONTENT = "피드백";
     public static final String TARGET_HIGHLIGHT_FEEDBACK_CONTENT = "수정된 하이라이트";
     public static final String TARGET_IMPROVEMENT_FEEDBACK_CONTENT = "수정된 개선점";
@@ -48,7 +49,7 @@ public class ReportFixture {
     }
 
     public static Report createReport(User user, LocalDate reportOn) {
-        return createReport(user, reportOn, WEEKLY, createReportFeedbackItems(), REQUESTED_AT);
+        return createReport(user, reportOn, WEEKLY, createReportFeedbackItems(), CURRENT_DATE);
     }
 
     public static Report createReport(LocalDate reportOn) {
@@ -60,7 +61,7 @@ public class ReportFixture {
     }
 
     public static Report createReport(LocalDate reportOn, List<ReportFeedback> feedbackItems) {
-        return createReport(createReconstructedUser(), reportOn, WEEKLY, feedbackItems, REQUESTED_AT);
+        return createReport(createReconstructedUser(), reportOn, WEEKLY, feedbackItems, CURRENT_DATE);
     }
 
     public static Report createReport(
@@ -68,9 +69,9 @@ public class ReportFixture {
             LocalDate reportOn,
             ReportType reportType,
             List<ReportFeedback> feedbackItems,
-            LocalDateTime requestedAt
+            LocalDate currentDate
     ) {
-        return Report.create(user, reportOn, reportType, feedbackItems, requestedAt);
+        return Report.create(user, reportOn, reportType, feedbackItems, currentDate);
     }
 
     public static Report createReconstructedReport() {
@@ -88,7 +89,7 @@ public class ReportFixture {
                 REPORT_ON,
                 WEEKLY,
                 createReportFeedbackItems(),
-                REQUESTED_AT
+                CURRENT_DATE
         );
     }
 
@@ -107,7 +108,7 @@ public class ReportFixture {
                 reportOn,
                 WEEKLY,
                 feedbackItems,
-                REQUESTED_AT
+                CURRENT_DATE
         );
     }
 
@@ -117,9 +118,9 @@ public class ReportFixture {
             LocalDate reportOn,
             ReportType reportType,
             List<ReportFeedback> feedbackItems,
-            LocalDateTime requestedAt
+            LocalDate currentDate
     ) {
-        return Report.reconstruct(reportId, user, reportOn, reportType, feedbackItems, requestedAt);
+        return Report.reconstruct(reportId, user, reportOn, reportType, feedbackItems, currentDate);
     }
 
     public static ReportFeedback createReportFeedback(FeedbackType feedbackType) {

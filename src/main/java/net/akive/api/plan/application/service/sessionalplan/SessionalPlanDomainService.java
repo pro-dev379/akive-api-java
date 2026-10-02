@@ -7,7 +7,9 @@ import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+
+import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 
 @Component
 @RequiredArgsConstructor
@@ -17,11 +19,11 @@ class SessionalPlanDomainService {
     private final CurrentTimeProvider currentTimeProvider;
 
     SessionalPlan create(User user, String sessionName, SessionPeriod sessionPeriod) {
-        LocalDateTime now = currentTimeProvider.now();
+        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
 
-        sessionalPlanValidationService.validateCreatable(user.getUserId(), sessionName, now.toLocalDate());
+        sessionalPlanValidationService.validateCreatable(user.getUserId(), sessionName, currentDate);
 
-        return SessionalPlan.create(user, sessionName, sessionPeriod, now);
+        return SessionalPlan.create(user, sessionName, sessionPeriod, currentDate);
     }
 
     void update(
@@ -35,6 +37,8 @@ class SessionalPlanDomainService {
                 targetSessionPeriod
         );
 
-        currentSessionalPlan.update(targetSessionName, targetSessionPeriod, currentTimeProvider.now());
+        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
+
+        currentSessionalPlan.update(targetSessionName, targetSessionPeriod, currentDate);
     }
 }

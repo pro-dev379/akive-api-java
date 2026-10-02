@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
+
 @Repository
 @RequiredArgsConstructor
 class ReportJpaAdapter implements ReportRepository {
@@ -36,7 +38,8 @@ class ReportJpaAdapter implements ReportRepository {
     @Override
     public Report save(Report report) {
         if (report.getReportId() == null) {
-            return reportJpaRepository.save(ReportEntity.from(report)).to(currentTimeProvider.now());
+            return reportJpaRepository.save(ReportEntity.from(report))
+                    .to(toKoreanDate(currentTimeProvider.now()));
         }
 
         ReportEntity reportEntity = reportJpaRepository.findById(report.getReportId()).orElseThrow();
@@ -46,13 +49,13 @@ class ReportJpaAdapter implements ReportRepository {
 
         reportEntity.updateFeedbackItems(report.getFeedbackItems());
 
-        return reportEntity.to(currentTimeProvider.now());
+        return reportEntity.to(toKoreanDate(currentTimeProvider.now()));
     }
 
     @Override
     public Optional<Report> findByReportIdAndUserId(Long reportId, Long userId) {
         return reportJpaRepository.findByReportIdAndUser_UserId(reportId, userId)
-                .map(entity -> entity.to(currentTimeProvider.now()));
+                .map(entity -> entity.to(toKoreanDate(currentTimeProvider.now())));
     }
 
 
@@ -63,6 +66,8 @@ class ReportJpaAdapter implements ReportRepository {
             LocalDate startOn,
             LocalDate endOn
     ) {
+        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
+
         return reportJpaRepository
                 .findAllByUser_UserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
                         userId,
@@ -71,7 +76,7 @@ class ReportJpaAdapter implements ReportRepository {
                         endOn
                 )
                 .stream()
-                .map(entity -> entity.to(currentTimeProvider.now()))
+                .map(entity -> entity.to(currentDate))
                 .toList();
     }
 

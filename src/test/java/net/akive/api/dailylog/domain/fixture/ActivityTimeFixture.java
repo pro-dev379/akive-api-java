@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static java.time.Duration.between;
-import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.NOW;
+import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.CURRENT_INSTANT;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.startOn;
 
 public class ActivityTimeFixture {
@@ -41,7 +41,7 @@ public class ActivityTimeFixture {
                 endOn,
                 focusTimeSec,
                 focusRateExcluded,
-                NOW
+                CURRENT_INSTANT
         );
     }
 }

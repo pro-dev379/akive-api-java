@@ -26,12 +26,12 @@ class SessionalPlanValidationService {
     private final SessionalPlanRepository sessionalPlanRepository;
     private final TotalQuantityRepository totalQuantityRepository;
 
-    void validateCreatable(Long userId, String sessionName, LocalDate requestedAt) {
+    void validateCreatable(Long userId, String sessionName, LocalDate currentDate) {
         String normalizedSessionName = validateSessionName(sessionName);
 
         validateSessionNameUniqueForCreate(userId, normalizedSessionName);
 
-        validateInProgressSessionalPlanLimit(userId, requestedAt);
+        validateInProgressSessionalPlanLimit(userId, currentDate);
     }
 
     void validateUpdatable(
@@ -78,8 +78,8 @@ class SessionalPlanValidationService {
         }
     }
 
-    private void validateInProgressSessionalPlanLimit(Long userId, LocalDate requestedAt) {
-        long inProgressSessionalPlanCount = sessionalPlanRepository.countInProgressByUserId(userId, requestedAt);
+    private void validateInProgressSessionalPlanLimit(Long userId, LocalDate currentDate) {
+        long inProgressSessionalPlanCount = sessionalPlanRepository.countInProgressByUserId(userId, currentDate);
 
         if (inProgressSessionalPlanCount >= IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT) {
             throw new BusinessRuleViolationException(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);

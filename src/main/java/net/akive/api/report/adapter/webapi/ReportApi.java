@@ -18,10 +18,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static net.akive.api.common.pagination.SortDirection.DESC;
+import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -41,9 +41,9 @@ public class ReportApi {
             @AuthenticatedUserId Long userId,
             @Validated @RequestBody ReportCreateRequest request
     ) {
-        LocalDateTime requestedAt = currentTimeProvider.now();
+        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
 
-        return new ReportCreateResponse(reportCreator.create(request.to(userId, requestedAt)));
+        return new ReportCreateResponse(reportCreator.create(request.to(userId, currentDate)));
     }
 
     @GetMapping("/{reportId}")
@@ -104,7 +104,7 @@ public class ReportApi {
 
     @GetMapping("/writing-statuses")
     public ReportWritingStatusesFindResponse findWritingStatuses(@AuthenticatedUserId Long userId) {
-        LocalDate baseDate = currentTimeProvider.now().toLocalDate();
+        LocalDate baseDate = toKoreanDate(currentTimeProvider.now());
 
         return ReportWritingStatusesFindResponse.from(reportFinder.findWritingStatuses(userId, baseDate));
     }

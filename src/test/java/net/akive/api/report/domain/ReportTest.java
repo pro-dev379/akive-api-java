@@ -29,7 +29,7 @@ class ReportTest {
                 REPORT_ON,
                 WEEKLY,
                 feedbackItems,
-                REQUESTED_AT
+                CURRENT_DATE
         );
 
         assertThat(report.getReportId()).isEqualTo(REPORT_ID);
@@ -42,7 +42,7 @@ class ReportTest {
     @Test
     void 리포트_작성일이_미래이면_리포트를_복원할_수_없다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> createReconstructedReport(REQUESTED_AT.toLocalDate().plusDays(1)))
+                .isThrownBy(() -> createReconstructedReport(CURRENT_DATE.plusDays(1)))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(REPORT_DATE_IN_FUTURE);
     }
@@ -65,7 +65,7 @@ class ReportTest {
                 REPORT_ON,
                 WEEKLY,
                 feedbackItems,
-                REQUESTED_AT
+                CURRENT_DATE
         );
 
         assertThat(report.getReportId()).isNull();
@@ -78,7 +78,7 @@ class ReportTest {
     @Test
     void 리포트_작성일이_미래이면_리포트를_생성할_수_없다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> createReport(REQUESTED_AT.toLocalDate().plusDays(1)))
+                .isThrownBy(() -> createReport(CURRENT_DATE.plusDays(1)))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(REPORT_DATE_IN_FUTURE);
     }
@@ -143,8 +143,8 @@ class ReportTest {
     @Test
     void 식별자가_없는_리포트끼리는_나머지_값이_같더라도_다른_것으로_취급한다() {
         User user = createReconstructedUser();
-        Report report = Report.create(user, REPORT_ON, WEEKLY, createReportFeedbackItems(), REQUESTED_AT);
-        Report anotherReport = Report.create(user, REPORT_ON, WEEKLY, createReportFeedbackItems(), REQUESTED_AT);
+        Report report = Report.create(user, REPORT_ON, WEEKLY, createReportFeedbackItems(), CURRENT_DATE);
+        Report anotherReport = Report.create(user, REPORT_ON, WEEKLY, createReportFeedbackItems(), CURRENT_DATE);
 
         assertThat(report).isNotEqualTo(anotherReport);
     }

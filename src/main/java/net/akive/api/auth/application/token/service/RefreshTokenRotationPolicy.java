@@ -16,7 +16,7 @@ class RefreshTokenRotationPolicy {
     private final CurrentTimeProvider currentTimeProvider;
 
     boolean requiresRotation(Instant expiresAt) {
-        Instant now = currentTimeProvider.instant();
+        Instant now = currentTimeProvider.now();
         Duration remaining = Duration.between(now, expiresAt);
 
         return remaining.compareTo(Duration.ZERO) > 0 && remaining.compareTo(ROTATION_THRESHOLD) <= 0;

@@ -39,7 +39,7 @@ class ReportCommandService implements ReportCreator {
                 command.reportOn(),
                 command.reportType(),
                 command.feedbackItems(),
-                command.requestedAt()
+                command.currentDate()
         );
 
         Report savedReport = reportRepository.save(report);

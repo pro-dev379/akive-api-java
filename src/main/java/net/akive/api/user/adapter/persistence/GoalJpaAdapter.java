@@ -9,19 +9,17 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
+import static java.time.ZoneOffset.UTC;
+import static net.akive.api.common.time.ServiceDayPolicy.toServiceDayStart;
 
 @Repository
 @RequiredArgsConstructor
 class GoalJpaAdapter implements GoalRepository {
 
-    private static final ZoneId GOAL_DATE_ZONE = ZoneId.of("Asia/Seoul");
     private final GoalJpaRepository goalJpaRepository;
 
     @Override
@@ -41,8 +39,8 @@ class GoalJpaAdapter implements GoalRepository {
 
     @Override
     public List<GoalVersion> findVersionsForPeriod(Long userId, LocalDate startOn, LocalDate endOn) {
-        LocalDateTime periodStart = koreanServiceDayStartAsUtc(startOn);
-        LocalDateTime periodEnd = koreanServiceDayStartAsUtc(endOn);
+        LocalDateTime periodStart = toUtcDateTimeAtServiceDayStart(startOn);
+        LocalDateTime periodEnd = toUtcDateTimeAtServiceDayStart(endOn);
         List<GoalVersion> goalVersions = new ArrayList<>();
 
         goalJpaRepository
@@ -61,11 +59,8 @@ class GoalJpaAdapter implements GoalRepository {
         return List.copyOf(goalVersions);
     }
 
-    private LocalDateTime koreanServiceDayStartAsUtc(LocalDate date) {
-        return date.atTime(DAILY_BOUNDARY_HOUR, 0)
-                .atZone(GOAL_DATE_ZONE)
-                .withZoneSameInstant(ZoneOffset.UTC)
-                .toLocalDateTime();
+    private LocalDateTime toUtcDateTimeAtServiceDayStart(LocalDate date) {
+        return LocalDateTime.ofInstant(toServiceDayStart(date), UTC);
     }
 
     private GoalVersion toVersion(GoalEntity entity) {

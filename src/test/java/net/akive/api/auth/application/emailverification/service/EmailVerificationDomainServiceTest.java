@@ -50,7 +50,7 @@ class EmailVerificationDomainServiceTest {
 
     @Test
     void 새로운_이메일_인증번호를_발급한다() {
-        given(currentTimeProvider.instant()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(NOW);
         given(emailVerificationCodeGenerator.generate()).willReturn(VERIFICATION_CODE);
         given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.empty());
@@ -70,7 +70,7 @@ class EmailVerificationDomainServiceTest {
 
     @Test
     void 기존_인증정보가_존재하면_새_인증번호로_갱신한다() {
-        given(currentTimeProvider.instant()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(NOW);
 
         EmailVerificationCode newVerificationCode = new EmailVerificationCode("654321");
         EmailVerification previous = createEmailVerification(
@@ -100,7 +100,7 @@ class EmailVerificationDomainServiceTest {
 
         assertThatThrownBy(() -> emailVerificationDomainService.issue(EMAIL, SIGN_UP)).isSameAs(exception);
 
-        then(currentTimeProvider).should(never()).instant();
+        then(currentTimeProvider).should(never()).now();
         then(emailVerificationCodeGenerator).should(never()).generate();
         then(emailVerificationStore).should(never()).findByEmailAndVerificationPurpose(any(), any());
     }
@@ -113,7 +113,7 @@ class EmailVerificationDomainServiceTest {
                 NOW.minus(1, MINUTES)
         );
 
-        given(currentTimeProvider.instant()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(NOW);
         given(emailVerificationStore.findByEmailAndVerificationPurpose(EMAIL, SIGN_UP))
                 .willReturn(Optional.of(emailVerification));
 

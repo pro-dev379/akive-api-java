@@ -8,7 +8,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -48,9 +48,9 @@ public class SessionalPlan {
             User user,
             String sessionName,
             SessionPeriod sessionPeriod,
-            LocalDateTime requestedAt
+            LocalDate currentDate
     ) {
-        validateSchedulableSessionPeriod(sessionPeriod, requestedAt);
+        validateSchedulableSessionPeriod(sessionPeriod, currentDate);
 
         return SessionalPlan.builder()
                 .user(requireNonNull(user))
@@ -62,9 +62,9 @@ public class SessionalPlan {
     public void update(
             String targetSessionName,
             SessionPeriod targetSessionPeriod,
-            LocalDateTime requestedAt
+            LocalDate currentDate
     ) {
-        validateSchedulableSessionPeriod(targetSessionPeriod, requestedAt);
+        validateSchedulableSessionPeriod(targetSessionPeriod, currentDate);
 
         this.sessionName = requireMaxLength(requireNotBlank(targetSessionName), SESSION_NAME_MAX_LENGTH);
         this.sessionPeriod = targetSessionPeriod;
@@ -72,13 +72,13 @@ public class SessionalPlan {
 
     private static void validateSchedulableSessionPeriod(
             SessionPeriod sessionPeriod,
-            LocalDateTime requestedAt
+            LocalDate currentDate
     ) {
         requireNonNull(sessionPeriod);
-        requireNonNull(requestedAt);
+        requireNonNull(currentDate);
 
-        if (sessionPeriod.startOn().isBefore(requestedAt.toLocalDate()) ||
-                !sessionPeriod.endOn().isAfter(requestedAt.toLocalDate())) {
+        if (sessionPeriod.startOn().isBefore(currentDate) ||
+                !sessionPeriod.endOn().isAfter(currentDate)) {
             throw new BusinessRuleViolationException(INVALID_SESSION_PERIOD);
         }
     }

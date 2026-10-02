@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +30,7 @@ class DailyLogJpaAdapter implements DailyLogRepository {
 
     @Override
     public DailyLog save(DailyLog dailyLog) {
-        LocalDateTime reconstructedAt = currentTimeProvider.now();
+        Instant reconstructedAt = currentTimeProvider.now();
 
         return dailyLogJpaRepository.save(DailyLogEntity.from(dailyLog)).to(reconstructedAt);
     }
@@ -58,7 +59,7 @@ class DailyLogJpaAdapter implements DailyLogRepository {
 
     @Override
     public Optional<DailyLog> findByDailyLogIdAndUserId(Long dailyLogId, Long userId) {
-        LocalDateTime reconstructedAt = currentTimeProvider.now();
+        Instant reconstructedAt = currentTimeProvider.now();
 
         return dailyLogJpaRepository.findByDailyLogIdAndUser_UserId(dailyLogId, userId)
                 .map(entity -> entity.to(reconstructedAt));
@@ -66,7 +67,7 @@ class DailyLogJpaAdapter implements DailyLogRepository {
 
     @Override
     public List<DailyLog> findAllByUserIdAndLogOnOrderByStartOn(Long userId, LocalDate logOn) {
-        LocalDateTime reconstructedAt = currentTimeProvider.now();
+        Instant reconstructedAt = currentTimeProvider.now();
 
         return dailyLogJpaRepository
                 .findAllByUserIdAndLogOnOrderByStartOnAsc(userId, logOn)
@@ -81,7 +82,7 @@ class DailyLogJpaAdapter implements DailyLogRepository {
             LocalDateTime startOn,
             LocalDateTime endOn
     ) {
-        LocalDateTime reconstructedAt = currentTimeProvider.now();
+        Instant reconstructedAt = currentTimeProvider.now();
 
         return dailyLogJpaRepository
                 .findAllByUserIdAndOverlappingTimeRangeOrderByStartOnAsc(userId, startOn, endOn)

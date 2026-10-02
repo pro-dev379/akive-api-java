@@ -30,7 +30,7 @@ class EmailVerificationDomainService {
     EmailVerification issue(Email email, EmailVerificationPurpose verificationPurpose) {
         emailVerificationValidationService.validateIssuable(email, verificationPurpose);
 
-        Instant requestedAt = currentTimeProvider.instant();
+        Instant requestedAt = currentTimeProvider.now();
         EmailVerificationCode verificationCode = emailVerificationCodeGenerator.generate();
 
         return emailVerificationStore
@@ -52,7 +52,7 @@ class EmailVerificationDomainService {
                 .findByEmailAndVerificationPurpose(email, verificationPurpose)
                 .orElseThrow(() -> new ResourceNotFoundException(EMAIL_VERIFICATION_NOT_FOUND));
 
-        emailVerification.verify(verificationCode, currentTimeProvider.instant());
+        emailVerification.verify(verificationCode, currentTimeProvider.now());
 
         return emailVerification;
     }

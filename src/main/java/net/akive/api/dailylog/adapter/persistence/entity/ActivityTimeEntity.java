@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.dailylog.domain.ActivityTime;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -43,7 +44,7 @@ public class ActivityTimeEntity {
         );
     }
 
-    public ActivityTime to(LocalDateTime reconstructedAt) {
+    public ActivityTime to(Instant reconstructedAt) {
         return ActivityTime.of(
                 this.startOn,
                 this.endOn,

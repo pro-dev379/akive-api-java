@@ -8,7 +8,6 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.user.domain.User;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,9 +37,9 @@ public class Report {
             LocalDate reportOn,
             ReportType reportType,
             List<ReportFeedback> feedbackItems,
-            LocalDateTime requestedAt
+            LocalDate currentDate
     ) {
-        validateReportOnNotFuture(reportOn, requestedAt);
+        validateReportOnNotFuture(reportOn, currentDate);
 
         return Report.builder()
                 .reportId(requirePositive(reportId))
@@ -56,9 +55,9 @@ public class Report {
             LocalDate reportOn,
             ReportType reportType,
             List<ReportFeedback> feedbackItems,
-            LocalDateTime requestedAt
+            LocalDate currentDate
     ) {
-        validateReportOnNotFuture(reportOn, requestedAt);
+        validateReportOnNotFuture(reportOn, currentDate);
 
         return Report.builder()
                 .user(requireNonNull(user))
@@ -87,11 +86,11 @@ public class Report {
         return getClass().hashCode();
     }
 
-    private static void validateReportOnNotFuture(LocalDate reportOn, LocalDateTime baseTime) {
+    private static void validateReportOnNotFuture(LocalDate reportOn, LocalDate currentDate) {
         requireNonNull(reportOn);
-        requireNonNull(baseTime);
+        requireNonNull(currentDate);
 
-        if (reportOn.isAfter(baseTime.toLocalDate())) {
+        if (reportOn.isAfter(currentDate)) {
             throw new BusinessRuleViolationException(REPORT_DATE_IN_FUTURE);
         }
     }

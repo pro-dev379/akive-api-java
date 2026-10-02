@@ -4,9 +4,10 @@ import net.akive.api.plan.domain.model.SessionalPlan;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
+import static net.akive.api.common.time.ServiceDayPolicy.toInstantAtServiceZone;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 
 public class SessionalPlanFixture {
@@ -18,8 +19,9 @@ public class SessionalPlanFixture {
     public static final int UNKNOWN_WEEK_NUM = 999;
     public static final String SESSION_NAME = "2026 1월 학습";
     public static final String ANOTHER_SESSION_NAME = "2026 2월 학습";
-    public static final LocalDateTime REQUESTED_AT =
-            LocalDateTime.of(2025, 12, 31, 10, 0);
+    public static final LocalDate CURRENT_KOREAN_DATE = LocalDate.of(2025, 12, 31);
+    public static final Instant CURRENT_INSTANT =
+            toInstantAtServiceZone(CURRENT_KOREAN_DATE.atTime(10, 0));
     public static final SessionPeriod SESSION_PERIOD = new SessionPeriod(
             LocalDate.of(2026, 1, 1),
             LocalDate.of(2026, 1, 12)
@@ -45,16 +47,16 @@ public class SessionalPlanFixture {
         return createSessionalPlan(user, SESSION_NAME);
     }
 
-    public static SessionalPlan createSessionalPlan(User user, LocalDateTime requestedAt) {
-        return createSessionalPlan(user, SESSION_NAME, requestedAt);
+    public static SessionalPlan createSessionalPlan(User user, LocalDate currentDate) {
+        return createSessionalPlan(user, SESSION_NAME, currentDate);
     }
 
     public static SessionalPlan createSessionalPlan(User user, String sessionName) {
-        return createSessionalPlan(user, sessionName, REQUESTED_AT);
+        return createSessionalPlan(user, sessionName, CURRENT_KOREAN_DATE);
     }
 
-    public static SessionalPlan createSessionalPlan(User user, String sessionName, LocalDateTime requestedAt) {
-        return SessionalPlan.create(user, sessionName, SESSION_PERIOD, requestedAt);
+    public static SessionalPlan createSessionalPlan(User user, String sessionName, LocalDate currentDate) {
+        return SessionalPlan.create(user, sessionName, SESSION_PERIOD, currentDate);
     }
 
     public static SessionalPlan createReconstructedSessionalPlan() {

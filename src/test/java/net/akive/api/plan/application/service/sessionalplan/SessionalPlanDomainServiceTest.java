@@ -10,9 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static net.akive.api.common.exception.business.ResourceConflictError.SESSION_NAME_ALREADY_EXISTS;
+import static net.akive.api.common.time.ServiceDayPolicy.toInstantAtServiceZone;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.createReconstructedUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +36,7 @@ class SessionalPlanDomainServiceTest {
     @Test
     void 세셔널_플랜을_생성한다() {
         User user = createReconstructedUser();
-        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
 
         SessionalPlan sessionalPlan = sessionalPlanDomainService.create(user, SESSION_NAME, SESSION_PERIOD);
 
@@ -45,17 +46,17 @@ class SessionalPlanDomainServiceTest {
 
         then(currentTimeProvider).should().now();
         then(sessionalPlanValidationService).should()
-                .validateCreatable(user.getUserId(), SESSION_NAME, REQUESTED_AT.toLocalDate());
+                .validateCreatable(user.getUserId(), SESSION_NAME, CURRENT_KOREAN_DATE);
     }
 
     @Test
     void 세셔널_플랜_생성_검증에_실패하면_예외를_전파하고_생성하지_않는다() {
         User user = createReconstructedUser();
         ResourceConflictException exception = new ResourceConflictException(SESSION_NAME_ALREADY_EXISTS);
-        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         willThrow(exception)
                 .given(sessionalPlanValidationService)
-                .validateCreatable(user.getUserId(), SESSION_NAME, REQUESTED_AT.toLocalDate());
+                .validateCreatable(user.getUserId(), SESSION_NAME, CURRENT_KOREAN_DATE);
 
         assertThatExceptionOfType(ResourceConflictException.class)
                 .isThrownBy(() -> sessionalPlanDomainService.create(user, SESSION_NAME, SESSION_PERIOD))
@@ -63,14 +64,14 @@ class SessionalPlanDomainServiceTest {
 
         then(currentTimeProvider).should().now();
         then(sessionalPlanValidationService).should()
-                .validateCreatable(user.getUserId(), SESSION_NAME, REQUESTED_AT.toLocalDate());
+                .validateCreatable(user.getUserId(), SESSION_NAME, CURRENT_KOREAN_DATE);
     }
 
     @Test
     void 세셔널_플랜을_수정한다() {
         SessionalPlan currentSessionalPlan = createReconstructedSessionalPlan();
-        LocalDateTime requestedAt = REQUESTED_AT.plusDays(1);
-        given(currentTimeProvider.now()).willReturn(requestedAt);
+        Instant currentInstant = toInstantAtServiceZone(CURRENT_KOREAN_DATE.plusDays(1).atTime(10, 0));
+        given(currentTimeProvider.now()).willReturn(currentInstant);
 
         sessionalPlanDomainService.update(currentSessionalPlan, TARGET_SESSION_NAME, TARGET_SESSION_PERIOD);
 

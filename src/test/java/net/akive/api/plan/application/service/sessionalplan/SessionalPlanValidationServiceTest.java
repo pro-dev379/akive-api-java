@@ -39,17 +39,17 @@ class SessionalPlanValidationServiceTest {
     void 세셔널_플랜을_생성할_수_있는지_검증한다() {
         given(sessionalPlanRepository.existsByUserIdAndSessionName(USER_ID, SESSION_NAME))
                 .willReturn(false);
-        given(sessionalPlanRepository.countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate()))
+        given(sessionalPlanRepository.countInProgressByUserId(USER_ID, CURRENT_KOREAN_DATE))
                 .willReturn(IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT - 1);
 
         sessionalPlanValidationService.validateCreatable(
                 USER_ID,
                 "  " + SESSION_NAME + "  ",
-                REQUESTED_AT.toLocalDate()
+                CURRENT_KOREAN_DATE
         );
 
         then(sessionalPlanRepository).should().existsByUserIdAndSessionName(USER_ID, SESSION_NAME);
-        then(sessionalPlanRepository).should().countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate());
+        then(sessionalPlanRepository).should().countInProgressByUserId(USER_ID, CURRENT_KOREAN_DATE);
     }
 
     @Test
@@ -61,33 +61,33 @@ class SessionalPlanValidationServiceTest {
                 .isThrownBy(() -> sessionalPlanValidationService.validateCreatable(
                         USER_ID,
                         SESSION_NAME,
-                        REQUESTED_AT.toLocalDate()
+                        CURRENT_KOREAN_DATE
                 ))
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(SESSION_NAME_ALREADY_EXISTS);
 
         then(sessionalPlanRepository).should().existsByUserIdAndSessionName(USER_ID, SESSION_NAME);
-        then(sessionalPlanRepository).should(never()).countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate());
+        then(sessionalPlanRepository).should(never()).countInProgressByUserId(USER_ID, CURRENT_KOREAN_DATE);
     }
 
     @Test
     void 진행_중인_세셔널_플랜_수가_최대치에_도달하면_생성할_수_없다() {
         given(sessionalPlanRepository.existsByUserIdAndSessionName(USER_ID, SESSION_NAME))
                 .willReturn(false);
-        given(sessionalPlanRepository.countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate()))
+        given(sessionalPlanRepository.countInProgressByUserId(USER_ID, CURRENT_KOREAN_DATE))
                 .willReturn(IN_PROGRESS_SESSIONAL_PLAN_MAX_COUNT);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> sessionalPlanValidationService.validateCreatable(
                         USER_ID,
                         SESSION_NAME,
-                        REQUESTED_AT.toLocalDate()
+                        CURRENT_KOREAN_DATE
                 ))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(IN_PROGRESS_SESSIONAL_PLAN_LIMIT_EXCEEDED);
 
         then(sessionalPlanRepository).should().existsByUserIdAndSessionName(USER_ID, SESSION_NAME);
-        then(sessionalPlanRepository).should().countInProgressByUserId(USER_ID, REQUESTED_AT.toLocalDate());
+        then(sessionalPlanRepository).should().countInProgressByUserId(USER_ID, CURRENT_KOREAN_DATE);
     }
 
     @Test

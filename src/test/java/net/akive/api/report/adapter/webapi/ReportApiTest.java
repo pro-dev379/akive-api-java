@@ -34,6 +34,7 @@ import static net.akive.api.common.exception.business.ResourceConflictError.REPO
 import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
+import static net.akive.api.common.time.ServiceDayPolicy.toInstantAtServiceZone;
 import static net.akive.api.report.adapter.webapi.fixture.ReportRequestFixture.*;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportCreateCommand;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportFeedbackItemsUpdateCommand;
@@ -74,7 +75,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     void 리포트를_생성한다() {
         ReportCreateRequest request = createReportCreateRequest();
         ReportCreateCommand command = createReportCreateCommand(USER_ID);
-        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(REQUESTED_AT));
         given(reportCreator.create(command)).willReturn(REPORT_ID);
 
         MvcTestResultAssert result = postJson(REPORTS_URL, USER_ID, toJson(request)).hasStatus(CREATED);
@@ -99,7 +100,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     @Test
     void 리포트_생성_시_피드백_내용이_하나도_없으면_400을_응답한다() {
         ReportCreateRequest reportCreateRequest = createReportCreateRequest(createEmptyReportFeedbackRequest());
-        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(REQUESTED_AT));
 
         MvcTestResultAssert result = postJson(REPORTS_URL, USER_ID, toJson(reportCreateRequest)).hasStatus(BAD_REQUEST);
 
@@ -112,7 +113,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     @Test
     void 리포트_생성_시_리포트_작성일이_미래면_400을_응답한다() {
         ReportCreateRequest request = createReportCreateRequest(REQUESTED_AT.toLocalDate().plusDays(1));
-        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(REQUESTED_AT));
 
         MvcTestResultAssert result = postJson(REPORTS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
@@ -126,7 +127,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     void 리포트_생성_시_리포트_작성일에_맞지_않는_리포트_타입으로_요청하면_400을_응답한다() {
         ReportCreateRequest request = createReportCreateRequest();
         ReportCreateCommand command = createReportCreateCommand(USER_ID);
-        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(REQUESTED_AT));
         willThrow(new BusinessRuleViolationException(INVALID_REPORT_TYPE))
                 .given(reportCreator)
                 .create(command);
@@ -143,7 +144,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     void 리포트_생성_시_회원이_없으면_404를_응답한다() {
         ReportCreateRequest request = createReportCreateRequest();
         ReportCreateCommand command = createReportCreateCommand(UNKNOWN_USER_ID);
-        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(REQUESTED_AT));
         willThrow(new ResourceNotFoundException(USER_NOT_FOUND))
                 .given(reportCreator)
                 .create(command);
@@ -160,7 +161,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     void 리포트_생성_시_세셔널_플랜이_없으면_404를_응답한다() {
         ReportCreateRequest request = createReportCreateRequest();
         ReportCreateCommand command = createReportCreateCommand(USER_ID);
-        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(REQUESTED_AT));
         willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND))
                 .given(reportCreator)
                 .create(command);
@@ -177,7 +178,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     void 리포트_생성_시_이미_리포트_작성일과_타입이_같은_리포트가_존재하면_409를_응답한다() {
         ReportCreateRequest request = createReportCreateRequest();
         ReportCreateCommand command = createReportCreateCommand(USER_ID);
-        given(currentTimeProvider.now()).willReturn(REQUESTED_AT);
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(REQUESTED_AT));
         willThrow(new ResourceConflictException(REPORT_ALREADY_EXISTS))
                 .given(reportCreator)
                 .create(command);
@@ -502,7 +503,7 @@ class ReportApiTest extends PrivateApiTestSupport {
         ReportWritingStatusResult dailyWritingStatus = createDailyWritingStatus();
         ReportWritingStatusResult weeklyWritingStatus = createWeeklyWritingStatus();
         ReportWritingStatusResult monthlyWritingStatus = createMonthlyWritingStatus();
-        given(currentTimeProvider.now()).willReturn(baseDate.atStartOfDay());
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(baseDate.atStartOfDay()));
         given(reportFinder.findWritingStatuses(USER_ID, baseDate))
                 .willReturn(List.of(dailyWritingStatus, weeklyWritingStatus, monthlyWritingStatus));
 
@@ -522,7 +523,7 @@ class ReportApiTest extends PrivateApiTestSupport {
     @Test
     void 오늘_기준으로_리포트_작성_여부를_조회_시_오늘과_관련된_세셔널_플랜이_없으면_404를_응답한다() {
         LocalDate baseDate = REPORT_ON;
-        given(currentTimeProvider.now()).willReturn(baseDate.atStartOfDay());
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(baseDate.atStartOfDay()));
         given(reportFinder.findWritingStatuses(USER_ID, baseDate))
                 .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));
 

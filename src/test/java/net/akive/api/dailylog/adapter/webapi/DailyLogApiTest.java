@@ -68,9 +68,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그를_생성한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest();
-        DailyLogCreateCommand command = request.to(USER_ID, NOW);
+        DailyLogCreateCommand command = request.to(USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         given(dailyLogCreator.create(command)).willReturn(DAILY_LOG_ID);
 
         MvcTestResultAssert result = postJson(
@@ -100,12 +100,12 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     void 일일_로그_생성_시_미래_시간_범위로_요청하면_400을_응답한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest(
                 createActivityTimeRequest(
-                        NOW.plusHours(1),
-                        NOW.plusHours(2)
+                        CURRENT_KOREAN_DATE_TIME.plusHours(1),
+                        CURRENT_KOREAN_DATE_TIME.plusHours(2)
                 )
         );
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
 
         MvcTestResultAssert result = postJson(
                 DAILY_LOGS_URL,
@@ -128,7 +128,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 )
         );
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
 
 
         MvcTestResultAssert result = postJson(
@@ -150,7 +150,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 3601L
         );
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
 
         MvcTestResultAssert result = postJson(
                 DAILY_LOGS_URL,
@@ -171,9 +171,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 SLEEP,
                 "수면"
         );
-        DailyLogCreateCommand command = request.to(USER_ID, NOW);
+        DailyLogCreateCommand command = request.to(USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         willThrow(new BusinessRuleViolationException(DAILY_LOG_SLEEP_TIME_TOO_SHORT))
                 .given(dailyLogCreator)
                 .create(command);
@@ -191,9 +191,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 REST,
                 "휴식"
         );
-        DailyLogCreateCommand command = request.to(USER_ID, NOW);
+        DailyLogCreateCommand command = request.to(USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         willThrow(new BusinessRuleViolationException(DAILY_LOG_FOCUS_TIME_NOT_ALLOWED))
                 .given(dailyLogCreator)
                 .create(command);
@@ -207,9 +207,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_회원이_없으면_404를_응답한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest();
-        DailyLogCreateCommand command = request.to(USER_ID, NOW);
+        DailyLogCreateCommand command = request.to(USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         willThrow(new ResourceNotFoundException(USER_NOT_FOUND))
                 .given(dailyLogCreator)
                 .create(command);
@@ -229,9 +229,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_생성_시_기존_일일_로그의_시간_범위와_오버랩되면_409를_응답한다() {
         DailyLogCreateRequest request = createDailyLogCreateRequest();
-        DailyLogCreateCommand command = request.to(USER_ID, NOW);
+        DailyLogCreateCommand command = request.to(USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         willThrow(new ResourceConflictException(DAILY_LOG_TIME_OVERLAPS))
                 .given(dailyLogCreator)
                 .create(command);
@@ -251,9 +251,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그를_수정한다() {
         DailyLogUpdateRequest request = createDailyLogUpdateRequest();
-        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, NOW);
+        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
 
         putJson(
                 DAILY_LOG_URL,
@@ -279,12 +279,12 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     void 일일_로그_수정_시_미래_시간_범위로_요청하면_400을_응답한다() {
         DailyLogUpdateRequest request = createDailyLogUpdateRequest(
                 createActivityTimeRequest(
-                        NOW.plusHours(1),
-                        NOW.plusHours(2)
+                        CURRENT_KOREAN_DATE_TIME.plusHours(1),
+                        CURRENT_KOREAN_DATE_TIME.plusHours(2)
                 )
         );
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
 
         MvcTestResultAssert result = putJson(
                 DAILY_LOG_URL,
@@ -308,7 +308,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 )
         );
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
 
         MvcTestResultAssert result = putJson(
                 DAILY_LOG_URL,
@@ -330,7 +330,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 3601L
         );
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
 
         MvcTestResultAssert result = putJson(
                 DAILY_LOG_URL,
@@ -352,9 +352,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 SLEEP,
                 "수면"
         );
-        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, NOW);
+        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         willThrow(new BusinessRuleViolationException(DAILY_LOG_SLEEP_TIME_TOO_SHORT))
                 .given(dailyLogCreator)
                 .update(command);
@@ -374,9 +374,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 REST,
                 "휴식"
         );
-        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, NOW);
+        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         willThrow(new BusinessRuleViolationException(DAILY_LOG_FOCUS_TIME_NOT_ALLOWED))
                 .given(dailyLogCreator)
                 .update(command);
@@ -392,9 +392,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_수정_시_일일_로그가_없으면_404를_응답한다() {
         DailyLogUpdateRequest request = createDailyLogUpdateRequest();
-        DailyLogUpdateCommand command = request.to(UNKNOWN_DAILY_LOG_ID, USER_ID, NOW);
+        DailyLogUpdateCommand command = request.to(UNKNOWN_DAILY_LOG_ID, USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         willThrow(new ResourceNotFoundException(DAILY_LOG_NOT_FOUND))
                 .given(dailyLogCreator)
                 .update(command);
@@ -415,9 +415,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
     @Test
     void 일일_로그_수정_시_시간_범위가_오버랩되면_409를_응답한다() {
         DailyLogUpdateRequest request = createDailyLogUpdateRequest();
-        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, NOW);
+        DailyLogUpdateCommand command = request.to(DAILY_LOG_ID, USER_ID, CURRENT_INSTANT);
 
-        given(currentTimeProvider.now()).willReturn(NOW);
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         willThrow(new ResourceConflictException(DAILY_LOG_TIME_OVERLAPS))
                 .given(dailyLogCreator)
                 .update(command);

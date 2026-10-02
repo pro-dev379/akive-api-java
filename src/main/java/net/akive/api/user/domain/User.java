@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.domain.Email;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -82,7 +83,7 @@ public class User {
         this.userDetail = new UserDetail(targetNickname, targetProfileImageAssetId, targetAim);
     }
 
-    public void withdraw(LocalDateTime withdrawnAt, String reason) {
+    public void withdraw(Instant withdrawnAt, String reason) {
         this.withdrawal = Withdrawal.completedWith(withdrawnAt, reason);
     }
 

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.user.domain.User;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -15,6 +16,7 @@ import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
+import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 import static net.akive.api.dailylog.domain.DailyLogPolicy.MIN_SLEEP_DURATION_SEC;
 import static net.akive.api.dailylog.domain.DailyLogType.SLEEP;
 import static net.akive.api.dailylog.domain.DailyLogType.STUDY;
@@ -44,7 +46,7 @@ public class DailyLog {
             ActivityTime activityTime,
             DailyLogType dailyLogType,
             String contents,
-            LocalDateTime reconstructedAt
+            Instant reconstructedAt
     ) {
         requireNonNull(activityTime);
         requireNonNull(dailyLogType);
@@ -67,7 +69,7 @@ public class DailyLog {
             ActivityTime activityTime,
             DailyLogType dailyLogType,
             String contents,
-            LocalDateTime requestedAt
+            Instant requestedAt
     ) {
         requireNonNull(activityTime);
         requireNonNull(dailyLogType);
@@ -89,7 +91,7 @@ public class DailyLog {
             ActivityTime targetActivityTime,
             DailyLogType targetDailyLogType,
             String targetContents,
-            LocalDateTime requestedAt
+            Instant requestedAt
     ) {
         requireNonNull(targetActivityTime);
         requireNonNull(targetDailyLogType);
@@ -135,11 +137,11 @@ public class DailyLog {
         return getClass().hashCode();
     }
 
-    private static void validateLogOnNotFuture(LocalDate logOn, LocalDateTime baseTime) {
+    private static void validateLogOnNotFuture(LocalDate logOn, Instant baseTime) {
         requireNonNull(logOn);
         requireNonNull(baseTime);
 
-        if (logOn.isAfter(baseTime.toLocalDate())) {
+        if (logOn.isAfter(toKoreanDate(baseTime))) {
             throw new BusinessRuleViolationException(DAILY_LOG_DATE_IN_FUTURE);
         }
     }

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.user.domain.Withdrawal;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -17,7 +17,7 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 public class WithdrawalEntity {
 
-    private LocalDateTime withdrawnAt;
+    private Instant withdrawnAt;
 
     private String withdrawalReason;
 

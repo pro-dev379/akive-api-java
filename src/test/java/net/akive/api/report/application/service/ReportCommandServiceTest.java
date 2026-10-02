@@ -59,7 +59,7 @@ class ReportCommandServiceTest {
                 command.reportOn(),
                 command.reportType(),
                 command.feedbackItems(),
-                command.requestedAt()
+                command.currentDate()
         );
 
         given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));

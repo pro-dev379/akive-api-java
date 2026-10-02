@@ -27,7 +27,7 @@ public class ReportCommandFixture {
                 REPORT_ON,
                 WEEKLY,
                 feedbackItems,
-                REQUESTED_AT
+                CURRENT_DATE
         );
     }
 

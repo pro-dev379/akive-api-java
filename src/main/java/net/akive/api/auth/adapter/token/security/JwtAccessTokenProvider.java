@@ -27,7 +27,7 @@ class JwtAccessTokenProvider implements AccessTokenCreator {
 
     @Override
     public AccessToken create(Long userId, RoleType roleType) {
-        Instant now = currentTimeProvider.instant();
+        Instant now = currentTimeProvider.now();
         Instant expiresAt = now.plus(jwtProperties.accessToken().expirationMinutes(), MINUTES);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()

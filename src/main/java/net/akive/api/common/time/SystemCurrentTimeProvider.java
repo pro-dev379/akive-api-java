@@ -4,20 +4,14 @@ import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Component
 public class SystemCurrentTimeProvider implements CurrentTimeProvider {
 
-    private final Clock clock = Clock.systemDefaultZone();
+    private final Clock clock = Clock.systemUTC();
 
     @Override
-    public LocalDateTime now() {
-        return LocalDateTime.now(clock);
-    }
-
-    @Override
-    public Instant instant() {
+    public Instant now() {
         return Instant.now(clock);
     }
 }

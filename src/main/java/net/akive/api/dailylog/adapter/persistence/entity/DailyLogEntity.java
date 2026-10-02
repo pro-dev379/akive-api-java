@@ -11,8 +11,8 @@ import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.DailyLogType;
 import net.akive.api.user.adapter.persistence.entity.UserEntity;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
@@ -71,7 +71,7 @@ public class DailyLogEntity extends BaseTimeEntity {
         );
     }
 
-    public DailyLog to(LocalDateTime reconstructedAt) {
+    public DailyLog to(Instant reconstructedAt) {
         try {
             return DailyLog.reconstruct(
                     this.dailyLogId,

@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.createDailyLog;
@@ -84,8 +83,8 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
         return sessionalPlanRepository.save(sessionalPlan);
     }
 
-    protected SessionalPlan saveSessionalPlan(LocalDateTime requestedAt) {
-        SessionalPlan sessionalPlan = createSessionalPlan(saveUser(), requestedAt);
+    protected SessionalPlan saveSessionalPlan(LocalDate currentDate) {
+        SessionalPlan sessionalPlan = createSessionalPlan(saveUser(), currentDate);
 
         return sessionalPlanRepository.save(sessionalPlan);
     }
@@ -143,7 +142,7 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
             List<ReportFeedback> feedbackItems
     ) {
         return reportRepository.save(
-                createReport(savedUser, reportOn, reportType, feedbackItems, reportOn.atStartOfDay())
+                createReport(savedUser, reportOn, reportType, feedbackItems, reportOn)
         );
     }
 

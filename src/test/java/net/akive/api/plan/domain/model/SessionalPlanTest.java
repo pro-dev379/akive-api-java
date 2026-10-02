@@ -5,7 +5,7 @@ import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.*;
@@ -41,7 +41,7 @@ class SessionalPlanTest {
                 user,
                 "  " + SESSION_NAME + "  ",
                 SESSION_PERIOD,
-                REQUESTED_AT
+                CURRENT_KOREAN_DATE
         );
 
         assertThat(sessionalPlan.getSessionalPlanId()).isNull();
@@ -53,8 +53,8 @@ class SessionalPlanTest {
     @Test
     void 세셔널_플랜_생성_시_세션_시작일이_생성_요청일보다_과거일_수_없다() {
         SessionPeriod sessionPeriod = new SessionPeriod(
-                REQUESTED_AT.toLocalDate().minusDays(1),
-                REQUESTED_AT.toLocalDate().plusDays(1)
+                CURRENT_KOREAN_DATE.minusDays(1),
+                CURRENT_KOREAN_DATE.plusDays(1)
         );
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
@@ -62,7 +62,7 @@ class SessionalPlanTest {
                         createReconstructedUser(),
                         SESSION_NAME,
                         sessionPeriod,
-                        REQUESTED_AT
+                        CURRENT_KOREAN_DATE
                 ))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
@@ -71,17 +71,17 @@ class SessionalPlanTest {
     @Test
     void 세셔널_플랜_생성_시_세션_종료일이_생성_요청일과_같을_수_없다() {
         SessionPeriod sessionPeriod = new SessionPeriod(
-                REQUESTED_AT.toLocalDate(),
-                REQUESTED_AT.toLocalDate().plusDays(1)
+                CURRENT_KOREAN_DATE,
+                CURRENT_KOREAN_DATE.plusDays(1)
         );
-        LocalDateTime requestedAt = REQUESTED_AT.plusDays(1);
+        LocalDate currentDate = CURRENT_KOREAN_DATE.plusDays(1);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> SessionalPlan.create(
                         createReconstructedUser(),
                         SESSION_NAME,
                         sessionPeriod,
-                        requestedAt
+                        currentDate
                 ))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
@@ -96,7 +96,7 @@ class SessionalPlanTest {
                         createReconstructedUser(),
                         sessionName,
                         SESSION_PERIOD,
-                        REQUESTED_AT
+                        CURRENT_KOREAN_DATE
                 ))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(BLANK_VALUE);
@@ -108,7 +108,7 @@ class SessionalPlanTest {
         String sessionName = "a".repeat(SESSION_NAME_MAX_LENGTH + 1);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> SessionalPlan.create(user, sessionName, SESSION_PERIOD, REQUESTED_AT))
+                .isThrownBy(() -> SessionalPlan.create(user, sessionName, SESSION_PERIOD, CURRENT_KOREAN_DATE))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
@@ -120,7 +120,7 @@ class SessionalPlanTest {
         sessionalPlan.update(
                 "  " + TARGET_SESSION_NAME + "  ",
                 TARGET_SESSION_PERIOD,
-                REQUESTED_AT
+                CURRENT_KOREAN_DATE
         );
 
         assertThat(sessionalPlan.getSessionName()).isEqualTo(TARGET_SESSION_NAME);
@@ -131,12 +131,12 @@ class SessionalPlanTest {
     void 세셔널_플랜_수정_시_세션_시작일이_수정_요청일보다_과거일_수_없다() {
         SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
         SessionPeriod targetSessionPeriod = new SessionPeriod(
-                REQUESTED_AT.toLocalDate().minusDays(1),
-                REQUESTED_AT.toLocalDate().plusDays(1)
+                CURRENT_KOREAN_DATE.minusDays(1),
+                CURRENT_KOREAN_DATE.plusDays(1)
         );
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> sessionalPlan.update(SESSION_NAME, targetSessionPeriod, REQUESTED_AT))
+                .isThrownBy(() -> sessionalPlan.update(SESSION_NAME, targetSessionPeriod, CURRENT_KOREAN_DATE))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
@@ -144,14 +144,14 @@ class SessionalPlanTest {
     @Test
     void 세셔널_플랜_수정_시_세션_종료일이_수정_요청일과_같을_수_없다() {
         SessionalPlan sessionalPlan = createReconstructedSessionalPlan();
-        LocalDateTime requestedAt = REQUESTED_AT.plusDays(1);
+        LocalDate currentDate = CURRENT_KOREAN_DATE.plusDays(1);
         SessionPeriod targetSessionPeriod = new SessionPeriod(
-                requestedAt.toLocalDate().minusDays(1),
-                requestedAt.toLocalDate()
+                currentDate.minusDays(1),
+                currentDate
         );
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> sessionalPlan.update(SESSION_NAME, targetSessionPeriod, requestedAt))
+                .isThrownBy(() -> sessionalPlan.update(SESSION_NAME, targetSessionPeriod, currentDate))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_SESSION_PERIOD);
     }
@@ -162,7 +162,7 @@ class SessionalPlanTest {
         String targetSessionName = "   ";
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> sessionalPlan.update(targetSessionName, SESSION_PERIOD, REQUESTED_AT))
+                .isThrownBy(() -> sessionalPlan.update(targetSessionName, SESSION_PERIOD, CURRENT_KOREAN_DATE))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(BLANK_VALUE);
     }
@@ -173,7 +173,7 @@ class SessionalPlanTest {
         String targetSessionName = "a".repeat(SESSION_NAME_MAX_LENGTH + 1);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> sessionalPlan.update(targetSessionName, SESSION_PERIOD, REQUESTED_AT))
+                .isThrownBy(() -> sessionalPlan.update(targetSessionName, SESSION_PERIOD, CURRENT_KOREAN_DATE))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
@@ -198,8 +198,13 @@ class SessionalPlanTest {
     @Test
     void 식별자가_없는_세셔널_플랜끼리는_나머지_값이_같더라도_다른_것으로_취급한다() {
         User user = createReconstructedUser();
-        SessionalPlan sessionalPlan = SessionalPlan.create(user, SESSION_NAME, SESSION_PERIOD, REQUESTED_AT);
-        SessionalPlan anotherSessionalPlan = SessionalPlan.create(user, SESSION_NAME, SESSION_PERIOD, REQUESTED_AT);
+        SessionalPlan sessionalPlan = SessionalPlan.create(user, SESSION_NAME, SESSION_PERIOD, CURRENT_KOREAN_DATE);
+        SessionalPlan anotherSessionalPlan = SessionalPlan.create(
+                user,
+                SESSION_NAME,
+                SESSION_PERIOD,
+                CURRENT_KOREAN_DATE
+        );
 
         assertThat(sessionalPlan).isNotEqualTo(anotherSessionalPlan);
     }

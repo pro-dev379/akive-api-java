@@ -19,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -45,7 +45,7 @@ public class DailyLogApi {
             @AuthenticatedUserId Long userId,
             @Validated @RequestBody DailyLogCreateRequest request
     ) {
-        LocalDateTime requestedAt = currentTimeProvider.now();
+        Instant requestedAt = currentTimeProvider.now();
         DailyLogCreateCommand command = request.to(userId, requestedAt);
 
         return new DailyLogCreateResponse(dailyLogCreator.create(command));
@@ -58,7 +58,7 @@ public class DailyLogApi {
             @PathVariable Long dailyLogId,
             @Validated @RequestBody DailyLogUpdateRequest request
     ) {
-        LocalDateTime requestedAt = currentTimeProvider.now();
+        Instant requestedAt = currentTimeProvider.now();
 
         dailyLogCreator.update(request.to(dailyLogId, userId, requestedAt));
     }

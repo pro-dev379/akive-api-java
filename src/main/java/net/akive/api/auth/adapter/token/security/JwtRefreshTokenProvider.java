@@ -32,7 +32,7 @@ class JwtRefreshTokenProvider implements RefreshTokenCreator, RefreshTokenParser
 
     @Override
     public RefreshToken create(Long userId, ClientInstanceId clientInstanceId, RoleType roleType) {
-        Instant now = currentTimeProvider.instant();
+        Instant now = currentTimeProvider.now();
         Instant expiresAt = now.plus(jwtProperties.refreshToken().expirationDays(), DAYS);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()

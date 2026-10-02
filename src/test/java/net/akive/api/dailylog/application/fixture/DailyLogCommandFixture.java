@@ -24,7 +24,7 @@ public class DailyLogCommandFixture {
                 ACTIVITY_TIME,
                 STUDY,
                 CONTENTS,
-                NOW
+                CURRENT_INSTANT
         );
     }
 
@@ -35,7 +35,7 @@ public class DailyLogCommandFixture {
                 createActivityTime(TARGET_START_ON, TARGET_END_ON, null, true),
                 ATTENDANCE,
                 TARGET_CONTENTS,
-                NOW
+                CURRENT_INSTANT
         );
     }
 }

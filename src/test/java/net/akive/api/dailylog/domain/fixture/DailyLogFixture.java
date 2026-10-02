@@ -5,9 +5,11 @@ import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.dailylog.domain.DailyLogType;
 import net.akive.api.user.domain.User;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static net.akive.api.common.time.ServiceDayPolicy.toInstantAtServiceZone;
 import static net.akive.api.dailylog.domain.DailyLogType.*;
 import static net.akive.api.dailylog.domain.fixture.ActivityTimeFixture.createActivityTime;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
@@ -24,9 +26,11 @@ public class DailyLogFixture {
     public static final LocalDate ANOTHER_LOG_ON = LocalDate.of(2026, 9, 13);
     public static final LocalDateTime START_ON = LocalDateTime.of(2026, 9, 12, 9, 0);
     public static final LocalDateTime END_ON = LocalDateTime.of(2026, 9, 12, 10, 0);
-    public static final LocalDateTime NOW = LocalDateTime.of(2026, 9, 14, 23, 59);
+    public static final LocalDateTime CURRENT_KOREAN_DATE_TIME = LocalDateTime.of(2026, 9, 14, 23, 59);
+    public static final Instant CURRENT_INSTANT = toInstantAtServiceZone(CURRENT_KOREAN_DATE_TIME);
     public static final Long FOCUS_TIME_SEC = 3_000L;
-    public static final ActivityTime ACTIVITY_TIME = ActivityTime.of(START_ON, END_ON, FOCUS_TIME_SEC, false, NOW);
+    public static final ActivityTime ACTIVITY_TIME =
+            ActivityTime.of(START_ON, END_ON, FOCUS_TIME_SEC, false, CURRENT_INSTANT);
     public static final String CONTENTS = "오늘의 학습 기록";
     public static final LocalDate TARGET_LOG_ON = LocalDate.of(2026, 9, 14);
     public static final LocalDateTime TARGET_START_ON = LocalDateTime.of(2026, 9, 13, 11, 0);
@@ -43,7 +47,7 @@ public class DailyLogFixture {
                 ACTIVITY_TIME,
                 STUDY,
                 CONTENTS,
-                NOW
+                CURRENT_INSTANT
         );
     }
 
@@ -84,7 +88,7 @@ public class DailyLogFixture {
                 endOn,
                 focusTimeSec,
                 focusRateExcluded,
-                NOW
+                CURRENT_INSTANT
         );
 
         return createDailyLog(createUser(), activityTime, dailyLogType, dailyLogType.getLabel());
@@ -101,7 +105,7 @@ public class DailyLogFixture {
                 activityTime,
                 dailyLogType,
                 contents,
-                NOW
+                CURRENT_INSTANT
         );
     }
 

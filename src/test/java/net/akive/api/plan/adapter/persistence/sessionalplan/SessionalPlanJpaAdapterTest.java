@@ -101,13 +101,13 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
                 savedUser,
                 SESSION_NAME,
                 firstSessionPeriod,
-                REQUESTED_AT
+                CURRENT_KOREAN_DATE
         ));
         sessionalPlanRepository.save(SessionalPlan.create(
                 savedUser,
                 ANOTHER_SESSION_NAME,
                 secondSessionPeriod,
-                REQUESTED_AT
+                CURRENT_KOREAN_DATE
         ));
         flushAndClear();
 
@@ -150,12 +150,12 @@ class SessionalPlanJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 회원의_진행_중인_세셔널_플랜_개수를_조회한다() {
-        SessionalPlan savedSessionalPlan = saveSessionalPlan(REQUESTED_AT);
+        SessionalPlan savedSessionalPlan = saveSessionalPlan(CURRENT_KOREAN_DATE);
         flushAndClear();
 
         long count = sessionalPlanRepository.countInProgressByUserId(
                 savedSessionalPlan.getUser().getUserId(),
-                REQUESTED_AT.toLocalDate()
+                CURRENT_KOREAN_DATE
         );
 
         assertThat(count).isEqualTo(1);
