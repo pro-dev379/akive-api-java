@@ -1,6 +1,5 @@
 package net.akive.api.report.application.provided.dto;
 
-import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.report.domain.ReportFeedback;
 import net.akive.api.report.domain.ReportType;
 
@@ -8,14 +7,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.domain.DomainValidator.*;
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.REPORT_DATE_IN_FUTURE;
 
 public record ReportCreateCommand(
         Long userId,
         LocalDate reportOn,
         ReportType reportType,
-        List<ReportFeedback> feedbackItems,
-        LocalDate currentDate
+        List<ReportFeedback> feedbackItems
 ) {
 
     public ReportCreateCommand {
@@ -23,10 +20,5 @@ public record ReportCreateCommand(
         requireNonNull(reportOn);
         requireNonNull(reportType);
         requireNotEmpty(feedbackItems);
-        requireNonNull(currentDate);
-
-        if (reportOn.isAfter(currentDate)) {
-            throw new BusinessRuleViolationException(REPORT_DATE_IN_FUTURE);
-        }
     }
 }

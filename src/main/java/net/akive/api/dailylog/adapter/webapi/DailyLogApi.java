@@ -3,7 +3,6 @@ package net.akive.api.dailylog.adapter.webapi;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
-import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogCreateRequest;
 import net.akive.api.dailylog.adapter.webapi.dto.request.DailyLogUpdateRequest;
@@ -19,7 +18,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.Instant;
 
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -32,7 +30,6 @@ public class DailyLogApi {
 
     private final DailyLogFinder dailyLogFinder;
     private final DailyLogCreator dailyLogCreator;
-    private final CurrentTimeProvider currentTimeProvider;
 
     @GetMapping
     public DailyLogsFindResponse findAll(@AuthenticatedUserId Long userId, @RequestParam LocalDate logOn) {
@@ -45,8 +42,7 @@ public class DailyLogApi {
             @AuthenticatedUserId Long userId,
             @Validated @RequestBody DailyLogCreateRequest request
     ) {
-        Instant requestedAt = currentTimeProvider.now();
-        DailyLogCreateCommand command = request.to(userId, requestedAt);
+        DailyLogCreateCommand command = request.to(userId);
 
         return new DailyLogCreateResponse(dailyLogCreator.create(command));
     }
@@ -58,9 +54,7 @@ public class DailyLogApi {
             @PathVariable Long dailyLogId,
             @Validated @RequestBody DailyLogUpdateRequest request
     ) {
-        Instant requestedAt = currentTimeProvider.now();
-
-        dailyLogCreator.update(request.to(dailyLogId, userId, requestedAt));
+        dailyLogCreator.update(request.to(dailyLogId, userId));
     }
 
     @DeleteMapping("/{dailyLogId}")

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.report.application.provided.ReportCreator;
 import net.akive.api.report.application.provided.dto.ReportCreateCommand;
 import net.akive.api.report.application.provided.dto.ReportFeedbackItemsUpdateCommand;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.REPORT_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 
 @Service
 @Transactional
@@ -25,6 +27,7 @@ class ReportCommandService implements ReportCreator {
     private final UserFinder userFinder;
     private final ReportRepository reportRepository;
 
+    private final CurrentTimeProvider currentTimeProvider;
     private final ReportValidationService reportValidationService;
 
     @Override
@@ -39,7 +42,7 @@ class ReportCommandService implements ReportCreator {
                 command.reportOn(),
                 command.reportType(),
                 command.feedbackItems(),
-                command.currentDate()
+                toKoreanDate(currentTimeProvider.now())
         );
 
         Report savedReport = reportRepository.save(report);

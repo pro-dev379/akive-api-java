@@ -13,13 +13,12 @@ public record ReportCreateRequest(
         @NotNull @Valid ReportFeedbackRequest feedback
 ) {
 
-    public ReportCreateCommand to(Long userId, LocalDate currentDate) {
+    public ReportCreateCommand to(Long userId) {
         return new ReportCreateCommand(
                 userId,
                 this.reportOn,
                 this.reportType,
-                this.feedback.to(),
-                currentDate
+                this.feedback.to()
         );
     }
 }

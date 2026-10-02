@@ -2,9 +2,8 @@ package net.akive.api.dailylog.adapter.webapi.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import net.akive.api.dailylog.domain.ActivityTime;
+import net.akive.api.dailylog.application.provided.dto.ActivityTimeCreateCommand;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 public record ActivityTimeRequest(
@@ -14,7 +13,7 @@ public record ActivityTimeRequest(
         boolean focusRateExcluded
 ) {
 
-    public ActivityTime to(Instant requestedAt) {
-        return ActivityTime.of(this.startOn, this.endOn, this.focusTimeSec, this.focusRateExcluded, requestedAt);
+    public ActivityTimeCreateCommand to() {
+        return new ActivityTimeCreateCommand(this.startOn, this.endOn, this.focusTimeSec, this.focusRateExcluded);
     }
 }

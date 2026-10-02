@@ -27,8 +27,7 @@ public interface ReportFinder {
     ReportCoveragePeriod findCoveragePeriod(ReportCoveragePeriodFindQuery query)
             throws ResourceNotFoundException, BusinessRuleViolationException;
 
-    List<ReportWritingStatusResult> findWritingStatuses(Long userId, LocalDate baseDate)
-            throws ResourceNotFoundException;
+    List<ReportWritingStatusResult> findWritingStatuses(Long userId) throws ResourceNotFoundException;
 
     List<ReportType> findAvailableReportTypes(Long userId, LocalDate reportOn) throws ResourceNotFoundException;
 }

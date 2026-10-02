@@ -72,20 +72,20 @@ public final class ActivityTime {
         );
     }
 
+    private static void validateNotFuture(LocalDateTime endOn, Instant baseTime) {
+        requireNonNull(baseTime);
+
+        if (toInstantAtServiceZone(endOn).isAfter(baseTime)) {
+            throw new BusinessRuleViolationException(DAILY_LOG_TIME_RANGE_IN_FUTURE);
+        }
+    }
+
     private static void validateMaxPeriod(LocalDateTime startOn, LocalDateTime endOn) {
         Duration timeRange = Duration.between(startOn, endOn);
         Duration maxTimeRange = Duration.ofHours(MAX_TIME_RANGE_HOURS);
 
         if (timeRange.compareTo(maxTimeRange) > 0) {
             throw new BusinessRuleViolationException(DAILY_LOG_TIME_RANGE_TOO_LONG);
-        }
-    }
-
-    private static void validateNotFuture(LocalDateTime endOn, Instant baseTime) {
-        requireNonNull(baseTime);
-
-        if (toInstantAtServiceZone(endOn).isAfter(baseTime)) {
-            throw new BusinessRuleViolationException(DAILY_LOG_TIME_RANGE_IN_FUTURE);
         }
     }
 

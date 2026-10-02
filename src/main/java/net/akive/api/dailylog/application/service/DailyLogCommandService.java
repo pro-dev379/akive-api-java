@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.application.provided.DailyLogCreator;
 import net.akive.api.dailylog.application.provided.dto.DailyLogCreateCommand;
 import net.akive.api.dailylog.application.provided.dto.DailyLogDeleteCommand;
@@ -15,6 +16,8 @@ import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 
 import static net.akive.api.common.exception.business.ResourceConflictError.DAILY_LOG_TIME_OVERLAPS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.DAILY_LOG_NOT_FOUND;
@@ -28,19 +31,23 @@ class DailyLogCommandService implements DailyLogCreator {
     private final UserFinder userFinder;
     private final DailyLogRepository dailyLogRepository;
 
+    private final CurrentTimeProvider currentTimeProvider;
+
     @Override
     public Long create(DailyLogCreateCommand command)
             throws BusinessRuleViolationException, ResourceNotFoundException, ResourceConflictException {
+        Instant requestedAt = currentTimeProvider.now();
+        ActivityTime activityTime = command.activityTime().to(requestedAt);
         User user = findUserOrThrow(command.userId());
 
-        validateTimeNotOverlapping(command.userId(), command.activityTime());
+        validateTimeNotOverlapping(command.userId(), activityTime);
 
         DailyLog dailyLog = DailyLog.create(
                 user,
-                command.activityTime(),
+                activityTime,
                 command.dailyLogType(),
                 command.contents(),
-                command.requestedAt()
+                requestedAt
         );
 
         DailyLog savedDailyLog = dailyLogRepository.save(dailyLog);
@@ -51,15 +58,21 @@ class DailyLogCommandService implements DailyLogCreator {
     @Override
     public void update(DailyLogUpdateCommand command)
             throws BusinessRuleViolationException, ResourceNotFoundException, ResourceConflictException {
+        Instant requestedAt = currentTimeProvider.now();
+        ActivityTime targetActivityTime = command.targetActivityTime().to(requestedAt);
         DailyLog dailyLog = findDailyLogOrThrow(command.dailyLogId(), command.userId());
 
-        validateTimeNotOverlappingExcludingSelf(command.userId(), command.targetActivityTime(), command.dailyLogId());
+        validateTimeNotOverlappingExcludingSelf(
+                command.userId(),
+                targetActivityTime,
+                command.dailyLogId()
+        );
 
         dailyLog.update(
-                command.targetActivityTime(),
+                targetActivityTime,
                 command.targetDailyLogType(),
                 command.targetContents(),
-                command.requestedAt()
+                requestedAt
         );
 
         dailyLogRepository.save(dailyLog);

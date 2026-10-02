@@ -26,8 +26,7 @@ public class ReportCommandFixture {
                 userId,
                 REPORT_ON,
                 WEEKLY,
-                feedbackItems,
-                CURRENT_DATE
+                feedbackItems
         );
     }
 

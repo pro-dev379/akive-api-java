@@ -5,6 +5,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.domain.value.SessionPeriod;
 import net.akive.api.report.application.provided.ReportFinder;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.REPORT_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
+import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,6 +35,8 @@ class ReportQueryService implements ReportFinder {
 
     private final SessionalPlanFinder sessionalPlanFinder;
     private final ReportRepository reportRepository;
+
+    private final CurrentTimeProvider currentTimeProvider;
 
     @Override
     public Report find(Long reportId, Long userId) {
@@ -72,8 +76,8 @@ class ReportQueryService implements ReportFinder {
     }
 
     @Override
-    public List<ReportWritingStatusResult> findWritingStatuses(Long userId, LocalDate baseDate)
-            throws ResourceNotFoundException {
+    public List<ReportWritingStatusResult> findWritingStatuses(Long userId) throws ResourceNotFoundException {
+        LocalDate baseDate = toKoreanDate(currentTimeProvider.now());
         List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriodsByUserId(userId);
 
         validateReportOnWithinSessionPeriod(baseDate, sessionPeriods);

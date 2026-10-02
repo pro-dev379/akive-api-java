@@ -2,6 +2,7 @@ package net.akive.api.report.application.service;
 
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.report.application.provided.dto.ReportCreateCommand;
 import net.akive.api.report.application.provided.dto.ReportFeedbackItemsUpdateCommand;
 import net.akive.api.report.application.required.ReportRepository;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import static net.akive.api.common.exception.business.ResourceConflictError.REPORT_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.REPORT_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.common.time.ServiceDayPolicy.toInstantAtServiceZone;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportCreateCommand;
 import static net.akive.api.report.application.service.fixture.ReportCommandFixture.createReportFeedbackItemsUpdateCommand;
 import static net.akive.api.report.domain.FeedbackType.HIGHLIGHT;
@@ -43,6 +45,9 @@ class ReportCommandServiceTest {
     ReportRepository reportRepository;
 
     @Mock
+    CurrentTimeProvider currentTimeProvider;
+
+    @Mock
     ReportValidationService reportValidationService;
 
     @InjectMocks
@@ -59,9 +64,10 @@ class ReportCommandServiceTest {
                 command.reportOn(),
                 command.reportType(),
                 command.feedbackItems(),
-                command.currentDate()
+                CURRENT_DATE
         );
 
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(CURRENT_DATE.atStartOfDay()));
         given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
         given(reportRepository.save(any(Report.class))).willReturn(savedReport);
 

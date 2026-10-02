@@ -3,7 +3,6 @@ package net.akive.api.report.adapter.webapi;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
-import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.report.adapter.webapi.dto.request.ReportCreateRequest;
 import net.akive.api.report.adapter.webapi.dto.request.ReportFeedbackUpdateRequest;
@@ -21,7 +20,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.pagination.SortDirection.DESC;
-import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -33,17 +31,13 @@ public class ReportApi {
     private final ReportFinder reportFinder;
     private final ReportCreator reportCreator;
 
-    private final CurrentTimeProvider currentTimeProvider;
-
     @PostMapping
     @ResponseStatus(CREATED)
     public ReportCreateResponse create(
             @AuthenticatedUserId Long userId,
             @Validated @RequestBody ReportCreateRequest request
     ) {
-        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
-
-        return new ReportCreateResponse(reportCreator.create(request.to(userId, currentDate)));
+        return new ReportCreateResponse(reportCreator.create(request.to(userId)));
     }
 
     @GetMapping("/{reportId}")
@@ -104,9 +98,7 @@ public class ReportApi {
 
     @GetMapping("/writing-statuses")
     public ReportWritingStatusesFindResponse findWritingStatuses(@AuthenticatedUserId Long userId) {
-        LocalDate baseDate = toKoreanDate(currentTimeProvider.now());
-
-        return ReportWritingStatusesFindResponse.from(reportFinder.findWritingStatuses(userId, baseDate));
+        return ReportWritingStatusesFindResponse.from(reportFinder.findWritingStatuses(userId));
     }
 
     @GetMapping("/available-types")

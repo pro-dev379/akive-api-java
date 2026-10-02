@@ -4,6 +4,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
+import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.report.application.provided.dto.*;
 import net.akive.api.report.application.required.ReportRepository;
@@ -26,6 +27,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.REPO
 import static net.akive.api.common.exception.business.ResourceNotFoundError.SESSIONAL_PLAN_NOT_FOUND;
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
+import static net.akive.api.common.time.ServiceDayPolicy.toInstantAtServiceZone;
 import static net.akive.api.report.application.service.fixture.ReportQueryFixture.createWrittenReportHeaders;
 import static net.akive.api.report.domain.ReportType.*;
 import static net.akive.api.report.domain.fixture.ReportFixture.*;
@@ -42,6 +44,9 @@ class ReportQueryServiceTest {
 
     @Mock
     ReportRepository reportRepository;
+
+    @Mock
+    CurrentTimeProvider currentTimeProvider;
 
     @InjectMocks
     ReportQueryService reportQueryService;
@@ -165,12 +170,13 @@ class ReportQueryServiceTest {
         LocalDate baseDate = LocalDate.of(2026, 1, 20);
         LocalDate startOn = LocalDate.of(2026, 1, 4);
         LocalDate endOn = LocalDate.of(2026, 11, 29);
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(baseDate.atStartOfDay()));
         given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
         given(reportRepository.findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(USER_ID, startOn, endOn))
                 .willReturn(createWrittenReportHeaders());
 
-        List<ReportWritingStatusResult> writingStatuses = reportQueryService.findWritingStatuses(USER_ID, baseDate);
+        List<ReportWritingStatusResult> writingStatuses = reportQueryService.findWritingStatuses(USER_ID);
 
         assertWritingStatusesForBaseDate20260120(writingStatuses);
 
@@ -185,11 +191,12 @@ class ReportQueryServiceTest {
     @Test
     void 기준일과_관련된_세셔널_플랜이_없으면_리포트_작성_여부_조회에_실패한다() {
         LocalDate baseDate = LocalDate.of(2024, 1, 1);
+        given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(baseDate.atStartOfDay()));
         given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> reportQueryService.findWritingStatuses(USER_ID, baseDate))
+                .isThrownBy(() -> reportQueryService.findWritingStatuses(USER_ID))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 

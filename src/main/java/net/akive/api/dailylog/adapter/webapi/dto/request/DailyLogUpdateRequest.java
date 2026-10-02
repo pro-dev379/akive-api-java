@@ -6,22 +6,19 @@ import jakarta.validation.constraints.NotNull;
 import net.akive.api.dailylog.application.provided.dto.DailyLogUpdateCommand;
 import net.akive.api.dailylog.domain.DailyLogType;
 
-import java.time.Instant;
-
 public record DailyLogUpdateRequest(
         @NotNull @Valid ActivityTimeRequest targetActivityTime,
         @NotNull DailyLogType targetDailyLogType,
         @NotBlank String targetContents
 ) {
 
-    public DailyLogUpdateCommand to(Long dailyLogId, Long userId, Instant requestedAt) {
+    public DailyLogUpdateCommand to(Long dailyLogId, Long userId) {
         return new DailyLogUpdateCommand(
                 dailyLogId,
                 userId,
-                this.targetActivityTime.to(requestedAt),
+                this.targetActivityTime.to(),
                 this.targetDailyLogType,
-                this.targetContents,
-                requestedAt
+                this.targetContents
         );
     }
 }
