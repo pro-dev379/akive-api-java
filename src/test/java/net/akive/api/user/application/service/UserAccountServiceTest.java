@@ -4,7 +4,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
-import net.akive.api.file.application.provided.FileManager;
+import net.akive.api.file.application.provided.ImageAssetDeleter;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.event.UserWithdrawnEvent;
 import net.akive.api.user.application.provided.UserValidator;
@@ -51,7 +51,7 @@ class UserAccountServiceTest {
     GoalRepository goalRepository;
 
     @Mock
-    FileManager fileManager;
+    ImageAssetDeleter imageAssetDeleter;
 
     @Mock
     UserSignUpDomainService userSignUpDomainService;
@@ -137,7 +137,7 @@ class UserAccountServiceTest {
         then(userValidator).should()
                 .validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
         then(userRepository).should().save(user);
-        then(fileManager).shouldHaveNoInteractions();
+        then(imageAssetDeleter).shouldHaveNoInteractions();
     }
 
     @Test
@@ -158,7 +158,7 @@ class UserAccountServiceTest {
 
         assertThat(user.getUserDetail().profileImageAssetId()).isEqualTo(targetProfileImageAssetId);
         then(userRepository).should().save(user);
-        then(fileManager).should().deleteImageAsset(existingProfileImageAssetId);
+        then(imageAssetDeleter).should().delete(existingProfileImageAssetId);
     }
 
     @Test
@@ -172,7 +172,7 @@ class UserAccountServiceTest {
         userAccountService.updateUserDetail(command);
 
         then(userRepository).should().save(user);
-        then(fileManager).shouldHaveNoInteractions();
+        then(imageAssetDeleter).shouldHaveNoInteractions();
     }
 
     @Test

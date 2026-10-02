@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.file.adapter.webapi.request.UploadUrlCreateRequest;
 import net.akive.api.file.adapter.webapi.response.UploadUrlCreateResponse;
-import net.akive.api.file.application.provided.FileManager;
+import net.akive.api.file.application.provided.UploadUrlCreator;
 import net.akive.api.file.application.provided.dto.UploadUrlCreateResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class FileApi {
 
-    private final FileManager fileManager;
+    private final UploadUrlCreator uploadUrlCreator;
 
     @PostMapping("/upload-urls")
     public UploadUrlCreateResponse createUploadUrl(
             @AuthenticatedUserId Long userId,
             @Validated @RequestBody UploadUrlCreateRequest request
     ) {
-        UploadUrlCreateResult result = fileManager.createUploadUrl(request.to(userId));
+        UploadUrlCreateResult result = uploadUrlCreator.create(request.to(userId));
 
         return UploadUrlCreateResponse.from(result);
     }

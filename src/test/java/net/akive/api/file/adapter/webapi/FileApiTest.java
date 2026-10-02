@@ -3,7 +3,7 @@ package net.akive.api.file.adapter.webapi;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.file.adapter.webapi.fixture.FileRequestFixture;
 import net.akive.api.file.adapter.webapi.request.UploadUrlCreateRequest;
-import net.akive.api.file.application.provided.FileManager;
+import net.akive.api.file.application.provided.UploadUrlCreator;
 import net.akive.api.file.application.provided.dto.UploadUrlCreateCommand;
 import net.akive.api.file.application.provided.dto.UploadUrlCreateResult;
 import net.akive.api.support.PrivateApiTestSupport;
@@ -34,21 +34,21 @@ class FileApiTest extends PrivateApiTestSupport {
     private static final String UPLOAD_URLS_URL = "/files/upload-urls";
 
     @MockitoBean
-    FileManager fileManager;
+    UploadUrlCreator uploadUrlCreator;
 
     @Test
     void 파일_업로드_URL을_생성한다() {
         UploadUrlCreateRequest request = createUploadUrlCreateRequest();
         UploadUrlCreateCommand command = request.to(USER_ID);
         UploadUrlCreateResult result = new UploadUrlCreateResult(IMAGE_ASSET_ID, UPLOAD_URL, EXPIRES_AT);
-        given(fileManager.createUploadUrl(command)).willReturn(result);
+        given(uploadUrlCreator.create(command)).willReturn(result);
 
         MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(OK);
 
         response.bodyJson().extractingPath("$.imageAssetId").isEqualTo(IMAGE_ASSET_ID.toString());
         response.bodyJson().extractingPath("$.uploadUrl").isEqualTo(UPLOAD_URL.toString());
         response.bodyJson().extractingPath("$.expiresAt").isEqualTo(EXPIRES_AT.toString());
-        then(fileManager).should().createUploadUrl(command);
+        then(uploadUrlCreator).should().create(command);
     }
 
     @ParameterizedTest
@@ -56,7 +56,7 @@ class FileApiTest extends PrivateApiTestSupport {
     void 파일_업로드_URL_생성_요청값이_올바르지_않으면_400을_응답한다(UploadUrlCreateRequest request) {
         postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
-        then(fileManager).shouldHaveNoInteractions();
+        then(uploadUrlCreator).shouldHaveNoInteractions();
     }
 
     @Test
@@ -73,7 +73,7 @@ class FileApiTest extends PrivateApiTestSupport {
                 """
         ).hasStatus(BAD_REQUEST);
 
-        then(fileManager).shouldHaveNoInteractions();
+        then(uploadUrlCreator).shouldHaveNoInteractions();
     }
 
     @Test
@@ -84,12 +84,12 @@ class FileApiTest extends PrivateApiTestSupport {
                 PROFILE_IMAGE_MAX_SIZE_BYTES + 1
         );
         UploadUrlCreateCommand command = request.to(USER_ID);
-        willThrow(new BusinessRuleViolationException(FILE_SIZE_EXCEEDED)).given(fileManager).createUploadUrl(command);
+        willThrow(new BusinessRuleViolationException(FILE_SIZE_EXCEEDED)).given(uploadUrlCreator).create(command);
 
         MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         assertErrorResponse(response, FILE_SIZE_EXCEEDED);
-        then(fileManager).should().createUploadUrl(command);
+        then(uploadUrlCreator).should().create(command);
     }
 
     @Test
@@ -97,13 +97,13 @@ class FileApiTest extends PrivateApiTestSupport {
         UploadUrlCreateRequest request = createUploadUrlCreateRequest(PROFILE_IMAGE, "image/svg+xml", 1024L);
         UploadUrlCreateCommand command = request.to(USER_ID);
         willThrow(new BusinessRuleViolationException(FILE_CONTENT_TYPE_NOT_ALLOWED))
-                .given(fileManager)
-                .createUploadUrl(command);
+                .given(uploadUrlCreator)
+                .create(command);
 
         MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         assertErrorResponse(response, FILE_CONTENT_TYPE_NOT_ALLOWED);
-        then(fileManager).should().createUploadUrl(command);
+        then(uploadUrlCreator).should().create(command);
     }
 
     private static Stream<UploadUrlCreateRequest> invalidUploadUrlCreateRequests() {

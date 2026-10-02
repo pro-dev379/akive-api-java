@@ -7,7 +7,7 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ImageUrlFinder {
+public interface ImageAssetReader {
 
     Optional<URI> findImageUrl(UUID imageAssetId, VariantType variantType) throws ResourceNotFoundException;
 }

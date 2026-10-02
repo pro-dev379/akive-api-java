@@ -3,7 +3,7 @@ package net.akive.api.user.adapter.webapi;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
-import net.akive.api.file.application.provided.ImageUrlFinder;
+import net.akive.api.file.application.provided.ImageAssetReader;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
@@ -62,7 +62,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     UserNicknameChecker userNicknameChecker;
 
     @MockitoBean
-    ImageUrlFinder imageUrlFinder;
+    ImageAssetReader imageAssetReader;
 
     @Test
     void 개인_정보를_조회한다() {
@@ -70,7 +70,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
         User user = createReconstructedUser(USER_ID, userDetail);
 
         given(userFinder.findOrThrowByUserIdAndNotWithdrawn(USER_ID)).willReturn(user);
-        given(imageUrlFinder.findImageUrl(userDetail.profileImageAssetId(), DETAIL))
+        given(imageAssetReader.findImageUrl(userDetail.profileImageAssetId(), DETAIL))
                 .willReturn(Optional.of(PROFILE_IMAGE_URL));
 
         MvcTestResultAssert result = get(MEMBER_ME_URL, USER_ID).hasStatus(OK);
@@ -87,7 +87,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
                 .isEqualTo(PROFILE_IMAGE_URL.toString());
 
         then(userFinder).should().findOrThrowByUserIdAndNotWithdrawn(USER_ID);
-        then(imageUrlFinder).should().findImageUrl(userDetail.profileImageAssetId(), DETAIL);
+        then(imageAssetReader).should().findImageUrl(userDetail.profileImageAssetId(), DETAIL);
     }
 
     @Test
@@ -100,7 +100,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
 
         result.bodyJson().extractingPath("$.userDetail.profileImage").isNull();
         then(userFinder).should().findOrThrowByUserIdAndNotWithdrawn(USER_ID);
-        then(imageUrlFinder).shouldHaveNoInteractions();
+        then(imageAssetReader).shouldHaveNoInteractions();
     }
 
     @Test

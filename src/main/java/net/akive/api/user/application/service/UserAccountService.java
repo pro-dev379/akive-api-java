@@ -6,7 +6,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
-import net.akive.api.file.application.provided.FileManager;
+import net.akive.api.file.application.provided.ImageAssetDeleter;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.event.UserWithdrawnEvent;
 import net.akive.api.user.application.provided.UserAccountManager;
@@ -33,7 +33,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.USER
 public class UserAccountService implements UserAccountManager {
 
     private final UserValidator userValidator;
-    private final FileManager fileManager;
+    private final ImageAssetDeleter imageAssetDeleter;
 
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
@@ -83,7 +83,7 @@ public class UserAccountService implements UserAccountManager {
 
         if (existingProfileImageAssetId != null
                 && !Objects.equals(existingProfileImageAssetId, command.targetProfileImageAssetId())) {
-            fileManager.deleteImageAsset(existingProfileImageAssetId);
+            imageAssetDeleter.delete(existingProfileImageAssetId);
         }
     }
 
