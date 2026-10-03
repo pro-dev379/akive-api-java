@@ -40,7 +40,7 @@ class MentoringProfileServiceTest {
         User user = createUser(USER_ID);
         MentoringProfile savedMentoringProfile = MentoringProfile.create(user);
 
-        given(userFinder.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.of(user));
+        given(userFinder.find(USER_ID)).willReturn(Optional.of(user));
         given(mentoringProfileRepository.save(any(MentoringProfile.class)))
                 .willReturn(savedMentoringProfile);
 
@@ -48,7 +48,7 @@ class MentoringProfileServiceTest {
 
         assertThat(result).isSameAs(savedMentoringProfile);
 
-        then(userFinder).should().findByUserIdAndNotWithdrawn(USER_ID);
+        then(userFinder).should().find(USER_ID);
         then(mentoringProfileRepository)
                 .should()
                 .save(argThat(mentoringProfile ->
@@ -59,7 +59,7 @@ class MentoringProfileServiceTest {
 
     @Test
     void 회원이_존재하지_않으면_멘토링_프로필을_생성하지_않는다() {
-        given(userFinder.findByUserIdAndNotWithdrawn(UNKNOWN_USER_ID)).willReturn(Optional.empty());
+        given(userFinder.find(UNKNOWN_USER_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> mentoringProfileService.create(UNKNOWN_USER_ID))

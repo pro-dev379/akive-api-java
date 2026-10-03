@@ -68,7 +68,7 @@ class ReportQueryService implements ReportFinder {
     @Override
     public ReportCoveragePeriod findCoveragePeriod(ReportCoveragePeriodFindQuery query)
             throws ResourceNotFoundException, BusinessRuleViolationException {
-        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriodsByUserId(query.userId());
+        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriods(query.userId());
 
         validateReportOnWithinSessionPeriod(query.reportOn(), sessionPeriods);
 
@@ -78,7 +78,7 @@ class ReportQueryService implements ReportFinder {
     @Override
     public List<ReportWritingStatusResult> findWritingStatuses(Long userId) throws ResourceNotFoundException {
         LocalDate baseDate = toKoreanDate(currentTimeProvider.now());
-        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriodsByUserId(userId);
+        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriods(userId);
 
         validateReportOnWithinSessionPeriod(baseDate, sessionPeriods);
 
@@ -106,7 +106,7 @@ class ReportQueryService implements ReportFinder {
     @Override
     public List<ReportType> findAvailableReportTypes(Long userId, LocalDate reportOn)
             throws ResourceNotFoundException {
-        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriodsByUserId(userId);
+        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriods(userId);
 
         validateReportOnWithinSessionPeriod(reportOn, sessionPeriods);
 

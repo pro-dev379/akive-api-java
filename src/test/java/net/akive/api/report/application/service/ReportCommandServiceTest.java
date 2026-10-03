@@ -68,7 +68,7 @@ class ReportCommandServiceTest {
         );
 
         given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(CURRENT_DATE.atStartOfDay()));
-        given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        given(userFinder.find(command.userId())).willReturn(Optional.of(user));
         given(reportRepository.save(any(Report.class))).willReturn(savedReport);
 
         Long result = reportCommandService.create(command);
@@ -76,7 +76,7 @@ class ReportCommandServiceTest {
         assertThat(result).isEqualTo(REPORT_ID);
 
         ArgumentCaptor<Report> reportCaptor = ArgumentCaptor.forClass(Report.class);
-        then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userFinder).should().find(command.userId());
         then(reportValidationService).should()
                 .validateCreatable(command.userId(), command.reportOn(), command.reportType());
         then(reportRepository).should().save(reportCaptor.capture());
@@ -94,14 +94,14 @@ class ReportCommandServiceTest {
                 UNKNOWN_USER_ID,
                 List.of(createReportFeedback(HIGHLIGHT))
         );
-        given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.empty());
+        given(userFinder.find(command.userId())).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> reportCommandService.create(command))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
-        then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userFinder).should().find(command.userId());
         then(reportValidationService).should(never()).validateCreatable(any(), any(), any());
         then(reportRepository).should(never()).save(any());
     }
@@ -110,7 +110,7 @@ class ReportCommandServiceTest {
     void 리포트_생성_검증에_실패하면_리포트를_저장하지_않는다() {
         User user = createReconstructedUser(USER_ID);
         ReportCreateCommand command = createReportCreateCommand(USER_ID, List.of(createReportFeedback(HIGHLIGHT)));
-        given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        given(userFinder.find(command.userId())).willReturn(Optional.of(user));
         willThrow(new ResourceConflictException(REPORT_ALREADY_EXISTS))
                 .given(reportValidationService)
                 .validateCreatable(command.userId(), command.reportOn(), command.reportType());
@@ -120,7 +120,7 @@ class ReportCommandServiceTest {
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(REPORT_ALREADY_EXISTS);
 
-        then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userFinder).should().find(command.userId());
         then(reportValidationService).should()
                 .validateCreatable(command.userId(), command.reportOn(), command.reportType());
         then(reportRepository).should(never()).save(any());

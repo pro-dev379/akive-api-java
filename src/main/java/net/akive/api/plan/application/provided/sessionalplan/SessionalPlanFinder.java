@@ -18,7 +18,7 @@ public interface SessionalPlanFinder {
 
     SessionalPlanDetail findDetail(SessionalPlanDetailFindQuery query) throws ResourceNotFoundException;
 
-    List<SessionPeriod> findSessionPeriodsByUserId(Long userId);
+    List<SessionPeriod> findSessionPeriods(Long userId);
 
     CompletionRate findCompletionRate(CompletionRateFindQuery query);
 

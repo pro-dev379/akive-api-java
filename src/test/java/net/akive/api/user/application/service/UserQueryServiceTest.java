@@ -36,7 +36,7 @@ class UserQueryServiceTest {
         User user = createReconstructedUser();
         given(userRepository.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.of(user));
 
-        User foundUser = userQueryService.findOrThrowByUserIdAndNotWithdrawn(USER_ID);
+        User foundUser = userQueryService.findOrThrow(USER_ID);
 
         assertThat(foundUser).isEqualTo(user);
 
@@ -48,7 +48,7 @@ class UserQueryServiceTest {
         given(userRepository.findByUserIdAndNotWithdrawn(UNKNOWN_USER_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> userQueryService.findOrThrowByUserIdAndNotWithdrawn(UNKNOWN_USER_ID))
+                .isThrownBy(() -> userQueryService.findOrThrow(UNKNOWN_USER_ID))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
@@ -60,7 +60,7 @@ class UserQueryServiceTest {
         User user = createReconstructedUser();
         given(userRepository.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.of(user));
 
-        Optional<User> foundUser = userQueryService.findByUserIdAndNotWithdrawn(USER_ID);
+        Optional<User> foundUser = userQueryService.find(USER_ID);
 
         assertThat(foundUser).contains(user);
 
@@ -72,7 +72,7 @@ class UserQueryServiceTest {
         User user = createReconstructedUser();
         given(userRepository.findByEmailAndNotWithdrawn(EMAIL)).willReturn(Optional.of(user));
 
-        Optional<User> foundUser = userQueryService.findByEmailAndNotWithdrawn(EMAIL);
+        Optional<User> foundUser = userQueryService.findByEmail(EMAIL);
 
         assertThat(foundUser).contains(user);
 

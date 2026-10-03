@@ -135,7 +135,7 @@ class ReportQueryServiceTest {
     @Test
     void 리포트_커버_기간을_조회한다() {
         ReportCoveragePeriodFindQuery query = new ReportCoveragePeriodFindQuery(USER_ID, REPORT_ON, MONTHLY);
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
         ReportCoveragePeriod coveragePeriod = reportQueryService.findCoveragePeriod(query);
@@ -144,7 +144,7 @@ class ReportQueryServiceTest {
                 LocalDate.of(2026, 1, 1),
                 REPORT_ON
         ));
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
     }
 
     @Test
@@ -154,7 +154,7 @@ class ReportQueryServiceTest {
                 LocalDate.of(2024, 1, 1),
                 MONTHLY
         );
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -162,7 +162,7 @@ class ReportQueryServiceTest {
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
     }
 
     @Test
@@ -171,7 +171,7 @@ class ReportQueryServiceTest {
         LocalDate startOn = LocalDate.of(2026, 1, 4);
         LocalDate endOn = LocalDate.of(2026, 11, 29);
         given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(baseDate.atStartOfDay()));
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
         given(reportRepository.findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(USER_ID, startOn, endOn))
                 .willReturn(createWrittenReportHeaders());
@@ -180,7 +180,7 @@ class ReportQueryServiceTest {
 
         assertWritingStatusesForBaseDate20260120(writingStatuses);
 
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
         then(reportRepository).should().findHeadersByUserIdAndReportOnBetweenOrderByReportOnAsc(
                 USER_ID,
                 startOn,
@@ -192,7 +192,7 @@ class ReportQueryServiceTest {
     void 기준일과_관련된_세셔널_플랜이_없으면_리포트_작성_여부_조회에_실패한다() {
         LocalDate baseDate = LocalDate.of(2024, 1, 1);
         given(currentTimeProvider.now()).willReturn(toInstantAtServiceZone(baseDate.atStartOfDay()));
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -200,25 +200,25 @@ class ReportQueryServiceTest {
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
         then(reportRepository).shouldHaveNoMoreInteractions();
     }
 
     @Test
     void 리포트_작성_가능한_리포트_타입을_조회한다() {
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
         List<ReportType> reportTypes = reportQueryService.findAvailableReportTypes(USER_ID, REPORT_ON);
 
         assertThat(reportTypes).containsExactly(WEEKLY, MONTHLY);
 
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
     }
 
     @Test
     void 리포트_날짜와_관련된_세셔널_플랜이_없으면_리포트_작성_가능한_리포트_타입_조회에_실패한다() {
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -226,7 +226,7 @@ class ReportQueryServiceTest {
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
     }
 
     private static void assertWritingStatusesForBaseDate20260120(List<ReportWritingStatusResult> writingStatuses) {

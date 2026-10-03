@@ -35,7 +35,7 @@ public class MemberPrivateApi {
 
     @GetMapping
     public UserFindResponse find(@AuthenticatedUserId Long userId) {
-        User foundUser = userFinder.findOrThrowByUserIdAndNotWithdrawn(userId);
+        User foundUser = userFinder.findOrThrow(userId);
 
         return UserFindResponse.from(foundUser, findProfileImage(foundUser));
     }

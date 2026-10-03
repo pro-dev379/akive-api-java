@@ -54,13 +54,13 @@ class PasswordCommandServiceTest {
         PasswordUpdateCommand command = createPasswordUpdateCommand();
         User user = createUser(USER_ID, PASSWORD_HASH);
 
-        given(userFinder.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.of(user));
+        given(userFinder.find(USER_ID)).willReturn(Optional.of(user));
         given(passwordEncoder.matches(command.currentPassword(), user.getPasswordHash())).willReturn(true);
         given(passwordEncoder.encode(command.targetPassword())).willReturn(TARGET_PASSWORD_HASH);
 
         passwordCommandService.update(command);
 
-        then(userFinder).should().findByUserIdAndNotWithdrawn(USER_ID);
+        then(userFinder).should().find(USER_ID);
         then(passwordEncoder).should().matches(command.currentPassword(), user.getPasswordHash());
         then(passwordEncoder).should().encode(command.targetPassword());
         then(userAccountManager).should().updatePasswordByUserId(USER_ID, TARGET_PASSWORD_HASH);
@@ -70,7 +70,7 @@ class PasswordCommandServiceTest {
     void 회원을_조회할_수_없으면_패스워드_변경에_실패한다() {
         PasswordUpdateCommand command = createPasswordUpdateCommand(UNKNOWN_USER_ID);
 
-        given(userFinder.findByUserIdAndNotWithdrawn(UNKNOWN_USER_ID)).willReturn(Optional.empty());
+        given(userFinder.find(UNKNOWN_USER_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> passwordCommandService.update(command))
@@ -86,7 +86,7 @@ class PasswordCommandServiceTest {
         PasswordUpdateCommand command = createPasswordUpdateCommand();
         User user = createUser(USER_ID, PASSWORD_HASH);
 
-        given(userFinder.findByUserIdAndNotWithdrawn(USER_ID)).willReturn(Optional.of(user));
+        given(userFinder.find(USER_ID)).willReturn(Optional.of(user));
         given(passwordEncoder.matches(command.currentPassword(), user.getPasswordHash())).willReturn(false);
 
         assertThatExceptionOfType(AuthenticationException.class)

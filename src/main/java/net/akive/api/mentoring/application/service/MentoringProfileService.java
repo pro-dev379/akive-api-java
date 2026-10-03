@@ -22,8 +22,7 @@ class MentoringProfileService implements MentoringProfileCreator {
 
     @Override
     public MentoringProfile create(Long userId) throws ResourceNotFoundException {
-        User user = userFinder.findByUserIdAndNotWithdrawn(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+        User user = userFinder.find(userId).orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
 
         MentoringProfile mentoringProfile = MentoringProfile.create(user);
 

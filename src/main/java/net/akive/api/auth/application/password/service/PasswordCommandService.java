@@ -55,7 +55,7 @@ class PasswordCommandService implements PasswordModifier {
     }
 
     private User findUserOrThrow(Long userId) {
-        return userFinder.findByUserIdAndNotWithdrawn(userId)
+        return userFinder.find(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
     }
 

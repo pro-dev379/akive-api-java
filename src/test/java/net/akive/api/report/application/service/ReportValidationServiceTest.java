@@ -41,21 +41,21 @@ class ReportValidationServiceTest {
 
     @Test
     void 리포트_생성_가능_여부를_검증한다() {
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
         given(reportRepository.existsByUserIdAndReportOnAndReportType(USER_ID, REPORT_ON, WEEKLY))
                 .willReturn(false);
 
         reportValidationService.validateCreatable(USER_ID, REPORT_ON, WEEKLY);
 
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
         then(reportRepository).should().existsByUserIdAndReportOnAndReportType(USER_ID, REPORT_ON, WEEKLY);
     }
 
     @Test
     void 리포트_작성일에_해당하는_세션_기간이_없으면_생성_가능_여부_검증에_실패한다() {
         LocalDate reportOn = LocalDate.of(2024, 1, 1);
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -63,13 +63,13 @@ class ReportValidationServiceTest {
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(SESSIONAL_PLAN_NOT_FOUND);
 
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
         then(reportRepository).should(never()).existsByUserIdAndReportOnAndReportType(USER_ID, reportOn, DAILY);
     }
 
     @Test
     void 리포트_작성_가능한_리포트_타입이_아니면_생성_가능_여부_검증에_실패한다() {
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
@@ -77,13 +77,13 @@ class ReportValidationServiceTest {
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(INVALID_REPORT_TYPE);
 
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
         then(reportRepository).should(never()).existsByUserIdAndReportOnAndReportType(USER_ID, REPORT_ON, DAILY);
     }
 
     @Test
     void 이미_리포트_작성일과_리포트_타입이_같은_리포트가_존재하면_생성_가능_여부_검증에_실패한다() {
-        given(sessionalPlanFinder.findSessionPeriodsByUserId(USER_ID))
+        given(sessionalPlanFinder.findSessionPeriods(USER_ID))
                 .willReturn(List.of(createYear2026SessionPeriod()));
         given(reportRepository.existsByUserIdAndReportOnAndReportType(USER_ID, REPORT_ON, WEEKLY))
                 .willReturn(true);
@@ -93,7 +93,7 @@ class ReportValidationServiceTest {
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(REPORT_ALREADY_EXISTS);
 
-        then(sessionalPlanFinder).should().findSessionPeriodsByUserId(USER_ID);
+        then(sessionalPlanFinder).should().findSessionPeriods(USER_ID);
         then(reportRepository).should().existsByUserIdAndReportOnAndReportType(USER_ID, REPORT_ON, WEEKLY);
     }
 }

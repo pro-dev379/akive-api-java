@@ -69,7 +69,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
         UserDetail userDetail = createUserDetail();
         User user = createReconstructedUser(USER_ID, userDetail);
 
-        given(userFinder.findOrThrowByUserIdAndNotWithdrawn(USER_ID)).willReturn(user);
+        given(userFinder.findOrThrow(USER_ID)).willReturn(user);
         given(imageAssetReader.findImageUrl(userDetail.profileImageAssetId(), DETAIL))
                 .willReturn(Optional.of(PROFILE_IMAGE_URL));
 
@@ -86,7 +86,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
         result.bodyJson().extractingPath("$.userDetail.profileImage.url")
                 .isEqualTo(PROFILE_IMAGE_URL.toString());
 
-        then(userFinder).should().findOrThrowByUserIdAndNotWithdrawn(USER_ID);
+        then(userFinder).should().findOrThrow(USER_ID);
         then(imageAssetReader).should().findImageUrl(userDetail.profileImageAssetId(), DETAIL);
     }
 
@@ -94,24 +94,23 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     void 프로필_이미지가_없는_개인_정보를_조회한다() {
         User user = createReconstructedUser(USER_ID);
 
-        given(userFinder.findOrThrowByUserIdAndNotWithdrawn(USER_ID)).willReturn(user);
+        given(userFinder.findOrThrow(USER_ID)).willReturn(user);
 
         MvcTestResultAssert result = get(MEMBER_ME_URL, USER_ID).hasStatus(OK);
 
         result.bodyJson().extractingPath("$.userDetail.profileImage").isNull();
-        then(userFinder).should().findOrThrowByUserIdAndNotWithdrawn(USER_ID);
+        then(userFinder).should().findOrThrow(USER_ID);
         then(imageAssetReader).shouldHaveNoInteractions();
     }
 
     @Test
     void 개인_정보_조회_시_멤버를_조회할_수_없으면_404를_응답한다() {
-        given(userFinder.findOrThrowByUserIdAndNotWithdrawn(UNKNOWN_USER_ID))
-                .willThrow(new ResourceNotFoundException(USER_NOT_FOUND));
+        given(userFinder.findOrThrow(UNKNOWN_USER_ID)).willThrow(new ResourceNotFoundException(USER_NOT_FOUND));
 
         MvcTestResultAssert result = get(MEMBER_ME_URL, UNKNOWN_USER_ID).hasStatus(NOT_FOUND);
 
         assertErrorResponse(result, USER_NOT_FOUND);
-        then(userFinder).should().findOrThrowByUserIdAndNotWithdrawn(UNKNOWN_USER_ID);
+        then(userFinder).should().findOrThrow(UNKNOWN_USER_ID);
     }
 
     @Test

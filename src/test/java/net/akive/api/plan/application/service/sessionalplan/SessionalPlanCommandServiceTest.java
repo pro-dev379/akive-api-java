@@ -50,7 +50,7 @@ class SessionalPlanCommandServiceTest {
         SessionalPlan savedSessionalPlan = createReconstructedSessionalPlan(SESSIONAL_PLAN_ID, sessionalPlan);
         SessionalPlanCreateCommand command = createSessionalPlanCreateCommand();
 
-        given(userFinder.findByUserIdAndNotWithdrawn(command.userId()))
+        given(userFinder.find(command.userId()))
                 .willReturn(Optional.of(user));
         given(sessionalPlanDomainService.create(user, command.sessionName(), command.sessionPeriod()))
                 .willReturn(sessionalPlan);
@@ -61,7 +61,7 @@ class SessionalPlanCommandServiceTest {
 
         assertThat(result).isEqualTo(SESSIONAL_PLAN_ID);
 
-        then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userFinder).should().find(command.userId());
         then(sessionalPlanDomainService).should().create(user, command.sessionName(), command.sessionPeriod());
         then(sessionalPlanRepository).should().save(sessionalPlan);
     }
@@ -69,14 +69,14 @@ class SessionalPlanCommandServiceTest {
     @Test
     void 회원이_없으면_세셔널_플랜_생성에_실패하고_예외를_던진다() {
         SessionalPlanCreateCommand command = createSessionalPlanCreateCommand(UNKNOWN_USER_ID);
-        given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.empty());
+        given(userFinder.find(command.userId())).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> sessionalPlanCommandService.create(command))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
-        then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userFinder).should().find(command.userId());
         then(sessionalPlanDomainService).should(never()).create(any(), any(), any());
         then(sessionalPlanRepository).should(never()).save(any());
     }

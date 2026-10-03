@@ -31,7 +31,7 @@ class SessionalPlanCommandService implements SessionalPlanCreator {
     @Override
     public Long create(SessionalPlanCreateCommand command)
             throws BusinessRuleViolationException, ResourceConflictException, ResourceNotFoundException {
-        User user = userFinder.findByUserIdAndNotWithdrawn(command.userId())
+        User user = userFinder.find(command.userId())
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
 
         SessionalPlan sessionalPlan = sessionalPlanDomainService.create(

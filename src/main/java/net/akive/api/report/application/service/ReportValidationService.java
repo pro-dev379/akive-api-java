@@ -26,7 +26,7 @@ class ReportValidationService {
     private final ReportRepository reportRepository;
 
     void validateCreatable(Long userId, LocalDate reportOn, ReportType reportType) {
-        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriodsByUserId(userId);
+        List<SessionPeriod> sessionPeriods = sessionalPlanFinder.findSessionPeriods(userId);
 
         validateReportOnWithinSessionPeriod(reportOn, sessionPeriods);
         validateReportType(reportOn, reportType, sessionPeriods);

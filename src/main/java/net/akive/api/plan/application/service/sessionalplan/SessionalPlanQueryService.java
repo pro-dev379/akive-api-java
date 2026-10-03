@@ -52,7 +52,7 @@ class SessionalPlanQueryService implements SessionalPlanFinder {
     }
 
     @Override
-    public List<SessionPeriod> findSessionPeriodsByUserId(Long userId) {
+    public List<SessionPeriod> findSessionPeriods(Long userId) {
         return sessionalPlanRepository.findSessionPeriodsByUserId(userId);
     }
 

@@ -68,8 +68,7 @@ class ReportCommandService implements ReportCreator {
     }
 
     private User findUserOrThrow(Long userId) {
-        return userFinder.findByUserIdAndNotWithdrawn(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+        return userFinder.find(userId).orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
     }
 
     private Report findReportOrThrow(Long reportId, Long userId) {

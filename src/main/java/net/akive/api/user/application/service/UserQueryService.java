@@ -24,18 +24,18 @@ class UserQueryService implements UserFinder, UserNicknameChecker {
     private final UserRepository userRepository;
 
     @Override
-    public Optional<User> findByUserIdAndNotWithdrawn(Long userId) {
+    public Optional<User> find(Long userId) {
         return userRepository.findByUserIdAndNotWithdrawn(userId);
     }
 
     @Override
-    public User findOrThrowByUserIdAndNotWithdrawn(Long userId) throws ResourceNotFoundException {
+    public User findOrThrow(Long userId) throws ResourceNotFoundException {
         return userRepository.findByUserIdAndNotWithdrawn(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
     }
 
     @Override
-    public Optional<User> findByEmailAndNotWithdrawn(Email email) {
+    public Optional<User> findByEmail(Email email) {
         return userRepository.findByEmailAndNotWithdrawn(email);
     }
 

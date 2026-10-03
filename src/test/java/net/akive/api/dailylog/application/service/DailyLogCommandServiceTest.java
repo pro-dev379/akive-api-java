@@ -71,7 +71,7 @@ class DailyLogCommandServiceTest {
                 CURRENT_KOREAN_DATE
         );
 
-        given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        given(userFinder.find(command.userId())).willReturn(Optional.of(user));
         given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTime(command.userId(), activityTime))
                 .willReturn(false);
         given(dailyLogRepository.save(any(DailyLog.class))).willReturn(savedDailyLog);
@@ -81,7 +81,7 @@ class DailyLogCommandServiceTest {
         assertThat(result).isEqualTo(DAILY_LOG_ID);
 
         ArgumentCaptor<DailyLog> dailyLogCaptor = ArgumentCaptor.forClass(DailyLog.class);
-        then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userFinder).should().find(command.userId());
         then(dailyLogRepository).should()
                 .existsOverlappingTimeByUserIdAndActivityTime(command.userId(), activityTime);
         then(dailyLogRepository).should().save(dailyLogCaptor.capture());
@@ -97,14 +97,14 @@ class DailyLogCommandServiceTest {
     @Test
     void 회원이_없으면_일일_로그를_생성할_수_없다() {
         DailyLogCreateCommand command = createDailyLogCreateCommand(UNKNOWN_USER_ID);
-        given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.empty());
+        given(userFinder.find(command.userId())).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> dailyLogCommandService.create(command))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(USER_NOT_FOUND);
 
-        then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userFinder).should().find(command.userId());
         then(dailyLogRepository).should(never()).existsOverlappingTimeByUserIdAndActivityTime(any(), any());
         then(dailyLogRepository).should(never()).save(any());
     }
@@ -115,7 +115,7 @@ class DailyLogCommandServiceTest {
         DailyLogCreateCommand command = createDailyLogCreateCommand();
         ActivityTime activityTime = command.activityTime().to(CURRENT_INSTANT);
 
-        given(userFinder.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        given(userFinder.find(command.userId())).willReturn(Optional.of(user));
         given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTime(command.userId(), activityTime))
                 .willReturn(true);
 
@@ -124,7 +124,7 @@ class DailyLogCommandServiceTest {
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(DAILY_LOG_TIME_OVERLAPS);
 
-        then(userFinder).should().findByUserIdAndNotWithdrawn(command.userId());
+        then(userFinder).should().find(command.userId());
         then(dailyLogRepository).should()
                 .existsOverlappingTimeByUserIdAndActivityTime(command.userId(), activityTime);
         then(dailyLogRepository).should(never()).save(any());

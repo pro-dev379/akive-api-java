@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface UserFinder {
 
-    Optional<User> findByUserIdAndNotWithdrawn(Long userId);
+    Optional<User> find(Long userId);
 
-    User findOrThrowByUserIdAndNotWithdrawn(Long userId) throws ResourceNotFoundException;
+    User findOrThrow(Long userId) throws ResourceNotFoundException;
 
-    Optional<User> findByEmailAndNotWithdrawn(Email email);
+    Optional<User> findByEmail(Email email);
 }

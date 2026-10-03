@@ -116,7 +116,7 @@ class SessionalPlanQueryServiceTest {
         given(sessionalPlanRepository.findSessionPeriodsByUserId(USER_ID))
                 .willReturn(List.of(SESSION_PERIOD));
 
-        List<SessionPeriod> sessionPeriods = sessionalPlanQueryService.findSessionPeriodsByUserId(USER_ID);
+        List<SessionPeriod> sessionPeriods = sessionalPlanQueryService.findSessionPeriods(USER_ID);
 
         assertThat(sessionPeriods).containsExactly(SESSION_PERIOD);
 
