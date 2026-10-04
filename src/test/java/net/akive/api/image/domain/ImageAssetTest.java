@@ -11,6 +11,7 @@ import static net.akive.api.image.domain.ImagePolicy.OBJECT_KEY_MAX_LENGTH;
 import static net.akive.api.image.domain.ImageType.ATTENDANCE_PROOF;
 import static net.akive.api.image.domain.ImageType.PROFILE_IMAGE;
 import static net.akive.api.image.domain.ProcessingStatus.*;
+import static net.akive.api.image.domain.VariantType.DETAIL;
 import static net.akive.api.image.domain.fixture.ImageAssetFixture.*;
 import static net.akive.api.image.domain.fixture.ImageVariantFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -155,6 +156,38 @@ class ImageAssetTest {
 
         assertThat(imageAsset.isOfType(ATTENDANCE_PROOF)).isTrue();
         assertThat(imageAsset.isOfType(PROFILE_IMAGE)).isFalse();
+    }
+
+    @Test
+    void 활성화된_변환_규칙_버전과_유형이_일치하는_변환본을_조회한다() {
+        ImageVariant activeDetailVariant = detailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION);
+        ImageVariant inactiveDetailVariant = detailImageVariant(SECOND_IMAGE_VARIANT_ID, ANOTHER_RECIPE_VERSION);
+        ImageAsset imageAsset = readyImageAsset(activeDetailVariant, inactiveDetailVariant);
+
+        assertThat(imageAsset.findActiveVariant(DETAIL)).contains(activeDetailVariant);
+    }
+
+    @Test
+    void 활성화된_변환_규칙_버전에_요청한_유형의_변환본이_없으면_조회할_수_없다() {
+        ImageAsset imageAsset = readyImageAsset(thumbnailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION));
+
+        assertThat(imageAsset.findActiveVariant(DETAIL)).isEmpty();
+    }
+
+    @Test
+    void 비활성화된_변환_규칙_버전에_요청한_유형의_변환본이_있으면_조회할_수_없다() {
+        ImageVariant activeThumbnailVariant = thumbnailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION);
+        ImageVariant inactiveDetailVariant = detailImageVariant(SECOND_IMAGE_VARIANT_ID, ANOTHER_RECIPE_VERSION);
+        ImageAsset imageAsset = readyImageAsset(activeThumbnailVariant, inactiveDetailVariant);
+
+        assertThat(imageAsset.findActiveVariant(DETAIL)).isEmpty();
+    }
+
+    @Test
+    void 활성화된_변환_규칙_버전이_없으면_변환본을_조회할_수_없다() {
+        ImageAsset imageAsset = ImageAsset.create(IMAGE_ASSET_ID, ATTENDANCE_PROOF);
+
+        assertThat(imageAsset.findActiveVariant(DETAIL)).isEmpty();
     }
 
     @Test

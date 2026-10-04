@@ -3,7 +3,9 @@ package net.akive.api.user.adapter.webapi;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.image.adapter.webapi.mapper.ImageResponseMapper;
 import net.akive.api.image.application.provided.ImageAssetReader;
+import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
@@ -32,8 +34,15 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.image.domain.ImageType.PROFILE_IMAGE;
+import static net.akive.api.image.domain.ProcessingStatus.READY;
+import static net.akive.api.image.domain.ProcessingStatus.UPLOADING;
 import static net.akive.api.image.domain.VariantType.DETAIL;
+import static net.akive.api.image.domain.fixture.ImageAssetFixture.RECIPE_VERSION;
 import static net.akive.api.image.domain.fixture.ImageAssetFixture.UNKNOWN_IMAGE_ASSET_ID;
+import static net.akive.api.image.domain.fixture.ImageAssetFixture.readyImageAsset;
+import static net.akive.api.image.domain.fixture.ImageVariantFixture.FIRST_IMAGE_VARIANT_ID;
+import static net.akive.api.image.domain.fixture.ImageVariantFixture.detailImageVariant;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserDetailUpdateRequest;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserWithdrawRequest;
 import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserDetailUpdateCommand;
@@ -67,13 +76,21 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     @MockitoBean
     ImageAssetReader imageAssetReader;
 
+    @MockitoBean
+    ImageResponseMapper imageResponseMapper;
+
     @Test
     void 개인_정보를_조회한다() {
         UserDetail userDetail = createUserDetail();
         User user = createReconstructedUser(USER_ID, userDetail);
+        ImageAsset profileImageAsset = readyImageAsset(
+                PROFILE_IMAGE,
+                detailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION)
+        );
 
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
-        given(imageAssetReader.findImageUrl(userDetail.profileImageAssetId(), DETAIL))
+        given(imageAssetReader.find(userDetail.profileImageAssetId())).willReturn(Optional.of(profileImageAsset));
+        given(imageResponseMapper.resolveUrl(profileImageAsset, DETAIL))
                 .willReturn(Optional.of(PROFILE_IMAGE_URL));
 
         MvcTestResultAssert result = get(MEMBER_ME_URL, USER_ID).hasStatus(OK);
@@ -86,11 +103,14 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
         result.bodyJson().extractingPath("$.userDetail.aim").isEqualTo(AIM);
         result.bodyJson().extractingPath("$.userDetail.profileImage.assetId")
                 .isEqualTo(userDetail.profileImageAssetId().toString());
+        result.bodyJson().extractingPath("$.userDetail.profileImage.processingStatus")
+                .isEqualTo(READY.name());
         result.bodyJson().extractingPath("$.userDetail.profileImage.url")
                 .isEqualTo(PROFILE_IMAGE_URL.toString());
 
         then(userFinder).should().findOrThrow(USER_ID);
-        then(imageAssetReader).should().findImageUrl(userDetail.profileImageAssetId(), DETAIL);
+        then(imageAssetReader).should().find(userDetail.profileImageAssetId());
+        then(imageResponseMapper).should().resolveUrl(profileImageAsset, DETAIL);
     }
 
     @Test
@@ -104,6 +124,43 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
         result.bodyJson().extractingPath("$.userDetail.profileImage").isNull();
         then(userFinder).should().findOrThrow(USER_ID);
         then(imageAssetReader).shouldHaveNoInteractions();
+        then(imageResponseMapper).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 개인_정보_조회_시_프로필_이미지_에셋은_있지만_URL을_생성할_수_없으면_이미지_리사이즈_처리_상태와_null_URL을_응답한다() {
+        UserDetail userDetail = createUserDetail();
+        User user = createReconstructedUser(USER_ID, userDetail);
+        ImageAsset profileImageAsset = ImageAsset.create(userDetail.profileImageAssetId(), PROFILE_IMAGE);
+
+        given(userFinder.findOrThrow(USER_ID)).willReturn(user);
+        given(imageAssetReader.find(userDetail.profileImageAssetId())).willReturn(Optional.of(profileImageAsset));
+        given(imageResponseMapper.resolveUrl(profileImageAsset, DETAIL)).willReturn(Optional.empty());
+
+        MvcTestResultAssert result = get(MEMBER_ME_URL, USER_ID).hasStatus(OK);
+
+        result.bodyJson().extractingPath("$.userDetail.profileImage.assetId")
+                .isEqualTo(userDetail.profileImageAssetId().toString());
+        result.bodyJson().extractingPath("$.userDetail.profileImage.processingStatus")
+                .isEqualTo(UPLOADING.name());
+        result.bodyJson().extractingPath("$.userDetail.profileImage.url").isNull();
+        then(imageAssetReader).should().find(userDetail.profileImageAssetId());
+        then(imageResponseMapper).should().resolveUrl(profileImageAsset, DETAIL);
+    }
+
+    @Test
+    void 개인_정보_조회_시_프로필_이미지_에셋을_찾을_수_없으면_404를_응답한다() {
+        UserDetail userDetail = createUserDetail();
+        User user = createReconstructedUser(USER_ID, userDetail);
+
+        given(userFinder.findOrThrow(USER_ID)).willReturn(user);
+        given(imageAssetReader.find(userDetail.profileImageAssetId())).willReturn(Optional.empty());
+
+        MvcTestResultAssert result = get(MEMBER_ME_URL, USER_ID).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, IMAGE_ASSET_NOT_FOUND);
+        then(imageAssetReader).should().find(userDetail.profileImageAssetId());
+        then(imageResponseMapper).shouldHaveNoInteractions();
     }
 
     @Test

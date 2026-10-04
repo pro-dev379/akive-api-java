@@ -2,8 +2,11 @@ package net.akive.api.user.adapter.webapi;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.image.adapter.webapi.mapper.ImageResponseMapper;
 import net.akive.api.image.application.provided.ImageAssetReader;
+import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
 import net.akive.api.user.adapter.webapi.dto.response.UserFindResponse;
@@ -17,8 +20,10 @@ import net.akive.api.user.domain.User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.UUID;
 
+import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
 import static net.akive.api.image.domain.VariantType.DETAIL;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -32,12 +37,13 @@ public class MemberPrivateApi {
     private final UserNicknameChecker userNicknameChecker;
     private final UserAccountManager userAccountManager;
     private final ImageAssetReader imageAssetReader;
+    private final ImageResponseMapper imageResponseMapper;
 
     @GetMapping
     public UserFindResponse find(@AuthenticatedUserId Long userId) {
         User foundUser = userFinder.findOrThrow(userId);
 
-        return UserFindResponse.from(foundUser, findProfileImage(foundUser));
+        return UserFindResponse.of(foundUser, findProfileImage(foundUser));
     }
 
     @PatchMapping
@@ -76,9 +82,14 @@ public class MemberPrivateApi {
             return null;
         }
 
-        return new ProfileImageResponse(
-                imageAssetId,
-                imageAssetReader.findImageUrl(imageAssetId, DETAIL).orElse(null)
+        ImageAsset imageAsset = imageAssetReader.find(imageAssetId)
+                .orElseThrow(() -> new ResourceNotFoundException(IMAGE_ASSET_NOT_FOUND));
+        URI imageUrl = imageResponseMapper.resolveUrl(imageAsset, DETAIL).orElse(null);
+
+        return ProfileImageResponse.of(
+                imageAsset.getImageAssetId(),
+                imageAsset.getProcessingStatus(),
+                imageUrl
         );
     }
 }

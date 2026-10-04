@@ -81,6 +81,17 @@ public class ImageAsset {
         return this.imageType == imageType;
     }
 
+    public Optional<ImageVariant> findActiveVariant(VariantType variantType) {
+        if (this.activeRecipeVersion == null) {
+            return Optional.empty();
+        }
+
+        return this.variants.stream()
+                .filter(variant -> this.activeRecipeVersion.equals(variant.getRecipeVersion()))
+                .filter(variant -> variant.getVariantType() == variantType)
+                .findFirst();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

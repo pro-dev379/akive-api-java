@@ -1,6 +1,7 @@
 package net.akive.api.image.domain.fixture;
 
 import net.akive.api.image.domain.ImageAsset;
+import net.akive.api.image.domain.ImageType;
 import net.akive.api.image.domain.ImageVariant;
 import net.akive.api.image.domain.ProcessingStatus;
 
@@ -48,13 +49,20 @@ public class ImageAssetFixture {
     }
 
     public static ImageAsset readyImageAsset(ImageVariant... variants) {
-        return reconstructImageAsset(
+        return readyImageAsset(ATTENDANCE_PROOF, variants);
+    }
+
+    public static ImageAsset readyImageAsset(ImageType imageType, ImageVariant... variants) {
+        return ImageAsset.reconstruct(
+                IMAGE_ASSET_ID,
+                imageType,
                 MASTER_OBJECT_KEY,
                 RECIPE_VERSION,
                 READY,
                 null,
                 PROCESSED_AT,
-                List.of(variants)
+                List.of(variants),
+                CREATED_AT
         );
     }
 }

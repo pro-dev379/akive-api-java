@@ -1,5 +1,6 @@
 package net.akive.api.user.adapter.webapi.dto.response;
 
+import net.akive.api.image.domain.ProcessingStatus;
 import net.akive.api.user.domain.User;
 
 import java.net.URI;
@@ -14,7 +15,7 @@ public record UserFindResponse(
         Instant createdAt
 ) {
 
-    public static UserFindResponse from(User user, ProfileImageResponse profileImage) {
+    public static UserFindResponse of(User user, ProfileImageResponse profileImage) {
         return new UserFindResponse(
                 user.getEmail().value(),
                 user.getRoleType().name(),
@@ -30,5 +31,10 @@ public record UserFindResponse(
 
     public record UserDetailResponse(String nickname, String aim, ProfileImageResponse profileImage) {}
 
-    public record ProfileImageResponse(UUID assetId, URI url) {}
+    public record ProfileImageResponse(UUID assetId, ProcessingStatus processingStatus, URI url) {
+
+        public static ProfileImageResponse of(UUID assetId, ProcessingStatus processingStatus, URI url) {
+            return new ProfileImageResponse(assetId, processingStatus, url);
+        }
+    }
 }
