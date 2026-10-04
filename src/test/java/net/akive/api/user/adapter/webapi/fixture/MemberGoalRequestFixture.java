@@ -2,6 +2,7 @@ package net.akive.api.user.adapter.webapi.fixture;
 
 import net.akive.api.user.adapter.webapi.dto.request.GoalCreateRequest;
 
+import java.time.LocalTime;
 import java.util.stream.Stream;
 
 import static net.akive.api.user.domain.UserPolicy.*;
@@ -12,8 +13,12 @@ public class MemberGoalRequestFixture {
     }
 
     public static GoalCreateRequest createGoalCreateRequest() {
+        return createGoalCreateRequest(DEFAULT_GOAL_ATTEND_ON);
+    }
+
+    public static GoalCreateRequest createGoalCreateRequest(LocalTime attendOn) {
         return new GoalCreateRequest(
-                DEFAULT_GOAL_ATTEND_ON,
+                attendOn,
                 DEFAULT_GOAL_REST_10_MIN_SEC,
                 DEFAULT_GOAL_MEAL_NUM,
                 DEFAULT_GOAL_MEAL_1_TIME_SEC

@@ -1,5 +1,6 @@
 package net.akive.api.user.adapter.webapi;
 
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.GoalCreateRequest;
@@ -14,6 +15,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
+import java.time.LocalTime;
+
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.GOAL_ATTEND_ON_NOT_ALLOWED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.GOAL_NOT_FOUND;
 import static net.akive.api.user.adapter.webapi.fixture.MemberGoalRequestFixture.createGoalCreateRequest;
@@ -54,6 +58,21 @@ class MemberGoalApiTest extends PrivateApiTestSupport {
         postJson(MEMBER_LATEST_GOAL_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
 
         then(goalCreator).should(never()).create(any(GoalCreateCommand.class));
+    }
+
+    @Test
+    void 목표_출석_시간을_오전_5시부터_5시_5분_사이로_하면_400을_응답한다() {
+        GoalCreateRequest request = createGoalCreateRequest(LocalTime.of(5, 3));
+        GoalCreateCommand command = request.to(USER_ID);
+        willThrow(new BusinessRuleViolationException(GOAL_ATTEND_ON_NOT_ALLOWED))
+                .given(goalCreator)
+                .create(command);
+
+        MvcTestResultAssert result = postJson(MEMBER_LATEST_GOAL_URL, USER_ID, toJson(request))
+                .hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, GOAL_ATTEND_ON_NOT_ALLOWED);
+        then(goalCreator).should().create(command);
     }
 
     @Test
