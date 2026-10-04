@@ -68,6 +68,23 @@ class ImageVariantTest {
         ), MAX_LENGTH_EXCEEDED);
     }
 
+    @Test
+    void 같은_식별자를_가진_이미지_변환본은_같게_취급한다() {
+        ImageVariant imageVariant = detailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION);
+        ImageVariant sameImageVariant = thumbnailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION);
+
+        assertThat(imageVariant).isEqualTo(sameImageVariant);
+        assertThat(imageVariant.hashCode()).isEqualTo(sameImageVariant.hashCode());
+    }
+
+    @Test
+    void 식별자가_다른_이미지_변환본은_다르게_취급한다() {
+        ImageVariant imageVariant = detailImageVariant(FIRST_IMAGE_VARIANT_ID, RECIPE_VERSION);
+        ImageVariant anotherImageVariant = detailImageVariant(SECOND_IMAGE_VARIANT_ID, RECIPE_VERSION);
+
+        assertThat(imageVariant).isNotEqualTo(anotherImageVariant);
+    }
+
     private static void assertViolation(
             ThrowableAssert.ThrowingCallable callable,
             BusinessRuleViolationError expectedError

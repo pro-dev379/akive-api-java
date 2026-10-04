@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
 import static net.akive.api.image.domain.ImagePolicy.OBJECT_KEY_MAX_LENGTH;
@@ -51,5 +53,20 @@ public class ImageVariant {
                 .format(requireNonNull(format))
                 .byteSize(requireNonNegativeIfPresent(byteSize))
                 .build();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ImageVariant that = (ImageVariant) o;
+
+        return this.imageVariantId != null && Objects.equals(this.imageVariantId, that.imageVariantId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }
