@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static org.hibernate.annotations.OnDeleteAction.CASCADE;
@@ -66,7 +66,7 @@ public class ImageAssetEntity extends BaseTimeEntity implements Persistable<UUID
     private Instant processedAt;
 
     @OnDelete(action = CASCADE)
-    @OneToMany(mappedBy = "imageAsset", fetch = LAZY)
+    @OneToMany(mappedBy = "imageAsset", cascade = ALL, orphanRemoval = true)
     private List<ImageVariantEntity> variants = new ArrayList<>();
 
     public static ImageAssetEntity from(ImageAsset imageAsset) {
