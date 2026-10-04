@@ -64,7 +64,7 @@ class AttendanceProofApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 출석_인증_이미지_식별자가_없으면_400을_응답한다() {
+    void 출석_인증_이미지_에셋_식별자가_없으면_400을_응답한다() {
         AttendanceProofSubmitRequest request = new AttendanceProofSubmitRequest(null);
 
         postJson(ATTENDANCE_PROOFS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
