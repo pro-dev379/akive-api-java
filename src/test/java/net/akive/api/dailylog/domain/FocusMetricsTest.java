@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
+import static net.akive.api.common.time.ServiceDayPolicy.toServiceDayStart;
 import static net.akive.api.user.domain.fixture.GoalFixture.createGoalVersion;
 import static net.akive.api.user.domain.fixture.GoalFixture.goalVersionWithoutMealAndRestAllowance;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +17,7 @@ class FocusMetricsTest {
     @Test
     void 일간_경계_시간을_가로지른_학습_로그의_집중_시간을_각_일자의_활동_시간에_비례해_배분한다() {
         DailyLog fourHourStudyAcrossBoundary = study(LOG_ON.plusDays(1), 4, 8, hours(3));
-        GoalVersion goalVersion = createGoalVersion(LOG_ON.minusDays(1).atStartOfDay());
+        GoalVersion goalVersion = createGoalVersion(toServiceDayStart(LOG_ON.minusDays(1)));
 
         FocusMetrics previousDayMetrics = FocusMetrics.calculate(
                 LOG_ON,
@@ -54,7 +55,7 @@ class FocusMetricsTest {
                 150,
                 1,
                 minutes(30),
-                LOG_ON.minusDays(1).atStartOfDay()
+                toServiceDayStart(LOG_ON.minusDays(1))
         );
 
         FocusMetrics metrics = FocusMetrics.calculate(
@@ -78,7 +79,7 @@ class FocusMetricsTest {
                 etc(LOG_ON, 12, 13, true),
                 study(LOG_ON, 14, 15, hours(1))
         );
-        GoalVersion goalVersion = createGoalVersion(LOG_ON.minusDays(1).atStartOfDay());
+        GoalVersion goalVersion = createGoalVersion(toServiceDayStart(LOG_ON.minusDays(1)));
 
         FocusMetrics metrics = FocusMetrics.calculate(LOG_ON, LOG_ON, dailyLogs, List.of(goalVersion));
 
@@ -95,7 +96,7 @@ class FocusMetricsTest {
                 etc(LOG_ON, 10, 11, false),
                 study(LOG_ON, 11, 12, hours(1))
         );
-        GoalVersion goalVersion = createGoalVersion(LOG_ON.minusDays(1).atStartOfDay());
+        GoalVersion goalVersion = createGoalVersion(toServiceDayStart(LOG_ON.minusDays(1)));
 
         FocusMetrics metrics = FocusMetrics.calculate(LOG_ON, LOG_ON, dailyLogs, List.of(goalVersion));
 
@@ -110,7 +111,7 @@ class FocusMetricsTest {
         LocalDate nextOn = LOG_ON.plusDays(1);
         DailyLog firstDayStudy = study(LOG_ON, 9, 11, hours(1));
         DailyLog secondDayStudy = study(nextOn, 9, 17, hours(6));
-        GoalVersion goalVersion = createGoalVersion(LOG_ON.minusDays(1).atStartOfDay());
+        GoalVersion goalVersion = createGoalVersion(toServiceDayStart(LOG_ON.minusDays(1)));
 
         FocusMetrics metrics = FocusMetrics.calculate(
                 LOG_ON,
@@ -134,8 +135,8 @@ class FocusMetricsTest {
                 study(targetOn, 11, 12, hours(1))
         );
         GoalVersion goalWithoutMealAllowance =
-                goalVersionWithoutMealAndRestAllowance(targetOn.minusDays(2).atStartOfDay());
-        GoalVersion latestGoalWithMealAllowance = createGoalVersion(targetOn.minusDays(1).atTime(19, 59));
+                goalVersionWithoutMealAndRestAllowance(toServiceDayStart(targetOn.minusDays(1)));
+        GoalVersion latestGoalWithMealAllowance = createGoalVersion(toServiceDayStart(targetOn).minusSeconds(60));
 
         FocusMetrics metrics = FocusMetrics.calculate(
                 targetOn,
@@ -162,10 +163,10 @@ class FocusMetricsTest {
                 study(dayAfterNextOn, 11, 12, hours(1))
         );
         GoalVersion currentGoalWithoutMealAllowance = goalVersionWithoutMealAndRestAllowance(
-                LOG_ON.minusDays(1).atStartOfDay()
+                toServiceDayStart(LOG_ON)
         );
-        GoalVersion goalCreatedBeforeBoundary = createGoalVersion(LOG_ON.atTime(19, 59));
-        GoalVersion goalCreatedAtBoundary = goalVersionWithoutMealAndRestAllowance(LOG_ON.atTime(20, 0));
+        GoalVersion goalCreatedBeforeBoundary = createGoalVersion(toServiceDayStart(nextOn).minusSeconds(60));
+        GoalVersion goalCreatedAtBoundary = goalVersionWithoutMealAndRestAllowance(toServiceDayStart(nextOn));
 
         FocusMetrics beforeBoundaryGoalMetrics = FocusMetrics.calculate(
                 nextOn,

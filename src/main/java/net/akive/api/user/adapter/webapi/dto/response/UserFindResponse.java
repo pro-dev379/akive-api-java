@@ -3,7 +3,7 @@ package net.akive.api.user.adapter.webapi.dto.response;
 import net.akive.api.user.domain.User;
 
 import java.net.URI;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 public record UserFindResponse(
@@ -11,7 +11,7 @@ public record UserFindResponse(
         String roleType,
         String loginType,
         UserDetailResponse userDetail,
-        LocalDateTime createdAt
+        Instant createdAt
 ) {
 
     public static UserFindResponse from(User user, ProfileImageResponse profileImage) {

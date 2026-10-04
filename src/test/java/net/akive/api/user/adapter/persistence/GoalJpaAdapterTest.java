@@ -6,8 +6,8 @@ import net.akive.api.user.domain.GoalVersion;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static net.akive.api.user.domain.UserPolicy.*;
@@ -51,13 +51,13 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
         User savedUser = saveUser();
         LocalDate startOn = LocalDate.of(2026, 9, 14);
         LocalDate endOn = LocalDate.of(2026, 9, 20);
-        saveGoalAt(savedUser, 100, LocalDateTime.of(2026, 9, 10, 0, 0));
-        saveGoalAt(savedUser, 200, LocalDateTime.of(2026, 9, 13, 19, 59));
-        saveGoalAt(savedUser, 210, LocalDateTime.of(2026, 9, 13, 19, 59));
-        saveGoalAt(savedUser, 300, LocalDateTime.of(2026, 9, 13, 20, 0));
-        saveGoalAt(savedUser, 400, LocalDateTime.of(2026, 9, 16, 20, 0));
-        saveGoalAt(savedUser, 500, LocalDateTime.of(2026, 9, 19, 19, 59));
-        saveGoalAt(savedUser, 600, LocalDateTime.of(2026, 9, 19, 20, 0));
+        saveGoalAt(savedUser, 100, Instant.parse("2026-09-10T00:00:00Z"));
+        saveGoalAt(savedUser, 200, Instant.parse("2026-09-13T19:59:00Z"));
+        saveGoalAt(savedUser, 210, Instant.parse("2026-09-13T19:59:00Z"));
+        saveGoalAt(savedUser, 300, Instant.parse("2026-09-13T20:00:00Z"));
+        saveGoalAt(savedUser, 400, Instant.parse("2026-09-16T20:00:00Z"));
+        saveGoalAt(savedUser, 500, Instant.parse("2026-09-19T19:59:00Z"));
+        saveGoalAt(savedUser, 600, Instant.parse("2026-09-19T20:00:00Z"));
 
         List<GoalVersion> goalVersions = goalRepository.findVersionsForPeriod(
                 savedUser.getUserId(),
@@ -81,9 +81,9 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
     void 특정_날짜_이전에_생성된_최신_목표를_조회한다() {
         User savedUser = saveUser();
         LocalDate date = LocalDate.of(2026, 9, 14);
-        saveGoalAt(savedUser, 100, LocalDateTime.of(2026, 9, 13, 19, 59));
-        Goal expectedGoal = saveGoalAt(savedUser, 200, LocalDateTime.of(2026, 9, 13, 19, 59));
-        saveGoalAt(savedUser, 300, LocalDateTime.of(2026, 9, 13, 20, 0));
+        saveGoalAt(savedUser, 100, Instant.parse("2026-09-13T19:59:00Z"));
+        Goal expectedGoal = saveGoalAt(savedUser, 200, Instant.parse("2026-09-13T19:59:00Z"));
+        saveGoalAt(savedUser, 300, Instant.parse("2026-09-13T20:00:00Z"));
         flushAndClear();
 
         Goal effectiveGoal = goalRepository
@@ -93,7 +93,7 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
         assertThat(effectiveGoal).isEqualTo(expectedGoal);
     }
 
-    private Goal saveGoalAt(User user, long rest10MinSec, LocalDateTime createdAt) {
+    private Goal saveGoalAt(User user, long rest10MinSec, Instant createdAt) {
         Goal goal = goalRepository.save(Goal.create(
                 user,
                 DEFAULT_GOAL_ATTEND_ON,

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import net.akive.api.common.domain.Email;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -36,7 +35,7 @@ public class User {
 
     private Withdrawal withdrawal;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public static User reconstruct(
             Long userId,
@@ -46,7 +45,7 @@ public class User {
             String passwordHash,
             UserDetail userDetail,
             Withdrawal withdrawal,
-            LocalDateTime createdAt
+            Instant createdAt
     ) {
         return User.builder()
                 .userId(userId)

@@ -28,6 +28,7 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.pagination.SortDirection.DESC;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.*;
 import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
+import static net.akive.api.common.time.ServiceDayPolicy.toServiceDayStart;
 import static net.akive.api.common.analytics.TimeSeriesUnit.DAY;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.*;
 import static net.akive.api.user.domain.fixture.GoalFixture.goalVersionWithoutMealAndRestAllowance;
@@ -98,7 +99,7 @@ class DailyLogQueryServiceTest {
     @Test
     void 조회_기간의_일일_로그와_목표_목록으로_집중도와_집중_시간을_조회한다() {
         DailyLog dailyLog = study(LOG_ON, 9, 10, hours(1));
-        GoalVersion goal = goalVersionWithoutMealAndRestAllowance(LOG_ON.minusDays(1).atStartOfDay());
+        GoalVersion goal = goalVersionWithoutMealAndRestAllowance(toServiceDayStart(LOG_ON.minusDays(1)));
         FocusMetricsFindQuery query = new FocusMetricsFindQuery(USER_ID, LOG_ON, LOG_ON);
         givenDailyLogsForPeriod(LOG_ON, LOG_ON, dailyLog);
         givenGoalVersionsForPeriod(LOG_ON, LOG_ON, goal);
@@ -114,7 +115,7 @@ class DailyLogQueryServiceTest {
     void 조회_기간의_일일_로그와_목표_목록으로_날짜별_집중도와_집중_시간을_계산한다() {
         LocalDate endOn = LOG_ON.plusDays(1);
         DailyLog dailyLog = study(LOG_ON, 9, 10, hours(1));
-        GoalVersion goalVersion = goalVersionWithoutMealAndRestAllowance(LOG_ON.minusDays(1).atStartOfDay());
+        GoalVersion goalVersion = goalVersionWithoutMealAndRestAllowance(toServiceDayStart(LOG_ON.minusDays(1)));
         FocusMetricsSeriesFindQuery query = new FocusMetricsSeriesFindQuery(USER_ID, LOG_ON, endOn, DAY);
         givenDailyLogsForPeriod(LOG_ON, endOn, dailyLog);
         givenGoalVersionsForPeriod(LOG_ON, endOn, goalVersion);

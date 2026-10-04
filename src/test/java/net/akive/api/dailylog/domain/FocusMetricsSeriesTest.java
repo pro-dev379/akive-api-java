@@ -9,6 +9,7 @@ import java.util.List;
 import static net.akive.api.common.analytics.TimeSeriesUnit.DAY;
 import static net.akive.api.common.analytics.TimeSeriesUnit.MONTH;
 import static net.akive.api.common.analytics.TimeSeriesUnit.WEEK;
+import static net.akive.api.common.time.ServiceDayPolicy.toServiceDayStart;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.LOG_ON;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.hours;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.study;
@@ -23,7 +24,7 @@ class FocusMetricsSeriesTest {
     void 일_단위로_각_날짜의_집중_시간과_집중도를_계산한다() {
         DailyLog firstDayStudy = study(LOG_ON, 9, 11, hours(1));
         DailyLog secondDayStudy = study(LOG_ON.plusDays(1), 9, 17, hours(6));
-        GoalVersion goal = createGoalVersion(LOG_ON.minusDays(1).atStartOfDay());
+        GoalVersion goal = createGoalVersion(toServiceDayStart(LOG_ON.minusDays(1)));
 
         FocusMetricsSeries focusMetricsSeries = FocusMetricsSeries.calculate(
                 LOG_ON,

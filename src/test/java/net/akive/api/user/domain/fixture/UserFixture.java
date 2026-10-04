@@ -3,7 +3,7 @@ package net.akive.api.user.domain.fixture;
 import net.akive.api.common.domain.Email;
 import net.akive.api.user.domain.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
@@ -23,7 +23,7 @@ public class UserFixture {
     public static final String PASSWORD_HASH = "password-hash";
     public static final String TARGET_PASSWORD = "targetPassword123!";
     public static final String TARGET_PASSWORD_HASH = "target-password-hash";
-    public static final LocalDateTime CREATED_AT = LocalDateTime.of(2026, 9, 18, 12, 0, 1);
+    public static final Instant CREATED_AT = Instant.parse("2026-09-18T12:00:01Z");
 
     public static User createUser() {
         return createUser(EMAIL, NICKNAME);

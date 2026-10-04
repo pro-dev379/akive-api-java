@@ -4,7 +4,7 @@ import net.akive.api.user.adapter.persistence.entity.GoalEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +28,7 @@ interface GoalJpaRepository extends JpaRepository<GoalEntity, Long> {
         order by g.createdAt desc, g.goalId desc
         limit 1
     """)
-    Optional<GoalEntity> findLatestByUserIdAndCreatedAtBefore(Long userId, LocalDateTime createdAtBefore);
+    Optional<GoalEntity> findLatestByUserIdAndCreatedAtBefore(Long userId, Instant createdAtBefore);
 
     @Query("""
         select g
@@ -40,7 +40,7 @@ interface GoalJpaRepository extends JpaRepository<GoalEntity, Long> {
     """)
     List<GoalEntity> findAllByUserIdAndCreatedAtInRange(
             Long userId,
-            LocalDateTime startInclusive,
-            LocalDateTime endExclusive
+            Instant startInclusive,
+            Instant endExclusive
     );
 }

@@ -3,7 +3,7 @@ package net.akive.api.user.domain.fixture;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.GoalVersion;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.LocalTime;
 
 import static net.akive.api.user.domain.UserPolicy.*;
@@ -38,11 +38,11 @@ public class GoalFixture {
         );
     }
 
-    public static GoalVersion goalVersionWithoutMealAndRestAllowance(LocalDateTime createdAt) {
+    public static GoalVersion goalVersionWithoutMealAndRestAllowance(Instant createdAt) {
         return createGoalVersion(0, 0, 0, createdAt);
     }
 
-    public static GoalVersion createGoalVersion(LocalDateTime createdAt) {
+    public static GoalVersion createGoalVersion(Instant createdAt) {
         return createGoalVersion(
                 DEFAULT_GOAL_REST_10_MIN_SEC,
                 DEFAULT_GOAL_MEAL_NUM,
@@ -55,7 +55,7 @@ public class GoalFixture {
             long rest10MinSec,
             int mealNum,
             long meal1TimeSec,
-            LocalDateTime createdAt
+            Instant createdAt
     ) {
         return new GoalVersion(rest10MinSec, mealNum, meal1TimeSec, createdAt);
     }

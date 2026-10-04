@@ -10,7 +10,7 @@ import net.akive.api.user.domain.Goal;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.LocalTime;
 
 import static jakarta.persistence.FetchType.LAZY;
@@ -47,7 +47,7 @@ public class GoalEntity {
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public static GoalEntity from(Goal goal) {
         GoalEntity goalEntity = new GoalEntity();

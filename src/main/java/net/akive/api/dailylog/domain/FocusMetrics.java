@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.math.RoundingMode.HALF_UP;
-import static java.time.ZoneOffset.UTC;
 import static net.akive.api.common.domain.DomainValidator.requireStartNotAfterEnd;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.GOAL_NOT_FOUND;
 import static net.akive.api.common.time.ServiceDayPolicy.DAILY_BOUNDARY_HOUR;
@@ -122,7 +121,7 @@ public record FocusMetrics(long focusTimeSec, BigDecimal focusRate) {
         Instant serviceDayStartedAt = toServiceDayStart(date);
 
         for (GoalVersion goal : goals) {
-            Instant goalCreatedAt = goal.createdAt().toInstant(UTC);
+            Instant goalCreatedAt = goal.createdAt();
 
             if (goalCreatedAt.isBefore(serviceDayStartedAt)
                     && (latest == null || !goal.createdAt().isBefore(latest.createdAt()))) {

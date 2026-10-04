@@ -8,12 +8,11 @@ import net.akive.api.user.domain.GoalVersion;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static java.time.ZoneOffset.UTC;
 import static net.akive.api.common.time.ServiceDayPolicy.toServiceDayStart;
 
 @Repository
@@ -39,15 +38,15 @@ class GoalJpaAdapter implements GoalRepository {
 
     @Override
     public Optional<Goal> findLatestByUserIdAndCreatedAtBefore(Long userId, LocalDate date) {
-        LocalDateTime serviceDayStart = toUtcDateTimeAtServiceDayStart(date);
+        Instant serviceDayStart = toServiceDayStart(date);
 
         return goalJpaRepository.findLatestByUserIdAndCreatedAtBefore(userId, serviceDayStart).map(GoalEntity::to);
     }
 
     @Override
     public List<GoalVersion> findVersionsForPeriod(Long userId, LocalDate startOn, LocalDate endOn) {
-        LocalDateTime periodStart = toUtcDateTimeAtServiceDayStart(startOn);
-        LocalDateTime periodEnd = toUtcDateTimeAtServiceDayStart(endOn);
+        Instant periodStart = toServiceDayStart(startOn);
+        Instant periodEnd = toServiceDayStart(endOn);
         List<GoalVersion> goalVersions = new ArrayList<>();
 
         goalJpaRepository
@@ -64,10 +63,6 @@ class GoalJpaAdapter implements GoalRepository {
         }
 
         return List.copyOf(goalVersions);
-    }
-
-    private LocalDateTime toUtcDateTimeAtServiceDayStart(LocalDate date) {
-        return LocalDateTime.ofInstant(toServiceDayStart(date), UTC);
     }
 
     private GoalVersion toVersion(GoalEntity entity) {

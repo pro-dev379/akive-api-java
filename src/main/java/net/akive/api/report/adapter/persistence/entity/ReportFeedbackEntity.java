@@ -11,7 +11,7 @@ import org.hibernate.annotations.OnDelete;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
@@ -61,7 +61,7 @@ public class ReportFeedbackEntity {
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public static ReportFeedbackEntity from(ReportFeedback reportFeedback) {
         ReportFeedbackEntity reportFeedbackEntity = new ReportFeedbackEntity();

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -34,11 +34,11 @@ public class ImageAsset {
 
     private String processingError;
 
-    private LocalDateTime processedAt;
+    private Instant processedAt;
 
     private List<ImageVariant> variants;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public static ImageAsset reconstruct(
             UUID imageAssetId,
@@ -47,9 +47,9 @@ public class ImageAsset {
             Integer activeRecipeVersion,
             ProcessingStatus processingStatus,
             String processingError,
-            LocalDateTime processedAt,
+            Instant processedAt,
             List<ImageVariant> variants,
-            LocalDateTime createdAt
+            Instant createdAt
     ) {
         ImageAsset imageAsset = ImageAsset.builder()
                 .imageAssetId(requireNonNull(imageAssetId))

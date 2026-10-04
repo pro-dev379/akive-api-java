@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_DATE_RANGE;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.GOAL_NOT_FOUND;
+import static net.akive.api.common.time.ServiceDayPolicy.toServiceDayStart;
 import static net.akive.api.user.domain.fixture.GoalFixture.GOAL_ID;
 import static net.akive.api.user.domain.fixture.GoalFixture.createReconstructedGoal;
 import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
@@ -92,7 +93,7 @@ class GoalQueryServiceTest {
         LocalDate startOn = LocalDate.of(2026, 9, 14);
         LocalDate endOn = startOn.plusDays(6);
         GoalVersionsFindQuery query = new GoalVersionsFindQuery(USER_ID, startOn, endOn);
-        List<GoalVersion> goalVersions = List.of(new GoalVersion(600, 2, 1800, startOn.atStartOfDay()));
+        List<GoalVersion> goalVersions = List.of(new GoalVersion(600, 2, 1800, toServiceDayStart(startOn)));
         given(goalRepository.findVersionsForPeriod(USER_ID, startOn, endOn)).willReturn(goalVersions);
 
         List<GoalVersion> foundVersions = goalQueryService.findVersionsForPeriod(query);

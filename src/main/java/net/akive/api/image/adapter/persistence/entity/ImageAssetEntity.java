@@ -15,7 +15,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -63,7 +63,7 @@ public class ImageAssetEntity extends BaseTimeEntity implements Persistable<UUID
     @Column(columnDefinition = "TEXT")
     private String processingError;
 
-    private LocalDateTime processedAt;
+    private Instant processedAt;
 
     @OnDelete(action = CASCADE)
     @OneToMany(mappedBy = "imageAsset", fetch = LAZY)
