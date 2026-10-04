@@ -30,6 +30,8 @@ public enum ResourceNotFoundError implements ApplicationError {
     REPORT_NOT_FOUND("Report not found."),
 
     IMAGE_ASSET_NOT_FOUND("Image asset not found."),
+
+    ATTENDANCE_PROOF_NOT_FOUND("Attendance proof not found"),
     ;
 
     private final String message;

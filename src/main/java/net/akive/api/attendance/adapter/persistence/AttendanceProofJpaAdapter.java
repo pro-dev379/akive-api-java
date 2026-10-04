@@ -8,6 +8,7 @@ import net.akive.api.common.time.CurrentTimeProvider;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static net.akive.api.common.time.ServiceDayPolicy.toServiceDate;
 
@@ -23,6 +24,13 @@ class AttendanceProofJpaAdapter implements AttendanceProofRepository {
         return attendanceProofJpaRepository
                 .save(AttendanceProofEntity.from(attendanceProof))
                 .to(toServiceDate(currentTimeProvider.now()));
+    }
+
+    @Override
+    public Optional<AttendanceProof> findByUserAndProofOn(Long userId, LocalDate proofOn) {
+        return attendanceProofJpaRepository
+                .findByUser_UserIdAndProofOn(userId, proofOn)
+                .map(entity -> entity.to(toServiceDate(currentTimeProvider.now())));
     }
 
     @Override

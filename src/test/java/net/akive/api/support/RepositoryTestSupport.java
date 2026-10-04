@@ -1,11 +1,15 @@
 package net.akive.api.support;
 
 import jakarta.persistence.EntityManager;
+import net.akive.api.attendance.application.required.AttendanceProofRepository;
+import net.akive.api.attendance.domain.AttendanceProof;
 import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.ActivityTime;
 import net.akive.api.dailylog.domain.DailyLog;
+import net.akive.api.image.application.required.ImageAssetRepository;
+import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
@@ -26,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
+import static net.akive.api.attendance.domain.fixture.AttendanceProofFixture.createAttendanceProofImageAsset;
+import static net.akive.api.attendance.domain.fixture.AttendanceProofFixture.submitAttendanceProof;
 import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.createDailyLog;
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_SUBJECT_NAME;
@@ -66,6 +72,12 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     @Autowired
     protected DailyLogRepository dailyLogRepository;
+
+    @Autowired
+    protected AttendanceProofRepository attendanceProofRepository;
+
+    @Autowired
+    protected ImageAssetRepository imageAssetRepository;
 
     @Autowired
     protected CurrentTimeProvider currentTimeProvider;
@@ -141,17 +153,26 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
             ReportType reportType,
             List<ReportFeedback> feedbackItems
     ) {
-        return reportRepository.save(
-                createReport(savedUser, reportOn, reportType, feedbackItems, reportOn)
-        );
+        return reportRepository.save(createReport(savedUser, reportOn, reportType, feedbackItems, reportOn));
     }
 
-    private DailyLog saveDailyLog(DailyLog dailyLog) {
-        return dailyLogRepository.save(dailyLog);
+    protected AttendanceProof saveAttendanceProof() {
+        User savedUser = saveUser();
+        ImageAsset savedImageAsset = saveAttendanceProofImageAsset();
+
+        return attendanceProofRepository.save(submitAttendanceProof(savedUser, savedImageAsset));
+    }
+
+    protected ImageAsset saveAttendanceProofImageAsset() {
+        return imageAssetRepository.save(createAttendanceProofImageAsset());
     }
 
     protected void flushAndClear() {
         entityManager.flush();
         entityManager.clear();
+    }
+
+    private DailyLog saveDailyLog(DailyLog dailyLog) {
+        return dailyLogRepository.save(dailyLog);
     }
 }

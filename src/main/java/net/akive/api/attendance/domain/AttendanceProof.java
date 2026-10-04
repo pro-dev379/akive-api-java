@@ -62,14 +62,14 @@ public class AttendanceProof {
             User user,
             ImageAsset proofImageAsset,
             LocalTime goalAttendOn,
-            Instant requestedAt
+            Instant submittedAt
     ) {
-        LocalDate proofOn = toServiceDate(requestedAt);
+        LocalDate proofOn = toServiceDate(submittedAt);
         Instant targetAttendanceAt = resolveTargetAttendanceAt(proofOn, requireNonNull(goalAttendOn));
 
-        validateAttendanceAllowed(requestedAt, targetAttendanceAt);
+        validateAttendanceAllowed(submittedAt, targetAttendanceAt);
 
-        boolean late = requestedAt.isAfter(targetAttendanceAt);
+        boolean late = submittedAt.isAfter(targetAttendanceAt);
 
         return AttendanceProof.builder()
                 .user(requireNonNull(user))

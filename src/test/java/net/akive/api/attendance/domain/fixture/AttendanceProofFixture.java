@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static net.akive.api.common.time.ServiceDayPolicy.toInstantAtServiceZone;
 import static net.akive.api.image.domain.ImageType.ATTENDANCE_PROOF;
 import static net.akive.api.image.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
@@ -35,6 +36,15 @@ public class AttendanceProofFixture {
         );
     }
 
+    public static AttendanceProof submitAttendanceProof(User user, ImageAsset proofImageAsset) {
+        return submitAttendanceProof(
+                user,
+                proofImageAsset,
+                GOAL_ATTEND_ON,
+                toInstantAtServiceZone(PROOF_ON.atTime(GOAL_ATTEND_ON))
+        );
+    }
+
     public static AttendanceProof submitAttendanceProof(
             User user,
             ImageAsset proofImageAsset,
@@ -56,6 +66,24 @@ public class AttendanceProofFixture {
                 createAttendanceProofImageAsset(),
                 false,
                 currentDate
+        );
+    }
+
+    public static AttendanceProof createReconstructedAttendanceProof(boolean late) {
+        return createReconstructedAttendanceProof(createAttendanceProofImageAsset(), late);
+    }
+
+    public static AttendanceProof createReconstructedAttendanceProof(
+            ImageAsset proofImageAsset,
+            boolean late
+    ) {
+        return createReconstructedAttendanceProof(
+                ATTENDANCE_PROOF_ID,
+                createUser(),
+                PROOF_ON,
+                proofImageAsset,
+                late,
+                PROOF_ON
         );
     }
 
