@@ -5,6 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-@ConfigurationProperties(prefix = "file.storage.s3")
+@ConfigurationProperties(prefix = "image.storage.s3")
 public record S3Properties(@NotBlank String bucketName) {
 }

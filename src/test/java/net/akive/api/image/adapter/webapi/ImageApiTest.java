@@ -1,0 +1,114 @@
+package net.akive.api.image.adapter.webapi;
+
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.image.adapter.webapi.fixture.UploadUrlRequestFixture;
+import net.akive.api.image.adapter.webapi.request.UploadUrlCreateRequest;
+import net.akive.api.image.application.provided.UploadUrlCreator;
+import net.akive.api.image.application.provided.dto.UploadUrlCreateCommand;
+import net.akive.api.image.application.provided.dto.UploadUrlCreateResult;
+import net.akive.api.support.PrivateApiTestSupport;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
+
+import java.util.stream.Stream;
+
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.IMAGE_CONTENT_TYPE_NOT_ALLOWED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.IMAGE_FILE_SIZE_EXCEEDED;
+import static net.akive.api.image.adapter.storage.fixture.S3ImageStorageFixture.*;
+import static net.akive.api.image.adapter.webapi.fixture.UploadUrlRequestFixture.createUploadUrlCreateRequest;
+import static net.akive.api.image.domain.ImagePolicy.PROFILE_IMAGE_MAX_SIZE_BYTES;
+import static net.akive.api.image.domain.ImageType.PROFILE_IMAGE;
+import static net.akive.api.image.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
+
+@WebMvcTest(ImageApi.class)
+class ImageApiTest extends PrivateApiTestSupport {
+
+    private static final String UPLOAD_URLS_URL = "/images/upload-urls";
+
+    @MockitoBean
+    UploadUrlCreator uploadUrlCreator;
+
+    @Test
+    void 이미지_업로드_URL을_생성한다() {
+        UploadUrlCreateRequest request = createUploadUrlCreateRequest();
+        UploadUrlCreateCommand command = request.to(USER_ID);
+        UploadUrlCreateResult result = new UploadUrlCreateResult(IMAGE_ASSET_ID, UPLOAD_URL, EXPIRES_AT);
+        given(uploadUrlCreator.create(command)).willReturn(result);
+
+        MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(OK);
+
+        response.bodyJson().extractingPath("$.imageAssetId").isEqualTo(IMAGE_ASSET_ID.toString());
+        response.bodyJson().extractingPath("$.uploadUrl").isEqualTo(UPLOAD_URL.toString());
+        response.bodyJson().extractingPath("$.expiresAt").isEqualTo(EXPIRES_AT.toString());
+        then(uploadUrlCreator).should().create(command);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUploadUrlCreateRequests")
+    void 이미지_업로드_URL_생성_요청값이_올바르지_않으면_400을_응답한다(UploadUrlCreateRequest request) {
+        postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
+
+        then(uploadUrlCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 이미지_타입이_올바르지_않으면_400을_응답한다() {
+        postJson(
+                UPLOAD_URLS_URL,
+                USER_ID,
+                """
+                {
+                    "imageType": "INVALID",
+                    "contentType": "image/jpeg",
+                    "fileSize": 1024
+                }
+                """
+        ).hasStatus(BAD_REQUEST);
+
+        then(uploadUrlCreator).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 이미지_파일_사이즈가_허용량을_초과하면_400을_응답한다() {
+        UploadUrlCreateRequest request = createUploadUrlCreateRequest(
+                PROFILE_IMAGE,
+                CONTENT_TYPE,
+                PROFILE_IMAGE_MAX_SIZE_BYTES + 1
+        );
+        UploadUrlCreateCommand command = request.to(USER_ID);
+        willThrow(new BusinessRuleViolationException(IMAGE_FILE_SIZE_EXCEEDED))
+                .given(uploadUrlCreator)
+                .create(command);
+
+        MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(response, IMAGE_FILE_SIZE_EXCEEDED);
+        then(uploadUrlCreator).should().create(command);
+    }
+
+    @Test
+    void 콘텐츠_타입이_허용되지_않으면_400을_응답한다() {
+        UploadUrlCreateRequest request = createUploadUrlCreateRequest(PROFILE_IMAGE, "image/svg+xml", 1024L);
+        UploadUrlCreateCommand command = request.to(USER_ID);
+        willThrow(new BusinessRuleViolationException(IMAGE_CONTENT_TYPE_NOT_ALLOWED))
+                .given(uploadUrlCreator)
+                .create(command);
+
+        MvcTestResultAssert response = postJson(UPLOAD_URLS_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(response, IMAGE_CONTENT_TYPE_NOT_ALLOWED);
+        then(uploadUrlCreator).should().create(command);
+    }
+
+    private static Stream<UploadUrlCreateRequest> invalidUploadUrlCreateRequests() {
+        return UploadUrlRequestFixture.invalidUploadUrlCreateRequests();
+    }
+}

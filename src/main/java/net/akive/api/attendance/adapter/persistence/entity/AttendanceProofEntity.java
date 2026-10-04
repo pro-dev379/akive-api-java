@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import net.akive.api.attendance.domain.AttendanceProof;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.internal.InvalidPersistedDataException;
-import net.akive.api.file.adapter.persistence.entity.ImageAssetEntity;
+import net.akive.api.image.adapter.persistence.entity.ImageAssetEntity;
 import net.akive.api.user.adapter.persistence.entity.UserEntity;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;

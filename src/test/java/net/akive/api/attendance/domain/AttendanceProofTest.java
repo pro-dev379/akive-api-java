@@ -1,7 +1,7 @@
 package net.akive.api.attendance.domain;
 
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
-import net.akive.api.file.domain.ImageAsset;
+import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
 

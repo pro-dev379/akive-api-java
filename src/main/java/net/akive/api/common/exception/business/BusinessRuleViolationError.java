@@ -72,8 +72,8 @@ public enum BusinessRuleViolationError implements ApplicationError {
     REPORT_DATE_IN_FUTURE("Report date must not be in future."),
     INVALID_REPORT_TYPE("Invalid report type."),
 
-    FILE_SIZE_EXCEEDED("File is too large."),
-    FILE_CONTENT_TYPE_NOT_ALLOWED("File content type is not allowed."),
+    IMAGE_FILE_SIZE_EXCEEDED("Image file is too large."),
+    IMAGE_CONTENT_TYPE_NOT_ALLOWED("Image content type is not allowed."),
     INVALID_IMAGE_ASSET_STATE("Image asset state is invalid."),
 
     GOAL_ATTEND_ON_NOT_ALLOWED("Goal attendance time must be before 05:00 or at/after 05:05."),

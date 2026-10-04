@@ -2,7 +2,7 @@ package net.akive.api.attendance.adapter.webapi.fixture;
 
 import net.akive.api.attendance.adapter.webapi.request.AttendanceProofSubmitRequest;
 
-import static net.akive.api.file.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
+import static net.akive.api.image.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
 
 public class AttendanceProofRequestFixture {
 

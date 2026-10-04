@@ -7,9 +7,9 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
-import net.akive.api.file.application.provided.ImageAssetReader;
-import net.akive.api.file.application.provided.ImageAssetUploadChecker;
-import net.akive.api.file.domain.ImageAsset;
+import net.akive.api.image.application.provided.ImageAssetReader;
+import net.akive.api.image.application.provided.ImageAssetUploadChecker;
+import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.user.application.provided.GoalFinder;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.Goal;
@@ -33,10 +33,10 @@ import static net.akive.api.common.exception.business.ResourceConflictError.ATTE
 import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
 import static net.akive.api.common.time.ServiceDayPolicy.toInstantAtServiceZone;
 import static net.akive.api.common.time.ServiceDayPolicy.toServiceDate;
-import static net.akive.api.file.domain.ImageType.ATTENDANCE_PROOF;
-import static net.akive.api.file.domain.ImageType.PROFILE_IMAGE;
-import static net.akive.api.file.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
-import static net.akive.api.file.domain.fixture.ImageAssetFixture.UNKNOWN_IMAGE_ASSET_ID;
+import static net.akive.api.image.domain.ImageType.ATTENDANCE_PROOF;
+import static net.akive.api.image.domain.ImageType.PROFILE_IMAGE;
+import static net.akive.api.image.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
+import static net.akive.api.image.domain.fixture.ImageAssetFixture.UNKNOWN_IMAGE_ASSET_ID;
 import static net.akive.api.user.domain.UserPolicy.*;
 import static net.akive.api.user.domain.fixture.GoalFixture.GOAL_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
@@ -93,7 +93,7 @@ class AttendanceProofCommandServiceTest {
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
         given(currentTimeProvider.now()).willReturn(SUBMITTED_AT);
         given(attendanceProofRepository.existsByUserIdAndProofOn(USER_ID, EXPECTED_PROOF_ON)).willReturn(false);
-        given(imageAssetUploadChecker.isOriginalUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF)).willReturn(true);
+        given(imageAssetUploadChecker.isOriginalImageUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF)).willReturn(true);
         given(goalFinder.findLatestBefore(USER_ID, EXPECTED_PROOF_ON)).willReturn(effectiveGoal);
         given(attendanceProofRepository.save(any(AttendanceProof.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
@@ -106,7 +106,7 @@ class AttendanceProofCommandServiceTest {
         assertThat(attendanceProof.getLate()).isTrue();
 
         then(attendanceProofRepository).should().existsByUserIdAndProofOn(USER_ID, EXPECTED_PROOF_ON);
-        then(imageAssetUploadChecker).should().isOriginalUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF);
+        then(imageAssetUploadChecker).should().isOriginalImageUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF);
         then(goalFinder).should().findLatestBefore(USER_ID, EXPECTED_PROOF_ON);
         then(attendanceProofRepository).should().save(attendanceProof);
     }
@@ -194,7 +194,7 @@ class AttendanceProofCommandServiceTest {
         given(currentTimeProvider.now()).willReturn(SUBMITTED_AT);
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
         given(imageAssetReader.find(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
-        given(imageAssetUploadChecker.isOriginalUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF)).willReturn(false);
+        given(imageAssetUploadChecker.isOriginalImageUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF)).willReturn(false);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> attendanceProofCommandService.submit(command))
@@ -215,7 +215,7 @@ class AttendanceProofCommandServiceTest {
         given(currentTimeProvider.now()).willReturn(SUBMITTED_AT);
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
         given(imageAssetReader.find(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
-        given(imageAssetUploadChecker.isOriginalUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF)).willReturn(true);
+        given(imageAssetUploadChecker.isOriginalImageUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF)).willReturn(true);
         given(goalFinder.findLatestBefore(USER_ID, EXPECTED_PROOF_ON))
                 .willThrow(new ResourceNotFoundException(GOAL_NOT_FOUND));
 

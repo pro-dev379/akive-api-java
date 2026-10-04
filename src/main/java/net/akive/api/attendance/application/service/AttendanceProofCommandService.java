@@ -9,9 +9,9 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
-import net.akive.api.file.application.provided.ImageAssetReader;
-import net.akive.api.file.application.provided.ImageAssetUploadChecker;
-import net.akive.api.file.domain.ImageAsset;
+import net.akive.api.image.application.provided.ImageAssetReader;
+import net.akive.api.image.application.provided.ImageAssetUploadChecker;
+import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.user.application.provided.GoalFinder;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.Goal;
@@ -27,7 +27,7 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.exception.business.ResourceConflictError.ATTENDANCE_PROOF_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
 import static net.akive.api.common.time.ServiceDayPolicy.toServiceDate;
-import static net.akive.api.file.domain.ImageType.ATTENDANCE_PROOF;
+import static net.akive.api.image.domain.ImageType.ATTENDANCE_PROOF;
 
 @Service
 @Transactional
@@ -76,7 +76,7 @@ class AttendanceProofCommandService implements AttendanceProofSubmitter {
                 .filter(imageAsset -> imageAsset.isOfType(ATTENDANCE_PROOF))
                 .orElseThrow(() -> new ResourceNotFoundException((IMAGE_ASSET_NOT_FOUND)));
 
-        if (!imageAssetUploadChecker.isOriginalUploaded(imageAssetId, ATTENDANCE_PROOF)) {
+        if (!imageAssetUploadChecker.isOriginalImageUploaded(imageAssetId, ATTENDANCE_PROOF)) {
             throw new BusinessRuleViolationException(ATTENDANCE_PROOF_IMAGE_NOT_UPLOADED);
         }
 

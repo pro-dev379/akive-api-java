@@ -3,7 +3,7 @@ package net.akive.api.user.adapter.webapi;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
-import net.akive.api.file.application.provided.ImageAssetReader;
+import net.akive.api.image.application.provided.ImageAssetReader;
 import net.akive.api.support.PrivateApiTestSupport;
 import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
@@ -31,7 +31,7 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.file.domain.VariantType.DETAIL;
+import static net.akive.api.image.domain.VariantType.DETAIL;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserDetailUpdateRequest;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserWithdrawRequest;
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;

@@ -29,7 +29,7 @@ jwt:
   refresh-token:
     secret: ${refreshTokenSecret}
 
-file:
+image:
   cdn:
     base-url: https://cdn.akive.net
   storage:

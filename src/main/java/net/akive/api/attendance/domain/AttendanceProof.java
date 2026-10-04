@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
-import net.akive.api.file.domain.ImageAsset;
+import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.user.domain.User;
 
 import java.time.Duration;

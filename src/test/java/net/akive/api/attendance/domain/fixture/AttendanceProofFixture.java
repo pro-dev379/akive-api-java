@@ -1,15 +1,15 @@
 package net.akive.api.attendance.domain.fixture;
 
 import net.akive.api.attendance.domain.AttendanceProof;
-import net.akive.api.file.domain.ImageAsset;
+import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.user.domain.User;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static net.akive.api.file.domain.ImageType.ATTENDANCE_PROOF;
-import static net.akive.api.file.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
+import static net.akive.api.image.domain.ImageType.ATTENDANCE_PROOF;
+import static net.akive.api.image.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 
 public class AttendanceProofFixture {

@@ -33,7 +33,7 @@ email:
     welcome: no-reply@akive.net
     support: support@akive.net
 
-file:
+image:
   cdn:
     base-url: https://dev-cdn.akive.net
   storage:

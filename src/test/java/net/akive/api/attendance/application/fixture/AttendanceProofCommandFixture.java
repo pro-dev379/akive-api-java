@@ -4,7 +4,7 @@ import net.akive.api.attendance.application.provided.dto.AttendanceProofSubmitCo
 
 import java.util.UUID;
 
-import static net.akive.api.file.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
+import static net.akive.api.image.domain.fixture.ImageAssetFixture.IMAGE_ASSET_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class AttendanceProofCommandFixture {
