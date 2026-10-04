@@ -15,5 +15,7 @@ public interface GoalRepository {
 
     Optional<Goal> findLatestByUserIdAndUserNotWithdrawn(Long userId);
 
+    Optional<Goal> findLatestByUserIdAndCreatedAtBefore(Long userId, LocalDate date);
+
     List<GoalVersion> findVersionsForPeriod(Long userId, LocalDate startOn, LocalDate endOn);
 }

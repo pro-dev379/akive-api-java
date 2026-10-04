@@ -25,6 +25,11 @@ class ImageAssetReadService implements ImageAssetReader {
     private final CdnProperties cdnProperties;
 
     @Override
+    public Optional<ImageAsset> find(UUID imageAssetId) {
+        return imageAssetRepository.findByImageAssetId(imageAssetId);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Optional<URI> findImageUrl(UUID imageAssetId, VariantType variantType) throws ResourceNotFoundException {
         ImageAsset imageAsset = findImageAssetOrThrow(imageAssetId);

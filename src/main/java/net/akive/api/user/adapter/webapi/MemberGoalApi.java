@@ -30,6 +30,6 @@ public class MemberGoalApi {
 
     @GetMapping
     public GoalFindResponse findLatest(@AuthenticatedUserId Long userId) {
-        return GoalFindResponse.from(goalFinder.findLatestByUserIdAndUserNotWithdrawn(userId));
+        return GoalFindResponse.from(goalFinder.findLatest(userId));
     }
 }

@@ -38,6 +38,13 @@ class GoalJpaAdapter implements GoalRepository {
     }
 
     @Override
+    public Optional<Goal> findLatestByUserIdAndCreatedAtBefore(Long userId, LocalDate date) {
+        LocalDateTime serviceDayStart = toUtcDateTimeAtServiceDayStart(date);
+
+        return goalJpaRepository.findLatestByUserIdAndCreatedAtBefore(userId, serviceDayStart).map(GoalEntity::to);
+    }
+
+    @Override
     public List<GoalVersion> findVersionsForPeriod(Long userId, LocalDate startOn, LocalDate endOn) {
         LocalDateTime periodStart = toUtcDateTimeAtServiceDayStart(startOn);
         LocalDateTime periodEnd = toUtcDateTimeAtServiceDayStart(endOn);

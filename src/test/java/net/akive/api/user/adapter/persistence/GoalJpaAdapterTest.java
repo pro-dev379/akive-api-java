@@ -77,7 +77,23 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
         assertThat(singleDayVersions).extracting(GoalVersion::rest10MinSec).containsExactly(210L);
     }
 
-    private void saveGoalAt(User user, long rest10MinSec, LocalDateTime createdAt) {
+    @Test
+    void 특정_날짜_이전에_생성된_최신_목표를_조회한다() {
+        User savedUser = saveUser();
+        LocalDate date = LocalDate.of(2026, 9, 14);
+        saveGoalAt(savedUser, 100, LocalDateTime.of(2026, 9, 13, 19, 59));
+        Goal expectedGoal = saveGoalAt(savedUser, 200, LocalDateTime.of(2026, 9, 13, 19, 59));
+        saveGoalAt(savedUser, 300, LocalDateTime.of(2026, 9, 13, 20, 0));
+        flushAndClear();
+
+        Goal effectiveGoal = goalRepository
+                .findLatestByUserIdAndCreatedAtBefore(savedUser.getUserId(), date)
+                .orElseThrow();
+
+        assertThat(effectiveGoal).isEqualTo(expectedGoal);
+    }
+
+    private Goal saveGoalAt(User user, long rest10MinSec, LocalDateTime createdAt) {
         Goal goal = goalRepository.save(Goal.create(
                 user,
                 DEFAULT_GOAL_ATTEND_ON,
@@ -90,5 +106,7 @@ class GoalJpaAdapterTest extends RepositoryTestSupport {
                 .setParameter("createdAt", createdAt)
                 .setParameter("goalId", goal.getGoalId())
                 .executeUpdate();
+
+        return goal;
     }
 }

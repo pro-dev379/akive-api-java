@@ -10,6 +10,7 @@ import net.akive.api.user.domain.GoalVersion;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.GOAL_NOT_FOUND;
@@ -22,9 +23,15 @@ public class GoalQueryService implements GoalFinder {
     private final GoalRepository goalRepository;
 
     @Override
-    public Goal findLatestByUserIdAndUserNotWithdrawn(Long userId) throws ResourceNotFoundException {
+    public Goal findLatest(Long userId) throws ResourceNotFoundException {
         return goalRepository.findLatestByUserIdAndUserNotWithdrawn(userId).
                 orElseThrow(() -> new ResourceNotFoundException(GOAL_NOT_FOUND));
+    }
+
+    @Override
+    public Goal findLatestBefore(Long userId, LocalDate serviceDate) throws ResourceNotFoundException {
+        return goalRepository.findLatestByUserIdAndCreatedAtBefore(userId, serviceDate)
+                .orElseThrow(() -> new ResourceNotFoundException(GOAL_NOT_FOUND));
     }
 
     @Override

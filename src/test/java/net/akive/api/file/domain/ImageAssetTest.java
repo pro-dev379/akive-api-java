@@ -9,6 +9,7 @@ import java.util.List;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.file.domain.FilePolicy.OBJECT_KEY_MAX_LENGTH;
 import static net.akive.api.file.domain.ImageType.ATTENDANCE_PROOF;
+import static net.akive.api.file.domain.ImageType.PROFILE_IMAGE;
 import static net.akive.api.file.domain.ProcessingStatus.*;
 import static net.akive.api.file.domain.fixture.ImageAssetFixture.*;
 import static net.akive.api.file.domain.fixture.ImageVariantFixture.*;
@@ -146,6 +147,31 @@ class ImageAssetTest {
         assertThat(imageAsset.getProcessedAt()).isNull();
         assertThat(imageAsset.getVariants()).isEmpty();
         assertThat(imageAsset.getCreatedAt()).isNull();
+    }
+
+    @Test
+    void 이미지_타입이_일치하는지_확인한다() {
+        ImageAsset imageAsset = ImageAsset.create(IMAGE_ASSET_ID, ATTENDANCE_PROOF);
+
+        assertThat(imageAsset.isOfType(ATTENDANCE_PROOF)).isTrue();
+        assertThat(imageAsset.isOfType(PROFILE_IMAGE)).isFalse();
+    }
+
+    @Test
+    void 같은_식별자를_가진_이미지_에셋은_같게_취급한다() {
+        ImageAsset imageAsset = ImageAsset.create(IMAGE_ASSET_ID, ATTENDANCE_PROOF);
+        ImageAsset sameImageAsset = ImageAsset.create(IMAGE_ASSET_ID, PROFILE_IMAGE);
+
+        assertThat(imageAsset).isEqualTo(sameImageAsset);
+        assertThat(imageAsset.hashCode()).isEqualTo(sameImageAsset.hashCode());
+    }
+
+    @Test
+    void 식별자가_다른_이미지_에셋은_다르게_취급한다() {
+        ImageAsset imageAsset = ImageAsset.create(IMAGE_ASSET_ID, ATTENDANCE_PROOF);
+        ImageAsset anotherImageAsset = ImageAsset.create(ANOTHER_IMAGE_ASSET_ID, ATTENDANCE_PROOF);
+
+        assertThat(imageAsset).isNotEqualTo(anotherImageAsset);
     }
 
     private static void assertInvalidState(ThrowableAssert.ThrowingCallable callable) {

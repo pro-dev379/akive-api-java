@@ -21,6 +21,8 @@ public enum ResourceConflictError implements ApplicationError {
 
     DAILY_LOG_TIME_OVERLAPS("Daily log time overlaps with existing daily log."),
 
+    ATTENDANCE_PROOF_ALREADY_EXISTS("Attendance proof already exists."),
+
     REPORT_ALREADY_EXISTS("Report already exists.")
     ;
 

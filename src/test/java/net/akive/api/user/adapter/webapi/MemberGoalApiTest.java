@@ -74,7 +74,7 @@ class MemberGoalApiTest extends PrivateApiTestSupport {
     @Test
     void 최신_목표를_조회한다() {
         Goal goal = Goal.createDefault(createUser(USER_ID));
-        given(goalFinder.findLatestByUserIdAndUserNotWithdrawn(USER_ID)).willReturn(goal);
+        given(goalFinder.findLatest(USER_ID)).willReturn(goal);
 
         MvcTestResultAssert result = get(MEMBER_LATEST_GOAL_URL, USER_ID).hasStatus(OK);
 
@@ -82,17 +82,17 @@ class MemberGoalApiTest extends PrivateApiTestSupport {
         result.bodyJson().extractingPath("$.rest10MinSec").isEqualTo((int) DEFAULT_GOAL_REST_10_MIN_SEC);
         result.bodyJson().extractingPath("$.mealNum").isEqualTo(DEFAULT_GOAL_MEAL_NUM);
         result.bodyJson().extractingPath("$.meal1TimeSec").isEqualTo((int) DEFAULT_GOAL_MEAL_1_TIME_SEC);
-        then(goalFinder).should().findLatestByUserIdAndUserNotWithdrawn(USER_ID);
+        then(goalFinder).should().findLatest(USER_ID);
     }
 
     @Test
     void 최신_목표를_조회할_수_없으면_404를_응답한다() {
-        given(goalFinder.findLatestByUserIdAndUserNotWithdrawn(UNKNOWN_USER_ID))
+        given(goalFinder.findLatest(UNKNOWN_USER_ID))
                 .willThrow(new ResourceNotFoundException(GOAL_NOT_FOUND));
 
         MvcTestResultAssert result = get(MEMBER_LATEST_GOAL_URL, UNKNOWN_USER_ID).hasStatus(NOT_FOUND);
 
         assertErrorResponse(result, GOAL_NOT_FOUND);
-        then(goalFinder).should().findLatestByUserIdAndUserNotWithdrawn(UNKNOWN_USER_ID);
+        then(goalFinder).should().findLatest(UNKNOWN_USER_ID);
     }
 }

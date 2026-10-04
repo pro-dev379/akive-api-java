@@ -1,11 +1,20 @@
 package net.akive.api.user.domain;
 
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.LocalTime;
+import java.util.stream.Stream;
+
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.GOAL_ATTEND_ON_NOT_ALLOWED;
 import static net.akive.api.user.domain.UserPolicy.*;
 import static net.akive.api.user.domain.fixture.GoalFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class GoalTest {
 
@@ -63,6 +72,21 @@ class GoalTest {
         assertThat(goal.getMeal1TimeSec()).isEqualTo(DEFAULT_GOAL_MEAL_1_TIME_SEC);
     }
 
+    @ParameterizedTest
+    @MethodSource("allowedGoalAttendTimesAroundBoundary")
+    void 오전_5시_이전과_5시_5분부터는_목표_출석_시간으로_설정할_수_있다(LocalTime attendOn) {
+        assertThatCode(() -> createGoal(attendOn)).doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
+    @MethodSource("blockedGoalAttendTimes")
+    void 오전_5시부터_5시_5분_전까지는_목표_출석_시간으로_설정할_수_없다(LocalTime attendOn) {
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> createGoal(attendOn))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(GOAL_ATTEND_ON_NOT_ALLOWED);
+    }
+
     @Test
     void 같은_식별자를_가진_목표는_같게_취급한다() {
         Goal goal = createReconstructedGoal(GOAL_ID);
@@ -87,5 +111,20 @@ class GoalTest {
         Goal anotherGoal = Goal.createDefault(user);
 
         assertThat(goal).isNotEqualTo(anotherGoal);
+    }
+
+    private static Stream<LocalTime> allowedGoalAttendTimesAroundBoundary() {
+        return Stream.of(
+                LocalTime.of(4, 59, 59, 999_999_999),
+                LocalTime.of(5, 5)
+        );
+    }
+
+    private static Stream<LocalTime> blockedGoalAttendTimes() {
+        return Stream.of(
+                LocalTime.of(5, 0),
+                LocalTime.of(5, 4),
+                LocalTime.of(5, 4, 59, 999_999_999)
+        );
     }
 }

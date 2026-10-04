@@ -33,18 +33,17 @@ public class FileCommandFixture {
 
     public static Stream<Arguments> allowedUploadFiles() {
         return Stream.of(
-                Arguments.of(PROFILE_IMAGE, "image/jpeg", "profile-images", "jpg", PROFILE_IMAGE_MAX_SIZE_BYTES),
-                Arguments.of(PROFILE_IMAGE, "image/png", "profile-images", "png", FILE_SIZE),
-                Arguments.of(PROFILE_IMAGE, "image/webp", "profile-images", "webp", FILE_SIZE),
+                Arguments.of(PROFILE_IMAGE, "image/jpeg", "jpg", PROFILE_IMAGE_MAX_SIZE_BYTES),
+                Arguments.of(PROFILE_IMAGE, "image/png", "png", FILE_SIZE),
+                Arguments.of(PROFILE_IMAGE, "image/webp", "webp", FILE_SIZE),
                 Arguments.of(
                         ATTENDANCE_PROOF,
                         "image/jpeg",
-                        "attendance-proofs",
                         "jpg",
                         ATTENDANCE_PROOF_MAX_SIZE_BYTES
                 ),
-                Arguments.of(ATTENDANCE_PROOF, "image/png", "attendance-proofs", "png", FILE_SIZE),
-                Arguments.of(ATTENDANCE_PROOF, "image/webp", "attendance-proofs", "webp", FILE_SIZE)
+                Arguments.of(ATTENDANCE_PROOF, "image/png", "png", FILE_SIZE),
+                Arguments.of(ATTENDANCE_PROOF, "image/webp", "webp", FILE_SIZE)
         );
     }
 

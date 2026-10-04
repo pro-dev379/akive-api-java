@@ -59,7 +59,6 @@ class UploadUrlCreateServiceTest {
     void 이미지_타입과_콘텐츠_타입에_맞는_파일_키로_업로드_URL을_생성한다(
             ImageType imageType,
             String contentType,
-            String imageTypePath,
             String extension,
             long fileSize
     ) {
@@ -67,8 +66,10 @@ class UploadUrlCreateServiceTest {
         given(imageAssetIdGenerator.generate()).willReturn(IMAGE_ASSET_ID);
         given(imageAssetRepository.save(any(ImageAsset.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
-        given(fileStorage.createUploadUrl(
-                anyString(),
+        given(fileStorage.createOriginalImageUploadUrl(
+                eq(IMAGE_ASSET_ID),
+                eq(imageType),
+                eq(extension),
                 eq(contentType),
                 eq(fileSize),
                 eq(UPLOAD_URL_EXPIRATION_DURATION)
@@ -86,17 +87,15 @@ class UploadUrlCreateServiceTest {
         assertThat(savedImageAsset.getVariants()).isEmpty();
         assertThat(savedImageAsset.getCreatedAt()).isNull();
 
-        ArgumentCaptor<String> fileKeyCaptor = ArgumentCaptor.forClass(String.class);
-        then(fileStorage).should().createUploadUrl(
-                fileKeyCaptor.capture(),
-                eq(contentType),
-                eq(fileSize),
-                eq(UPLOAD_URL_EXPIRATION_DURATION)
+        then(fileStorage).should().createOriginalImageUploadUrl(
+                IMAGE_ASSET_ID,
+                imageType,
+                extension,
+                contentType,
+                fileSize,
+                UPLOAD_URL_EXPIRATION_DURATION
         );
 
-        String fileKey = fileKeyCaptor.getValue();
-        assertThat(fileKey)
-                .isEqualTo("uploads/%s/%s/original.%s".formatted(imageTypePath, IMAGE_ASSET_ID, extension));
         assertThat(result.imageAssetId()).isEqualTo(IMAGE_ASSET_ID);
         assertThat(result.uploadUrl()).isEqualTo(UPLOAD_URL);
         assertThat(result.expiresAt()).isEqualTo(EXPIRES_AT);

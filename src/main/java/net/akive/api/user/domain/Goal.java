@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
 import java.time.LocalTime;
 import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.GOAL_ATTEND_ON_NOT_ALLOWED;
 import static net.akive.api.user.domain.UserPolicy.*;
 
 @Getter
@@ -41,7 +43,7 @@ public class Goal {
         return Goal.builder()
                 .goalId(requirePositive(goalId))
                 .user(requireNonNull(user))
-                .attendOn(requireNonNull(attendOn))
+                .attendOn(validateAttendOn(attendOn))
                 .rest10MinSec(requireNonNegative(rest10MinSec))
                 .mealNum(requireNonNegative(mealNum))
                 .meal1TimeSec(requireNonNegative(meal1TimeSec))
@@ -57,7 +59,7 @@ public class Goal {
     ) {
         return Goal.builder()
                 .user(requireNonNull(user))
-                .attendOn(requireNonNull(attendOn))
+                .attendOn(validateAttendOn(attendOn))
                 .rest10MinSec(requireNonNegative(rest10MinSec))
                 .mealNum(requireNonNegative(mealNum))
                 .meal1TimeSec(requireNonNegative(meal1TimeSec))
@@ -72,6 +74,17 @@ public class Goal {
                 DEFAULT_GOAL_MEAL_NUM,
                 DEFAULT_GOAL_MEAL_1_TIME_SEC
         );
+    }
+
+    private static LocalTime validateAttendOn(LocalTime attendOn) {
+        LocalTime validatedAttendOn = requireNonNull(attendOn);
+
+        if (!validatedAttendOn.isBefore(GOAL_ATTEND_ON_BLOCKED_FROM)
+                && validatedAttendOn.isBefore(GOAL_ATTEND_ON_BLOCKED_UNTIL)) {
+            throw new BusinessRuleViolationException(GOAL_ATTEND_ON_NOT_ALLOWED);
+        }
+
+        return validatedAttendOn;
     }
 
     @Override

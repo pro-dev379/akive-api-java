@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static lombok.AccessLevel.PRIVATE;
 import static net.akive.api.common.domain.DomainValidator.*;
@@ -78,6 +75,25 @@ public class ImageAsset {
                 .processingStatus(UPLOADING)
                 .variants(List.of())
                 .build();
+    }
+
+    public boolean isOfType(ImageType imageType) {
+        return this.imageType == imageType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ImageAsset that = (ImageAsset) o;
+
+        return this.imageAssetId != null && Objects.equals(this.imageAssetId, that.imageAssetId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     private void validateState() {

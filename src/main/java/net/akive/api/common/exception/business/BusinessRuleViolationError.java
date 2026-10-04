@@ -75,6 +75,12 @@ public enum BusinessRuleViolationError implements ApplicationError {
     FILE_SIZE_EXCEEDED("File is too large."),
     FILE_CONTENT_TYPE_NOT_ALLOWED("File content type is not allowed."),
     INVALID_IMAGE_ASSET_STATE("Image asset state is invalid."),
+
+    GOAL_ATTEND_ON_NOT_ALLOWED("Goal attendance time must be before 05:00 or at/after 05:05."),
+
+    ATTENDANCE_PROOF_DATE_IN_FUTURE("Attendance proof date must not be in future."),
+    ATTENDANCE_PROOF_NOT_YET_ALLOWED("Attendance proof is not allowed yet."),
+    ATTENDANCE_PROOF_IMAGE_NOT_UPLOADED( "Attendance proof image has not been uploaded."),
     ;
 
     private final String message;

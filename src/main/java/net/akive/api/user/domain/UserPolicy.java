@@ -22,6 +22,8 @@ public final class UserPolicy {
     public static final int WITHDRAWAL_REASON_MAX_LENGTH = 300;
 
     public static final LocalTime DEFAULT_GOAL_ATTEND_ON = LocalTime.of(20, 0);
+    public static final LocalTime GOAL_ATTEND_ON_BLOCKED_FROM = LocalTime.of(5, 0);
+    public static final LocalTime GOAL_ATTEND_ON_BLOCKED_UNTIL = LocalTime.of(5, 5);
     public static final long DEFAULT_GOAL_REST_10_MIN_SEC = 120L;
     public static final int DEFAULT_GOAL_MEAL_NUM = 3;
     public static final long DEFAULT_GOAL_MEAL_1_TIME_SEC = 3_600L;

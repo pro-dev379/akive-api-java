@@ -34,10 +34,10 @@ class UploadUrlCreateService implements UploadUrlCreator {
 
         String extension = extensionOf(command.imageType(), command.contentType());
         ImageAsset imageAsset = registerImageAsset(command.imageType());
-        String fileKey = createOriginalFileKey(imageAsset, extension);
-
-        UploadUrl uploadUrl = fileStorage.createUploadUrl(
-                fileKey,
+        UploadUrl uploadUrl = fileStorage.createOriginalImageUploadUrl(
+                imageAsset.getImageAssetId(),
+                imageAsset.getImageType(),
+                extension,
                 command.contentType(),
                 command.fileSize(),
                 UPLOAD_URL_EXPIRATION_DURATION
@@ -54,19 +54,6 @@ class UploadUrlCreateService implements UploadUrlCreator {
         ImageAsset imageAsset = ImageAsset.create(imageAssetIdGenerator.generate(), imageType);
 
         return imageAssetRepository.save(imageAsset);
-    }
-
-    private String createOriginalFileKey(ImageAsset imageAsset, String extension) {
-        String imageTypePath = switch (imageAsset.getImageType()) {
-            case PROFILE_IMAGE -> "profile-images";
-            case ATTENDANCE_PROOF -> "attendance-proofs";
-        };
-
-        return "uploads/%s/%s/original.%s".formatted(
-                imageTypePath,
-                imageAsset.getImageAssetId(),
-                extension
-        );
     }
 
     private String extensionOf(ImageType imageType, String contentType) {

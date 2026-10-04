@@ -14,6 +14,7 @@ import static net.akive.api.file.domain.ProcessingStatus.READY;
 public class ImageAssetFixture {
 
     public static final UUID IMAGE_ASSET_ID = UUID.fromString("0199a8e2-7c31-7abc-8123-456789abcdef");
+    public static final UUID ANOTHER_IMAGE_ASSET_ID = UUID.fromString("08609705-5187-4956-872d-e78834230681");
     public static final UUID UNKNOWN_IMAGE_ASSET_ID = UUID.fromString("d032ed06-de8f-4f49-9489-535973ed3126");
     public static final String MASTER_OBJECT_KEY =
             "uploads/attendance-proofs/0199a8e2-7c31-7abc-8123-456789abcdef/original.jpg";
