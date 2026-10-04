@@ -5,6 +5,8 @@ import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.image.application.provided.ImageAssetDeleter;
+import net.akive.api.image.application.provided.ImageAssetReader;
+import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.event.UserWithdrawnEvent;
 import net.akive.api.user.application.provided.UserValidator;
@@ -29,7 +31,10 @@ import java.util.UUID;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.image.domain.ImageType.ATTENDANCE_PROOF;
+import static net.akive.api.image.domain.ImageType.PROFILE_IMAGE;
 import static net.akive.api.user.application.fixture.UserAccountCommandFixture.*;
 import static net.akive.api.user.domain.UserPolicy.*;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
@@ -52,6 +57,9 @@ class UserAccountServiceTest {
 
     @Mock
     ImageAssetDeleter imageAssetDeleter;
+
+    @Mock
+    ImageAssetReader imageAssetReader;
 
     @Mock
     UserSignUpDomainService userSignUpDomainService;
@@ -123,8 +131,10 @@ class UserAccountServiceTest {
     void 회원_상세_정보를_수정한다() {
         UserDetailUpdateCommand command = createUserDetailUpdateCommand();
         User user = createReconstructedUser(command.userId());
+        ImageAsset profileImageAsset = ImageAsset.create(command.targetProfileImageAssetId(), PROFILE_IMAGE);
 
         given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        given(imageAssetReader.find(command.targetProfileImageAssetId())).willReturn(Optional.of(profileImageAsset));
 
         userAccountService.updateUserDetail(command);
 
@@ -136,6 +146,7 @@ class UserAccountServiceTest {
         then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
         then(userValidator).should()
                 .validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
+        then(imageAssetReader).should().find(command.targetProfileImageAssetId());
         then(userRepository).should().save(user);
         then(imageAssetDeleter).shouldHaveNoInteractions();
     }
@@ -151,8 +162,10 @@ class UserAccountServiceTest {
                 targetProfileImageAssetId
         );
         User user = createReconstructedUser(command.userId(), createUserDetail(existingProfileImageAssetId));
+        ImageAsset profileImageAsset = ImageAsset.create(targetProfileImageAssetId, PROFILE_IMAGE);
 
         given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        given(imageAssetReader.find(targetProfileImageAssetId)).willReturn(Optional.of(profileImageAsset));
 
         userAccountService.updateUserDetail(command);
 
@@ -166,13 +179,70 @@ class UserAccountServiceTest {
         UserDetailUpdateCommand command = createUserDetailUpdateCommand();
         UserDetail existingUserDetail = createUserDetail(command.targetProfileImageAssetId());
         User user = createReconstructedUser(command.userId(), existingUserDetail);
+        ImageAsset profileImageAsset = ImageAsset.create(command.targetProfileImageAssetId(), PROFILE_IMAGE);
 
         given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        given(imageAssetReader.find(command.targetProfileImageAssetId())).willReturn(Optional.of(profileImageAsset));
 
         userAccountService.updateUserDetail(command);
 
         then(userRepository).should().save(user);
         then(imageAssetDeleter).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 회원_상세_정보_수정_시_프로필_이미지_에셋이_없으면_수정하지_않는다() {
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand();
+        User user = createReconstructedUser(command.userId());
+
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        given(imageAssetReader.find(command.targetProfileImageAssetId())).willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> userAccountService.updateUserDetail(command))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(IMAGE_ASSET_NOT_FOUND);
+
+        then(imageAssetReader).should().find(command.targetProfileImageAssetId());
+        then(userRepository).should(never()).save(any(User.class));
+        then(imageAssetDeleter).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 회원_상세_정보_수정_시_프로필_이미지용이_아닌_이미지_에셋이면_수정하지_않는다() {
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand();
+        User user = createReconstructedUser(command.userId());
+        ImageAsset attendanceProofImageAsset = ImageAsset.create(
+                command.targetProfileImageAssetId(),
+                ATTENDANCE_PROOF
+        );
+
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+        given(imageAssetReader.find(command.targetProfileImageAssetId()))
+                .willReturn(Optional.of(attendanceProofImageAsset));
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> userAccountService.updateUserDetail(command))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(IMAGE_ASSET_NOT_FOUND);
+
+        then(imageAssetReader).should().find(command.targetProfileImageAssetId());
+        then(userRepository).should(never()).save(any(User.class));
+        then(imageAssetDeleter).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 회원_상세_정보_수정_시_프로필_이미지_에셋을_지정하지_않으면_프로필_이미지를_제거한다() {
+        UserDetailUpdateCommand command = new UserDetailUpdateCommand(USER_ID, NICKNAME, AIM, null);
+        User user = createReconstructedUser(command.userId(), createUserDetail(PROFILE_IMAGE_ASSET_ID));
+
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
+
+        userAccountService.updateUserDetail(command);
+
+        assertThat(user.getUserDetail().profileImageAssetId()).isNull();
+        then(userRepository).should().save(user);
+        then(imageAssetDeleter).should().delete(PROFILE_IMAGE_ASSET_ID);
     }
 
     @Test
@@ -188,6 +258,7 @@ class UserAccountServiceTest {
 
         then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
         then(userValidator).shouldHaveNoInteractions();
+        then(imageAssetReader).shouldHaveNoInteractions();
         then(userRepository).should(never()).save(any(User.class));
     }
 
@@ -209,6 +280,7 @@ class UserAccountServiceTest {
         then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
         then(userValidator).should()
                 .validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
+        then(imageAssetReader).shouldHaveNoInteractions();
         then(userRepository).should(never()).save(any(User.class));
     }
 

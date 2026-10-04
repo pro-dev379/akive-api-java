@@ -30,10 +30,13 @@ import java.util.stream.Stream;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.image.domain.VariantType.DETAIL;
+import static net.akive.api.image.domain.fixture.ImageAssetFixture.UNKNOWN_IMAGE_ASSET_ID;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserDetailUpdateRequest;
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserWithdrawRequest;
+import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserDetailUpdateCommand;
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
@@ -116,7 +119,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     @Test
     void 개인_상세_정보를_수정한다() {
         UserDetailUpdateRequest request = createUserDetailUpdateRequest();
-        UserDetailUpdateCommand command = new UserDetailUpdateCommand(USER_ID, NICKNAME, AIM, PROFILE_IMAGE_ASSET_ID);
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand();
 
         patchJson(MEMBER_ME_URL, USER_ID, toJson(request)).hasStatus(NO_CONTENT);
 
@@ -134,8 +137,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     @Test
     void 개인_상세_정보_수정_시_멤버를_조회할_수_없으면_404를_응답한다() {
         UserDetailUpdateRequest request = createUserDetailUpdateRequest();
-        UserDetailUpdateCommand command =
-                new UserDetailUpdateCommand(UNKNOWN_USER_ID, NICKNAME, AIM, PROFILE_IMAGE_ASSET_ID);
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand(UNKNOWN_USER_ID);
         willThrow(new ResourceNotFoundException(USER_NOT_FOUND))
                 .given(userAccountManager)
                 .updateUserDetail(command);
@@ -148,10 +150,24 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 개인_상세_정보_수정_시_프로필_이미지_에셋을_조회할_수_없으면_404를_응답한다() {
+        UserDetailUpdateRequest request = createUserDetailUpdateRequest(UNKNOWN_IMAGE_ASSET_ID);
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand(UNKNOWN_IMAGE_ASSET_ID);
+        willThrow(new ResourceNotFoundException(IMAGE_ASSET_NOT_FOUND))
+                .given(userAccountManager)
+                .updateUserDetail(command);
+
+        MvcTestResultAssert result = patchJson(MEMBER_ME_URL, USER_ID, toJson(request))
+                .hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, IMAGE_ASSET_NOT_FOUND);
+        then(userAccountManager).should().updateUserDetail(command);
+    }
+
+    @Test
     void 개인_상세_정보_수정_시_이미_존재하는_닉네임이면_409를_응답한다() {
         UserDetailUpdateRequest request = createUserDetailUpdateRequest();
-        UserDetailUpdateCommand command =
-                new UserDetailUpdateCommand(USER_ID, NICKNAME, AIM, PROFILE_IMAGE_ASSET_ID);
+        UserDetailUpdateCommand command = createUserDetailUpdateCommand();
         willThrow(new ResourceConflictException(NICKNAME_ALREADY_EXISTS))
                 .given(userAccountManager)
                 .updateUserDetail(command);

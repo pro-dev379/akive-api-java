@@ -52,6 +52,10 @@ public class MemberAccountRequestFixture {
         return createUserDetailUpdateRequest(NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
     }
 
+    public static UserDetailUpdateRequest createUserDetailUpdateRequest(UUID profileImageAssetId) {
+        return createUserDetailUpdateRequest(NICKNAME, profileImageAssetId, AIM);
+    }
+
     public static UserDetailUpdateRequest createUserDetailUpdateRequest(
             String nickname,
             UUID profileImageAssetId,
