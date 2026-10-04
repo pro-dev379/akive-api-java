@@ -85,19 +85,6 @@ class AttendanceProofApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 출석_인증_조회_시_출석_인증이_없으면_404를_응답한다() {
-        given(attendanceProofFinder.findOrThrow(USER_ID, PROOF_ON))
-                .willThrow(new ResourceNotFoundException(ATTENDANCE_PROOF_NOT_FOUND));
-
-        MvcTestResultAssert result = get(ATTENDANCE_PROOFS_URL + "/" + PROOF_ON, USER_ID)
-                .hasStatus(NOT_FOUND);
-
-        assertErrorResponse(result, ATTENDANCE_PROOF_NOT_FOUND);
-        then(attendanceProofFinder).should().findOrThrow(USER_ID, PROOF_ON);
-        then(imageResponseMapper).shouldHaveNoInteractions();
-    }
-
-    @Test
     void 출석_인증_조회_시_출석_인증일의_형식이_올바르지_않으면_400을_응답한다() {
         MvcTestResultAssert result = get(ATTENDANCE_PROOFS_URL + "/invalid-date", USER_ID)
                 .hasStatus(BAD_REQUEST);
@@ -108,6 +95,19 @@ class AttendanceProofApiTest extends PrivateApiTestSupport {
                 .extractingPath("$.errors[0].message")
                 .isEqualTo("Invalid date format. Expected yyyy-MM-dd.");
         then(attendanceProofFinder).shouldHaveNoInteractions();
+        then(imageResponseMapper).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 출석_인증_조회_시_출석_인증이_없으면_404를_응답한다() {
+        given(attendanceProofFinder.findOrThrow(USER_ID, PROOF_ON))
+                .willThrow(new ResourceNotFoundException(ATTENDANCE_PROOF_NOT_FOUND));
+
+        MvcTestResultAssert result = get(ATTENDANCE_PROOFS_URL + "/" + PROOF_ON, USER_ID)
+                .hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, ATTENDANCE_PROOF_NOT_FOUND);
+        then(attendanceProofFinder).should().findOrThrow(USER_ID, PROOF_ON);
         then(imageResponseMapper).shouldHaveNoInteractions();
     }
 
