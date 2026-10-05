@@ -12,4 +12,6 @@ public interface AttendanceProofRepository {
     Optional<AttendanceProof> findByUserAndProofOn(Long userId, LocalDate proofOn);
 
     boolean existsByUserIdAndProofOn(Long userId, LocalDate proofOn);
+
+    void delete(AttendanceProof attendanceProof);
 }

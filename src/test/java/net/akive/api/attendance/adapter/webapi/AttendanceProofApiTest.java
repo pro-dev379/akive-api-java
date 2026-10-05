@@ -112,6 +112,45 @@ class AttendanceProofApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 출석_인증을_취소한다() {
+        delete(ATTENDANCE_PROOFS_URL + "/{proofOn}", USER_ID, PROOF_ON).hasStatus(NO_CONTENT);
+
+        then(attendanceProofSubmitter).should().cancel(USER_ID, PROOF_ON);
+    }
+
+    @Test
+    void 출석_인증_취소_시_출석_인증일의_형식이_올바르지_않으면_400을_응답한다() {
+        MvcTestResultAssert result = delete(
+                ATTENDANCE_PROOFS_URL + "/{proofOn}",
+                USER_ID,
+                "invalid-date"
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_INPUT_VALUE);
+        result.bodyJson().extractingPath("$.errors[0].field").isEqualTo("proofOn");
+        result.bodyJson()
+                .extractingPath("$.errors[0].message")
+                .isEqualTo("Invalid date format. Expected yyyy-MM-dd.");
+        then(attendanceProofSubmitter).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 출석_인증_취소_시_출석_인증이_없으면_404를_응답한다() {
+        willThrow(new ResourceNotFoundException(ATTENDANCE_PROOF_NOT_FOUND))
+                .given(attendanceProofSubmitter)
+                .cancel(USER_ID, PROOF_ON);
+
+        MvcTestResultAssert result = delete(
+                ATTENDANCE_PROOFS_URL + "/{proofOn}",
+                USER_ID,
+                PROOF_ON
+        ).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, ATTENDANCE_PROOF_NOT_FOUND);
+        then(attendanceProofSubmitter).should().cancel(USER_ID, PROOF_ON);
+    }
+
+    @Test
     void 출석을_인증한다() {
         AttendanceProofSubmitRequest request = createAttendanceProofSubmitRequest();
         AttendanceProofSubmitCommand command = request.to(USER_ID);

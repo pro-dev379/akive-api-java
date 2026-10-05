@@ -2,6 +2,7 @@ package net.akive.api.attendance.adapter.persistence;
 
 import net.akive.api.attendance.adapter.persistence.entity.AttendanceProofEntity;
 import net.akive.api.attendance.domain.AttendanceProof;
+import net.akive.api.image.adapter.persistence.entity.ImageAssetEntity;
 import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.support.RepositoryTestSupport;
 import net.akive.api.user.domain.User;
@@ -74,5 +75,26 @@ class AttendanceProofJpaAdapterTest extends RepositoryTestSupport {
 
         assertThat(exists).isTrue();
         assertThat(existsOnAnotherDate).isFalse();
+    }
+
+    @Test
+    void 출석_인증을_삭제한다() {
+        AttendanceProof savedAttendanceProof = saveAttendanceProof();
+        flushAndClear();
+
+        attendanceProofRepository.delete(savedAttendanceProof);
+        flushAndClear();
+
+        AttendanceProofEntity foundAttendanceProof = entityManager.find(
+                AttendanceProofEntity.class,
+                savedAttendanceProof.getAttendanceProofId()
+        );
+        ImageAssetEntity foundImageAsset = entityManager.find(
+                ImageAssetEntity.class,
+                savedAttendanceProof.getProofImageAsset().getImageAssetId()
+        );
+
+        assertThat(foundAttendanceProof).isNull();
+        assertThat(foundImageAsset).isNotNull();
     }
 }

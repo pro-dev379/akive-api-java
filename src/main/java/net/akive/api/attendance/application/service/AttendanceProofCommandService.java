@@ -9,6 +9,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
+import net.akive.api.image.application.provided.ImageAssetDeleter;
 import net.akive.api.image.application.provided.ImageAssetReader;
 import net.akive.api.image.application.provided.ImageAssetUploadChecker;
 import net.akive.api.image.domain.ImageAsset;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.ATTENDANCE_PROOF_IMAGE_NOT_UPLOADED;
 import static net.akive.api.common.exception.business.ResourceConflictError.ATTENDANCE_PROOF_ALREADY_EXISTS;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.ATTENDANCE_PROOF_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
 import static net.akive.api.common.time.ServiceDayPolicy.toServiceDate;
 import static net.akive.api.image.domain.ImageType.ATTENDANCE_PROOF;
@@ -37,6 +39,7 @@ class AttendanceProofCommandService implements AttendanceProofSubmitter {
     private final UserFinder userFinder;
     private final GoalFinder goalFinder;
     private final ImageAssetReader imageAssetReader;
+    private final ImageAssetDeleter imageAssetDeleter;
     private final ImageAssetUploadChecker imageAssetUploadChecker;
 
     private final AttendanceProofRepository attendanceProofRepository;
@@ -65,6 +68,15 @@ class AttendanceProofCommandService implements AttendanceProofSubmitter {
         return attendanceProofRepository.save(attendanceProof);
     }
 
+    @Override
+    public void cancel(Long userId, LocalDate proofOn) throws ResourceNotFoundException {
+        AttendanceProof attendanceProof = findAttendanceProofOrThrow(userId, proofOn);
+        UUID imageAssetId = attendanceProof.getProofImageAsset().getImageAssetId();
+
+        attendanceProofRepository.delete(attendanceProof);
+        imageAssetDeleter.delete(imageAssetId);
+    }
+
     private void validateNotAlreadySubmitted(Long userId, LocalDate proofOn) {
         if (attendanceProofRepository.existsByUserIdAndProofOn(userId, proofOn)) {
             throw new ResourceConflictException(ATTENDANCE_PROOF_ALREADY_EXISTS);
@@ -81,5 +93,10 @@ class AttendanceProofCommandService implements AttendanceProofSubmitter {
         }
 
         return proofImageAsset;
+    }
+
+    private AttendanceProof findAttendanceProofOrThrow(Long userId, LocalDate proofOn) {
+        return attendanceProofRepository.findByUserAndProofOn(userId, proofOn)
+                .orElseThrow(() -> new ResourceNotFoundException(ATTENDANCE_PROOF_NOT_FOUND));
     }
 }

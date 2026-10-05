@@ -8,10 +8,11 @@ public record AttendanceProofFindResponse(ProofImageResponse proofImage, boolean
 
     public static AttendanceProofFindResponse of(
             ProcessingStatus imageStatus,
-            boolean late, URI processingStatus
+            boolean late,
+            URI proofImageUrl
     ) {
         return new AttendanceProofFindResponse(
-                new ProofImageResponse(imageStatus, processingStatus),
+                new ProofImageResponse(imageStatus, proofImageUrl),
                 late
         );
     }

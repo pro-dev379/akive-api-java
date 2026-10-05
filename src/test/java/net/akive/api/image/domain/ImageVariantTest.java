@@ -22,7 +22,7 @@ class ImageVariantTest {
         ImageVariant imageVariant = reconstructImageVariant(
                 FIRST_IMAGE_VARIANT_ID,
                 THUMBNAIL,
-                IMAGE_VARIANT_OBJECT_KEY,
+                THUMBNAIL_OBJECT_KEY,
                 RECIPE_VERSION,
                 IMAGE_VARIANT_WIDTH,
                 IMAGE_VARIANT_HEIGHT,
@@ -32,7 +32,7 @@ class ImageVariantTest {
 
         assertThat(imageVariant.getImageVariantId()).isEqualTo(FIRST_IMAGE_VARIANT_ID);
         assertThat(imageVariant.getVariantType()).isEqualTo(THUMBNAIL);
-        assertThat(imageVariant.getObjectKey()).isEqualTo(IMAGE_VARIANT_OBJECT_KEY);
+        assertThat(imageVariant.getObjectKey()).isEqualTo(THUMBNAIL_OBJECT_KEY);
         assertThat(imageVariant.getRecipeVersion()).isEqualTo(RECIPE_VERSION);
         assertThat(imageVariant.getWidth()).isEqualTo(IMAGE_VARIANT_WIDTH);
         assertThat(imageVariant.getHeight()).isEqualTo(IMAGE_VARIANT_HEIGHT);

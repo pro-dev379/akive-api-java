@@ -7,6 +7,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
+import net.akive.api.image.application.provided.ImageAssetDeleter;
 import net.akive.api.image.application.provided.ImageAssetReader;
 import net.akive.api.image.application.provided.ImageAssetUploadChecker;
 import net.akive.api.image.domain.ImageAsset;
@@ -26,8 +27,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static net.akive.api.attendance.application.fixture.AttendanceProofCommandFixture.createAttendanceProofSubmitCommand;
-import static net.akive.api.attendance.domain.fixture.AttendanceProofFixture.GOAL_ATTEND_ON;
-import static net.akive.api.attendance.domain.fixture.AttendanceProofFixture.createAttendanceProofImageAsset;
+import static net.akive.api.attendance.domain.fixture.AttendanceProofFixture.*;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.ATTENDANCE_PROOF_IMAGE_NOT_UPLOADED;
 import static net.akive.api.common.exception.business.ResourceConflictError.ATTENDANCE_PROOF_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.*;
@@ -62,6 +62,9 @@ class AttendanceProofCommandServiceTest {
 
     @Mock
     ImageAssetReader imageAssetReader;
+
+    @Mock
+    ImageAssetDeleter imageAssetDeleter;
 
     @Mock
     ImageAssetUploadChecker imageAssetUploadChecker;
@@ -226,6 +229,34 @@ class AttendanceProofCommandServiceTest {
 
         then(attendanceProofRepository).should().existsByUserIdAndProofOn(USER_ID, EXPECTED_PROOF_ON);
         then(attendanceProofRepository).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
+    void 출석_인증을_취소하면_출석_인증과_이미지_에셋을_삭제한다() {
+        AttendanceProof attendanceProof = createReconstructedAttendanceProof(false);
+        given(attendanceProofRepository.findByUserAndProofOn(USER_ID, PROOF_ON))
+                .willReturn(Optional.of(attendanceProof));
+
+        attendanceProofCommandService.cancel(USER_ID, PROOF_ON);
+
+        then(attendanceProofRepository).should().findByUserAndProofOn(USER_ID, PROOF_ON);
+        then(attendanceProofRepository).should().delete(attendanceProof);
+        then(imageAssetDeleter).should().delete(attendanceProof.getProofImageAsset().getImageAssetId());
+    }
+
+    @Test
+    void 출석_인증이_없으면_출석_인증을_취소할_수_없다() {
+        given(attendanceProofRepository.findByUserAndProofOn(USER_ID, PROOF_ON))
+                .willReturn(Optional.empty());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> attendanceProofCommandService.cancel(USER_ID, PROOF_ON))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(ATTENDANCE_PROOF_NOT_FOUND);
+
+        then(attendanceProofRepository).should().findByUserAndProofOn(USER_ID, PROOF_ON);
+        then(attendanceProofRepository).shouldHaveNoMoreInteractions();
+        then(imageAssetDeleter).shouldHaveNoInteractions();
     }
 
     private void assertImageAssetNotFound(AttendanceProofSubmitCommand command) {

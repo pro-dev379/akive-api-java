@@ -37,4 +37,9 @@ class AttendanceProofJpaAdapter implements AttendanceProofRepository {
     public boolean existsByUserIdAndProofOn(Long userId, LocalDate proofOn) {
         return attendanceProofJpaRepository.existsByUser_UserIdAndProofOn(userId, proofOn);
     }
+
+    @Override
+    public void delete(AttendanceProof attendanceProof) {
+        attendanceProofJpaRepository.delete(AttendanceProofEntity.from(attendanceProof));
+    }
 }

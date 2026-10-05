@@ -17,6 +17,7 @@ import java.time.LocalDate;
 
 import static net.akive.api.image.domain.VariantType.DETAIL;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping("/attendance-proofs")
@@ -50,5 +51,11 @@ public class AttendanceProofApi {
                 attendanceProof.getLate(),
                 proofImageUrl
         );
+    }
+
+    @DeleteMapping("{proofOn}")
+    @ResponseStatus(NO_CONTENT)
+    public void cancel(@AuthenticatedUserId Long userId, @PathVariable LocalDate proofOn) {
+        attendanceProofSubmitter.cancel(userId, proofOn);
     }
 }

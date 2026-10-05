@@ -12,7 +12,8 @@ public class ImageVariantFixture {
 
     public static final Long FIRST_IMAGE_VARIANT_ID = 1L;
     public static final Long SECOND_IMAGE_VARIANT_ID = 2L;
-    public static final String IMAGE_VARIANT_OBJECT_KEY = "variants/attendance-proofs/1/thumbnail.webp";
+    public static final String THUMBNAIL_OBJECT_KEY = "variants/attendance-proofs/1/thumbnail.webp";
+    public static final String DETAIL_OBJECT_KEY = "variants/attendance-proofs/1/detail.webp";
     public static final Integer IMAGE_VARIANT_WIDTH = 500;
     public static final Integer IMAGE_VARIANT_HEIGHT = 500;
     public static final Long IMAGE_VARIANT_BYTE_SIZE = 10_000L;
