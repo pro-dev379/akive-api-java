@@ -5,7 +5,7 @@ import net.akive.api.auth.application.token.required.AccessTokenCreator;
 import net.akive.api.auth.domain.token.AccessToken;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
-import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.UserRole;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -26,7 +26,7 @@ class JwtAccessTokenProvider implements AccessTokenCreator {
     private final CurrentTimeProvider currentTimeProvider;
 
     @Override
-    public AccessToken create(Long userId, RoleType roleType) {
+    public AccessToken create(Long userId, UserRole role) {
         Instant now = currentTimeProvider.now();
         Instant expiresAt = now.plus(jwtProperties.accessToken().expirationMinutes(), MINUTES);
 
@@ -35,7 +35,7 @@ class JwtAccessTokenProvider implements AccessTokenCreator {
                 .subject(String.valueOf(userId))
                 .issuedAt(now)
                 .expiresAt(expiresAt)
-                .claim("role", roleType.name())
+                .claim("role", role.name())
                 .build();
 
         return new AccessToken(encode(accessTokenJwtEncoder, claims));

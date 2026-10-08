@@ -4,13 +4,13 @@ import net.akive.api.auth.domain.token.RefreshToken;
 import net.akive.api.auth.domain.token.RefreshTokenPayload;
 import net.akive.api.common.domain.ClientInstanceId;
 import net.akive.api.common.exception.business.AuthenticationException;
-import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.UserRole;
 
 import java.util.Optional;
 
 public interface RefreshTokenSessionManager {
 
-    RefreshToken start(Long userId, ClientInstanceId clientInstanceId, RoleType roleType);
+    RefreshToken start(Long userId, ClientInstanceId clientInstanceId, UserRole role);
 
     Optional<RefreshToken> rotateIfRequired(RefreshTokenPayload payload, RefreshToken currentRefreshToken)
             throws AuthenticationException;

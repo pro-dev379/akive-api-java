@@ -43,7 +43,7 @@ class LoginService implements LoginProcessor {
         return tokenIssuer.issue(new TokenIssueCommand(
                 user.getUserId(),
                 command.clientInstanceId(),
-                user.getRoleType()
+                user.getRole()
         ));
     }
 

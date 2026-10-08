@@ -4,7 +4,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.BLANK_VALUE;
-import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserRole.MEMBER;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.PROFILE_IMAGE_ASSET_ID;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.createUserDetail;
@@ -24,7 +24,7 @@ class UserTest {
         User user = User.reconstruct(
                 USER_ID,
                 EMAIL,
-                ROLE_TYPE,
+                USER_ROLE,
                 LOGIN_TYPE,
                 PASSWORD_HASH,
                 userDetail,
@@ -34,7 +34,7 @@ class UserTest {
 
         assertThat(user.getUserId()).isEqualTo(USER_ID);
         assertThat(user.getEmail()).isEqualTo(EMAIL);
-        assertThat(user.getRoleType()).isEqualTo(MEMBER);
+        assertThat(user.getRole()).isEqualTo(MEMBER);
         assertThat(user.getLoginType()).isEqualTo(LOGIN_TYPE);
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
         assertThat(user.getUserDetail()).isEqualTo(userDetail);
@@ -44,10 +44,10 @@ class UserTest {
 
     @Test
     void 이메일로_가입한_회원을_생성한다() {
-        User user = User.signUpByEmail(EMAIL, ROLE_TYPE, PASSWORD_HASH, NICKNAME);
+        User user = User.signUpByEmail(EMAIL, USER_ROLE, PASSWORD_HASH, NICKNAME);
 
         assertThat(user.getEmail()).isEqualTo(EMAIL);
-        assertThat(user.getRoleType()).isEqualTo(ROLE_TYPE);
+        assertThat(user.getRole()).isEqualTo(USER_ROLE);
         assertThat(user.getLoginType()).isEqualTo(LOGIN_TYPE);
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
         assertThat(user.getUserDetail().nickname()).isEqualTo(NICKNAME);
@@ -59,14 +59,14 @@ class UserTest {
 
     @Test
     void 패스워드가_있는지_확인한다() {
-        User user = User.signUpByEmail(EMAIL, ROLE_TYPE, PASSWORD_HASH, NICKNAME);
+        User user = User.signUpByEmail(EMAIL, USER_ROLE, PASSWORD_HASH, NICKNAME);
 
         assertThat(user.hasPassword()).isTrue();
 
         User anotherUser = User.reconstruct(
                 USER_ID,
                 EMAIL,
-                ROLE_TYPE,
+                USER_ROLE,
                 LOGIN_TYPE,
                 null,
                 createUserDetail(),
@@ -147,8 +147,8 @@ class UserTest {
 
     @Test
     void 식별자가_없는_회원끼리는_나머지_값이_같더라도_다른_것으로_취급한다() {
-        User user = User.signUpByEmail(EMAIL, ROLE_TYPE, PASSWORD_HASH, NICKNAME);
-        User anotherUser = User.signUpByEmail(EMAIL, ROLE_TYPE, PASSWORD_HASH, NICKNAME);
+        User user = User.signUpByEmail(EMAIL, USER_ROLE, PASSWORD_HASH, NICKNAME);
+        User anotherUser = User.signUpByEmail(EMAIL, USER_ROLE, PASSWORD_HASH, NICKNAME);
 
         assertThat(user).isNotEqualTo(anotherUser);
     }

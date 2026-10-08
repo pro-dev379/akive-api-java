@@ -9,7 +9,7 @@ import net.akive.api.common.domain.ClientInstanceId;
 import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.core.config.security.JwtProperties;
-import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.UserRole;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ class JwtRefreshTokenProvider implements RefreshTokenCreator, RefreshTokenParser
     private final CurrentTimeProvider currentTimeProvider;
 
     @Override
-    public RefreshToken create(Long userId, ClientInstanceId clientInstanceId, RoleType roleType) {
+    public RefreshToken create(Long userId, ClientInstanceId clientInstanceId, UserRole role) {
         Instant now = currentTimeProvider.now();
         Instant expiresAt = now.plus(jwtProperties.refreshToken().expirationDays(), DAYS);
 
@@ -41,7 +41,7 @@ class JwtRefreshTokenProvider implements RefreshTokenCreator, RefreshTokenParser
                 .issuedAt(now)
                 .expiresAt(expiresAt)
                 .claim("client", clientInstanceId.toString())
-                .claim("role", roleType.name())
+                .claim("role", role.name())
                 .build();
 
         return new RefreshToken(encode(refreshTokenJwtEncoder, claims));
@@ -81,7 +81,7 @@ class JwtRefreshTokenProvider implements RefreshTokenCreator, RefreshTokenParser
             return new RefreshTokenPayload(
                     Long.valueOf(jwt.getSubject()),
                     ClientInstanceId.parse(jwt.getClaimAsString("client")),
-                    RoleType.valueOf(jwt.getClaimAsString("role")),
+                    UserRole.valueOf(jwt.getClaimAsString("role")),
                     jwt.getExpiresAt()
             );
         } catch (RuntimeException e) {

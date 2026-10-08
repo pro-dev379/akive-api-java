@@ -15,8 +15,8 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
 import static net.akive.api.auth.adapter.token.fixture.JwtProviderFixture.*;
 import static net.akive.api.auth.domain.token.AccessTokenFixture.ACCESS_TOKEN_VALUE;
-import static net.akive.api.user.domain.RoleType.MEMBER;
-import static net.akive.api.user.domain.fixture.UserFixture.ROLE_TYPE;
+import static net.akive.api.user.domain.UserRole.MEMBER;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ROLE;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +49,7 @@ class JwtAccessTokenProviderTest {
 
         given(accessTokenJwtEncoder.encode(any(JwtEncoderParameters.class))).willReturn(jwt);
 
-        AccessToken accessToken = jwtAccessTokenProvider.create(USER_ID, ROLE_TYPE);
+        AccessToken accessToken = jwtAccessTokenProvider.create(USER_ID, USER_ROLE);
 
         assertThat(accessToken).isEqualTo(new AccessToken(ACCESS_TOKEN_VALUE));
 

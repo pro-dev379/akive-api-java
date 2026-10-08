@@ -5,12 +5,12 @@ import net.akive.api.common.domain.Email;
 import net.akive.api.user.application.provided.UserValidator;
 import net.akive.api.user.application.required.NicknameGenerator;
 import net.akive.api.user.application.required.UserEmailVerificationChecker;
-import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.UserRole;
 import net.akive.api.user.domain.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserRole.MEMBER;
 
 @Component
 @RequiredArgsConstructor
@@ -24,20 +24,20 @@ class UserSignUpDomainService {
     private final PasswordEncoder passwordEncoder;
 
     User signUpMemberByEmail(Email email, String password, String nickname) {
-        RoleType roleType = MEMBER;
+        UserRole role = MEMBER;
 
-        SignUpNickname signUpNickname = prepareNickname(roleType, nickname);
+        SignUpNickname signUpNickname = prepareNickname(role, nickname);
 
         validateEmailSignUpAvailable(email, signUpNickname);
 
         String passwordHash = passwordEncoder.encode(password);
 
-        return User.signUpByEmail(email, roleType, passwordHash, signUpNickname.value());
+        return User.signUpByEmail(email, role, passwordHash, signUpNickname.value());
     }
 
-    private SignUpNickname prepareNickname(RoleType roleType, String nickname) {
+    private SignUpNickname prepareNickname(UserRole role, String nickname) {
         if (nickname == null || nickname.isBlank()) {
-            return SignUpNickname.generated(nicknameGenerator.generate(roleType));
+            return SignUpNickname.generated(nicknameGenerator.generate(role));
         }
 
         return SignUpNickname.providedByUser(nickname.trim());

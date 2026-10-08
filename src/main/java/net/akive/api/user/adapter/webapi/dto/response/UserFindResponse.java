@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public record UserFindResponse(
         String email,
-        String roleType,
+        String role,
         String loginType,
         UserDetailResponse userDetail,
         Instant createdAt
@@ -18,7 +18,7 @@ public record UserFindResponse(
     public static UserFindResponse of(User user, ProfileImageResponse profileImage) {
         return new UserFindResponse(
                 user.getEmail().value(),
-                user.getRoleType().name(),
+                user.getRole().name(),
                 user.getLoginType().name(),
                 new UserDetailResponse(
                         user.getUserDetail().nickname(),

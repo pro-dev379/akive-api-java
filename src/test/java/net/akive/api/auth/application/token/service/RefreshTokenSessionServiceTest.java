@@ -20,8 +20,8 @@ import static net.akive.api.auth.domain.token.RefreshTokenFixture.*;
 import static net.akive.api.auth.domain.token.RefreshTokenPayloadFixture.createRefreshTokenPayload;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
-import static net.akive.api.user.domain.RoleType.MEMBER;
-import static net.akive.api.user.domain.fixture.UserFixture.ROLE_TYPE;
+import static net.akive.api.user.domain.UserRole.MEMBER;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ROLE;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -56,18 +56,18 @@ class RefreshTokenSessionServiceTest {
         ClientInstanceId clientInstanceId = createClientInstanceId();
         RefreshToken refreshToken = createRefreshToken();
 
-        given(refreshTokenCreator.create(USER_ID, clientInstanceId, ROLE_TYPE))
+        given(refreshTokenCreator.create(USER_ID, clientInstanceId, USER_ROLE))
                 .willReturn(refreshToken);
         given(jwtProperties.refreshToken())
                 .willReturn(refreshTokenProperties);
         given(refreshTokenProperties.expiration())
                 .willReturn(REFRESH_TOKEN_EXPIRATION);
 
-        RefreshToken result = refreshTokenSessionService.start(USER_ID, clientInstanceId, ROLE_TYPE);
+        RefreshToken result = refreshTokenSessionService.start(USER_ID, clientInstanceId, USER_ROLE);
 
         assertThat(result).isEqualTo(refreshToken);
 
-        then(refreshTokenCreator).should().create(USER_ID, clientInstanceId, ROLE_TYPE);
+        then(refreshTokenCreator).should().create(USER_ID, clientInstanceId, USER_ROLE);
         then(refreshTokenStore).should().save(USER_ID, clientInstanceId, refreshToken, REFRESH_TOKEN_EXPIRATION);
     }
 
@@ -76,13 +76,13 @@ class RefreshTokenSessionServiceTest {
         ClientInstanceId clientInstanceId = createClientInstanceId();
         RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
         RefreshToken newRefreshToken = createRefreshToken("new-refresh-token");
-        RefreshTokenPayload payload = createRefreshTokenPayload(USER_ID, clientInstanceId, ROLE_TYPE, EXPIRE_AT);
+        RefreshTokenPayload payload = createRefreshTokenPayload(USER_ID, clientInstanceId, USER_ROLE, EXPIRE_AT);
 
         given(refreshTokenStore.findByUserIdAndClientInstantId(USER_ID, clientInstanceId))
                 .willReturn(Optional.of(currentRefreshToken));
         given(refreshTokenRotationPolicy.requiresRotation(EXPIRE_AT))
                 .willReturn(true);
-        given(refreshTokenCreator.create(USER_ID, clientInstanceId, ROLE_TYPE))
+        given(refreshTokenCreator.create(USER_ID, clientInstanceId, USER_ROLE))
                 .willReturn(newRefreshToken);
         given(jwtProperties.refreshToken())
                 .willReturn(refreshTokenProperties);
@@ -102,7 +102,7 @@ class RefreshTokenSessionServiceTest {
 
         then(refreshTokenStore).should().findByUserIdAndClientInstantId(USER_ID, clientInstanceId);
         then(refreshTokenRotationPolicy).should().requiresRotation(EXPIRE_AT);
-        then(refreshTokenCreator).should().create(USER_ID, clientInstanceId, ROLE_TYPE);
+        then(refreshTokenCreator).should().create(USER_ID, clientInstanceId, USER_ROLE);
         then(refreshTokenStore).should().rotate(
                 USER_ID,
                 clientInstanceId,
@@ -185,14 +185,14 @@ class RefreshTokenSessionServiceTest {
         ClientInstanceId clientInstanceId = createClientInstanceId();
         RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
         RefreshToken newRefreshToken = createRefreshToken("new-refresh-token");
-        RefreshTokenPayload payload = createRefreshTokenPayload(USER_ID, clientInstanceId, ROLE_TYPE, EXPIRE_AT);
+        RefreshTokenPayload payload = createRefreshTokenPayload(USER_ID, clientInstanceId, USER_ROLE, EXPIRE_AT);
         Duration refreshTokenExpiration = Duration.ofDays(14);
 
         given(refreshTokenStore.findByUserIdAndClientInstantId(USER_ID, clientInstanceId))
                 .willReturn(Optional.of(currentRefreshToken));
         given(refreshTokenRotationPolicy.requiresRotation(EXPIRE_AT))
                 .willReturn(true);
-        given(refreshTokenCreator.create(USER_ID, clientInstanceId, ROLE_TYPE))
+        given(refreshTokenCreator.create(USER_ID, clientInstanceId, USER_ROLE))
                 .willReturn(newRefreshToken);
         given(jwtProperties.refreshToken())
                 .willReturn(refreshTokenProperties);

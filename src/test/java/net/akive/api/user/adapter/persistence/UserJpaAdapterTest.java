@@ -17,7 +17,7 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 회원을_저장한다() {
-        User user = User.signUpByEmail(EMAIL, ROLE_TYPE, PASSWORD_HASH, NICKNAME);
+        User user = User.signUpByEmail(EMAIL, USER_ROLE, PASSWORD_HASH, NICKNAME);
         user.updateUserDetail(NICKNAME, PROFILE_IMAGE_ASSET_ID, AIM);
 
         User savedUser = userRepository.save(user);
@@ -27,7 +27,7 @@ class UserJpaAdapterTest extends RepositoryTestSupport {
 
         assertThat(foundUser.getUserId()).isEqualTo(savedUser.getUserId());
         assertThat(foundUser.getEmail()).isEqualTo(EMAIL);
-        assertThat(foundUser.getRoleType()).isEqualTo(ROLE_TYPE);
+        assertThat(foundUser.getRole()).isEqualTo(USER_ROLE);
         assertThat(foundUser.getLoginType()).isEqualTo(LOGIN_TYPE);
         assertThat(foundUser.getPasswordHash()).isEqualTo(PASSWORD_HASH);
         assertThat(foundUser.getUserDetail().nickname()).isEqualTo(NICKNAME);

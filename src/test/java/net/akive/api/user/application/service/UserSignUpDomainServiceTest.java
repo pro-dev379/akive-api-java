@@ -19,7 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceConflictError.EMAIL_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
-import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserRole.MEMBER;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,7 +52,7 @@ class UserSignUpDomainServiceTest {
         User user = userSignUpDomainService.signUpMemberByEmail(EMAIL, PASSWORD, NICKNAME);
 
         assertThat(user.getEmail()).isEqualTo(EMAIL);
-        assertThat(user.getRoleType()).isEqualTo(MEMBER);
+        assertThat(user.getRole()).isEqualTo(MEMBER);
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
         assertThat(user.getUserDetail().nickname()).isEqualTo(NICKNAME);
 
@@ -72,7 +72,7 @@ class UserSignUpDomainServiceTest {
         User user = userSignUpDomainService.signUpMemberByEmail(EMAIL, PASSWORD, nickname);
 
         assertThat(user.getEmail()).isEqualTo(EMAIL);
-        assertThat(user.getRoleType()).isEqualTo(MEMBER);
+        assertThat(user.getRole()).isEqualTo(MEMBER);
         assertThat(user.getPasswordHash()).isEqualTo(PASSWORD_HASH);
         assertThat(user.getUserDetail().nickname()).isEqualTo(NICKNAME);
 

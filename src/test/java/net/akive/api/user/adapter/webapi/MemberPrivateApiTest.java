@@ -96,7 +96,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
         MvcTestResultAssert result = get(MEMBER_ME_URL, USER_ID).hasStatus(OK);
 
         result.bodyJson().extractingPath("$.email").isEqualTo(EMAIL.value());
-        result.bodyJson().extractingPath("$.roleType").isEqualTo(ROLE_TYPE.name());
+        result.bodyJson().extractingPath("$.role").isEqualTo(USER_ROLE.name());
         result.bodyJson().extractingPath("$.loginType").isEqualTo(LOGIN_TYPE.name());
         result.bodyJson().extractingPath("$.createdAt").isEqualTo(CREATED_AT.toString());
         result.bodyJson().extractingPath("$.userDetail.nickname").isEqualTo(NICKNAME);

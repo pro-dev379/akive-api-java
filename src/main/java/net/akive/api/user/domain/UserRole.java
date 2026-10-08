@@ -1,5 +1,5 @@
 package net.akive.api.user.domain;
 
-public enum RoleType {
+public enum UserRole {
     MEMBER, ADMIN
 }

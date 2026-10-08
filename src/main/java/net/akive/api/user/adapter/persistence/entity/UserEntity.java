@@ -9,7 +9,7 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import net.akive.api.common.persistence.BaseTimeEntity;
 import net.akive.api.user.domain.LoginType;
-import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.UserRole;
 import net.akive.api.user.domain.User;
 import net.akive.api.user.domain.Withdrawal;
 
@@ -40,7 +40,7 @@ public class UserEntity extends BaseTimeEntity {
 
     @Enumerated(STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20)")
-    private RoleType roleType;
+    private UserRole role;
 
     @Enumerated(STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20)")
@@ -58,7 +58,7 @@ public class UserEntity extends BaseTimeEntity {
         UserEntity userEntity = new UserEntity(
                 user.getUserId(),
                 user.getEmail().value(),
-                user.getRoleType(),
+                user.getRole(),
                 user.getLoginType(),
                 user.getPasswordHash(),
                 UserDetailEntity.from(user.getUserDetail()),
@@ -75,7 +75,7 @@ public class UserEntity extends BaseTimeEntity {
             return User.reconstruct(
                     this.userId,
                     new Email(this.email),
-                    this.roleType,
+                    this.role,
                     this.loginType,
                     this.passwordHash,
                     this.userDetail.to(),

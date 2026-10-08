@@ -9,7 +9,7 @@ import net.akive.api.auth.application.token.required.AccessTokenCreator;
 import net.akive.api.auth.application.token.required.RefreshTokenParser;
 import net.akive.api.auth.domain.token.*;
 import net.akive.api.common.exception.business.AuthenticationException;
-import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.UserRole;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +25,11 @@ class TokenIssueService implements TokenIssuer {
 
     @Override
     public IssuedToken issue(TokenIssueCommand command) {
-        AccessToken accessToken = accessTokenCreator.create(command.userId(), command.roleType());
+        AccessToken accessToken = accessTokenCreator.create(command.userId(), command.role());
         RefreshToken refreshToken = refreshTokenSessionManager.start(
                 command.userId(),
                 command.clientInstanceId(),
-                command.roleType()
+                command.role()
         );
 
         return new IssuedToken(accessToken, refreshToken);
@@ -40,9 +40,9 @@ class TokenIssueService implements TokenIssuer {
         RefreshTokenPayload refreshTokenPayload = refreshTokenParser.parse(command.refreshToken());
 
         Long userId = refreshTokenPayload.userId();
-        RoleType roleType = refreshTokenPayload.roleType();
+        UserRole role = refreshTokenPayload.role();
 
-        AccessToken newAccessToken = accessTokenCreator.create(userId, roleType);
+        AccessToken newAccessToken = accessTokenCreator.create(userId, role);
         RefreshToken newRefreshToken = refreshTokenSessionManager
                 .rotateIfRequired(refreshTokenPayload, command.refreshToken())
                 .orElse(null);

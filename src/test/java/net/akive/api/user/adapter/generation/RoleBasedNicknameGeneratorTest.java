@@ -1,6 +1,6 @@
 package net.akive.api.user.adapter.generation;
 
-import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.UserRole;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -13,10 +13,10 @@ class RoleBasedNicknameGeneratorTest {
     private final RoleBasedNicknameGenerator roleBasedNicknameGenerator = new RoleBasedNicknameGenerator();
 
     @ParameterizedTest
-    @EnumSource(RoleType.class)
-    void 역할_기반_닉네임을_생성한다(RoleType roleType) {
-        String nickname = roleBasedNicknameGenerator.generate(roleType);
-        String prefix = roleType.name().toLowerCase() + "@";
+    @EnumSource(UserRole.class)
+    void 역할_기반_닉네임을_생성한다(UserRole role) {
+        String nickname = roleBasedNicknameGenerator.generate(role);
+        String prefix = role.name().toLowerCase() + "@";
 
         assertThat(nickname).startsWith(prefix);
         assertThat(nickname).hasSize(prefix.length() + ROLE_BASED_NICKNAME_SUFFIX_LENGTH);

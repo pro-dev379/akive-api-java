@@ -25,7 +25,7 @@ public class User {
 
     private Email email;
 
-    private RoleType roleType;
+    private UserRole role;
 
     private LoginType loginType;
 
@@ -40,7 +40,7 @@ public class User {
     public static User reconstruct(
             Long userId,
             Email email,
-            RoleType roleType,
+            UserRole role,
             LoginType loginType,
             String passwordHash,
             UserDetail userDetail,
@@ -50,7 +50,7 @@ public class User {
         return User.builder()
                 .userId(userId)
                 .email(requireNonNull(email))
-                .roleType(requireNonNull(roleType))
+                .role(requireNonNull(role))
                 .loginType(requireNonNull(loginType))
                 .passwordHash(validatePasswordHash(passwordHash))
                 .userDetail(requireNonNull(userDetail))
@@ -59,10 +59,10 @@ public class User {
                 .build();
     }
 
-    public static User signUpByEmail(Email email, RoleType roleType, String passwordHash, String nickname) {
+    public static User signUpByEmail(Email email, UserRole role, String passwordHash, String nickname) {
         return User.builder()
                 .email(requireNonNull(email))
-                .roleType(requireNonNull(roleType))
+                .role(requireNonNull(role))
                 .loginType(EMAIL)
                 .passwordHash(validateRequiredPasswordHash(passwordHash))
                 .userDetail(UserDetail.initial(nickname))

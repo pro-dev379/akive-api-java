@@ -9,7 +9,7 @@ import net.akive.api.auth.domain.token.RefreshTokenPayload;
 import net.akive.api.common.domain.ClientInstanceId;
 import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.core.config.security.JwtProperties;
-import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.UserRole;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +29,8 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
     private final JwtProperties jwtProperties;
 
     @Override
-    public RefreshToken start(Long userId, ClientInstanceId clientInstanceId, RoleType roleType) {
-        RefreshToken refreshToken = refreshTokenCreator.create(userId, clientInstanceId, roleType);
+    public RefreshToken start(Long userId, ClientInstanceId clientInstanceId, UserRole role) {
+        RefreshToken refreshToken = refreshTokenCreator.create(userId, clientInstanceId, role);
 
         refreshTokenStore.save(
                 userId,
@@ -55,7 +55,7 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
         RefreshToken newRefreshToken = refreshTokenCreator.create(
                 payload.userId(),
                 payload.clientInstanceId(),
-                payload.roleType()
+                payload.role()
         );
 
         boolean rotated = refreshTokenStore.rotate(

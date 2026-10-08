@@ -1,13 +1,13 @@
 package net.akive.api.auth.domain.token;
 
 import net.akive.api.common.domain.ClientInstanceId;
-import net.akive.api.user.domain.RoleType;
+import net.akive.api.user.domain.UserRole;
 
 import java.time.Instant;
 
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.EXPIRE_AT;
 import static net.akive.api.common.domain.ClientInstanceIdFixture.createClientInstanceId;
-import static net.akive.api.user.domain.RoleType.MEMBER;
+import static net.akive.api.user.domain.UserRole.MEMBER;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 
 public class RefreshTokenPayloadFixture {
@@ -22,17 +22,17 @@ public class RefreshTokenPayloadFixture {
     public static RefreshTokenPayload createRefreshTokenPayload(
             Long userId,
             ClientInstanceId clientInstanceId,
-            RoleType roleType
+            UserRole role
     ) {
-        return createRefreshTokenPayload(userId, clientInstanceId, roleType, EXPIRE_AT);
+        return createRefreshTokenPayload(userId, clientInstanceId, role, EXPIRE_AT);
     }
 
     public static RefreshTokenPayload createRefreshTokenPayload(
             Long userId,
             ClientInstanceId clientInstanceId,
-            RoleType roleType,
+            UserRole role,
             Instant expiresAt
     ) {
-        return new RefreshTokenPayload(userId, clientInstanceId, roleType, expiresAt);
+        return new RefreshTokenPayload(userId, clientInstanceId, role, expiresAt);
     }
 }

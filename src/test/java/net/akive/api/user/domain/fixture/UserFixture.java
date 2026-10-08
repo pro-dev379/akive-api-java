@@ -17,7 +17,7 @@ public class UserFixture {
     public static final Long ANOTHER_USER_ID = 2L;
     public static final Long UNKNOWN_USER_ID = Long.MAX_VALUE;
     public static final Email EMAIL = createEmail();
-    public static final RoleType ROLE_TYPE = RoleType.MEMBER;
+    public static final UserRole USER_ROLE = UserRole.MEMBER;
     public static final LoginType LOGIN_TYPE = LoginType.EMAIL;
     public static final String PASSWORD = "password123!";
     public static final String PASSWORD_HASH = "password-hash";
@@ -42,7 +42,7 @@ public class UserFixture {
     }
 
     public static User createUser(Email email, String nickname, Withdrawal withdrawal) {
-        User user = User.signUpByEmail(email, ROLE_TYPE, PASSWORD_HASH, nickname);
+        User user = User.signUpByEmail(email, USER_ROLE, PASSWORD_HASH, nickname);
 
         if (withdrawal.isWithdrawn()) {
             user.withdraw(withdrawal.withdrawnAt(), withdrawal.withdrawalReason());
@@ -79,7 +79,7 @@ public class UserFixture {
         return User.reconstruct(
                 userId,
                 EMAIL,
-                ROLE_TYPE,
+                USER_ROLE,
                 LOGIN_TYPE,
                 passwordHash,
                 userDetail,

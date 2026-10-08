@@ -166,6 +166,6 @@ class LoginServiceTest {
     }
 
     private TokenIssueCommand createTokenIssueCommand(LoginByEmailCommand command, User user) {
-        return new TokenIssueCommand(user.getUserId(), command.clientInstanceId(), user.getRoleType());
+        return new TokenIssueCommand(user.getUserId(), command.clientInstanceId(), user.getRole());
     }
 }
