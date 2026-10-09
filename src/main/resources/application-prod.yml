@@ -2,7 +2,8 @@ spring:
   config:
     import: >
       aws-secretsmanager:akive/prod/db,
-      aws-secretsmanager:akive/prod/jwt
+      aws-secretsmanager:akive/prod/jwt,
+      aws-secretsmanager:akive/openai
 
   datasource:
     url: jdbc:mysql://${host}:${port}/${dbname}?characterEncoding=UTF-8

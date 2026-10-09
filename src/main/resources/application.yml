@@ -41,3 +41,7 @@ image:
   storage:
     s3:
       bucket-name: akive-bucket-dev
+
+openai:
+  api-key: ${openAiApiKey}
+  timeout: 30s

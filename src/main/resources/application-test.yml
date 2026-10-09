@@ -18,3 +18,6 @@ jwt:
     secret: test-access-secret-test-access-secret
   refresh-token:
     secret: test-refresh-secret-test-refresh-secret
+
+openai:
+  api-key: test-api-key

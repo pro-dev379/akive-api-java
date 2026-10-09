@@ -10,7 +10,6 @@ import net.akive.api.dailylog.domain.ActivityTime;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.image.application.required.ImageAssetRepository;
 import net.akive.api.image.domain.ImageAsset;
-import net.akive.api.mentoring.application.required.MentoringProfileRepository;
 import net.akive.api.plan.application.required.DailyQuantityRepository;
 import net.akive.api.plan.application.required.SessionalPlanRepository;
 import net.akive.api.plan.application.required.TotalQuantityRepository;
@@ -36,8 +35,8 @@ import static net.akive.api.dailylog.domain.fixture.DailyLogFixture.createDailyL
 import static net.akive.api.plan.domain.fixture.SessionalPlanFixture.createSessionalPlan;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.FIRST_SUBJECT_NAME;
 import static net.akive.api.plan.domain.fixture.TotalQuantityFixture.createTotalQuantity;
+import static net.akive.api.report.domain.ReportType.DAILY;
 import static net.akive.api.report.domain.fixture.ReportFixture.*;
-import static net.akive.api.report.domain.ReportType.*;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 
 @Transactional
@@ -51,9 +50,6 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     @Autowired
     protected LegacyUserPasswordRepository legacyUserPasswordRepository;
-
-    @Autowired
-    protected MentoringProfileRepository mentoringProfileRepository;
 
     @Autowired
     protected SessionalPlanRepository sessionalPlanRepository;

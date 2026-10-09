@@ -8,6 +8,6 @@ import java.util.UUID;
 public record AttendanceProofSubmitRequest(@NotNull UUID proofImageAssetId) {
 
     public AttendanceProofSubmitCommand to(Long userId) {
-        return new AttendanceProofSubmitCommand(userId, proofImageAssetId);
+        return new AttendanceProofSubmitCommand(userId, this.proofImageAssetId);
     }
 }
