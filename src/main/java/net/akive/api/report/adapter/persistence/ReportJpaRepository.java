@@ -3,8 +3,10 @@ package net.akive.api.report.adapter.persistence;
 import net.akive.api.report.adapter.persistence.entity.ReportEntity;
 import net.akive.api.report.application.provided.dto.ReportHeaderResult;
 import net.akive.api.report.domain.ReportType;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,8 +16,15 @@ import java.util.Optional;
 
 interface ReportJpaRepository extends JpaRepository<ReportEntity, Long> {
 
+    @Override
+    @NotNull
+    @EntityGraph(attributePaths = {"user", "feedbackItems"})
+    Optional<ReportEntity> findById(@NotNull Long reportId);
+
+    @EntityGraph(attributePaths = {"user", "feedbackItems"})
     Optional<ReportEntity> findByReportIdAndUser_UserId(Long reportId, Long userId);
 
+    @EntityGraph(attributePaths = "user")
     List<ReportEntity> findAllByUser_UserIdAndReportTypeAndReportOnBetweenOrderByReportOnAsc(
             Long userId,
             ReportType reportType,

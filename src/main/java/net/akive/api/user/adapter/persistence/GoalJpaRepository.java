@@ -1,6 +1,8 @@
 package net.akive.api.user.adapter.persistence;
 
 import net.akive.api.user.adapter.persistence.entity.GoalEntity;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,11 +12,17 @@ import java.util.Optional;
 
 interface GoalJpaRepository extends JpaRepository<GoalEntity, Long> {
 
+    @Override
+    @NotNull
+    @EntityGraph(attributePaths = "user")
+    Optional<GoalEntity> findById(@NotNull Long goalId);
+
     @Query("""
         select g
         from GoalEntity g
-        where g.user.userId = :userId
-          and g.user.withdrawal.withdrawnAt is null
+        join fetch g.user u
+        where u.userId = :userId
+          and u.withdrawal.withdrawnAt is null
         order by g.goalId desc
         limit 1
     """)
@@ -23,7 +31,8 @@ interface GoalJpaRepository extends JpaRepository<GoalEntity, Long> {
     @Query("""
         select g
         from GoalEntity g
-        where g.user.userId = :userId
+        join fetch g.user u
+        where u.userId = :userId
           and g.createdAt < :createdAtBefore
         order by g.createdAt desc, g.goalId desc
         limit 1

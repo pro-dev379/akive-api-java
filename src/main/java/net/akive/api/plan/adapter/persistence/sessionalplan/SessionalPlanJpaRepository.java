@@ -2,6 +2,7 @@ package net.akive.api.plan.adapter.persistence.sessionalplan;
 
 import net.akive.api.plan.adapter.persistence.entity.SessionPeriodEntity;
 import net.akive.api.plan.adapter.persistence.entity.SessionalPlanEntity;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -11,8 +12,10 @@ import java.util.Optional;
 
 interface SessionalPlanJpaRepository extends JpaRepository<SessionalPlanEntity, Long> {
 
+    @EntityGraph(attributePaths = "user")
     Optional<SessionalPlanEntity> findBySessionalPlanIdAndUser_UserId(Long sessionalPlanId, Long userId);
 
+    @EntityGraph(attributePaths = "user")
     List<SessionalPlanEntity> findByUser_UserIdOrderBySessionalPlanIdDesc(Long userId);
 
     @Query("""

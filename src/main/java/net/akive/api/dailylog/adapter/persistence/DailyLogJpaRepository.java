@@ -3,6 +3,7 @@ package net.akive.api.dailylog.adapter.persistence;
 import net.akive.api.dailylog.adapter.persistence.entity.DailyLogEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -27,12 +28,14 @@ interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Long> {
     )
     Page<LocalDate> findLogOnPageByUserId(Long userId, Pageable pageable);
 
+    @EntityGraph(attributePaths = "user")
     Optional<DailyLogEntity> findByDailyLogIdAndUser_UserId(Long dailyLogId, Long userId);
 
     @Query("""
         select d
         from DailyLogEntity d
-        where d.user.userId = :userId
+        join fetch d.user u
+        where u.userId = :userId
           and d.logOn = :logOn
         order by d.activityTime.startOn asc
     """)
@@ -41,7 +44,8 @@ interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Long> {
     @Query("""
         select d
         from DailyLogEntity d
-        where d.user.userId = :userId
+        join fetch d.user u
+        where u.userId = :userId
           and d.activityTime.startOn < :endOn
           and d.activityTime.endOn > :startOn
         order by d.activityTime.startOn asc

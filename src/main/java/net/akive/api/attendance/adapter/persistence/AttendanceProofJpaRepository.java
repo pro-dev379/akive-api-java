@@ -9,7 +9,7 @@ import java.util.Optional;
 
 interface AttendanceProofJpaRepository extends JpaRepository<AttendanceProofEntity, Long> {
 
-    @EntityGraph(attributePaths = {"proofImageAsset", "proofImageAsset.variants"})
+    @EntityGraph(attributePaths = {"user", "proofImageAsset", "proofImageAsset.variants"})
     Optional<AttendanceProofEntity> findByUser_UserIdAndProofOn(Long userId, LocalDate proofOn);
 
     boolean existsByUser_UserIdAndProofOn(Long userId, LocalDate proofOn);
