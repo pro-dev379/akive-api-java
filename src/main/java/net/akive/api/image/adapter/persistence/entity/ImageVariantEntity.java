@@ -47,7 +47,7 @@ public class ImageVariantEntity extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "VARCHAR(20)")
     private VariantType variantType;
 
-    @Column(nullable = false, length = 512)
+    @Column(nullable = false, length = 500)
     private String objectKey;
 
     @Column(nullable = false)

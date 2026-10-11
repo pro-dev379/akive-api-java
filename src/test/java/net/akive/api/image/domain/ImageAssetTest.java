@@ -121,7 +121,7 @@ class ImageAssetTest {
     }
 
     @Test
-    void 마스터_객체_키가_512자를_초과하면_복원할_수_없다() {
+    void 마스터_객체_키가_500자를_초과하면_복원할_수_없다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> reconstructImageAsset(
                         "a".repeat(OBJECT_KEY_MAX_LENGTH + 1),

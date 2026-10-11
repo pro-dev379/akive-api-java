@@ -51,7 +51,7 @@ public class ImageAssetEntity extends BaseTimeEntity implements Persistable<UUID
     @Column(nullable = false, columnDefinition = "VARCHAR(20)")
     private ImageType imageType;
 
-    @Column(length = 512)
+    @Column(length = 500)
     private String masterObjectKey;
 
     private Integer activeRecipeVersion;
