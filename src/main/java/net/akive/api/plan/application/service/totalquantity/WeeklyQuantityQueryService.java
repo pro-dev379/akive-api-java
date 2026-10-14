@@ -15,7 +15,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.WEEK
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class WeeklyQuantityQueryService implements WeeklyQuantityFinder {
+class WeeklyQuantityQueryService implements WeeklyQuantityFinder {
 
     private final WeeklyQuantityRepository weeklyQuantityRepository;
 

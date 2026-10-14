@@ -33,7 +33,7 @@ import static net.akive.api.image.domain.ImageType.PROFILE_IMAGE;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class UserAccountService implements UserAccountManager {
+class UserAccountService implements UserAccountManager {
 
     private final UserValidator userValidator;
     private final ImageAssetDeleter imageAssetDeleter;

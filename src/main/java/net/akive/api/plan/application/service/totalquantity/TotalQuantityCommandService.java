@@ -17,7 +17,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.TOTA
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class TotalQuantityCommandService implements TotalQuantityCreator, TotalQuantityModifier {
+class TotalQuantityCommandService implements TotalQuantityCreator, TotalQuantityModifier {
 
     private final TotalQuantityRepository totalQuantityRepository;
     private final TotalQuantityDomainService totalQuantityDomainService;

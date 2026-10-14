@@ -18,7 +18,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.GOAL
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class GoalQueryService implements GoalFinder {
+class GoalQueryService implements GoalFinder {
 
     private final GoalRepository goalRepository;
 
