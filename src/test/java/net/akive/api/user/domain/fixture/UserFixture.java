@@ -17,6 +17,8 @@ public class UserFixture {
     public static final Long ANOTHER_USER_ID = 2L;
     public static final Long UNKNOWN_USER_ID = Long.MAX_VALUE;
     public static final Email EMAIL = createEmail();
+    public static final Email ANOTHER_EMAIL = createEmail("another@test.com");
+    public static final String ANOTHER_NICKNAME = "another-member";
     public static final UserRole USER_ROLE = UserRole.MEMBER;
     public static final LoginType LOGIN_TYPE = LoginType.EMAIL;
     public static final String PASSWORD = "password123!";

@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.AuthenticationError;
 import net.akive.api.common.response.ApiErrorResponse;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -15,9 +14,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
+import static net.akive.api.common.exception.ApplicationErrorHttpStatusMapper.toHttpStatus;
 import static net.akive.api.common.exception.business.AuthenticationError.ACCESS_TOKEN_EXPIRED;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_ACCESS_TOKEN;
-import static net.akive.api.common.exception.ApplicationErrorHttpStatusMapper.toHttpStatus;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Component
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
         AuthenticationError errorCode = resolveUnauthorizedErrorCode(authException);
 
         response.setStatus(toHttpStatus(errorCode).value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setContentType(APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         objectMapper.writeValue(response.getWriter(), ApiErrorResponse.of(errorCode));

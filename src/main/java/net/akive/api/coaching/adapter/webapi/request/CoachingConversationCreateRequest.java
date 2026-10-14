@@ -7,6 +7,6 @@ import net.akive.api.coaching.domain.ConversationContext;
 public record CoachingConversationCreateRequest(@NotNull ConversationContext context) {
 
     public CoachingConversationCreateCommand to(Long userId) {
-        return new CoachingConversationCreateCommand(userId, this.context);
+        return new CoachingConversationCreateCommand(userId, context);
     }
 }

@@ -23,8 +23,9 @@ public enum ResourceConflictError implements ApplicationError {
 
     ATTENDANCE_PROOF_ALREADY_EXISTS("Attendance proof already exists."),
 
-    REPORT_ALREADY_EXISTS("Report already exists.")
-    ;
+    REPORT_ALREADY_EXISTS("Report already exists."),
+
+    COACHING_RESPONSE_ALREADY_IN_PROGRESS("A coaching response is already in progress.");
 
     private final String message;
 

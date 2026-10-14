@@ -7,12 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.user.domain.UserDetail;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
+import static org.hibernate.type.SqlTypes.BINARY;
 
 @Getter
 @Embeddable
@@ -23,7 +23,7 @@ public class UserDetailEntity {
     @Column(nullable = false)
     private String nickname;
 
-    @JdbcTypeCode(SqlTypes.BINARY)
+    @JdbcTypeCode(BINARY)
     @Column(name = "image_asset_id", columnDefinition = "BINARY(16)")
     private UUID profileImageAssetId;
 

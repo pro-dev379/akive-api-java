@@ -110,6 +110,14 @@ public final class DomainValidator {
         return value;
     }
 
+    public static Long requirePositiveIfPresent(Long value) {
+        if (value == null) {
+            return null;
+        }
+
+        return requirePositive(value);
+    }
+
     public static Integer requireNonNegative(Integer value) {
         requireNonNull(value);
 

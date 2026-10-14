@@ -21,6 +21,8 @@ spring:
     redis:
       timeout: 3s
       connect-timeout: 3s
+      repositories:
+        enabled: false
 
 jwt:
   issuer: akive
@@ -45,3 +47,22 @@ image:
 openai:
   api-key: ${openAiApiKey}
   timeout: 30s
+  streaming-timeout: 2m
+  model:
+    coaching: gpt-5.2
+    conversation-title: gpt-4.1-nano
+    learner-insight: gpt-5.4-mini
+    embed: text-embedding-3-small
+  embedding:
+    dimensions: 1536
+
+event:
+  outbox:
+    publish-delay: 1s
+
+vector:
+  qdrant:
+    grpc-port: 6334
+    tls-enabled: false
+    timeout: 5s
+    learner-insight-collection-name: learner_insight

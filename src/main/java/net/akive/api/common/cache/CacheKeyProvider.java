@@ -20,4 +20,12 @@ public class CacheKeyProvider {
     public static String refreshTokenPattern(Long userId) {
         return "refresh-token:%s:%s".formatted(userId, "*");
     }
+
+    public static String coachingConversationLock(Long coachingConversationId) {
+        return "coaching-conversation:%s:lock".formatted(coachingConversationId);
+    }
+
+    public static String pendingCoachingResponse(Long coachingConversationId) {
+        return "coaching-conversation:%s:pending-response".formatted(coachingConversationId);
+    }
 }

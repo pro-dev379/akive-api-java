@@ -27,6 +27,7 @@ import static net.akive.api.common.exception.business.BusinessRuleViolationError
 import static net.akive.api.common.exception.business.ResourceNotFoundError.ENDPOINT_NOT_FOUND;
 import static net.akive.api.common.exception.internal.UnexpectedServerError.INTERNAL_SERVER_ERROR;
 import static net.akive.api.common.exception.web.HttpRequestError.METHOD_NOT_ALLOWED;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestControllerAdvice
@@ -254,6 +255,7 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ApiErrorResponse> createErrorResponse(ApplicationError error) {
         return ResponseEntity
                 .status(toHttpStatus(error))
+                .contentType(APPLICATION_JSON)
                 .body(ApiErrorResponse.of(error));
     }
 
@@ -263,6 +265,7 @@ public class GlobalExceptionHandler {
     ) {
         return ResponseEntity
                 .status(toHttpStatus(error))
+                .contentType(APPLICATION_JSON)
                 .body(ApiErrorResponse.of(error, fieldErrorDetails));
     }
 }

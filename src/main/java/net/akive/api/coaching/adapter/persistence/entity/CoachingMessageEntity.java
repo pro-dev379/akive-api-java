@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.coaching.domain.CoachingMessage;
+import net.akive.api.coaching.domain.MessageCompletionStatus;
 import net.akive.api.coaching.domain.MessageRole;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.internal.InvalidPersistedDataException;
@@ -42,6 +43,10 @@ public class CoachingMessageEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Enumerated(STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    private MessageCompletionStatus completionStatus;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
@@ -52,6 +57,7 @@ public class CoachingMessageEntity {
                 CoachingConversationEntity.from(coachingMessage.getCoachingConversation()),
                 coachingMessage.getRole(),
                 coachingMessage.getContent(),
+                coachingMessage.getCompletionStatus(),
                 coachingMessage.getCreatedAt()
         );
     }
@@ -63,6 +69,7 @@ public class CoachingMessageEntity {
                     this.coachingConversation.to(),
                     this.role,
                     this.content,
+                    this.completionStatus,
                     this.createdAt
             );
         } catch (BusinessRuleViolationException e) {

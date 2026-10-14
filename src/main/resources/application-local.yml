@@ -4,6 +4,11 @@ spring:
       aws-secretsmanager:akive/dev/db,
       aws-secretsmanager:akive/openai
 
+  cloud:
+    aws:
+      sqs:
+        enabled: false
+
   datasource:
     url: jdbc:mysql://localhost:3306/akive?characterEncoding=UTF-8
     username: ${username}
@@ -32,3 +37,14 @@ jwt:
   refresh-token:
     secret: local-refresh-secret-local-refresh-secret
     expiration-days: 365
+
+event:
+  sqs:
+    learner-insight-analysis:
+      queue-name: akive-learner_insight_analysis_queue-dev.fifo
+    learner-insight-embedding:
+      queue-name: akive-learner_insight_embedding_queue-dev.fifo
+
+vector:
+  qdrant:
+    host: localhost

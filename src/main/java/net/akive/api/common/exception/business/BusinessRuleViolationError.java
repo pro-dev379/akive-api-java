@@ -78,6 +78,18 @@ public enum BusinessRuleViolationError implements ApplicationError {
 
     GOAL_ATTEND_ON_NOT_ALLOWED("Goal attendance time must be before 05:00 or at/after 05:05."),
 
+    INVALID_COACHING_MESSAGE_COMPLETION_STATUS( "Invalid coaching message completion status."),
+
+    LEARNER_INSIGHT_EVIDENCE_ADDITION_NOT_ALLOWED("Evidence cannot be added to a superseded learner insight."),
+    INVALID_LEARNER_INSIGHT_OBSERVATION_PERIOD("Invalid learner insight observation period."),
+    INVALID_LEARNER_INSIGHT_STATUS_AND_CONFIDENCE("Invalid learner insight status and confidence."),
+    INVALID_LEARNER_INSIGHT_STATUS_TRANSITION("Invalid learner insight status transition."),
+
+    INVALID_PRODUCED_EVENT_STATE("Invalid produced event state."),
+    INVALID_PRODUCED_EVENT_STATUS_TRANSITION("Invalid produced event status transition."),
+
+    LLM_USAGE_USER_ID_REQUIRED("User ID is required for user-scoped LLM usage."),
+
     ATTENDANCE_PROOF_DATE_IN_FUTURE("Attendance proof date must not be in future."),
     ATTENDANCE_PROOF_NOT_YET_ALLOWED("Attendance proof is not allowed yet."),
     ATTENDANCE_PROOF_IMAGE_NOT_UPLOADED( "Attendance proof image has not been uploaded."),

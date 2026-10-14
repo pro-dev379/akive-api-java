@@ -36,3 +36,14 @@ image:
   storage:
     s3:
       bucket-name: akive-bucket-prod
+
+event:
+  sqs:
+    learner-insight-analysis:
+      queue-name: akive-learner_insight_analysis_queue-prod.fifo
+    learner-insight-embedding:
+      queue-name: akive-learner_insight_embedding_queue-prod.fifo
+
+vector:
+  qdrant:
+    host: vector.akive.internal

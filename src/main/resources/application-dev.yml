@@ -34,3 +34,14 @@ jwt:
     secret: ${accessTokenSecret}
   refresh-token:
     secret: ${refreshTokenSecret}
+
+event:
+  sqs:
+    learner-insight-analysis:
+      queue-name: akive-learner_insight_analysis_queue-dev.fifo
+    learner-insight-embedding:
+      queue-name: akive-learner_insight_embedding_queue-dev.fifo
+
+vector:
+  qdrant:
+    host: dev-vector.akive.internal

@@ -1,11 +1,11 @@
 package net.akive.api.image.application.service;
 
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.id.UuidGenerator;
 import net.akive.api.image.application.fixture.ImageCommandFixture;
 import net.akive.api.image.application.provided.dto.UploadUrlCreateCommand;
 import net.akive.api.image.application.provided.dto.UploadUrlCreateResult;
 import net.akive.api.image.application.required.ImageStorage;
-import net.akive.api.image.application.required.ImageAssetIdGenerator;
 import net.akive.api.image.application.required.ImageAssetRepository;
 import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.image.domain.ImageType;
@@ -49,7 +49,7 @@ class UploadUrlCreateServiceTest {
     ImageAssetRepository imageAssetRepository;
 
     @Mock
-    ImageAssetIdGenerator imageAssetIdGenerator;
+    UuidGenerator uuidGenerator;
 
     @InjectMocks
     UploadUrlCreateService uploadUrlCreateService;
@@ -63,7 +63,7 @@ class UploadUrlCreateServiceTest {
             long fileSize
     ) {
         UploadUrlCreateCommand command = createUploadUrlCreateCommand(imageType, contentType, fileSize);
-        given(imageAssetIdGenerator.generate()).willReturn(IMAGE_ASSET_ID);
+        given(uuidGenerator.generate()).willReturn(IMAGE_ASSET_ID);
         given(imageAssetRepository.save(any(ImageAsset.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
         given(imageStorage.createOriginalImageUploadUrl(
@@ -112,7 +112,7 @@ class UploadUrlCreateServiceTest {
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(IMAGE_FILE_SIZE_EXCEEDED);
 
-        then(imageAssetIdGenerator).shouldHaveNoInteractions();
+        then(uuidGenerator).shouldHaveNoInteractions();
         then(imageAssetRepository).shouldHaveNoInteractions();
         then(imageStorage).shouldHaveNoInteractions();
     }
@@ -130,7 +130,7 @@ class UploadUrlCreateServiceTest {
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(IMAGE_CONTENT_TYPE_NOT_ALLOWED);
 
-        then(imageAssetIdGenerator).shouldHaveNoInteractions();
+        then(uuidGenerator).shouldHaveNoInteractions();
         then(imageAssetRepository).shouldHaveNoInteractions();
         then(imageStorage).shouldHaveNoInteractions();
     }

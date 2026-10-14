@@ -35,6 +35,17 @@ public class RedisTemplateClient {
             Long.class
     );
 
+    private static final DefaultRedisScript<Long> COMPARE_AND_DELETE_SCRIPT = new DefaultRedisScript<>(
+            """
+            if redis.call('GET', KEYS[1]) == ARGV[1] then
+                return redis.call('DEL', KEYS[1])
+            end
+
+            return 0
+            """,
+            Long.class
+    );
+
     private final RedisTemplate<String, Object> customRedisTemplate;
 
     public <T> Optional<T> get(String key, Class<T> type) {
@@ -68,6 +79,10 @@ public class RedisTemplateClient {
         customRedisTemplate.opsForValue().set(key, value, ttl);
     }
 
+    public boolean setIfAbsent(String key, Object value, Duration ttl) {
+        return Boolean.TRUE.equals(customRedisTemplate.opsForValue().setIfAbsent(key, value, ttl));
+    }
+
     public boolean compareAndSet(String key, Object expectedValue, Object newValue, Duration ttl) {
         Long result = customRedisTemplate.execute(
                 COMPARE_AND_SET_SCRIPT,
@@ -75,6 +90,16 @@ public class RedisTemplateClient {
                 expectedValue,
                 newValue,
                 String.valueOf(ttl.toMillis())
+        );
+
+        return Long.valueOf(1L).equals(result);
+    }
+
+    public boolean compareAndDelete(String key, Object expectedValue) {
+        Long result = customRedisTemplate.execute(
+                COMPARE_AND_DELETE_SCRIPT,
+                List.of(key),
+                expectedValue
         );
 
         return Long.valueOf(1L).equals(result);

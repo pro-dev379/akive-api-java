@@ -2,10 +2,13 @@ package net.akive.api.coaching.domain.fixture;
 
 import net.akive.api.coaching.domain.CoachingConversation;
 import net.akive.api.coaching.domain.CoachingMessage;
+import net.akive.api.coaching.domain.MessageCompletionStatus;
 import net.akive.api.coaching.domain.MessageRole;
 
 import java.time.Instant;
 
+import static net.akive.api.coaching.domain.MessageCompletionStatus.COMPLETED;
+import static net.akive.api.coaching.domain.MessageRole.ASSISTANT;
 import static net.akive.api.coaching.domain.MessageRole.USER;
 import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.createCoachingConversation;
 
@@ -29,6 +32,38 @@ public class CoachingMessageFixture {
         );
     }
 
+    public static CoachingMessage reconstructUserMessage(CoachingConversation coachingConversation) {
+        return reconstructCoachingMessage(
+                COACHING_MESSAGE_ID,
+                coachingConversation,
+                USER,
+                MESSAGE_CONTENT,
+                MESSAGE_CREATED_AT
+        );
+    }
+
+    public static CoachingMessage reconstructAssistantMessage(
+            CoachingConversation coachingConversation,
+            String content
+    ) {
+        return reconstructAssistantMessage(coachingConversation, content, COMPLETED);
+    }
+
+    public static CoachingMessage reconstructAssistantMessage(
+            CoachingConversation coachingConversation,
+            String content,
+            MessageCompletionStatus completionStatus
+    ) {
+        return reconstructCoachingMessage(
+                ANOTHER_COACHING_MESSAGE_ID,
+                coachingConversation,
+                ASSISTANT,
+                content,
+                completionStatus,
+                MESSAGE_CREATED_AT
+        );
+    }
+
     public static CoachingMessage reconstructCoachingMessage(
             Long coachingMessageId,
             CoachingConversation coachingConversation,
@@ -36,11 +71,30 @@ public class CoachingMessageFixture {
             String content,
             Instant createdAt
     ) {
+        return reconstructCoachingMessage(
+                coachingMessageId,
+                coachingConversation,
+                role,
+                content,
+                COMPLETED,
+                createdAt
+        );
+    }
+
+    public static CoachingMessage reconstructCoachingMessage(
+            Long coachingMessageId,
+            CoachingConversation coachingConversation,
+            MessageRole role,
+            String content,
+            MessageCompletionStatus completionStatus,
+            Instant createdAt
+    ) {
         return CoachingMessage.reconstruct(
                 coachingMessageId,
                 coachingConversation,
                 role,
                 content,
+                completionStatus,
                 createdAt
         );
     }

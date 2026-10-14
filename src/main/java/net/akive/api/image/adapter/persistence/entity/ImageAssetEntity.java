@@ -12,7 +12,6 @@ import net.akive.api.image.domain.ImageType;
 import net.akive.api.image.domain.ProcessingStatus;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OnDelete;
-import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
 import java.time.Instant;
@@ -26,6 +25,7 @@ import static jakarta.persistence.EnumType.STRING;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 import static org.hibernate.annotations.OnDeleteAction.CASCADE;
+import static org.hibernate.type.SqlTypes.BINARY;
 
 @Entity
 @Table(
@@ -43,7 +43,7 @@ import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 public class ImageAssetEntity extends BaseTimeEntity implements Persistable<UUID> {
 
     @Id
-    @JdbcTypeCode(SqlTypes.BINARY)
+    @JdbcTypeCode(BINARY)
     @Column(nullable = false, updatable = false, columnDefinition = "BINARY(16)")
     private UUID imageAssetId;
 

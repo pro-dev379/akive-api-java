@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static net.akive.api.coaching.domain.ConversationContext.MAIN;
+import static net.akive.api.coaching.application.fixture.CoachingConversationCommandFixture.createCoachingConversationCreateCommand;
 import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.*;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
@@ -42,13 +42,13 @@ class CoachingConversationCommandServiceTest {
     @Test
     void 코칭_대화를_생성한다() {
         User user = createReconstructedUser(USER_ID);
-        CoachingConversationCreateCommand command = new CoachingConversationCreateCommand(USER_ID, MAIN);
+        CoachingConversationCreateCommand command = createCoachingConversationCreateCommand(USER_ID);
         CoachingConversation savedCoachingConversation = reconstructCoachingConversation(
                 COACHING_CONVERSATION_ID,
                 user,
                 LLM_CONVERSATION_ID,
                 null,
-                MAIN
+                command.context()
         );
 
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
@@ -76,7 +76,7 @@ class CoachingConversationCommandServiceTest {
 
     @Test
     void 회원을_조회할_수_없으면_코칭_대화를_생성할_수_없다() {
-        CoachingConversationCreateCommand command = new CoachingConversationCreateCommand(UNKNOWN_USER_ID, MAIN);
+        CoachingConversationCreateCommand command = createCoachingConversationCreateCommand(UNKNOWN_USER_ID);
         given(userFinder.findOrThrow(UNKNOWN_USER_ID)).willThrow(new ResourceNotFoundException(USER_NOT_FOUND));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -86,6 +86,23 @@ class CoachingConversationCommandServiceTest {
 
         then(userFinder).should().findOrThrow(UNKNOWN_USER_ID);
         then(coachingLlm).shouldHaveNoInteractions();
+        then(coachingConversationRepository).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void LLM_대화를_생성할_수_없으면_코칭_대화를_생성할_수_없다() {
+        User user = createReconstructedUser(USER_ID);
+        CoachingConversationCreateCommand command = createCoachingConversationCreateCommand(USER_ID);
+        given(userFinder.findOrThrow(command.userId())).willReturn(user);
+        given(coachingLlm.createConversation())
+                .willThrow(new IllegalStateException("LLM conversation creation failed."));
+
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> coachingConversationCommandService.create(command))
+                .withMessage("LLM conversation creation failed.");
+
+        then(userFinder).should().findOrThrow(command.userId());
+        then(coachingLlm).should().createConversation();
         then(coachingConversationRepository).shouldHaveNoInteractions();
     }
 }

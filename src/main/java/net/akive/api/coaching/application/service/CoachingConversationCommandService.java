@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 class CoachingConversationCommandService implements CoachingConversationCreator {
 
     private final UserFinder userFinder;
-
     private final CoachingLlm coachingLlm;
     private final CoachingConversationRepository coachingConversationRepository;
 
@@ -25,14 +24,8 @@ class CoachingConversationCommandService implements CoachingConversationCreator 
         User user = userFinder.findOrThrow(command.userId());
         String llmConversationId = coachingLlm.createConversation();
 
-        CoachingConversation coachingConversation = CoachingConversation.create(
-                user,
-                llmConversationId,
-                command.context()
-        );
-
-        CoachingConversation savedCoachingConversation = coachingConversationRepository.save(coachingConversation);
-
-        return savedCoachingConversation.getCoachingConversationId();
+        return coachingConversationRepository
+                .save(CoachingConversation.create(user, llmConversationId, command.context()))
+                .getCoachingConversationId();
     }
 }

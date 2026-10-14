@@ -2,10 +2,10 @@ package net.akive.api.image.application.service;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.id.UuidGenerator;
 import net.akive.api.image.application.provided.UploadUrlCreator;
 import net.akive.api.image.application.provided.dto.UploadUrlCreateCommand;
 import net.akive.api.image.application.provided.dto.UploadUrlCreateResult;
-import net.akive.api.image.application.required.ImageAssetIdGenerator;
 import net.akive.api.image.application.required.ImageAssetRepository;
 import net.akive.api.image.application.required.ImageStorage;
 import net.akive.api.image.domain.ImageAsset;
@@ -25,7 +25,7 @@ class UploadUrlCreateService implements UploadUrlCreator {
 
     private final ImageStorage imageStorage;
     private final ImageAssetRepository imageAssetRepository;
-    private final ImageAssetIdGenerator imageAssetIdGenerator;
+    private final UuidGenerator uuidGenerator;
 
     @Override
     public UploadUrlCreateResult create(UploadUrlCreateCommand command)
@@ -51,7 +51,7 @@ class UploadUrlCreateService implements UploadUrlCreator {
     }
 
     private ImageAsset registerImageAsset(ImageType imageType) {
-        ImageAsset imageAsset = ImageAsset.create(imageAssetIdGenerator.generate(), imageType);
+        ImageAsset imageAsset = ImageAsset.create(uuidGenerator.generate(), imageType);
 
         return imageAssetRepository.save(imageAsset);
     }

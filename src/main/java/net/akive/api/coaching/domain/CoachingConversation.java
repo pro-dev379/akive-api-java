@@ -55,6 +55,10 @@ public class CoachingConversation {
                 .build();
     }
 
+    public void updateTitle(String title) {
+        this.title = requireNotBlank(title);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
