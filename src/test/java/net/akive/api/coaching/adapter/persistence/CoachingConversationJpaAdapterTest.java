@@ -256,11 +256,20 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
                 CONVERSATION_TITLE
         );
         coachingConversationRepository.saveMessage(CoachingMessage.fromUser(savedConversation, MESSAGE_CONTENT));
-        CoachingMessage latestMessage = coachingConversationRepository.saveMessage(
+        coachingConversationRepository.saveMessage(
                 CoachingMessage.fromAssistant(savedConversation, COACHING_RESPONSE_CONTENT, COMPLETED)
         );
         flushAndClear();
 
+        CoachingConversation persistedConversation = coachingConversationRepository
+                .findByCoachingConversationIdAndUserId(
+                        savedConversation.getCoachingConversationId(),
+                        savedUser.getUserId()
+                )
+                .orElseThrow();
+        CoachingMessage persistedLatestMessage = coachingConversationRepository
+                .findLatestMessage(savedConversation.getCoachingConversationId())
+                .orElseThrow();
         CursorResult<CoachingConversationSummaryData, Long> summaryPage = coachingConversationRepository
                 .findSummaryPageByUserIdAndContext(
                         savedUser.getUserId(),
@@ -274,10 +283,10 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
         assertThat(summary.title()).isEqualTo(CONVERSATION_TITLE);
         assertThat(summary.context()).isEqualTo(MAIN);
         assertThat(summary.preview()).isEqualTo(COACHING_RESPONSE_CONTENT);
-        assertThat(summary.lastMessageCreatedAt()).isEqualTo(latestMessage.getCreatedAt());
-        assertThat(summary.createdAt()).isEqualTo(savedConversation.getCreatedAt());
+        assertThat(summary.lastMessageCreatedAt()).isEqualTo(persistedLatestMessage.getCreatedAt());
+        assertThat(summary.createdAt()).isEqualTo(persistedConversation.getCreatedAt());
         assertThat(summary.updatedAt()).isNotNull().isAfterOrEqualTo(summary.createdAt());
-        assertThat(summary.latestMessageId()).isEqualTo(latestMessage.getCoachingMessageId());
+        assertThat(summary.latestMessageId()).isEqualTo(persistedLatestMessage.getCoachingMessageId());
     }
 
     @Test
