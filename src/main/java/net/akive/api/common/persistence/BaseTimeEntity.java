@@ -27,7 +27,12 @@ public abstract class BaseTimeEntity {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    protected void restoreCreatedAt(Instant createdAt) {
+    protected void restoreAuditTime(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    protected void restoreAuditTime(Instant createdAt, Instant updatedAt) {
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 }

@@ -65,7 +65,7 @@ public class UserEntity extends BaseTimeEntity {
                 WithdrawalEntity.from(user.getWithdrawal())
         );
 
-        userEntity.restoreCreatedAt(user.getCreatedAt());
+        userEntity.restoreAuditTime(user.getCreatedAt());
 
         return userEntity;
     }

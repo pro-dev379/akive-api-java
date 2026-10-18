@@ -37,18 +37,18 @@ public class LearnerInsightEntity extends BaseTimeEntity {
     private UserEntity user;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private InsightType insightType;
 
     @Column(nullable = false, length = 500)
     private String content;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private InsightConfidence confidence;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private InsightStatus status;
 
     @Column(nullable = false, updatable = false)

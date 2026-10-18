@@ -18,7 +18,15 @@ import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
-@Table(name = "coaching_conversation")
+@Table(
+        name = "coaching_conversation",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "ux-coaching_conversation-llm_conversation_id",
+                        columnNames = "llm_conversation_id"
+                )
+        }
+)
 @Getter
 @AllArgsConstructor(access = PRIVATE)
 @NoArgsConstructor(access = PROTECTED)
@@ -38,17 +46,24 @@ public class CoachingConversationEntity extends BaseTimeEntity {
     private String title;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private ConversationContext context;
 
     public static CoachingConversationEntity from(CoachingConversation coachingConversation) {
-        return new CoachingConversationEntity(
+        CoachingConversationEntity coachingConversationEntity = new CoachingConversationEntity(
                 coachingConversation.getCoachingConversationId(),
                 UserEntity.from(coachingConversation.getUser()),
                 coachingConversation.getLlmConversationId(),
                 coachingConversation.getTitle(),
                 coachingConversation.getContext()
         );
+
+        coachingConversationEntity.restoreAuditTime(
+                coachingConversation.getCreatedAt(),
+                coachingConversation.getUpdatedAt()
+        );
+
+        return coachingConversationEntity;
     }
 
     public CoachingConversation to() {
@@ -58,7 +73,9 @@ public class CoachingConversationEntity extends BaseTimeEntity {
                     this.user.to(),
                     this.llmConversationId,
                     this.title,
-                    this.context
+                    this.context,
+                    this.getCreatedAt(),
+                    this.getUpdatedAt()
             );
         } catch (BusinessRuleViolationException e) {
             throw new InvalidPersistedDataException(

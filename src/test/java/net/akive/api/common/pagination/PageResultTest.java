@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class PageResultTest {
 
     @Test
-    void 페이징_결과를_생성한다() {
+    void 페이지_결과를_생성한다() {
         PageResult<String> pageResult = createPageResult();
 
         assertThat(pageResult.pageInfo().page()).isEqualTo(DEFAULT_PAGE);
@@ -24,18 +24,18 @@ class PageResultTest {
     }
 
     @Test
-    void 페이지_정보가_null이면_페이징_결과를_생성할_수_없다() {
+    void 페이지_정보가_null이면_페이지_결과를_생성할_수_없다() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> new PageResult<>(null, CONTENTS))
                 .withMessage("Page info must not be null.");
     }
 
     @Test
-    void 페이지_내용이_null이면_페이징_결과를_생성할_수_없다() {
+    void 페이지_내용이_null이면_페이지_결과를_생성할_수_없다() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> PageResult.of(
                         DEFAULT_PAGE,
-                        DEFAULT_SIZE,
+                        DEFAULT_PAGE_SIZE,
                         TOTAL_ELEMENT,
                         TOTAL_PAGE,
                         true,
@@ -46,7 +46,7 @@ class PageResultTest {
     }
 
     @Test
-    void 페이지_내용_수가_페이지_크기보다_크면_페이징_결과를_생성할_수_없다() {
+    void 페이지_내용_수가_페이지_크기보다_크면_페이지_결과를_생성할_수_없다() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> PageResult.of(
                         DEFAULT_PAGE,

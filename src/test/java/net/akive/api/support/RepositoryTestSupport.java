@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import net.akive.api.attendance.application.required.AttendanceProofRepository;
 import net.akive.api.attendance.domain.AttendanceProof;
 import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
+import net.akive.api.common.domain.Email;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.dailylog.application.required.DailyLogRepository;
 import net.akive.api.dailylog.domain.ActivityTime;
@@ -83,6 +84,10 @@ public abstract class RepositoryTestSupport extends IntegrationTestSupport {
 
     protected User saveUser() {
         return userRepository.save(createUser());
+    }
+
+    protected User saveUser(Email email, String nickname) {
+        return userRepository.save(createUser(email, nickname));
     }
 
     protected SessionalPlan saveSessionalPlan() {

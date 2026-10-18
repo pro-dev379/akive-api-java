@@ -13,10 +13,10 @@ public record ReportHeaderPageFindResponse(
         List<ReportHeaderResponse> reportHeaders
 ) {
 
-    public static ReportHeaderPageFindResponse from(PageResult<ReportHeaderResult> reportHeaders) {
+    public static ReportHeaderPageFindResponse from(PageResult<ReportHeaderResult> reportHeaderPage) {
         return new ReportHeaderPageFindResponse(
-                reportHeaders.pageInfo(),
-                reportHeaders.contents().stream()
+                reportHeaderPage.pageInfo(),
+                reportHeaderPage.contents().stream()
                         .map(ReportHeaderResponse::from)
                         .toList()
         );

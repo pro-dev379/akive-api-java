@@ -284,7 +284,7 @@ class ReportApiTest extends PrivateApiTestSupport {
         ReportHeaderResult reportHeader = new ReportHeaderResult(REPORT_ID, REPORT_ON, WEEKLY);
         PageResult<ReportHeaderResult> reportHeaderPage = createPageResult(
                 DEFAULT_PAGE,
-                DEFAULT_SIZE,
+                DEFAULT_PAGE_SIZE,
                 List.of(reportHeader)
         );
         given(reportFinder.findHeaderPage(eq(USER_ID), any(PageCondition.class)))
@@ -294,7 +294,7 @@ class ReportApiTest extends PrivateApiTestSupport {
                 REPORT_HEADERS_URL + "?page={page}&size={size}",
                 USER_ID,
                 DEFAULT_PAGE,
-                DEFAULT_SIZE
+                DEFAULT_PAGE_SIZE
         ).hasStatusOk();
 
         assertReportHeaderFindResponse(result, reportHeaderPage, reportHeader);
@@ -302,7 +302,7 @@ class ReportApiTest extends PrivateApiTestSupport {
         ArgumentCaptor<PageCondition> pageConditionCaptor = ArgumentCaptor.forClass(PageCondition.class);
         then(reportFinder).should().findHeaderPage(eq(USER_ID), pageConditionCaptor.capture());
         assertThat(pageConditionCaptor.getValue().getPage()).isEqualTo(DEFAULT_PAGE);
-        assertThat(pageConditionCaptor.getValue().getSize()).isEqualTo(DEFAULT_SIZE);
+        assertThat(pageConditionCaptor.getValue().getSize()).isEqualTo(DEFAULT_PAGE_SIZE);
         assertThat(pageConditionCaptor.getValue().getSortCondition().property()).isEqualTo("reportOn");
         assertThat(pageConditionCaptor.getValue().getSortCondition().sortDirection()).isEqualTo(DESC);
     }
@@ -313,7 +313,7 @@ class ReportApiTest extends PrivateApiTestSupport {
             "0, 0, Size must be positive.",
             "0, 101, Size must not exceed 100."
     })
-    void 리포트_헤더_목록_조회_시_페이지_요청_파라미터가_올바르지_않으면_400을_응답한다(int page, int size, String message) {
+    void 리포트_헤더_목록_조회_시_페이징_요청_파라미터가_올바르지_않으면_400을_응답한다(int page, int size, String message) {
         MvcTestResultAssert result = get(
                 REPORT_HEADERS_URL + "?page={page}&size={size}",
                 USER_ID,

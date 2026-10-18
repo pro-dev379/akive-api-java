@@ -20,7 +20,8 @@ import static net.akive.api.learner.domain.InsightStatus.*;
 import static net.akive.api.learner.domain.InsightType.BEHAVIOR_PATTERN;
 import static net.akive.api.learner.domain.fixture.LearnerInsightEvidenceFixture.*;
 import static net.akive.api.learner.domain.fixture.LearnerInsightFixture.*;
-import static net.akive.api.user.domain.fixture.UserFixture.*;
+import static net.akive.api.user.domain.fixture.UserFixture.ANOTHER_EMAIL;
+import static net.akive.api.user.domain.fixture.UserFixture.ANOTHER_NICKNAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -113,7 +114,7 @@ class LearnerInsightJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 회원_식별자와_학습자_인사이트_상태가_일치하는_학습자_인사이트를_조회한다() {
         User savedUser = saveUser();
-        User anotherSavedUser = userRepository.save(createUser(ANOTHER_EMAIL, ANOTHER_NICKNAME));
+        User anotherSavedUser = saveUser(ANOTHER_EMAIL, ANOTHER_NICKNAME);
         LearnerInsight candidateInsight = learnerInsightRepository.save(createLearnerInsight(savedUser, CANDIDATE));
         LearnerInsight activeInsight = learnerInsightRepository.save(createLearnerInsight(savedUser, ACTIVE));
         learnerInsightRepository.save(createLearnerInsight(savedUser, SUPERSEDED));
@@ -131,7 +132,7 @@ class LearnerInsightJpaAdapterTest extends RepositoryTestSupport {
     @Test
     void 회원_식별자와_학습자_인사이트_식별자와_상태가_모두_일치하는_학습자_인사이트를_조회한다() {
         User savedUser = saveUser();
-        User anotherSavedUser = userRepository.save(createUser(ANOTHER_EMAIL, ANOTHER_NICKNAME));
+        User anotherSavedUser = saveUser(ANOTHER_EMAIL, ANOTHER_NICKNAME);
         LearnerInsight matchingCandidateInsight =
                 learnerInsightRepository.save(createLearnerInsight(savedUser, CANDIDATE));
         LearnerInsight matchingActiveInsight =

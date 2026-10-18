@@ -3,15 +3,21 @@ package net.akive.api.coaching.adapter.webapi;
 import net.akive.api.coaching.adapter.webapi.request.CoachingConversationCreateRequest;
 import net.akive.api.coaching.adapter.webapi.request.CoachingMessageSendRequest;
 import net.akive.api.coaching.application.provided.CoachingConversationCreator;
+import net.akive.api.coaching.application.provided.CoachingConversationFinder;
 import net.akive.api.coaching.application.provided.CoachingMessageSender;
 import net.akive.api.coaching.application.provided.dto.CoachingConversationCreateCommand;
+import net.akive.api.coaching.application.provided.dto.CoachingConversationSummaryResult;
 import net.akive.api.coaching.application.provided.dto.CoachingMessageSendCommand;
 import net.akive.api.coaching.application.provided.dto.CoachingMessageSendResult;
 import net.akive.api.coaching.application.stream.CoachingResponseStream;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.common.pagination.CursorCondition;
+import net.akive.api.common.pagination.CursorResult;
 import net.akive.api.support.PrivateApiTestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,20 +26,28 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static net.akive.api.coaching.application.fixture.CoachingMessageCommandFixture.COACHING_RESPONSE_CONTENT;
 import static net.akive.api.coaching.application.stream.CoachingResponseStream.IncompleteReason.MAX_OUTPUT_TOKENS;
 import static net.akive.api.coaching.domain.ConversationContext.MAIN;
 import static net.akive.api.coaching.domain.CoachingPolicy.USER_MESSAGE_CONTENT_MAX_LENGTH;
 import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.ANOTHER_COACHING_CONVERSATION_ID;
 import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.COACHING_CONVERSATION_ID;
 import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.CONVERSATION_TITLE;
+import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.CREATED_AT;
+import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.UPDATED_AT;
+import static net.akive.api.coaching.domain.fixture.CoachingMessageFixture.COACHING_MESSAGE_ID;
 import static net.akive.api.coaching.domain.fixture.CoachingMessageFixture.MESSAGE_CONTENT;
+import static net.akive.api.coaching.domain.fixture.CoachingMessageFixture.MESSAGE_CREATED_AT;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.COACHING_CONVERSATION_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceConflictError.COACHING_RESPONSE_ALREADY_IN_PROGRESS;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
+import static net.akive.api.common.pagination.fixture.PaginationFixture.CURSOR_PAGE_SIZE;
 import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +76,80 @@ class CoachingApiTest extends PrivateApiTestSupport {
     CoachingConversationCreator coachingConversationCreator;
 
     @MockitoBean
+    CoachingConversationFinder coachingConversationFinder;
+
+    @MockitoBean
     CoachingMessageSender coachingMessageSender;
+
+    @Test
+    void 회원_식별자와_코칭_대화_컨텍스트로_코칭_대화_목록을_커서_페이징_조회한다() {
+        CoachingConversationSummaryResult summary = new CoachingConversationSummaryResult(
+                COACHING_CONVERSATION_ID,
+                CONVERSATION_TITLE,
+                MAIN,
+                COACHING_RESPONSE_CONTENT,
+                MESSAGE_CREATED_AT,
+                CREATED_AT,
+                UPDATED_AT
+        );
+        CursorResult<CoachingConversationSummaryResult, Long> summaryPage = CursorResult.of(
+                null,
+                false,
+                List.of(summary)
+        );
+        given(coachingConversationFinder.findSummaryPage(eq(USER_ID), eq(MAIN), any()))
+                .willReturn(summaryPage);
+
+        MvcTestResultAssert result = get(
+                COACHING_CONVERSATIONS_URL + "?context={context}&cursor={cursor}&size={size}",
+                USER_ID,
+                MAIN,
+                COACHING_MESSAGE_ID,
+                CURSOR_PAGE_SIZE
+        ).hasStatusOk();
+
+        assertCoachingConversationsFindResponse(result, summaryPage, summary);
+
+        ArgumentCaptor<CursorCondition<Long>> cursorConditionCaptor = ArgumentCaptor.captor();
+        then(coachingConversationFinder).should().findSummaryPage(
+                eq(USER_ID),
+                eq(MAIN),
+                cursorConditionCaptor.capture()
+        );
+        assertThat(cursorConditionCaptor.getValue().cursor()).isEqualTo(COACHING_MESSAGE_ID);
+        assertThat(cursorConditionCaptor.getValue().size()).isEqualTo(CURSOR_PAGE_SIZE);
+    }
+
+    @Test
+    void 코칭_대화_컨텍스트가_없으면_400을_응답한다() {
+        get(COACHING_CONVERSATIONS_URL, USER_ID).hasStatus(BAD_REQUEST);
+
+        then(coachingConversationFinder).shouldHaveNoInteractions();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, Size must be positive.",
+            "101, Size must not exceed 100."
+    })
+    void 코칭_대화_목록_조회_시_커서_페이징_요청_파라미터가_올바르지_않으면_400을_응답한다(int size, String message) {
+        MvcTestResultAssert result = get(
+                COACHING_CONVERSATIONS_URL + "?context={context}&size={size}",
+                USER_ID,
+                MAIN,
+                size
+        ).hasStatus(BAD_REQUEST);
+
+        assertErrorResponse(result, INVALID_INPUT_VALUE);
+        result.bodyJson()
+                .extractingPath("$.errors[0].field")
+                .isEqualTo("argument");
+        result.bodyJson()
+                .extractingPath("$.errors[0].message")
+                .isEqualTo(message);
+
+        then(coachingConversationFinder).shouldHaveNoInteractions();
+    }
 
     @Test
     void 코칭_대화를_생성한다() {
@@ -108,29 +195,6 @@ class CoachingApiTest extends PrivateApiTestSupport {
 
         assertErrorResponse(result, USER_NOT_FOUND);
         then(coachingConversationCreator).should().create(command);
-    }
-
-    @Test
-    void 코칭_대화를_조회할_수_없으면_메시지_전송_시_404를_응답한다() {
-        String url = COACHING_CONVERSATIONS_URL + "/" + ANOTHER_COACHING_CONVERSATION_ID + "/messages";
-        CoachingMessageSendRequest request = new CoachingMessageSendRequest(MESSAGE_CONTENT);
-        CoachingMessageSendCommand command = request.to(USER_ID, ANOTHER_COACHING_CONVERSATION_ID);
-        willThrow(new ResourceNotFoundException(COACHING_CONVERSATION_NOT_FOUND))
-                .given(coachingMessageSender)
-                .send(command);
-
-        MvcTestResultAssert result = mvcTester.post()
-                .uri(url)
-                .accept(TEXT_EVENT_STREAM)
-                .contentType(APPLICATION_JSON)
-                .content(toJson(request))
-                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(USER_ID))))
-                .assertThat()
-                .hasStatus(NOT_FOUND)
-                .hasContentType(APPLICATION_JSON);
-
-        assertErrorResponse(result, COACHING_CONVERSATION_NOT_FOUND);
-        then(coachingMessageSender).should().send(command);
     }
 
     @Test
@@ -209,6 +273,29 @@ class CoachingApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void AI_코치_응답과_대화_제목_스트리밍_시_코칭_대화가_없으면_404를_응답한다() {
+        String url = COACHING_CONVERSATIONS_URL + "/" + ANOTHER_COACHING_CONVERSATION_ID + "/messages";
+        CoachingMessageSendRequest request = new CoachingMessageSendRequest(MESSAGE_CONTENT);
+        CoachingMessageSendCommand command = request.to(USER_ID, ANOTHER_COACHING_CONVERSATION_ID);
+        willThrow(new ResourceNotFoundException(COACHING_CONVERSATION_NOT_FOUND))
+                .given(coachingMessageSender)
+                .send(command);
+
+        MvcTestResultAssert result = mvcTester.post()
+                .uri(url)
+                .accept(TEXT_EVENT_STREAM)
+                .contentType(APPLICATION_JSON)
+                .content(toJson(request))
+                .with(jwt().jwt(jwt -> jwt.subject(String.valueOf(USER_ID))))
+                .assertThat()
+                .hasStatus(NOT_FOUND)
+                .hasContentType(APPLICATION_JSON);
+
+        assertErrorResponse(result, COACHING_CONVERSATION_NOT_FOUND);
+        then(coachingMessageSender).should().send(command);
+    }
+
+    @Test
     void AI_코치_응답과_대화_제목_스트리밍_중_회원이_메시지_전송하면_409를_응답한다() {
         CoachingMessageSendRequest request = new CoachingMessageSendRequest(MESSAGE_CONTENT);
         CoachingMessageSendCommand command = request.to(USER_ID, COACHING_CONVERSATION_ID);
@@ -228,6 +315,31 @@ class CoachingApiTest extends PrivateApiTestSupport {
 
         assertErrorResponse(result, COACHING_RESPONSE_ALREADY_IN_PROGRESS);
         then(coachingMessageSender).should().send(command);
+    }
+
+    private static void assertCoachingConversationsFindResponse(
+            MvcTestResultAssert result,
+            CursorResult<CoachingConversationSummaryResult, Long> summaryPage,
+            CoachingConversationSummaryResult summary
+    ) {
+        result.bodyJson().extractingPath("$.cursorInfo.nextCursor")
+                .isEqualTo(summaryPage.cursorInfo().nextCursor());
+        result.bodyJson().extractingPath("$.cursorInfo.hasNext")
+                .isEqualTo(summaryPage.cursorInfo().hasNext());
+        result.bodyJson().extractingPath("$.coachingConversations[0].coachingConversationId")
+                .isEqualTo(summary.coachingConversationId().intValue());
+        result.bodyJson().extractingPath("$.coachingConversations[0].title")
+                .isEqualTo(summary.title());
+        result.bodyJson().extractingPath("$.coachingConversations[0].context")
+                .isEqualTo(summary.context().name());
+        result.bodyJson().extractingPath("$.coachingConversations[0].preview")
+                .isEqualTo(summary.preview());
+        result.bodyJson().extractingPath("$.coachingConversations[0].lastMessageCreatedAt")
+                .isEqualTo(summary.lastMessageCreatedAt().toString());
+        result.bodyJson().extractingPath("$.coachingConversations[0].createdAt")
+                .isEqualTo(summary.createdAt().toString());
+        result.bodyJson().extractingPath("$.coachingConversations[0].updatedAt")
+                .isEqualTo(summary.updatedAt().toString());
     }
 
     private MvcResult sendMessage(CoachingMessageSendRequest request) throws Exception {

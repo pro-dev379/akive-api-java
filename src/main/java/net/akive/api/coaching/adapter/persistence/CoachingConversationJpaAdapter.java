@@ -4,11 +4,17 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.coaching.adapter.persistence.entity.CoachingConversationEntity;
 import net.akive.api.coaching.adapter.persistence.entity.CoachingMessageEntity;
 import net.akive.api.coaching.application.required.CoachingConversationRepository;
+import net.akive.api.coaching.application.required.data.CoachingConversationSummaryData;
 import net.akive.api.coaching.domain.CoachingConversation;
 import net.akive.api.coaching.domain.CoachingMessage;
+import net.akive.api.coaching.domain.ConversationContext;
+import net.akive.api.common.pagination.CursorCondition;
+import net.akive.api.common.pagination.CursorResult;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -37,6 +43,31 @@ class CoachingConversationJpaAdapter implements CoachingConversationRepository {
     @Override
     public CoachingMessage saveMessage(CoachingMessage coachingMessage) {
         return coachingMessageJpaRepository.save(CoachingMessageEntity.from(coachingMessage)).to();
+    }
+
+    @Override
+    public CursorResult<CoachingConversationSummaryData, Long> findSummaryPageByUserIdAndContext(
+            Long userId,
+            ConversationContext context,
+            CursorCondition<Long> cursorCondition
+    ) {
+        List<CoachingConversationSummaryData> fetchedSummaries = coachingConversationJpaRepository
+                .findSummariesByUserIdAndContextAndLatestMessageIdBefore(
+                        userId,
+                        context,
+                        cursorCondition.cursor(),
+                        PageRequest.of(0, cursorCondition.size() + 1)
+                );
+
+        boolean hasNext = fetchedSummaries.size() > cursorCondition.size();
+        List<CoachingConversationSummaryData> summaries = hasNext
+                ? fetchedSummaries.subList(0, cursorCondition.size())
+                : fetchedSummaries;
+        Long nextCursor = hasNext
+                ? summaries.getLast().latestMessageId()
+                : null;
+
+        return CursorResult.of(nextCursor, hasNext, summaries);
     }
 
     @Override

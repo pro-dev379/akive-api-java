@@ -22,7 +22,7 @@ class RefreshTokenRedisAdapterTest extends RedisTestSupport {
     private static final Duration SHORT_TTL = Duration.ofMillis(300);
 
     @Test
-    void 회원_식별자와_클라이언트_식벼자로_리프레시_토큰을_저장하고_조회한다() {
+    void 회원_식별자와_클라이언트_식별자로_리프레시_토큰을_저장하고_조회한다() {
         RefreshToken refreshToken = createRefreshToken();
         ClientInstanceId clientInstanceId = createClientInstanceId();
 

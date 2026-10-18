@@ -37,14 +37,14 @@ public class CoachingMessageEntity {
     private CoachingConversationEntity coachingConversation;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private MessageRole role;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private MessageCompletionStatus completionStatus;
 
     @CreatedDate

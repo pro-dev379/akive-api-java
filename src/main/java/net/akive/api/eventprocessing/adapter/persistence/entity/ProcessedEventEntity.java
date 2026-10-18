@@ -47,11 +47,11 @@ public class ProcessedEventEntity {
     private UUID eventId;
 
     @Enumerated(STRING)
-    @Column(nullable = false, updatable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, updatable = false, columnDefinition = "VARCHAR(50)")
     private EventType eventType;
 
     @Enumerated(STRING)
-    @Column(nullable = false, updatable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, updatable = false, columnDefinition = "VARCHAR(50)")
     private EventConsumer consumer;
 
     @CreatedDate

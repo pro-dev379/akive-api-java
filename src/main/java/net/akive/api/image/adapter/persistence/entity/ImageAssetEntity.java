@@ -84,7 +84,7 @@ public class ImageAssetEntity extends BaseTimeEntity implements Persistable<UUID
         imageAsset.getVariants().forEach(imageVariant -> imageAssetEntity.addImageVariant(
                 ImageVariantEntity.from(imageVariant)
         ));
-        imageAssetEntity.restoreCreatedAt(imageAsset.getCreatedAt());
+        imageAssetEntity.restoreAuditTime(imageAsset.getCreatedAt());
 
         return imageAssetEntity;
     }

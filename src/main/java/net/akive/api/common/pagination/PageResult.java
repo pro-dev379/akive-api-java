@@ -2,10 +2,7 @@ package net.akive.api.common.pagination;
 
 import java.util.List;
 
-public record PageResult<T>(
-        PageInfo pageInfo,
-        List<T> contents
-) {
+public record PageResult<T>(PageInfo pageInfo, List<T> contents) {
 
     public PageResult {
         if (pageInfo == null) {

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.akive.api.user.domain.User;
 
+import java.time.Instant;
 import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -27,12 +28,18 @@ public class CoachingConversation {
 
     private ConversationContext context;
 
+    private Instant createdAt;
+
+    private Instant updatedAt;
+
     public static CoachingConversation reconstruct(
             Long coachingConversationId,
             User user,
             String llmConversationId,
             String title,
-            ConversationContext context
+            ConversationContext context,
+            Instant createdAt,
+            Instant updatedAt
     ) {
         return CoachingConversation.builder()
                 .coachingConversationId(requirePositive(coachingConversationId))
@@ -40,6 +47,8 @@ public class CoachingConversation {
                 .llmConversationId(requireNotBlank(llmConversationId))
                 .title(title == null ? null : requireNotBlank(title))
                 .context(requireNonNull(context))
+                .createdAt(requireNonNull(createdAt))
+                .updatedAt(requireNonNull(updatedAt))
                 .build();
     }
 

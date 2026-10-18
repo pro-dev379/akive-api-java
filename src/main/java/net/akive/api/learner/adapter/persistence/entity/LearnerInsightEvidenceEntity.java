@@ -45,14 +45,14 @@ public class LearnerInsightEvidenceEntity {
     private LearnerInsightEntity learnerInsight;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private EvidenceSourceType sourceType;
 
     @Column(nullable = false)
     private Long sourceId;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private EvidenceStance stance;
 
     @Column(nullable = false, length = 500)

@@ -45,7 +45,7 @@ public class ProducedEventEntity {
     private UUID eventId;
 
     @Enumerated(STRING)
-    @Column(nullable = false, updatable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, updatable = false, columnDefinition = "VARCHAR(50)")
     private EventType eventType;
 
     @JdbcTypeCode(JSON)
@@ -53,7 +53,7 @@ public class ProducedEventEntity {
     private String payload;
 
     @Enumerated(STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private ProducedEventStatus status;
 
     @Column(nullable = false)

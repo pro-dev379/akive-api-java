@@ -79,7 +79,7 @@ class ReportQueryServiceTest {
 
     @Test
     void 리포트_헤더_목록을_페이징_조회한다() {
-        PageCondition pageCondition = PageCondition.of(DEFAULT_PAGE, DEFAULT_SIZE, "reportOn", DESC);
+        PageCondition pageCondition = PageCondition.of(DEFAULT_PAGE, DEFAULT_PAGE_SIZE, "reportOn", DESC);
         ReportHeaderResult reportHeader = new ReportHeaderResult(REPORT_ID, REPORT_ON, WEEKLY);
         PageResult<ReportHeaderResult> reportHeaderPage = createPageResult(List.of(reportHeader));
         given(reportRepository.findHeaderPageByUserId(USER_ID, pageCondition))

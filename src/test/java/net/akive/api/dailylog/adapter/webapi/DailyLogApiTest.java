@@ -476,7 +476,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         LocalDate olderLogOn = LocalDate.of(2026, 9, 1);
         LocalDate recentLogOn = olderLogOn.plusDays(1);
         List<LocalDate> contents = List.of(recentLogOn, olderLogOn);
-        PageResult<LocalDate> logOnPage = createPageResult(DEFAULT_PAGE, DEFAULT_SIZE, contents);
+        PageResult<LocalDate> logOnPage = createPageResult(DEFAULT_PAGE, DEFAULT_PAGE_SIZE, contents);
 
         given(dailyLogFinder.findLogOnPage(eq(USER_ID), any(PageCondition.class))).willReturn(logOnPage);
 
@@ -484,11 +484,11 @@ class DailyLogApiTest extends PrivateApiTestSupport {
                 DAILY_LOG_ONS_URL + "?page={page}&size={size}",
                 USER_ID,
                 DEFAULT_PAGE,
-                DEFAULT_SIZE
+                DEFAULT_PAGE_SIZE
         ).hasStatusOk();
 
         result.bodyJson().extractingPath("$.pageInfo.page").isEqualTo(DEFAULT_PAGE);
-        result.bodyJson().extractingPath("$.pageInfo.size").isEqualTo(DEFAULT_SIZE);
+        result.bodyJson().extractingPath("$.pageInfo.size").isEqualTo(DEFAULT_PAGE_SIZE);
         result.bodyJson().extractingPath("$.pageInfo.totalElement").isEqualTo(contents.size());
         result.bodyJson().extractingPath("$.pageInfo.totalPage").isEqualTo(1);
         result.bodyJson().extractingPath("$.pageInfo.first").isEqualTo(true);
@@ -499,7 +499,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
         ArgumentCaptor<PageCondition> pageConditionCaptor = ArgumentCaptor.forClass(PageCondition.class);
         then(dailyLogFinder).should().findLogOnPage(eq(USER_ID), pageConditionCaptor.capture());
         assertThat(pageConditionCaptor.getValue().getPage()).isEqualTo(DEFAULT_PAGE);
-        assertThat(pageConditionCaptor.getValue().getSize()).isEqualTo(DEFAULT_SIZE);
+        assertThat(pageConditionCaptor.getValue().getSize()).isEqualTo(DEFAULT_PAGE_SIZE);
         assertThat(pageConditionCaptor.getValue().getSortCondition().property()).isEqualTo("logOn");
         assertThat(pageConditionCaptor.getValue().getSortCondition().sortDirection()).isEqualTo(DESC);
     }
@@ -510,7 +510,7 @@ class DailyLogApiTest extends PrivateApiTestSupport {
             "0, 0, Size must be positive.",
             "0, 101, Size must not exceed 100."
     })
-    void 일일_로그_날짜_목록_조회_시_페이지_요청_파라미터가_올바르지_않으면_400을_응답한다(int page, int size, String message) {
+    void 일일_로그_날짜_목록_조회_시_페이징_요청_파라미터가_올바르지_않으면_400을_응답한다(int page, int size, String message) {
         MvcTestResultAssert result = get(
                 DAILY_LOG_ONS_URL + "?page={page}&size={size}",
                 USER_ID,

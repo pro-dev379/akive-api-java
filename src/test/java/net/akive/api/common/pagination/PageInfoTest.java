@@ -12,7 +12,7 @@ class PageInfoTest {
     void 페이지_정보를_생성한다() {
         PageInfo pageInfo = new PageInfo(
                 DEFAULT_PAGE,
-                DEFAULT_SIZE,
+                DEFAULT_PAGE_SIZE,
                 TOTAL_ELEMENT,
                 TOTAL_PAGE,
                 true,
@@ -20,7 +20,7 @@ class PageInfoTest {
         );
 
         assertThat(pageInfo.page()).isEqualTo(DEFAULT_PAGE);
-        assertThat(pageInfo.size()).isEqualTo(DEFAULT_SIZE);
+        assertThat(pageInfo.size()).isEqualTo(DEFAULT_PAGE_SIZE);
         assertThat(pageInfo.totalElement()).isEqualTo(TOTAL_ELEMENT);
         assertThat(pageInfo.totalPage()).isEqualTo(TOTAL_PAGE);
         assertThat(pageInfo.first()).isTrue();
@@ -32,7 +32,7 @@ class PageInfoTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> new PageInfo(
                         -1,
-                        DEFAULT_SIZE,
+                        DEFAULT_PAGE_SIZE,
                         TOTAL_ELEMENT,
                         TOTAL_PAGE,
                         false,
@@ -60,7 +60,7 @@ class PageInfoTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> new PageInfo(
                         DEFAULT_PAGE,
-                        DEFAULT_SIZE,
+                        DEFAULT_PAGE_SIZE,
                         -1,
                         TOTAL_PAGE,
                         true,
@@ -74,7 +74,7 @@ class PageInfoTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> new PageInfo(
                         DEFAULT_PAGE,
-                        DEFAULT_SIZE,
+                        DEFAULT_PAGE_SIZE,
                         TOTAL_ELEMENT,
                         -1,
                         true,

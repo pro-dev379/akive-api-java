@@ -4,10 +4,15 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.coaching.adapter.webapi.request.CoachingConversationCreateRequest;
 import net.akive.api.coaching.adapter.webapi.request.CoachingMessageSendRequest;
 import net.akive.api.coaching.adapter.webapi.response.CoachingConversationCreateResponse;
+import net.akive.api.coaching.adapter.webapi.response.CoachingConversationsFindResponse;
 import net.akive.api.coaching.application.provided.CoachingConversationCreator;
+import net.akive.api.coaching.application.provided.CoachingConversationFinder;
 import net.akive.api.coaching.application.provided.CoachingMessageSender;
+import net.akive.api.coaching.application.provided.dto.CoachingConversationSummaryResult;
 import net.akive.api.coaching.application.provided.dto.CoachingMessageSendResult;
 import net.akive.api.coaching.application.stream.CoachingResponseStream;
+import net.akive.api.coaching.domain.ConversationContext;
+import net.akive.api.common.pagination.CursorResult;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +24,7 @@ import java.util.concurrent.CompletionStage;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
+import static net.akive.api.common.pagination.CursorCondition.of;
 
 @RestController
 @RequestMapping("/coaching")
@@ -26,7 +32,21 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 public class CoachingApi {
 
     private final CoachingConversationCreator coachingConversationCreator;
+    private final CoachingConversationFinder coachingConversationFinder;
     private final CoachingMessageSender coachingMessageSender;
+
+    @GetMapping("/conversations")
+    public CoachingConversationsFindResponse findRecentConversations(
+            @AuthenticatedUserId Long userId,
+            @RequestParam ConversationContext context,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(required = false) Integer size
+    ) {
+        CursorResult<CoachingConversationSummaryResult, Long> summaryPage =
+                coachingConversationFinder.findSummaryPage(userId, context, of(cursor, size));
+
+        return CoachingConversationsFindResponse.from(summaryPage);
+    }
 
     @PostMapping("/conversations")
     @ResponseStatus(CREATED)

@@ -30,7 +30,7 @@ class CoachingPromptCompositionTest {
     }
 
     @Test
-    void 컨텍스트_섹션_없이_메시지만으로_코칭_프롬프트를_구성한다() {
+    void 코칭_컨텍스트_섹션_없이_메시지만으로_코칭_프롬프트를_구성한다() {
         CoachingPromptComposition composition = CoachingPromptComposition.from("  " + MESSAGE + "  ");
 
         assertThat(composition.message()).isEqualTo(MESSAGE);
@@ -38,7 +38,7 @@ class CoachingPromptCompositionTest {
     }
 
     @Test
-    void 코칭_프롬프트_구성의_컨텍스트_섹션_목록은_외부에서_수정할_수_없다() {
+    void 코칭_프롬프트_구성의_코칭_컨텍스트_섹션_목록은_외부에서_수정할_수_없다() {
         CoachingPromptComposition.ContextSection contextSection = createContextSection();
         List<CoachingPromptComposition.ContextSection> contextSections = new ArrayList<>(List.of(contextSection));
         CoachingPromptComposition composition = new CoachingPromptComposition(MESSAGE, contextSections);
