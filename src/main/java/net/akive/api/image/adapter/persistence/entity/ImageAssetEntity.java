@@ -11,7 +11,6 @@ import net.akive.api.image.domain.ImageAsset;
 import net.akive.api.image.domain.ImageType;
 import net.akive.api.image.domain.ProcessingStatus;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.OnDelete;
 import org.springframework.data.domain.Persistable;
 
 import java.time.Instant;
@@ -24,7 +23,6 @@ import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
-import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 import static org.hibernate.type.SqlTypes.BINARY;
 
 @Entity
@@ -65,7 +63,6 @@ public class ImageAssetEntity extends BaseTimeEntity implements Persistable<UUID
 
     private Instant processedAt;
 
-    @OnDelete(action = CASCADE)
     @OneToMany(mappedBy = "imageAsset", cascade = ALL, orphanRemoval = true)
     private List<ImageVariantEntity> variants = new ArrayList<>();
 

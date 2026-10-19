@@ -9,12 +9,14 @@ import net.akive.api.image.adapter.persistence.converter.ImageFormatConverter;
 import net.akive.api.image.domain.ImageFormat;
 import net.akive.api.image.domain.ImageVariant;
 import net.akive.api.image.domain.VariantType;
+import org.hibernate.annotations.OnDelete;
 
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
+import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Entity
 @Table(
@@ -39,6 +41,7 @@ public class ImageVariantEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long imageVariantId;
 
+    @OnDelete(action = CASCADE)
     @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "image_asset_id", nullable = false)
     private ImageAssetEntity imageAsset;
