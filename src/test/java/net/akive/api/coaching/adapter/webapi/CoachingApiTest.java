@@ -181,6 +181,23 @@ class CoachingApiTest extends PrivateApiTestSupport {
         assertThat(cursorConditionCaptor.getValue().size()).isEqualTo(CURSOR_PAGE_SIZE);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "0, Size must be positive.",
+            "101, Size must not exceed 100."
+    })
+    void 코칭_메시지_목록_조회_시_커서_페이징_요청_파라미터가_올바르지_않으면_400을_응답한다(int size, String message) {
+        MvcTestResultAssert result = get(
+                COACHING_MESSAGES_URL + "?size={size}",
+                USER_ID,
+                size
+        ).hasStatus(BAD_REQUEST);
+
+        assertInvalidCursorConditionResponse(result, message);
+
+        then(coachingConversationFinder).shouldHaveNoInteractions();
+    }
+
     @Test
     void 코칭_메시지_목록_조회_시_코칭_대화가_없으면_404를_응답한다() {
         String url = COACHING_CONVERSATIONS_URL + "/" + UNKNOWN_COACHING_CONVERSATION_ID + "/messages";
@@ -198,23 +215,6 @@ class CoachingApiTest extends PrivateApiTestSupport {
                 eq(UNKNOWN_COACHING_CONVERSATION_ID),
                 any()
         );
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "0, Size must be positive.",
-            "101, Size must not exceed 100."
-    })
-    void 코칭_메시지_목록_조회_시_커서_페이징_요청_파라미터가_올바르지_않으면_400을_응답한다(int size, String message) {
-        MvcTestResultAssert result = get(
-                COACHING_MESSAGES_URL + "?size={size}",
-                USER_ID,
-                size
-        ).hasStatus(BAD_REQUEST);
-
-        assertInvalidCursorConditionResponse(result, message);
-
-        then(coachingConversationFinder).shouldHaveNoInteractions();
     }
 
     @Test

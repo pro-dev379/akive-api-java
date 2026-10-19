@@ -89,6 +89,22 @@ class CoachingConversationQueryServiceTest {
         );
     }
 
+    @ParameterizedTest
+    @ValueSource(longs = {0, -1})
+    void 코칭_대화_목록_조회_시_커서가_양수가_아니면_예외를_던진다(long cursor) {
+        CursorCondition<Long> cursorCondition = CursorCondition.of(cursor, CURSOR_PAGE_SIZE);
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> coachingConversationQueryService.findSummaryPage(
+                        USER_ID,
+                        MAIN,
+                        cursorCondition
+                ))
+                .withMessage("Cursor must be positive.");
+
+        then(coachingConversationRepository).shouldHaveNoInteractions();
+    }
+
     @Test
     void 코칭_대화의_메시지_목록을_커서_페이징_조회한다() {
         CursorCondition<Long> cursorCondition = CursorCondition.of(null, CURSOR_PAGE_SIZE);
@@ -161,22 +177,6 @@ class CoachingConversationQueryServiceTest {
                 USER_ID
         );
         then(coachingConversationRepository).shouldHaveNoMoreInteractions();
-    }
-
-    @ParameterizedTest
-    @ValueSource(longs = {0, -1})
-    void 코칭_대화_목록_조회_시_커서가_양수가_아니면_예외를_던진다(long cursor) {
-        CursorCondition<Long> cursorCondition = CursorCondition.of(cursor, CURSOR_PAGE_SIZE);
-
-        assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> coachingConversationQueryService.findSummaryPage(
-                        USER_ID,
-                        MAIN,
-                        cursorCondition
-                ))
-                .withMessage("Cursor must be positive.");
-
-        then(coachingConversationRepository).shouldHaveNoInteractions();
     }
 
     @ParameterizedTest
