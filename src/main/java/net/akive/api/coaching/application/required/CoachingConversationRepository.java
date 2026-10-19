@@ -33,4 +33,6 @@ public interface CoachingConversationRepository {
     );
 
     Optional<CoachingMessage> findLatestMessage(Long coachingConversationId);
+
+    void delete(CoachingConversation coachingConversation);
 }

@@ -13,6 +13,7 @@ public class CoachingConversationFixture {
 
     public static final Long COACHING_CONVERSATION_ID = 1L;
     public static final Long ANOTHER_COACHING_CONVERSATION_ID = 2L;
+    public static final Long UNKNOWN_COACHING_CONVERSATION_ID = Long.MAX_VALUE;
     public static final String LLM_CONVERSATION_ID = "conv_123";
     public static final String ANOTHER_LLM_CONVERSATION_ID = "conv_456";
     public static final String CONVERSATION_TITLE = "학습 계획 코칭";

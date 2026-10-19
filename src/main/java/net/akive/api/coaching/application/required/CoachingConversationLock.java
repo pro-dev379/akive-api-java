@@ -4,7 +4,7 @@ import java.util.Optional;
 
 public interface CoachingConversationLock {
 
-    Optional<Lease> tryAcquire(Long coachingConversationId);
+    Optional<Lease> tryAcquire(Long coachingConversationId, Long userId);
 
     interface Lease {
 

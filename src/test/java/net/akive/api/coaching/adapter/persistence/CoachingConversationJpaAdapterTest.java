@@ -153,6 +153,33 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
+    void 코칭_대화를_삭제하면_코칭_메시지도_함께_삭제한다() {
+        CoachingConversation savedCoachingConversation = saveCoachingConversation();
+        CoachingMessage savedCoachingMessage = coachingConversationRepository.saveMessage(
+                CoachingMessage.fromUser(savedCoachingConversation, MESSAGE_CONTENT)
+        );
+        flushAndClear();
+
+        coachingConversationRepository.delete(savedCoachingConversation);
+        flushAndClear();
+
+        Optional<CoachingConversation> foundCoachingConversation = coachingConversationRepository
+                .findByCoachingConversationIdAndUserId(
+                        savedCoachingConversation.getCoachingConversationId(),
+                        savedCoachingConversation.getUser().getUserId()
+                );
+        Optional<CoachingMessage> foundCoachingMessage = coachingConversationRepository
+                .findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+                        savedCoachingMessage.getCoachingMessageId(),
+                        savedCoachingConversation.getCoachingConversationId(),
+                        savedCoachingConversation.getUser().getUserId()
+                );
+
+        assertThat(foundCoachingConversation).isEmpty();
+        assertThat(foundCoachingMessage).isEmpty();
+    }
+
+    @Test
     void 회원_식별자와_코칭_대화_컨텍스트로_코칭_대화_목록을_조회한다() {
         User savedUser = saveUser();
         CoachingConversation expectedConversation = saveCoachingConversation(

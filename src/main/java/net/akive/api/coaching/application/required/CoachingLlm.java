@@ -12,4 +12,6 @@ public interface CoachingLlm {
     CompletionStage<String> generateConversationTitle(Long userId, CoachingPrompt coachingPrompt);
 
     CoachingResponseStream streamResponse(Long userId, String conversationId, CoachingPrompt coachingPrompt);
+
+    void deleteConversation(String conversationId);
 }

@@ -10,6 +10,7 @@ import net.akive.api.coaching.application.required.data.CoachingTurnRecoveryData
 import net.akive.api.coaching.application.stream.CoachingResponseStream;
 import net.akive.api.coaching.domain.CoachingConversation;
 import net.akive.api.coaching.domain.CoachingMessage;
+import net.akive.api.common.exception.business.RateLimitExceededException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.id.UuidGenerator;
@@ -39,6 +40,7 @@ import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.
 import static net.akive.api.coaching.domain.fixture.CoachingMessageFixture.*;
 import static net.akive.api.common.exception.business.ResourceConflictError.COACHING_RESPONSE_ALREADY_IN_PROGRESS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.COACHING_CONVERSATION_NOT_FOUND;
+import static net.akive.api.common.exception.business.RateLimitError.LLM_DAILY_TOKEN_QUOTA_EXCEEDED;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -142,6 +144,34 @@ class CoachingMessageCommandServiceTest {
     }
 
     @Test
+    void 코칭_대화_락을_획득한_후_코칭_대화를_조회하고_AI_코치_응답_스트림을_생성한다() {
+        CoachingMessageSendCommand command = createCoachingMessageSendCommand();
+        CoachingConversation coachingConversation = reconstructCoachingConversation();
+        prepareMessageSend(command, coachingConversation);
+
+        coachingMessageCommandService.send(command);
+
+        InOrder requestOrder = inOrder(
+                coachingConversationLock,
+                coachingConversationRepository,
+                coachingLlm
+        );
+        requestOrder.verify(coachingConversationLock).tryAcquire(
+                command.coachingConversationId(),
+                command.userId()
+        );
+        requestOrder.verify(coachingConversationRepository).findByCoachingConversationIdAndUserId(
+                command.coachingConversationId(),
+                command.userId()
+        );
+        requestOrder.verify(coachingLlm).streamResponse(
+                eq(command.userId()),
+                eq(coachingConversation.getLlmConversationId()),
+                any(CoachingPrompt.class)
+        );
+    }
+
+    @Test
     void 코칭_대화_제목_생성에_실패하면_제목을_반환하지_않는다() {
         CoachingMessageSendCommand command = createCoachingMessageSendCommand();
         CoachingConversation coachingConversation = coachingConversationWithoutTitle();
@@ -192,6 +222,8 @@ class CoachingMessageCommandServiceTest {
     @Test
     void 코칭_대화를_조회할_수_없으면_메시지를_전송할_수_없다() {
         CoachingMessageSendCommand command = createCoachingMessageSendCommand();
+        given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
+                .willReturn(Optional.of(lease));
         given(coachingConversationRepository.findByCoachingConversationIdAndUserId(
                 command.coachingConversationId(),
                 command.userId()
@@ -202,20 +234,15 @@ class CoachingMessageCommandServiceTest {
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(COACHING_CONVERSATION_NOT_FOUND);
 
+        assertThat(lease.isReleased()).isTrue();
         then(llmUsageQuotaChecker).shouldHaveNoInteractions();
-        then(coachingConversationLock).shouldHaveNoInteractions();
         then(coachingLlm).shouldHaveNoInteractions();
     }
 
     @Test
     void AI_코치_응답_메시지_생성_중에는_회원이_메시지를_전송할_수_없다() {
         CoachingMessageSendCommand command = createCoachingMessageSendCommand();
-        CoachingConversation coachingConversation = reconstructCoachingConversation();
-        given(coachingConversationRepository.findByCoachingConversationIdAndUserId(
-                command.coachingConversationId(),
-                command.userId()
-        )).willReturn(Optional.of(coachingConversation));
-        given(coachingConversationLock.tryAcquire(command.coachingConversationId()))
+        given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
                 .willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceConflictException.class)
@@ -223,10 +250,35 @@ class CoachingMessageCommandServiceTest {
                 .extracting(ResourceConflictException::getError)
                 .isEqualTo(COACHING_RESPONSE_ALREADY_IN_PROGRESS);
 
-        then(llmUsageQuotaChecker).should().checkUserDailyQuota(command.userId());
+        then(llmUsageQuotaChecker).shouldHaveNoInteractions();
+        then(coachingConversationRepository).shouldHaveNoInteractions();
         then(coachingResponseRecoveryStore).shouldHaveNoInteractions();
         then(coachingLlm).shouldHaveNoInteractions();
         then(coachingConversationRepository).should(never()).saveMessage(any());
+    }
+
+    @Test
+    void LLM_일일_토큰_한도를_초과하면_락을_해제한다() {
+        CoachingMessageSendCommand command = createCoachingMessageSendCommand();
+        CoachingConversation coachingConversation = reconstructCoachingConversation();
+        given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
+                .willReturn(Optional.of(lease));
+        given(coachingConversationRepository.findByCoachingConversationIdAndUserId(
+                command.coachingConversationId(),
+                command.userId()
+        )).willReturn(Optional.of(coachingConversation));
+        willThrow(new RateLimitExceededException(LLM_DAILY_TOKEN_QUOTA_EXCEEDED))
+                .given(llmUsageQuotaChecker)
+                .checkUserDailyQuota(command.userId());
+
+        assertThatExceptionOfType(RateLimitExceededException.class)
+                .isThrownBy(() -> coachingMessageCommandService.send(command))
+                .extracting(RateLimitExceededException::getError)
+                .isEqualTo(LLM_DAILY_TOKEN_QUOTA_EXCEEDED);
+
+        assertThat(lease.isReleased()).isTrue();
+        then(coachingResponseRecoveryStore).shouldHaveNoInteractions();
+        then(coachingLlm).shouldHaveNoInteractions();
     }
 
     @Test
@@ -264,7 +316,7 @@ class CoachingMessageCommandServiceTest {
                 command.coachingConversationId(),
                 command.userId()
         )).willReturn(Optional.of(coachingConversation));
-        given(coachingConversationLock.tryAcquire(command.coachingConversationId()))
+        given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
                 .willReturn(Optional.of(lease));
         given(coachingResponseRecoveryStore.find(command.coachingConversationId()))
                 .willReturn(Optional.of(recoveryData));
@@ -514,7 +566,7 @@ class CoachingMessageCommandServiceTest {
                 command.coachingConversationId(),
                 command.userId()
         )).willReturn(Optional.of(coachingConversation));
-        given(coachingConversationLock.tryAcquire(command.coachingConversationId()))
+        given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
                 .willReturn(Optional.of(lease));
         given(coachingConversationRepository.saveMessage(any(CoachingMessage.class)))
                 .willReturn(savedUserMessage);

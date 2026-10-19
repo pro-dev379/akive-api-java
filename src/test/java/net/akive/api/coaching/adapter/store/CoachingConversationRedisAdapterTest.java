@@ -15,6 +15,8 @@ import static net.akive.api.coaching.application.fixture.CoachingMessageCommandF
 import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.COACHING_CONVERSATION_ID;
 import static net.akive.api.common.cache.CacheKeyProvider.coachingConversationLock;
 import static net.akive.api.common.cache.CacheKeyProvider.pendingCoachingResponse;
+import static net.akive.api.user.domain.fixture.UserFixture.ANOTHER_USER_ID;
+import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CoachingConversationRedisAdapterTest extends RedisTestSupport {
@@ -31,32 +33,47 @@ class CoachingConversationRedisAdapterTest extends RedisTestSupport {
     @Test
     void 코칭_대화_락을_획득하고_해제한다() {
         CoachingConversationLock.Lease lease = conversationLock
-                .tryAcquire(COACHING_CONVERSATION_ID)
+                .tryAcquire(COACHING_CONVERSATION_ID, USER_ID)
                 .orElseThrow();
-        Long ttl = redisTemplate.getExpire(coachingConversationLock(COACHING_CONVERSATION_ID), SECONDS);
+        Long ttl = redisTemplate.getExpire(
+                coachingConversationLock(COACHING_CONVERSATION_ID, USER_ID),
+                SECONDS
+        );
 
-        assertThat(conversationLock.tryAcquire(COACHING_CONVERSATION_ID)).isEmpty();
+        assertThat(conversationLock.tryAcquire(COACHING_CONVERSATION_ID, USER_ID)).isEmpty();
         assertThat(ttl)
                 .isPositive()
                 .isLessThanOrEqualTo(LOCK_TTL_SECONDS);
 
         lease.release();
 
-        assertThat(conversationLock.tryAcquire(COACHING_CONVERSATION_ID)).isPresent();
+        assertThat(conversationLock.tryAcquire(COACHING_CONVERSATION_ID, USER_ID)).isPresent();
     }
 
     @Test
     void 이전_락_소유자는_현재_락_소유자의_코칭_대화_락을_해제할_수_없다() {
         CoachingConversationLock.Lease previousOwner = conversationLock
-                .tryAcquire(COACHING_CONVERSATION_ID)
+                .tryAcquire(COACHING_CONVERSATION_ID, USER_ID)
                 .orElseThrow();
-        String lockKey = coachingConversationLock(COACHING_CONVERSATION_ID);
+        String lockKey = coachingConversationLock(COACHING_CONVERSATION_ID, USER_ID);
         String currentOwnerToken = "current-owner-token";
         redisTemplate.opsForValue().set(lockKey, currentOwnerToken);
 
         previousOwner.release();
 
         assertThat(redisTemplate.opsForValue().get(lockKey)).isEqualTo(currentOwnerToken);
+    }
+
+    @Test
+    void 같은_코칭_대화_식별자라도_회원이_다르면_락을_별도로_획득한다() {
+        Optional<CoachingConversationLock.Lease> userLease = conversationLock
+                .tryAcquire(COACHING_CONVERSATION_ID, USER_ID);
+
+        Optional<CoachingConversationLock.Lease> anotherUserLease = conversationLock
+                .tryAcquire(COACHING_CONVERSATION_ID, ANOTHER_USER_ID);
+
+        assertThat(userLease).isPresent();
+        assertThat(anotherUserLease).isPresent();
     }
 
     @Test

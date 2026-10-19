@@ -11,12 +11,14 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.internal.InvalidPersistedDataException;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.hibernate.annotations.OnDelete;
 
 import java.time.Instant;
 
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -32,6 +34,7 @@ public class CoachingMessageEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long coachingMessageId;
 
+    @OnDelete(action = CASCADE)
     @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "coaching_conversation_id", nullable = false)
     private CoachingConversationEntity coachingConversation;

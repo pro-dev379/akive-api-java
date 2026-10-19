@@ -3,7 +3,9 @@ package net.akive.api.coaching.adapter.llm;
 import com.openai.client.OpenAIClient;
 import com.openai.core.RequestOptions;
 import com.openai.core.http.AsyncStreamResponse;
+import com.openai.models.conversations.ConversationDeletedResource;
 import com.openai.models.responses.*;
+import com.openai.errors.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.akive.api.coaching.application.prompt.CoachingPrompt;
@@ -89,6 +91,22 @@ class OpenAiCoachingLlmAdapter implements CoachingLlm {
                         openAiProperties.model().coaching()
                 )
         );
+    }
+
+    @Override
+    public void deleteConversation(String conversationId) {
+        try {
+            ConversationDeletedResource deletedConversation = openAIClient.conversations().delete(
+                    conversationId,
+                    requestOptions(openAiProperties.timeout())
+            );
+
+            if (!deletedConversation.deleted()) {
+                throw new IllegalStateException("OpenAI did not delete the coaching conversation: " + conversationId);
+            }
+        } catch (NotFoundException ignored) {
+            log.info("OpenAI coaching conversation is already deleted: conversationId={}", conversationId);
+        }
     }
 
     private ResponseCreateParams createCoachingParams(String conversationId, CoachingPrompt coachingPrompt) {

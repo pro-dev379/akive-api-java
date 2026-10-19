@@ -54,11 +54,12 @@ class CoachingMessageCommandService implements CoachingMessageSender {
     @Override
     public CoachingMessageSendResult send(CoachingMessageSendCommand command)
             throws ResourceNotFoundException, ResourceConflictException {
-        CoachingConversation coachingConversation = findCoachingConversationOrThrow(command);
-        llmUsageQuotaChecker.checkUserDailyQuota(command.userId());
-        Lease lease = acquireLeaseOrThrow(coachingConversation.getCoachingConversationId());
+        Lease lease = acquireLeaseOrThrow(command.coachingConversationId(), command.userId());
 
+        CoachingConversation coachingConversation;
         try {
+            coachingConversation = findCoachingConversationOrThrow(command);
+            llmUsageQuotaChecker.checkUserDailyQuota(command.userId());
             recoverPendingResponse(coachingConversation);
         } catch (RuntimeException e) {
             lease.release();
@@ -101,8 +102,8 @@ class CoachingMessageCommandService implements CoachingMessageSender {
                 : new CoachingPromptComposition(command.content(), contextSections);
     }
 
-    private Lease acquireLeaseOrThrow(Long coachingConversationId) {
-        return coachingConversationLock.tryAcquire(coachingConversationId)
+    private Lease acquireLeaseOrThrow(Long coachingConversationId, Long userId) {
+        return coachingConversationLock.tryAcquire(coachingConversationId, userId)
                 .orElseThrow(() -> new ResourceConflictException(COACHING_RESPONSE_ALREADY_IN_PROGRESS));
     }
 

@@ -27,8 +27,8 @@ class CoachingConversationRedisAdapter implements CoachingConversationLock, Coac
     private final UuidGenerator uuidGenerator;
 
     @Override
-    public Optional<Lease> tryAcquire(Long coachingConversationId) {
-        String key = coachingConversationLock(coachingConversationId);
+    public Optional<Lease> tryAcquire(Long coachingConversationId, Long userId) {
+        String key = coachingConversationLock(coachingConversationId, userId);
         String token = uuidGenerator.generate().toString();
 
         if (!redisTemplateClient.setIfAbsent(key, token, LOCK_TTL)) {

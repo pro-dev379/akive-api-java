@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -29,24 +29,18 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static net.akive.api.coaching.application.fixture.CoachingMessageCommandFixture.COACHING_RESPONSE_CONTENT;
 import static net.akive.api.coaching.application.stream.CoachingResponseStream.IncompleteReason.MAX_OUTPUT_TOKENS;
-import static net.akive.api.coaching.domain.ConversationContext.MAIN;
 import static net.akive.api.coaching.domain.CoachingPolicy.USER_MESSAGE_CONTENT_MAX_LENGTH;
-import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.ANOTHER_COACHING_CONVERSATION_ID;
-import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.COACHING_CONVERSATION_ID;
-import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.CONVERSATION_TITLE;
-import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.CREATED_AT;
-import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.UPDATED_AT;
-import static net.akive.api.coaching.domain.fixture.CoachingMessageFixture.COACHING_MESSAGE_ID;
-import static net.akive.api.coaching.domain.fixture.CoachingMessageFixture.MESSAGE_CONTENT;
-import static net.akive.api.coaching.domain.fixture.CoachingMessageFixture.MESSAGE_CREATED_AT;
+import static net.akive.api.coaching.domain.ConversationContext.MAIN;
+import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.*;
+import static net.akive.api.coaching.domain.fixture.CoachingMessageFixture.*;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
+import static net.akive.api.common.exception.business.ResourceConflictError.COACHING_RESPONSE_ALREADY_IN_PROGRESS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.COACHING_CONVERSATION_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
-import static net.akive.api.common.exception.business.ResourceConflictError.COACHING_RESPONSE_ALREADY_IN_PROGRESS;
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
 import static net.akive.api.common.pagination.fixture.PaginationFixture.CURSOR_PAGE_SIZE;
 import static net.akive.api.user.domain.fixture.UserFixture.UNKNOWN_USER_ID;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
@@ -58,14 +52,14 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CoachingApi.class)
 class CoachingApiTest extends PrivateApiTestSupport {
 
     private static final String COACHING_CONVERSATIONS_URL = "/coaching/conversations";
+    private static final String COACHING_CONVERSATION_URL =
+            COACHING_CONVERSATIONS_URL + "/{coachingConversationId}";
     private static final String COACHING_MESSAGES_URL =
             COACHING_CONVERSATIONS_URL + "/" + COACHING_CONVERSATION_ID + "/messages";
 
@@ -198,6 +192,49 @@ class CoachingApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 코칭_대화를_삭제한다() {
+        delete(
+                COACHING_CONVERSATION_URL,
+                USER_ID,
+                COACHING_CONVERSATION_ID
+        ).hasStatus(NO_CONTENT);
+
+        then(coachingConversationCreator).should().delete(COACHING_CONVERSATION_ID, USER_ID);
+    }
+
+    @Test
+    void 코칭_대화_삭제_시_코칭_대화가_없으면_404를_응답한다() {
+        willThrow(new ResourceNotFoundException(COACHING_CONVERSATION_NOT_FOUND))
+                .given(coachingConversationCreator)
+                .delete(UNKNOWN_COACHING_CONVERSATION_ID, USER_ID);
+
+        MvcTestResultAssert result = delete(
+                COACHING_CONVERSATION_URL,
+                USER_ID,
+                UNKNOWN_COACHING_CONVERSATION_ID
+        ).hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, COACHING_CONVERSATION_NOT_FOUND);
+        then(coachingConversationCreator).should().delete(UNKNOWN_COACHING_CONVERSATION_ID, USER_ID);
+    }
+
+    @Test
+    void AI_코치_응답_메시지_생성_중에_코칭_대화를_삭제하면_409를_응답한다() {
+        willThrow(new ResourceConflictException(COACHING_RESPONSE_ALREADY_IN_PROGRESS))
+                .given(coachingConversationCreator)
+                .delete(COACHING_CONVERSATION_ID, USER_ID);
+
+        MvcTestResultAssert result = delete(
+                COACHING_CONVERSATION_URL,
+                USER_ID,
+                COACHING_CONVERSATION_ID
+        ).hasStatus(CONFLICT);
+
+        assertErrorResponse(result, COACHING_RESPONSE_ALREADY_IN_PROGRESS);
+        then(coachingConversationCreator).should().delete(COACHING_CONVERSATION_ID, USER_ID);
+    }
+
+    @Test
     void AI_코치_응답과_대화_제목을_스트리밍한다() throws Exception {
         CoachingMessageSendRequest request = new CoachingMessageSendRequest(MESSAGE_CONTENT);
         CoachingMessageSendCommand command = request.to(USER_ID, COACHING_CONVERSATION_ID);
@@ -274,9 +311,9 @@ class CoachingApiTest extends PrivateApiTestSupport {
 
     @Test
     void AI_코치_응답과_대화_제목_스트리밍_시_코칭_대화가_없으면_404를_응답한다() {
-        String url = COACHING_CONVERSATIONS_URL + "/" + ANOTHER_COACHING_CONVERSATION_ID + "/messages";
+        String url = COACHING_CONVERSATIONS_URL + "/" + UNKNOWN_COACHING_CONVERSATION_ID + "/messages";
         CoachingMessageSendRequest request = new CoachingMessageSendRequest(MESSAGE_CONTENT);
-        CoachingMessageSendCommand command = request.to(USER_ID, ANOTHER_COACHING_CONVERSATION_ID);
+        CoachingMessageSendCommand command = request.to(USER_ID, UNKNOWN_COACHING_CONVERSATION_ID);
         willThrow(new ResourceNotFoundException(COACHING_CONVERSATION_NOT_FOUND))
                 .given(coachingMessageSender)
                 .send(command);

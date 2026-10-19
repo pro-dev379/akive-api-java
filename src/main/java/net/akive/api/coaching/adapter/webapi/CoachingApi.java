@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 import static net.akive.api.common.pagination.CursorCondition.of;
 
@@ -57,6 +58,12 @@ public class CoachingApi {
         Long coachingConversationId = coachingConversationCreator.create(request.to(userId));
 
         return new CoachingConversationCreateResponse(coachingConversationId);
+    }
+
+    @DeleteMapping("/conversations/{coachingConversationId}")
+    @ResponseStatus(NO_CONTENT)
+    public void delete(@AuthenticatedUserId Long userId, @PathVariable Long coachingConversationId) {
+        coachingConversationCreator.delete(coachingConversationId, userId);
     }
 
     @PostMapping(

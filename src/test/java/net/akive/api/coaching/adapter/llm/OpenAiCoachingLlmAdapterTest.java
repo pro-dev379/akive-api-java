@@ -5,7 +5,9 @@ import com.openai.client.OpenAIClientAsync;
 import com.openai.core.JsonValue;
 import com.openai.core.RequestOptions;
 import com.openai.core.http.AsyncStreamResponse;
+import com.openai.errors.NotFoundException;
 import com.openai.models.conversations.Conversation;
+import com.openai.models.conversations.ConversationDeletedResource;
 import com.openai.models.responses.*;
 import com.openai.services.async.ResponseServiceAsync;
 import com.openai.services.blocking.ConversationService;
@@ -42,8 +44,10 @@ import static net.akive.api.llmusage.domain.LlmUsageScope.USER;
 import static net.akive.api.llmusage.application.fixture.LlmUsageRecordCommandFixture.createLlmUsageRecordCommand;
 import static net.akive.api.user.domain.fixture.UserFixture.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -100,7 +104,7 @@ class OpenAiCoachingLlmAdapterTest {
                 .metadata(JsonValue.from(Map.of()))
                 .object_(JsonValue.from("conversation"))
                 .build();
-        given(openAIClient.conversations()).willReturn(conversationService);
+        prepareConversationService();
         given(conversationService.create()).willReturn(conversation);
 
         String llmConversationId = openAiCoachingLlmAdapter.createConversation();
@@ -245,9 +249,52 @@ class OpenAiCoachingLlmAdapterTest {
         then(openAiStream).should().close();
     }
 
+    @Test
+    void OpenAI_코칭_대화를_삭제한다() {
+        ConversationDeletedResource deletedConversation = mock(ConversationDeletedResource.class);
+        given(deletedConversation.deleted()).willReturn(true);
+        prepareConversationService();
+        given(conversationService.delete(eq(LLM_CONVERSATION_ID), any(RequestOptions.class)))
+                .willReturn(deletedConversation);
+
+        openAiCoachingLlmAdapter.deleteConversation(LLM_CONVERSATION_ID);
+
+        then(conversationService).should().delete(
+                eq(LLM_CONVERSATION_ID),
+                any(RequestOptions.class)
+        );
+    }
+
+    @Test
+    void 이미_삭제된_OpenAI_코칭_대화를_다시_삭제해도_예외를_던지지_않는다() {
+        prepareConversationService();
+        given(conversationService.delete(eq(LLM_CONVERSATION_ID), any(RequestOptions.class)))
+                .willThrow(mock(NotFoundException.class));
+
+        assertThatCode(() -> openAiCoachingLlmAdapter.deleteConversation(LLM_CONVERSATION_ID))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void OpenAI_코칭_대화_삭제에_실패하면_예외를_던진다() {
+        ConversationDeletedResource deletedConversation = mock(ConversationDeletedResource.class);
+        given(deletedConversation.deleted()).willReturn(false);
+        prepareConversationService();
+        given(conversationService.delete(eq(LLM_CONVERSATION_ID), any(RequestOptions.class)))
+                .willReturn(deletedConversation);
+
+        assertThatThrownBy(() -> openAiCoachingLlmAdapter.deleteConversation(LLM_CONVERSATION_ID))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("OpenAI did not delete the coaching conversation: " + LLM_CONVERSATION_ID);
+    }
+
     private void prepareResponseService() {
         given(openAIClient.async()).willReturn(openAIClientAsync);
         given(openAIClientAsync.responses()).willReturn(responseService);
+    }
+
+    private void prepareConversationService() {
+        given(openAIClient.conversations()).willReturn(conversationService);
     }
 
     private CoachingResponseStream createResponseStream(CoachingPrompt coachingPrompt) {

@@ -10,19 +10,19 @@ import static lombok.AccessLevel.PRIVATE;
 public class CacheKeyProvider {
 
     public static String emailVerification(String email, EmailVerificationPurpose verificationPurpose) {
-        return "email-auth:%s:%s".formatted(email, verificationPurpose.getCode());
+        return "email:%s:verification:%s".formatted(email, verificationPurpose.getCode());
     }
 
     public static String refreshToken(Long userId, ClientInstanceId clientInstanceId) {
-        return "refresh-token:%s:%s".formatted(userId, clientInstanceId);
+        return "user:%s:client:%s:refresh-token".formatted(userId, clientInstanceId);
     }
 
     public static String refreshTokenPattern(Long userId) {
-        return "refresh-token:%s:%s".formatted(userId, "*");
+        return "user:%s:client:*:refresh-token".formatted(userId);
     }
 
-    public static String coachingConversationLock(Long coachingConversationId) {
-        return "coaching-conversation:%s:lock".formatted(coachingConversationId);
+    public static String coachingConversationLock(Long coachingConversationId, Long userId) {
+        return "user:%s:coaching-conversation:%s:lock".formatted(userId, coachingConversationId);
     }
 
     public static String pendingCoachingResponse(Long coachingConversationId) {

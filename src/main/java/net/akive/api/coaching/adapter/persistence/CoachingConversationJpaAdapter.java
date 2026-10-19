@@ -87,4 +87,9 @@ class CoachingConversationJpaAdapter implements CoachingConversationRepository {
                 .findLatestByConversationId(coachingConversationId)
                 .map(CoachingMessageEntity::to);
     }
+
+    @Override
+    public void delete(CoachingConversation coachingConversation) {
+        coachingConversationJpaRepository.delete(CoachingConversationEntity.from(coachingConversation));
+    }
 }
