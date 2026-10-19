@@ -72,7 +72,7 @@ class CoachingMessageCommandService implements CoachingMessageSender {
         try {
             CoachingPrompt coachingPrompt = coachingPromptFactory.createCoaching(createPromptComposition(command));
 
-            CoachingMessage userMessage = coachingConversationRepository.saveMessage(
+            CoachingMessage userMessage = coachingConversationRepository.saveCoachingMessage(
                     CoachingMessage.fromUser(coachingConversation, command.content())
             );
 

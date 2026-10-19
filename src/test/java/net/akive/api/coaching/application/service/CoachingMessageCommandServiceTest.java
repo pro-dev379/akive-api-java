@@ -198,7 +198,7 @@ class CoachingMessageCommandServiceTest {
         coachingMessageCommandService.send(command);
 
         ArgumentCaptor<CoachingMessage> userMessageCaptor = ArgumentCaptor.forClass(CoachingMessage.class);
-        then(coachingConversationRepository).should().saveMessage(userMessageCaptor.capture());
+        then(coachingConversationRepository).should().saveCoachingMessage(userMessageCaptor.capture());
 
         CoachingMessage userMessage = userMessageCaptor.getValue();
         assertThat(userMessage.getCoachingConversation()).isEqualTo(coachingConversation);
@@ -254,7 +254,7 @@ class CoachingMessageCommandServiceTest {
         then(coachingConversationRepository).shouldHaveNoInteractions();
         then(coachingResponseRecoveryStore).shouldHaveNoInteractions();
         then(coachingLlm).shouldHaveNoInteractions();
-        then(coachingConversationRepository).should(never()).saveMessage(any());
+        then(coachingConversationRepository).should(never()).saveCoachingMessage(any());
     }
 
     @Test
@@ -298,7 +298,7 @@ class CoachingMessageCommandServiceTest {
         );
         recoveryOrder.verify(coachingTurnCompletionService).complete(coachingConversation, recoveryData);
         recoveryOrder.verify(coachingResponseRecoveryStore).delete(command.coachingConversationId());
-        recoveryOrder.verify(coachingConversationRepository).saveMessage(any(CoachingMessage.class));
+        recoveryOrder.verify(coachingConversationRepository).saveCoachingMessage(any(CoachingMessage.class));
         recoveryOrder.verify(coachingLlm).streamResponse(
                 eq(command.userId()),
                 eq(coachingConversation.getLlmConversationId()),
@@ -330,7 +330,7 @@ class CoachingMessageCommandServiceTest {
         assertThat(lease.isReleased()).isTrue();
         then(coachingResponseRecoveryStore).should(never()).delete(command.coachingConversationId());
         then(coachingLlm).shouldHaveNoInteractions();
-        then(coachingConversationRepository).should(never()).saveMessage(any());
+        then(coachingConversationRepository).should(never()).saveCoachingMessage(any());
     }
 
     @Test
@@ -568,7 +568,7 @@ class CoachingMessageCommandServiceTest {
         )).willReturn(Optional.of(coachingConversation));
         given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
                 .willReturn(Optional.of(lease));
-        given(coachingConversationRepository.saveMessage(any(CoachingMessage.class)))
+        given(coachingConversationRepository.saveCoachingMessage(any(CoachingMessage.class)))
                 .willReturn(savedUserMessage);
 
         return savedUserMessage;

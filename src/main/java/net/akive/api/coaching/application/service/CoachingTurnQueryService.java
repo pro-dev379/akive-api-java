@@ -24,13 +24,13 @@ class CoachingTurnQueryService implements CoachingTurnFinder {
 
     @Override
     public Optional<CoachingTurnResult> find(CoachingTurnFindQuery query) {
-        return findMessage(
+        return findCoachingMessage(
                 query.userMessageId(),
                 query.coachingConversationId(),
                 query.userId(),
                 USER
             )
-            .flatMap(userMessage -> findMessage(
+            .flatMap(userMessage -> findCoachingMessage(
                     query.assistantMessageId(),
                     query.coachingConversationId(),
                     query.userId(),
@@ -41,14 +41,14 @@ class CoachingTurnQueryService implements CoachingTurnFinder {
             )));
     }
 
-    private Optional<CoachingMessage> findMessage(
+    private Optional<CoachingMessage> findCoachingMessage(
             Long coachingMessageId,
             Long coachingConversationId,
             Long userId,
             MessageRole expectedRole
     ) {
         return coachingConversationRepository
-                .findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+                .findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
                         coachingMessageId,
                         coachingConversationId,
                         userId

@@ -40,7 +40,7 @@ interface ReportJpaRepository extends JpaRepository<ReportEntity, Long> {
         )
         from ReportEntity r
         where r.user.userId = :userId
-        """)
+    """)
     Page<ReportHeaderResult> findHeaderPageByUserId(Long userId, Pageable pageable);
 
     @Query("""

@@ -19,7 +19,7 @@ interface LlmUsageLogJpaRepository extends JpaRepository<LlmUsageLogEntity, Long
               and llmUsageLog.purpose in :purposes
               and llmUsageLog.createdAt >= :createdAtFrom
               and llmUsageLog.createdAt < :createdAtBefore
-            """)
+    """)
     long sumTokenCountByUserIdAndUsageScopeAndPurposesAndCreatedAtRange(
             Long userId,
             LlmUsageScope usageScope,

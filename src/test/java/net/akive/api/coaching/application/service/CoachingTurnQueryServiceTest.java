@@ -53,13 +53,13 @@ class CoachingTurnQueryServiceTest {
 
         InOrder messageFindOrder = inOrder(coachingConversationRepository);
         messageFindOrder.verify(coachingConversationRepository)
-                .findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+                .findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
                         query.userMessageId(),
                         query.coachingConversationId(),
                         query.userId()
                 );
         messageFindOrder.verify(coachingConversationRepository)
-                .findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+                .findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
                         query.assistantMessageId(),
                         query.coachingConversationId(),
                         query.userId()
@@ -69,7 +69,7 @@ class CoachingTurnQueryServiceTest {
     @Test
     void 회원_메시지를_조회할_수_없으면_회원_메시지와_AI_코치_응답_메시지를_반환하지_않는다() {
         CoachingTurnFindQuery query = createCoachingTurnFindQuery();
-        given(coachingConversationRepository.findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+        given(coachingConversationRepository.findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
                 query.userMessageId(),
                 query.coachingConversationId(),
                 query.userId()
@@ -79,7 +79,7 @@ class CoachingTurnQueryServiceTest {
 
         assertThat(result).isEmpty();
         then(coachingConversationRepository).should(never())
-                .findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+                .findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
                         query.assistantMessageId(),
                         query.coachingConversationId(),
                         query.userId()
@@ -102,7 +102,7 @@ class CoachingTurnQueryServiceTest {
 
         assertThat(result).isEmpty();
         then(coachingConversationRepository).should(never())
-                .findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+                .findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
                         query.assistantMessageId(),
                         query.coachingConversationId(),
                         query.userId()
@@ -114,7 +114,7 @@ class CoachingTurnQueryServiceTest {
         CoachingTurnFindQuery query = createCoachingTurnFindQuery();
         CoachingMessage userMessage = reconstructUserMessage(reconstructCoachingConversation());
         givenMessage(query.userMessageId(), query, userMessage);
-        given(coachingConversationRepository.findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+        given(coachingConversationRepository.findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
                 query.assistantMessageId(),
                 query.coachingConversationId(),
                 query.userId()
@@ -150,7 +150,7 @@ class CoachingTurnQueryServiceTest {
             CoachingTurnFindQuery query,
             CoachingMessage coachingMessage
     ) {
-        given(coachingConversationRepository.findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+        given(coachingConversationRepository.findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
                 coachingMessageId,
                 query.coachingConversationId(),
                 query.userId()

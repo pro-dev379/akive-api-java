@@ -18,6 +18,7 @@ import static net.akive.api.coaching.application.fixture.CoachingMessageCommandF
 import static net.akive.api.coaching.domain.ConversationContext.MAIN;
 import static net.akive.api.coaching.domain.ConversationContext.REPORT;
 import static net.akive.api.coaching.domain.MessageCompletionStatus.COMPLETED;
+import static net.akive.api.coaching.domain.MessageCompletionStatus.TRUNCATED;
 import static net.akive.api.coaching.domain.MessageRole.ASSISTANT;
 import static net.akive.api.coaching.domain.MessageRole.USER;
 import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.*;
@@ -78,29 +79,15 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 코칭_대화_식별자와_회원_식별자로_코칭_대화를_조회한다() {
-        CoachingConversation savedCoachingConversation = saveCoachingConversation();
-        flushAndClear();
-
-        Optional<CoachingConversation> foundCoachingConversation =
-                coachingConversationRepository.findByCoachingConversationIdAndUserId(
-                        savedCoachingConversation.getCoachingConversationId(),
-                        savedCoachingConversation.getUser().getUserId()
-                );
-
-        assertThat(foundCoachingConversation).contains(savedCoachingConversation);
-    }
-
-    @Test
     void 코칭_메시지를_저장한다() {
         CoachingConversation savedCoachingConversation = saveCoachingConversation();
         CoachingMessage userMessage = CoachingMessage.fromUser(savedCoachingConversation, MESSAGE_CONTENT);
 
-        CoachingMessage savedUserMessage = coachingConversationRepository.saveMessage(userMessage);
+        CoachingMessage savedUserMessage = coachingConversationRepository.saveCoachingMessage(userMessage);
         flushAndClear();
 
         CoachingMessage foundUserMessage = coachingConversationRepository
-                .findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+                .findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
                         savedUserMessage.getCoachingMessageId(),
                         savedCoachingConversation.getCoachingConversationId(),
                         savedCoachingConversation.getUser().getUserId()
@@ -115,68 +102,17 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 코칭_메시지와_코칭_대화와_회원_식별자로_코칭_메시지를_조회한다() {
+    void 코칭_대화_식별자와_회원_식별자로_코칭_대화를_조회한다() {
         CoachingConversation savedCoachingConversation = saveCoachingConversation();
-        CoachingMessage savedUserMessage = coachingConversationRepository.saveMessage(
-                CoachingMessage.fromUser(savedCoachingConversation, MESSAGE_CONTENT)
-        );
         flushAndClear();
 
-        Optional<CoachingMessage> foundUserMessage = coachingConversationRepository
-                .findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
-                        savedUserMessage.getCoachingMessageId(),
+        Optional<CoachingConversation> foundCoachingConversation =
+                coachingConversationRepository.findByCoachingConversationIdAndUserId(
                         savedCoachingConversation.getCoachingConversationId(),
                         savedCoachingConversation.getUser().getUserId()
                 );
 
-        assertThat(foundUserMessage).contains(savedUserMessage);
-    }
-
-    @Test
-    void 가장_최근에_저장된_코칭_메시지를_조회한다() {
-        CoachingConversation savedCoachingConversation = saveCoachingConversation();
-        coachingConversationRepository.saveMessage(
-                CoachingMessage.fromUser(savedCoachingConversation, MESSAGE_CONTENT)
-        );
-        CoachingMessage savedAssistantMessage = coachingConversationRepository.saveMessage(
-                CoachingMessage.fromAssistant(savedCoachingConversation, COACHING_RESPONSE_CONTENT, COMPLETED)
-        );
-        flushAndClear();
-
-        Optional<CoachingMessage> latestMessage = coachingConversationRepository.findLatestMessage(
-                savedCoachingConversation.getCoachingConversationId()
-        );
-
-        assertThat(latestMessage).contains(savedAssistantMessage);
-        assertThat(latestMessage.get().getRole()).isEqualTo(ASSISTANT);
-        assertThat(latestMessage.get().getContent()).isEqualTo(COACHING_RESPONSE_CONTENT);
-    }
-
-    @Test
-    void 코칭_대화를_삭제하면_코칭_메시지도_함께_삭제한다() {
-        CoachingConversation savedCoachingConversation = saveCoachingConversation();
-        CoachingMessage savedCoachingMessage = coachingConversationRepository.saveMessage(
-                CoachingMessage.fromUser(savedCoachingConversation, MESSAGE_CONTENT)
-        );
-        flushAndClear();
-
-        coachingConversationRepository.delete(savedCoachingConversation);
-        flushAndClear();
-
-        Optional<CoachingConversation> foundCoachingConversation = coachingConversationRepository
-                .findByCoachingConversationIdAndUserId(
-                        savedCoachingConversation.getCoachingConversationId(),
-                        savedCoachingConversation.getUser().getUserId()
-                );
-        Optional<CoachingMessage> foundCoachingMessage = coachingConversationRepository
-                .findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
-                        savedCoachingMessage.getCoachingMessageId(),
-                        savedCoachingConversation.getCoachingConversationId(),
-                        savedCoachingConversation.getUser().getUserId()
-                );
-
-        assertThat(foundCoachingConversation).isEmpty();
-        assertThat(foundCoachingMessage).isEmpty();
+        assertThat(foundCoachingConversation).contains(savedCoachingConversation);
     }
 
     @Test
@@ -200,13 +136,13 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
                 MAIN,
                 CONVERSATION_TITLE
         );
-        coachingConversationRepository.saveMessage(
+        coachingConversationRepository.saveCoachingMessage(
                 CoachingMessage.fromUser(expectedConversation, MESSAGE_CONTENT)
         );
-        coachingConversationRepository.saveMessage(
+        coachingConversationRepository.saveCoachingMessage(
                 CoachingMessage.fromUser(reportConversation, MESSAGE_CONTENT)
         );
-        coachingConversationRepository.saveMessage(
+        coachingConversationRepository.saveCoachingMessage(
                 CoachingMessage.fromUser(anotherUserConversation, MESSAGE_CONTENT)
         );
         flushAndClear();
@@ -224,7 +160,7 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 코칭_대화_목록을_최신_코칭_메시지_순으로_커서_페이징_조회한다() {
+    void 코칭_대화_목록을_최신_메시지_순으로_커서_페이징_조회한다() {
         User savedUser = saveUser();
         CoachingConversation olderConversation = saveCoachingConversation(
                 savedUser,
@@ -238,10 +174,10 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
                 MAIN,
                 CONVERSATION_TITLE
         );
-        CoachingMessage olderLatestMessage = coachingConversationRepository.saveMessage(
+        CoachingMessage olderLatestMessage = coachingConversationRepository.saveCoachingMessage(
                 CoachingMessage.fromUser(olderConversation, MESSAGE_CONTENT)
         );
-        CoachingMessage cursorMessage = coachingConversationRepository.saveMessage(
+        CoachingMessage cursorMessage = coachingConversationRepository.saveCoachingMessage(
                 CoachingMessage.fromUser(newerConversation, MESSAGE_CONTENT)
         );
         flushAndClear();
@@ -282,8 +218,10 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
                 MAIN,
                 CONVERSATION_TITLE
         );
-        coachingConversationRepository.saveMessage(CoachingMessage.fromUser(savedConversation, MESSAGE_CONTENT));
-        coachingConversationRepository.saveMessage(
+        coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromUser(savedConversation, MESSAGE_CONTENT)
+        );
+        coachingConversationRepository.saveCoachingMessage(
                 CoachingMessage.fromAssistant(savedConversation, COACHING_RESPONSE_CONTENT, COMPLETED)
         );
         flushAndClear();
@@ -295,7 +233,7 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
                 )
                 .orElseThrow();
         CoachingMessage persistedLatestMessage = coachingConversationRepository
-                .findLatestMessage(savedConversation.getCoachingConversationId())
+                .findLatestCoachingMessage(savedConversation.getCoachingConversationId())
                 .orElseThrow();
         CursorResult<CoachingConversationSummaryData, Long> summaryPage = coachingConversationRepository
                 .findSummaryPageByUserIdAndContext(
@@ -332,6 +270,146 @@ class CoachingConversationJpaAdapterTest extends RepositoryTestSupport {
         assertThat(summaryPage.contents()).isEmpty();
         assertThat(summaryPage.cursorInfo().hasNext()).isFalse();
         assertThat(summaryPage.cursorInfo().nextCursor()).isNull();
+    }
+
+    @Test
+    void 코칭_메시지와_코칭_대화와_회원_식별자로_코칭_메시지를_조회한다() {
+        CoachingConversation savedCoachingConversation = saveCoachingConversation();
+        CoachingMessage savedUserMessage = coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromUser(savedCoachingConversation, MESSAGE_CONTENT)
+        );
+        flushAndClear();
+
+        Optional<CoachingMessage> foundUserMessage = coachingConversationRepository
+                .findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+                        savedUserMessage.getCoachingMessageId(),
+                        savedCoachingConversation.getCoachingConversationId(),
+                        savedCoachingConversation.getUser().getUserId()
+                );
+
+        assertThat(foundUserMessage).contains(savedUserMessage);
+    }
+
+    @Test
+    void 가장_최근에_저장된_코칭_메시지를_조회한다() {
+        CoachingConversation savedCoachingConversation = saveCoachingConversation();
+        coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromUser(savedCoachingConversation, MESSAGE_CONTENT)
+        );
+        CoachingMessage savedAssistantMessage = coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromAssistant(savedCoachingConversation, COACHING_RESPONSE_CONTENT, COMPLETED)
+        );
+        flushAndClear();
+
+        Optional<CoachingMessage> latestMessage = coachingConversationRepository.findLatestCoachingMessage(
+                savedCoachingConversation.getCoachingConversationId()
+        );
+
+        assertThat(latestMessage).contains(savedAssistantMessage);
+        assertThat(latestMessage.get().getRole()).isEqualTo(ASSISTANT);
+        assertThat(latestMessage.get().getContent()).isEqualTo(COACHING_RESPONSE_CONTENT);
+    }
+
+    @Test
+    void 코칭_대화_식별자로_코칭_메시지_목록을_조회한다() {
+        User savedUser = saveUser();
+        CoachingConversation expectedConversation = saveCoachingConversation(
+                savedUser,
+                LLM_CONVERSATION_ID,
+                MAIN,
+                CONVERSATION_TITLE
+        );
+        CoachingConversation anotherConversation = saveCoachingConversation(
+                savedUser,
+                ANOTHER_LLM_CONVERSATION_ID,
+                MAIN,
+                CONVERSATION_TITLE
+        );
+        CoachingMessage expectedMessage = coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromUser(expectedConversation, MESSAGE_CONTENT)
+        );
+        coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromUser(anotherConversation, MESSAGE_CONTENT)
+        );
+        flushAndClear();
+
+        CursorResult<CoachingMessage, Long> messagePage = coachingConversationRepository
+                .findCoachingMessagePageByCoachingConversationId(
+                        expectedConversation.getCoachingConversationId(),
+                        CursorCondition.of(null, CURSOR_PAGE_SIZE)
+                );
+
+        assertThat(messagePage.contents())
+                .extracting(CoachingMessage::getCoachingMessageId)
+                .containsExactly(expectedMessage.getCoachingMessageId());
+    }
+
+    @Test
+    void 코칭_메시지_목록을_최신_메시지_기준으로_커서_페이징하고_오래된_순서로_반환한다() {
+        CoachingConversation savedConversation = saveCoachingConversation();
+        CoachingMessage oldestMessage = coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromUser(savedConversation, "첫 번째 회원 메시지")
+        );
+        CoachingMessage cursorMessage = coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromAssistant(savedConversation, "잘린 AI 코치 응답", TRUNCATED)
+        );
+        CoachingMessage latestMessage = coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromUser(savedConversation, "두 번째 회원 메시지")
+        );
+        flushAndClear();
+
+        CursorResult<CoachingMessage, Long> firstPage = coachingConversationRepository
+                .findCoachingMessagePageByCoachingConversationId(
+                        savedConversation.getCoachingConversationId(),
+                        CursorCondition.of(null, 2)
+                );
+        CursorResult<CoachingMessage, Long> secondPage = coachingConversationRepository
+                .findCoachingMessagePageByCoachingConversationId(
+                        savedConversation.getCoachingConversationId(),
+                        CursorCondition.of(firstPage.cursorInfo().nextCursor(), 2)
+                );
+
+        assertThat(firstPage.contents())
+                .extracting(CoachingMessage::getCoachingMessageId)
+                .containsExactly(
+                        cursorMessage.getCoachingMessageId(),
+                        latestMessage.getCoachingMessageId()
+                );
+        assertThat(firstPage.contents().getFirst().getCompletionStatus()).isEqualTo(TRUNCATED);
+        assertThat(firstPage.cursorInfo().hasNext()).isTrue();
+        assertThat(firstPage.cursorInfo().nextCursor()).isEqualTo(cursorMessage.getCoachingMessageId());
+        assertThat(secondPage.contents())
+                .extracting(CoachingMessage::getCoachingMessageId)
+                .containsExactly(oldestMessage.getCoachingMessageId());
+        assertThat(secondPage.cursorInfo().hasNext()).isFalse();
+        assertThat(secondPage.cursorInfo().nextCursor()).isNull();
+    }
+
+    @Test
+    void 코칭_대화를_삭제하면_코칭_메시지도_함께_삭제한다() {
+        CoachingConversation savedCoachingConversation = saveCoachingConversation();
+        CoachingMessage savedCoachingMessage = coachingConversationRepository.saveCoachingMessage(
+                CoachingMessage.fromUser(savedCoachingConversation, MESSAGE_CONTENT)
+        );
+        flushAndClear();
+
+        coachingConversationRepository.delete(savedCoachingConversation);
+        flushAndClear();
+
+        Optional<CoachingConversation> foundCoachingConversation = coachingConversationRepository
+                .findByCoachingConversationIdAndUserId(
+                        savedCoachingConversation.getCoachingConversationId(),
+                        savedCoachingConversation.getUser().getUserId()
+                );
+        Optional<CoachingMessage> foundCoachingMessage = coachingConversationRepository
+                .findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+                        savedCoachingMessage.getCoachingMessageId(),
+                        savedCoachingConversation.getCoachingConversationId(),
+                        savedCoachingConversation.getUser().getUserId()
+                );
+
+        assertThat(foundCoachingConversation).isEmpty();
+        assertThat(foundCoachingMessage).isEmpty();
     }
 
     private CoachingConversation saveCoachingConversation() {

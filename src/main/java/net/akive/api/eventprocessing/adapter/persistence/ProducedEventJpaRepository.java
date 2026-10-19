@@ -25,7 +25,7 @@ interface ProducedEventJpaRepository extends JpaRepository<ProducedEventEntity, 
               and producedEvent.status = net.akive.api.eventprocessing.domain.ProducedEventStatus.PENDING
               and producedEvent.nextAttemptAt <= :nextAttemptAtCutoff
             order by producedEvent.createdAt asc
-            """)
+    """)
     List<ProducedEventEntity> findPendingByEventTypesAndNextAttemptDueOrderByCreatedAtAsc(
             Collection<EventType> eventTypes,
             Instant nextAttemptAtCutoff,
@@ -40,7 +40,7 @@ interface ProducedEventJpaRepository extends JpaRepository<ProducedEventEntity, 
               and producedEvent.status = net.akive.api.eventprocessing.domain.ProducedEventStatus.PROCESSING
               and producedEvent.processingStartedAt <= :processingStartedAtCutoff
             order by producedEvent.processingStartedAt asc
-            """)
+    """)
     List<ProducedEventEntity> findTimedOutProcessingByEventTypesOrderByProcessingStartedAtAsc(
             Collection<EventType> eventTypes,
             Instant processingStartedAtCutoff,
@@ -52,7 +52,7 @@ interface ProducedEventJpaRepository extends JpaRepository<ProducedEventEntity, 
             select producedEvent
             from ProducedEventEntity producedEvent
             where producedEvent.producedEventId = :producedEventId
-            """)
+    """)
     Optional<ProducedEventEntity> findByIdForUpdate(Long producedEventId);
 
     boolean existsByEventId(UUID eventId);

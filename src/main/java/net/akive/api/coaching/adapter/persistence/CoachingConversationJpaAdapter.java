@@ -31,6 +31,11 @@ class CoachingConversationJpaAdapter implements CoachingConversationRepository {
     }
 
     @Override
+    public CoachingMessage saveCoachingMessage(CoachingMessage coachingMessage) {
+        return coachingMessageJpaRepository.save(CoachingMessageEntity.from(coachingMessage)).to();
+    }
+
+    @Override
     public Optional<CoachingConversation> findByCoachingConversationIdAndUserId(
             Long coachingConversationId,
             Long userId
@@ -41,18 +46,13 @@ class CoachingConversationJpaAdapter implements CoachingConversationRepository {
     }
 
     @Override
-    public CoachingMessage saveMessage(CoachingMessage coachingMessage) {
-        return coachingMessageJpaRepository.save(CoachingMessageEntity.from(coachingMessage)).to();
-    }
-
-    @Override
     public CursorResult<CoachingConversationSummaryData, Long> findSummaryPageByUserIdAndContext(
             Long userId,
             ConversationContext context,
             CursorCondition<Long> cursorCondition
     ) {
         List<CoachingConversationSummaryData> fetchedSummaries = coachingConversationJpaRepository
-                .findSummariesByUserIdAndContextAndLatestMessageIdBefore(
+                .findSummariesByUserIdAndContextAndLatestCoachingMessageIdBefore(
                         userId,
                         context,
                         cursorCondition.cursor(),
@@ -71,21 +71,45 @@ class CoachingConversationJpaAdapter implements CoachingConversationRepository {
     }
 
     @Override
-    public Optional<CoachingMessage> findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+    public Optional<CoachingMessage> findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
             Long coachingMessageId,
             Long coachingConversationId,
             Long userId
     ) {
         return coachingMessageJpaRepository
-                .findByIdAndConversationIdAndUserId(coachingMessageId, coachingConversationId, userId)
+                .findByIdAndCoachingConversationIdAndUserId(coachingMessageId, coachingConversationId, userId)
                 .map(CoachingMessageEntity::to);
     }
 
     @Override
-    public Optional<CoachingMessage> findLatestMessage(Long coachingConversationId) {
+    public Optional<CoachingMessage> findLatestCoachingMessage(Long coachingConversationId) {
         return coachingMessageJpaRepository
-                .findLatestByConversationId(coachingConversationId)
+                .findLatestByCoachingConversationId(coachingConversationId)
                 .map(CoachingMessageEntity::to);
+    }
+
+    @Override
+    public CursorResult<CoachingMessage, Long> findCoachingMessagePageByCoachingConversationId(
+            Long coachingConversationId,
+            CursorCondition<Long> cursorCondition
+    ) {
+        List<CoachingMessageEntity> fetchedMessages = coachingMessageJpaRepository
+                .findPageByCoachingConversationIdAndCoachingMessageIdBefore(
+                        coachingConversationId,
+                        cursorCondition.cursor(),
+                        PageRequest.of(0, cursorCondition.size() + 1)
+                );
+
+        boolean hasNext = fetchedMessages.size() > cursorCondition.size();
+        List<CoachingMessage> messages = fetchedMessages.stream()
+                .limit(cursorCondition.size())
+                .map(CoachingMessageEntity::to)
+                .toList();
+        Long nextCursor = hasNext
+                ? messages.getLast().getCoachingMessageId()
+                : null;
+
+        return CursorResult.of(nextCursor, hasNext, messages.reversed());
     }
 
     @Override

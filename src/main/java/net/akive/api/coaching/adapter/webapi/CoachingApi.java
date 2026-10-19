@@ -5,11 +5,13 @@ import net.akive.api.coaching.adapter.webapi.request.CoachingConversationCreateR
 import net.akive.api.coaching.adapter.webapi.request.CoachingMessageSendRequest;
 import net.akive.api.coaching.adapter.webapi.response.CoachingConversationCreateResponse;
 import net.akive.api.coaching.adapter.webapi.response.CoachingConversationsFindResponse;
+import net.akive.api.coaching.adapter.webapi.response.CoachingMessagesFindResponse;
 import net.akive.api.coaching.application.provided.CoachingConversationCreator;
 import net.akive.api.coaching.application.provided.CoachingConversationFinder;
 import net.akive.api.coaching.application.provided.CoachingMessageSender;
 import net.akive.api.coaching.application.provided.dto.CoachingConversationSummaryResult;
 import net.akive.api.coaching.application.provided.dto.CoachingMessageSendResult;
+import net.akive.api.coaching.application.provided.dto.CoachingMessageResult;
 import net.akive.api.coaching.application.stream.CoachingResponseStream;
 import net.akive.api.coaching.domain.ConversationContext;
 import net.akive.api.common.pagination.CursorResult;
@@ -64,6 +66,22 @@ public class CoachingApi {
     @ResponseStatus(NO_CONTENT)
     public void delete(@AuthenticatedUserId Long userId, @PathVariable Long coachingConversationId) {
         coachingConversationCreator.delete(coachingConversationId, userId);
+    }
+
+    @GetMapping("/conversations/{coachingConversationId}/messages")
+    public CoachingMessagesFindResponse findMessages(
+            @AuthenticatedUserId Long userId,
+            @PathVariable Long coachingConversationId,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(required = false) Integer size
+    ) {
+        CursorResult<CoachingMessageResult, Long> messagePage = coachingConversationFinder.findMessagePage(
+                userId,
+                coachingConversationId,
+                of(cursor, size)
+        );
+
+        return CoachingMessagesFindResponse.from(messagePage);
     }
 
     @PostMapping(

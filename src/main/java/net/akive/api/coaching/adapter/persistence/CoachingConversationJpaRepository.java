@@ -45,8 +45,8 @@ interface CoachingConversationJpaRepository extends JpaRepository<CoachingConver
                   or message.coachingMessageId < :latestMessageIdCursor
               )
             order by message.coachingMessageId desc
-            """)
-    List<CoachingConversationSummaryData> findSummariesByUserIdAndContextAndLatestMessageIdBefore(
+    """)
+    List<CoachingConversationSummaryData> findSummariesByUserIdAndContextAndLatestCoachingMessageIdBefore(
             Long userId,
             ConversationContext context,
             Long latestMessageIdCursor,

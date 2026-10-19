@@ -39,11 +39,11 @@ class CoachingTurnCompletionService {
             CoachingTurnRecoveryData recoveryData
     ) {
         return coachingConversationRepository
-                .findLatestMessage(coachingConversation.getCoachingConversationId())
+                .findLatestCoachingMessage(coachingConversation.getCoachingConversationId())
                 .filter(message -> message.getRole() == ASSISTANT)
                 .filter(message -> recoveryData.content().equals(message.getContent()))
                 .filter(message -> recoveryData.completionStatus().equals(message.getCompletionStatus()))
-                .orElseGet(() -> coachingConversationRepository.saveMessage(
+                .orElseGet(() -> coachingConversationRepository.saveCoachingMessage(
                         CoachingMessage.fromAssistant(
                                 coachingConversation,
                                 recoveryData.content(),

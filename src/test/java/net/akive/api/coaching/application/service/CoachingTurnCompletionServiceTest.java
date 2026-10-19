@@ -55,16 +55,17 @@ class CoachingTurnCompletionServiceTest {
                 recoveryData.content(),
                 recoveryData.completionStatus()
         );
-        given(coachingConversationRepository.findLatestMessage(coachingConversation.getCoachingConversationId()))
-                .willReturn(Optional.empty());
-        given(coachingConversationRepository.saveMessage(any(CoachingMessage.class)))
+        given(coachingConversationRepository.findLatestCoachingMessage(
+                coachingConversation.getCoachingConversationId()
+        )).willReturn(Optional.empty());
+        given(coachingConversationRepository.saveCoachingMessage(any(CoachingMessage.class)))
                 .willReturn(savedAssistantMessage);
 
         coachingTurnCompletionService.complete(coachingConversation, recoveryData);
 
         ArgumentCaptor<CoachingMessage> assistantMessageCaptor = ArgumentCaptor.forClass(CoachingMessage.class);
         InOrder completionOrder = inOrder(coachingConversationRepository, integrationEventRecorder);
-        completionOrder.verify(coachingConversationRepository).saveMessage(assistantMessageCaptor.capture());
+        completionOrder.verify(coachingConversationRepository).saveCoachingMessage(assistantMessageCaptor.capture());
 
         CoachingMessage assistantMessageToSave = assistantMessageCaptor.getValue();
         assertThat(assistantMessageToSave.getCoachingConversation()).isEqualTo(coachingConversation);
@@ -97,12 +98,13 @@ class CoachingTurnCompletionServiceTest {
                 recoveryData.content(),
                 recoveryData.completionStatus()
         );
-        given(coachingConversationRepository.findLatestMessage(coachingConversation.getCoachingConversationId()))
-                .willReturn(Optional.of(savedAssistantMessage));
+        given(coachingConversationRepository.findLatestCoachingMessage(
+                coachingConversation.getCoachingConversationId()
+        )).willReturn(Optional.of(savedAssistantMessage));
 
         coachingTurnCompletionService.complete(coachingConversation, recoveryData);
 
-        then(coachingConversationRepository).should(never()).saveMessage(any(CoachingMessage.class));
+        then(coachingConversationRepository).should(never()).saveCoachingMessage(any(CoachingMessage.class));
 
         ArgumentCaptor<CoachingTurnCompletedEvent> completedEventCaptor =
                 ArgumentCaptor.forClass(CoachingTurnCompletedEvent.class);
@@ -167,15 +169,16 @@ class CoachingTurnCompletionServiceTest {
                 recoveryData.content(),
                 recoveryData.completionStatus()
         );
-        given(coachingConversationRepository.findLatestMessage(coachingConversation.getCoachingConversationId()))
-                .willReturn(Optional.of(latestMessage));
-        given(coachingConversationRepository.saveMessage(any(CoachingMessage.class)))
+        given(coachingConversationRepository.findLatestCoachingMessage(
+                coachingConversation.getCoachingConversationId()
+        )).willReturn(Optional.of(latestMessage));
+        given(coachingConversationRepository.saveCoachingMessage(any(CoachingMessage.class)))
                 .willReturn(savedAssistantMessage);
 
         coachingTurnCompletionService.complete(coachingConversation, recoveryData);
 
         ArgumentCaptor<CoachingMessage> assistantMessageCaptor = ArgumentCaptor.forClass(CoachingMessage.class);
-        then(coachingConversationRepository).should().saveMessage(assistantMessageCaptor.capture());
+        then(coachingConversationRepository).should().saveCoachingMessage(assistantMessageCaptor.capture());
         assertThat(assistantMessageCaptor.getValue().getRole()).isEqualTo(ASSISTANT);
         assertThat(assistantMessageCaptor.getValue().getContent()).isEqualTo(recoveryData.content());
         assertThat(assistantMessageCaptor.getValue().getCompletionStatus())

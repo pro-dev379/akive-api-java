@@ -13,12 +13,12 @@ public interface CoachingConversationRepository {
 
     CoachingConversation save(CoachingConversation coachingConversation);
 
+    CoachingMessage saveCoachingMessage(CoachingMessage coachingMessage);
+
     Optional<CoachingConversation> findByCoachingConversationIdAndUserId(
             Long coachingConversationId,
             Long userId
     );
-
-    CoachingMessage saveMessage(CoachingMessage coachingMessage);
 
     CursorResult<CoachingConversationSummaryData, Long> findSummaryPageByUserIdAndContext(
             Long userId,
@@ -26,13 +26,18 @@ public interface CoachingConversationRepository {
             CursorCondition<Long> cursorCondition
     );
 
-    Optional<CoachingMessage> findMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
+    Optional<CoachingMessage> findCoachingMessageByCoachingMessageIdAndCoachingConversationIdAndUserId(
             Long coachingMessageId,
             Long coachingConversationId,
             Long userId
     );
 
-    Optional<CoachingMessage> findLatestMessage(Long coachingConversationId);
+    Optional<CoachingMessage> findLatestCoachingMessage(Long coachingConversationId);
+
+    CursorResult<CoachingMessage, Long> findCoachingMessagePageByCoachingConversationId(
+            Long coachingConversationId,
+            CursorCondition<Long> cursorCondition
+    );
 
     void delete(CoachingConversation coachingConversation);
 }
