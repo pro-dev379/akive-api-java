@@ -7,6 +7,8 @@ import net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequest;
 import net.akive.api.auth.application.login.provided.LoginProcessor;
 import net.akive.api.common.exception.ApplicationError;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,6 +28,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
+import static org.springframework.http.HttpHeaders.ORIGIN;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -33,7 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @WebMvcTest(controllers = LoginApi.class)
 @AutoConfigureMockMvc
 @Import({ SecurityConfig.class, TokenAuthenticationEntryPoint.class })
-class PublicEndpointSecurityFilterChainTest {
+class SecurityConfigTest {
 
     @Autowired
     MockMvcTester mvcTester;
@@ -78,6 +85,32 @@ class PublicEndpointSecurityFilterChainTest {
                 .hasStatus(UNAUTHORIZED);
 
         assertErrorResponse(result, INVALID_ACCESS_TOKEN);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "http://localhost:3001",
+            "https://dev-www.akive.net",
+            "https://www.akive.net"
+    })
+    void 허용된_출처의_CORS_사전_요청을_허용한다(String origin) {
+        mvcTester.options()
+                .uri("/private")
+                .header(ORIGIN, origin)
+                .header(ACCESS_CONTROL_REQUEST_METHOD, POST.name())
+                .assertThat()
+                .hasStatus(OK)
+                .hasHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+    }
+
+    @Test
+    void 허용되지_않은_출처의_CORS_사전_요청을_거부한다() {
+        mvcTester.options()
+                .uri("/private")
+                .header(ORIGIN, "https://malicious.example")
+                .header(ACCESS_CONTROL_REQUEST_METHOD, POST.name())
+                .assertThat()
+                .hasStatus(FORBIDDEN);
     }
 
     private void assertErrorResponse(MvcTestResultAssert result, ApplicationError error) {
