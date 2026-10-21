@@ -100,10 +100,10 @@ class WeeklyPlanApiTest extends PrivateApiTestSupport {
 
         result.bodyJson().extractingPath("$.sessionWeek.weekNum").isEqualTo(sessionWeek.weekNum());
         result.bodyJson()
-                .extractingPath("$.sessionWeek.startOn")
+                .extractingPath("$.sessionWeek.weekPeriod.startOn")
                 .isEqualTo(sessionWeek.weekPeriod().startOn().toString());
         result.bodyJson()
-                .extractingPath("$.sessionWeek.endOn")
+                .extractingPath("$.sessionWeek.weekPeriod.endOn")
                 .isEqualTo(sessionWeek.weekPeriod().endOn().toString());
         result.bodyJson().extractingPath("$.planDates[0].date").isEqualTo(firstPlanDate.date().toString());
         result.bodyJson().extractingPath("$.planDates[0].dayOfWeek").isEqualTo(firstPlanDate.dayOfWeek().name());

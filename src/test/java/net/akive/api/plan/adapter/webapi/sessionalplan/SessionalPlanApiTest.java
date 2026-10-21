@@ -302,10 +302,10 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
                 .isEqualTo(sessionalPlan.getSessionPeriod().endOn().toString());
         result.bodyJson().extractingPath("$.sessionWeeks[0].weekNum").isEqualTo(firstSessionWeek.weekNum());
         result.bodyJson()
-                .extractingPath("$.sessionWeeks[0].startOn")
+                .extractingPath("$.sessionWeeks[0].weekPeriod.startOn")
                 .isEqualTo(firstSessionWeek.weekPeriod().startOn().toString());
         result.bodyJson()
-                .extractingPath("$.sessionWeeks[0].endOn")
+                .extractingPath("$.sessionWeeks[0].weekPeriod.endOn")
                 .isEqualTo(firstSessionWeek.weekPeriod().endOn().toString());
         result.bodyJson()
                 .extractingPath("$.totalQuantities[0].totalQuantityId")
