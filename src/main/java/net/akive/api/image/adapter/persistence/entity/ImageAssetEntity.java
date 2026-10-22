@@ -33,13 +33,7 @@ import static org.hibernate.type.SqlTypes.BINARY;
                         name = "ux-image_asset-master_object_key",
                         columnNames = "master_object_key"
                 )
-    },
-    indexes = {
-        @Index(
-                name = "ix-image_asset-image_type-created_at",
-                columnList = "image_type, created_at"
-        )
-        }
+    }
 )
 @Getter
 @AllArgsConstructor(access = PRIVATE)

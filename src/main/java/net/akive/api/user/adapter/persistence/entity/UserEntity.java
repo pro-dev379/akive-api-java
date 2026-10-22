@@ -24,9 +24,6 @@ import static lombok.AccessLevel.PROTECTED;
     uniqueConstraints = {
         @UniqueConstraint(name = "ux-user-email", columnNames = "email"),
         @UniqueConstraint(name = "ux-user-nickname", columnNames = "nickname")
-    },
-    indexes = {
-        @Index(name = "ix-user-image_asset_id", columnList = "image_asset_id")
     }
 )
 @Getter
