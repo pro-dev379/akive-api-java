@@ -1,5 +1,6 @@
 package net.akive.api.eventprocessing.adapter.persistence;
 
+import net.akive.api.eventprocessing.adapter.persistence.entity.ProducedEventEntity;
 import net.akive.api.eventprocessing.application.required.ProducedEventRepository;
 import net.akive.api.eventprocessing.domain.ProducedEvent;
 import net.akive.api.support.RepositoryTestSupport;
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import static jakarta.persistence.LockModeType.PESSIMISTIC_WRITE;
 import static net.akive.api.eventprocessing.domain.EventType.COACHING_TURN_DONE;
 import static net.akive.api.eventprocessing.domain.EventType.INSIGHT_CHANGED;
 import static net.akive.api.eventprocessing.domain.ProducedEventStatus.PENDING;
@@ -91,7 +93,7 @@ class ProducedEventJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 코칭_응답_완료_이벤트_중_다음_발행_시도_시각에_도달한_대기_이벤트만_조회한다() {
+    void 코칭_응답_완료_이벤트_중_다음_발행_시도_시각에_도달한_대기_이벤트만_비관적_쓰기_락으로_조회한다() {
         Instant nextAttemptAtCutoff = CREATED_AT.plusSeconds(10);
         ProducedEvent differentTypeEvent = ProducedEvent.create(
                 FIRST_EVENT_ID,
@@ -135,10 +137,11 @@ class ProducedEventJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundProducedEvents)
                 .extracting(ProducedEvent::getEventId)
                 .containsExactly(THIRD_EVENT_ID);
+        assertPessimisticWriteLocks(foundProducedEvents);
     }
 
     @Test
-    void 메시지_큐에_발행할_대기_이벤트를_오래된_순서대로_정해진_개수만큼_조회한다() {
+    void 메시지_큐에_발행할_대기_이벤트를_오래된_순서대로_정해진_개수만큼_비관적_쓰기_락으로_조회한다() {
         Instant nextAttemptAtCutoff = CREATED_AT.plusSeconds(10);
         ProducedEvent oldestPendingEvent = ProducedEvent.create(
                 FIRST_EVENT_ID,
@@ -170,10 +173,11 @@ class ProducedEventJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundProducedEvents)
                 .extracting(ProducedEvent::getEventId)
                 .containsExactly(FIRST_EVENT_ID, SECOND_EVENT_ID);
+        assertPessimisticWriteLocks(foundProducedEvents);
     }
 
     @Test
-    void 코칭_응답_완료_이벤트_중_발행_처리_시간이_초과된_이벤트만_조회한다() {
+    void 코칭_응답_완료_이벤트_중_발행_처리_시간이_초과된_이벤트만_비관적_쓰기_락으로_조회한다() {
         Instant processingStartedAtCutoff = CREATED_AT.plusSeconds(10);
         ProducedEvent differentTypeEvent = createProcessingProducedEvent(
                 FIRST_EVENT_ID,
@@ -213,10 +217,11 @@ class ProducedEventJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundProducedEvents)
                 .extracting(ProducedEvent::getEventId)
                 .containsExactly(THIRD_EVENT_ID);
+        assertPessimisticWriteLocks(foundProducedEvents);
     }
 
     @Test
-    void 메시지_큐에_발행_중인_이벤트를_발행_시작_시각이_오래된_순서대로_정해진_개수만큼_조회한다() {
+    void 메시지_큐에_발행_중인_이벤트를_발행_시작_시각이_오래된_순서대로_정해진_개수만큼_비관적_쓰기_락으로_조회한다() {
         Instant processingStartedAtCutoff = CREATED_AT.plusSeconds(10);
         ProducedEvent oldestProcessingEvent = createProcessingProducedEvent(
                 FIRST_EVENT_ID,
@@ -245,10 +250,11 @@ class ProducedEventJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundProducedEvents)
                 .extracting(ProducedEvent::getEventId)
                 .containsExactly(FIRST_EVENT_ID, SECOND_EVENT_ID);
+        assertPessimisticWriteLocks(foundProducedEvents);
     }
 
     @Test
-    void 메시지_큐에_발행할_이벤트_식별자로_해당_이벤트를_조회한다() {
+    void 메시지_큐에_발행할_이벤트_식별자로_해당_이벤트를_비관적_쓰기_락으로_조회한다() {
         ProducedEvent savedProducedEvent = producedEventRepository.save(ProducedEvent.create(
                 FIRST_EVENT_ID,
                 COACHING_TURN_DONE,
@@ -265,6 +271,7 @@ class ProducedEventJpaAdapterTest extends RepositoryTestSupport {
         assertThat(foundProducedEvent.get().getProducedEventId())
                 .isEqualTo(savedProducedEvent.getProducedEventId());
         assertThat(foundProducedEvent.get().getEventId()).isEqualTo(FIRST_EVENT_ID);
+        assertPessimisticWriteLocks(List.of(foundProducedEvent.get()));
     }
 
     @Test
@@ -286,6 +293,16 @@ class ProducedEventJpaAdapterTest extends RepositoryTestSupport {
     private void saveEvents(ProducedEvent... producedEvents) {
         for (ProducedEvent producedEvent : producedEvents) {
             producedEventRepository.save(producedEvent);
+        }
+    }
+
+    private void assertPessimisticWriteLocks(List<ProducedEvent> producedEvents) {
+        for (ProducedEvent producedEvent : producedEvents) {
+            ProducedEventEntity entity = entityManager.find(
+                    ProducedEventEntity.class,
+                    producedEvent.getProducedEventId()
+            );
+            assertThat(entityManager.getLockMode(entity)).isEqualTo(PESSIMISTIC_WRITE);
         }
     }
 }
