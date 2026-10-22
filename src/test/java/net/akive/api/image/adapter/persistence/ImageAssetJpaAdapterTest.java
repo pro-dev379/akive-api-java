@@ -160,11 +160,13 @@ class ImageAssetJpaAdapterTest extends RepositoryTestSupport {
 
     @Test
     void 조회_기준_시각과_같은_미사용_이미지는_조회하지_않는다() {
-        ImageAsset imageAsset = imageAssetRepository.save(ImageAsset.create(IMAGE_ASSET_ID, PROFILE_IMAGE));
+        imageAssetRepository.save(ImageAsset.create(IMAGE_ASSET_ID, PROFILE_IMAGE));
         flushAndClear();
 
+        ImageAsset persistedImageAsset = imageAssetRepository.findByImageAssetId(IMAGE_ASSET_ID).orElseThrow();
+
         List<UUID> imageAssetIds = imageAssetRepository.findUnreferencedProfileImageAssetIdsCreatedBefore(
-                imageAsset.getCreatedAt(),
+                persistedImageAsset.getCreatedAt(),
                 UNREFERENCED_IMAGE_LIMIT
         );
 
