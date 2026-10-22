@@ -8,4 +8,6 @@ import java.util.UUID;
 public interface ImageAssetReader {
 
     Optional<ImageAsset> find(UUID imageAssetId);
+
+    Optional<ImageAsset> findForUpdate(UUID imageAssetId);
 }

@@ -27,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
@@ -134,7 +133,8 @@ class UserAccountServiceTest {
         ImageAsset profileImageAsset = ImageAsset.create(command.targetProfileImageAssetId(), PROFILE_IMAGE);
 
         given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
-        given(imageAssetReader.find(command.targetProfileImageAssetId())).willReturn(Optional.of(profileImageAsset));
+        given(imageAssetReader.findForUpdate(command.targetProfileImageAssetId()))
+                .willReturn(Optional.of(profileImageAsset));
 
         userAccountService.updateUserDetail(command);
 
@@ -146,32 +146,32 @@ class UserAccountServiceTest {
         then(userRepository).should().findByUserIdAndNotWithdrawn(command.userId());
         then(userValidator).should()
                 .validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
-        then(imageAssetReader).should().find(command.targetProfileImageAssetId());
+        then(imageAssetReader).should().findForUpdate(command.targetProfileImageAssetId());
         then(userRepository).should().save(user);
         then(imageAssetDeleter).shouldHaveNoInteractions();
     }
 
     @Test
-    void 회원_상세_정보_수정_시_프로필_이미지_에셋이_변경되면_기존_이미지_에셋을_삭제한다() {
-        UUID existingProfileImageAssetId = PROFILE_IMAGE_ASSET_ID;
-        UUID targetProfileImageAssetId = ANOTHER_PROFILE_IMAGE_ASSET_ID;
+    void 회원_상세_정보_수정_시_프로필_이미지_에셋이_변경되어도_기존_이미지_에셋을_즉시_삭제하지_않는다() {
         UserDetailUpdateCommand command = new UserDetailUpdateCommand(
                 USER_ID,
                 NICKNAME,
                 AIM,
-                targetProfileImageAssetId
+                TARGET_PROFILE_IMAGE_ASSET_ID
         );
-        User user = createReconstructedUser(command.userId(), createUserDetail(existingProfileImageAssetId));
-        ImageAsset profileImageAsset = ImageAsset.create(targetProfileImageAssetId, PROFILE_IMAGE);
+        User user = createReconstructedUser(command.userId(), createUserDetail(PROFILE_IMAGE_ASSET_ID));
+        ImageAsset profileImageAsset = ImageAsset.create(TARGET_PROFILE_IMAGE_ASSET_ID, PROFILE_IMAGE);
 
-        given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
-        given(imageAssetReader.find(targetProfileImageAssetId)).willReturn(Optional.of(profileImageAsset));
+        given(userRepository.findByUserIdAndNotWithdrawn(command.userId()))
+                .willReturn(Optional.of(user));
+        given(imageAssetReader.findForUpdate(TARGET_PROFILE_IMAGE_ASSET_ID))
+                .willReturn(Optional.of(profileImageAsset));
 
         userAccountService.updateUserDetail(command);
 
-        assertThat(user.getUserDetail().profileImageAssetId()).isEqualTo(targetProfileImageAssetId);
+        assertThat(user.getUserDetail().profileImageAssetId()).isEqualTo(TARGET_PROFILE_IMAGE_ASSET_ID);
         then(userRepository).should().save(user);
-        then(imageAssetDeleter).should().delete(existingProfileImageAssetId);
+        then(imageAssetDeleter).shouldHaveNoInteractions();
     }
 
     @Test
@@ -182,7 +182,8 @@ class UserAccountServiceTest {
         ImageAsset profileImageAsset = ImageAsset.create(command.targetProfileImageAssetId(), PROFILE_IMAGE);
 
         given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
-        given(imageAssetReader.find(command.targetProfileImageAssetId())).willReturn(Optional.of(profileImageAsset));
+        given(imageAssetReader.findForUpdate(command.targetProfileImageAssetId()))
+                .willReturn(Optional.of(profileImageAsset));
 
         userAccountService.updateUserDetail(command);
 
@@ -196,14 +197,14 @@ class UserAccountServiceTest {
         User user = createReconstructedUser(command.userId());
 
         given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
-        given(imageAssetReader.find(command.targetProfileImageAssetId())).willReturn(Optional.empty());
+        given(imageAssetReader.findForUpdate(command.targetProfileImageAssetId())).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> userAccountService.updateUserDetail(command))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(IMAGE_ASSET_NOT_FOUND);
 
-        then(imageAssetReader).should().find(command.targetProfileImageAssetId());
+        then(imageAssetReader).should().findForUpdate(command.targetProfileImageAssetId());
         then(userRepository).should(never()).save(any(User.class));
         then(imageAssetDeleter).shouldHaveNoInteractions();
     }
@@ -218,7 +219,7 @@ class UserAccountServiceTest {
         );
 
         given(userRepository.findByUserIdAndNotWithdrawn(command.userId())).willReturn(Optional.of(user));
-        given(imageAssetReader.find(command.targetProfileImageAssetId()))
+        given(imageAssetReader.findForUpdate(command.targetProfileImageAssetId()))
                 .willReturn(Optional.of(attendanceProofImageAsset));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -226,7 +227,7 @@ class UserAccountServiceTest {
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(IMAGE_ASSET_NOT_FOUND);
 
-        then(imageAssetReader).should().find(command.targetProfileImageAssetId());
+        then(imageAssetReader).should().findForUpdate(command.targetProfileImageAssetId());
         then(userRepository).should(never()).save(any(User.class));
         then(imageAssetDeleter).shouldHaveNoInteractions();
     }
@@ -242,7 +243,7 @@ class UserAccountServiceTest {
 
         assertThat(user.getUserDetail().profileImageAssetId()).isNull();
         then(userRepository).should().save(user);
-        then(imageAssetDeleter).should().delete(PROFILE_IMAGE_ASSET_ID);
+        then(imageAssetDeleter).shouldHaveNoInteractions();
     }
 
     @Test

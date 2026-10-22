@@ -11,7 +11,7 @@ public class UserDetailFixture {
 
     public static final String NICKNAME = "member@abcdefg1234";
     public static final UUID PROFILE_IMAGE_ASSET_ID = UUID.fromString("0199a8e2-7c31-7abc-8123-456789abcdef");
-    public static final UUID ANOTHER_PROFILE_IMAGE_ASSET_ID = UUID.fromString("0199a8e2-7c31-7abc-8123-456789abcdee");
+    public static final UUID TARGET_PROFILE_IMAGE_ASSET_ID = UUID.fromString("0199a8e2-7c31-7abc-8123-456789abcdee");
     public static final String AIM = "목표";
 
     public static UserDetail createUserDetail() {

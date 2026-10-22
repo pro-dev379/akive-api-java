@@ -18,6 +18,10 @@ spring:
     redis:
       host: localhost
 
+image:
+  cleanup:
+    cron: "-"
+
 jwt:
   access-token:
     secret: test-access-secret-test-access-secret

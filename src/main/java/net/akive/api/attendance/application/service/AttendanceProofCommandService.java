@@ -84,7 +84,7 @@ class AttendanceProofCommandService implements AttendanceProofSubmitter {
     }
 
     private ImageAsset findUploadedProofImageOrThrow(UUID imageAssetId) {
-        ImageAsset proofImageAsset = imageAssetReader.find(imageAssetId)
+        ImageAsset proofImageAsset = imageAssetReader.findForUpdate(imageAssetId)
                 .filter(imageAsset -> imageAsset.isOfType(ATTENDANCE_PROOF))
                 .orElseThrow(() -> new ResourceNotFoundException((IMAGE_ASSET_NOT_FOUND)));
 

@@ -40,6 +40,10 @@ email:
 image:
   cdn:
     base-url: https://dev-cdn.akive.net
+  cleanup:
+    retention: 24h
+    batch-size: 100
+    cron: "0 0 * * * *"
   storage:
     s3:
       bucket-name: akive-bucket-dev

@@ -43,7 +43,7 @@ class ImageAssetDeleteServiceTest {
         ImageVariant detailVariant = detailImageVariant(SECOND_IMAGE_VARIANT_ID, RECIPE_VERSION);
         ImageAsset imageAsset = readyImageAsset(thumbnailVariant, detailVariant);
 
-        given(imageAssetRepository.findByImageAssetId(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
+        given(imageAssetRepository.findByImageAssetIdForUpdate(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
 
         imageAssetDeleteService.delete(IMAGE_ASSET_ID);
 
@@ -59,14 +59,14 @@ class ImageAssetDeleteServiceTest {
 
     @Test
     void 존재하지_않는_이미지_에셋은_삭제할_수_없다() {
-        given(imageAssetRepository.findByImageAssetId(UNKNOWN_IMAGE_ASSET_ID)).willReturn(Optional.empty());
+        given(imageAssetRepository.findByImageAssetIdForUpdate(UNKNOWN_IMAGE_ASSET_ID)).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> imageAssetDeleteService.delete(UNKNOWN_IMAGE_ASSET_ID))
                 .extracting(ResourceNotFoundException::getError)
                 .isEqualTo(IMAGE_ASSET_NOT_FOUND);
 
-        then(imageAssetRepository).should().findByImageAssetId(UNKNOWN_IMAGE_ASSET_ID);
+        then(imageAssetRepository).should().findByImageAssetIdForUpdate(UNKNOWN_IMAGE_ASSET_ID);
         then(applicationEventPublisher).shouldHaveNoInteractions();
         then(imageAssetRepository).should(never()).delete(any(ImageAsset.class));
     }

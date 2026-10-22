@@ -21,4 +21,10 @@ class ImageAssetReadService implements ImageAssetReader {
     public Optional<ImageAsset> find(UUID imageAssetId) {
         return imageAssetRepository.findByImageAssetId(imageAssetId);
     }
+
+    @Override
+    @Transactional
+    public Optional<ImageAsset> findForUpdate(UUID imageAssetId) {
+        return imageAssetRepository.findByImageAssetIdForUpdate(imageAssetId);
+    }
 }

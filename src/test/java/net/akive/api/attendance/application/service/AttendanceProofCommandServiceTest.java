@@ -92,7 +92,7 @@ class AttendanceProofCommandServiceTest {
         );
         AttendanceProofSubmitCommand command = createAttendanceProofSubmitCommand();
 
-        given(imageAssetReader.find(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
+        given(imageAssetReader.findForUpdate(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
         given(currentTimeProvider.now()).willReturn(SUBMITTED_AT);
         given(attendanceProofRepository.existsByUserIdAndProofOn(USER_ID, EXPECTED_PROOF_ON)).willReturn(false);
@@ -160,7 +160,7 @@ class AttendanceProofCommandServiceTest {
 
         given(currentTimeProvider.now()).willReturn(SUBMITTED_AT);
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
-        given(imageAssetReader.find(UNKNOWN_IMAGE_ASSET_ID)).willReturn(Optional.empty());
+        given(imageAssetReader.findForUpdate(UNKNOWN_IMAGE_ASSET_ID)).willReturn(Optional.empty());
 
         assertImageAssetNotFound(command);
 
@@ -178,7 +178,7 @@ class AttendanceProofCommandServiceTest {
 
         given(currentTimeProvider.now()).willReturn(SUBMITTED_AT);
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
-        given(imageAssetReader.find(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
+        given(imageAssetReader.findForUpdate(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
 
         assertImageAssetNotFound(command);
 
@@ -196,7 +196,7 @@ class AttendanceProofCommandServiceTest {
 
         given(currentTimeProvider.now()).willReturn(SUBMITTED_AT);
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
-        given(imageAssetReader.find(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
+        given(imageAssetReader.findForUpdate(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
         given(imageAssetUploadChecker.isOriginalImageUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF)).willReturn(false);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
@@ -217,7 +217,7 @@ class AttendanceProofCommandServiceTest {
 
         given(currentTimeProvider.now()).willReturn(SUBMITTED_AT);
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
-        given(imageAssetReader.find(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
+        given(imageAssetReader.findForUpdate(IMAGE_ASSET_ID)).willReturn(Optional.of(imageAsset));
         given(imageAssetUploadChecker.isOriginalImageUploaded(IMAGE_ASSET_ID, ATTENDANCE_PROOF)).willReturn(true);
         given(goalFinder.findLatestBefore(USER_ID, EXPECTED_PROOF_ON))
                 .willThrow(new ResourceNotFoundException(GOAL_NOT_FOUND));

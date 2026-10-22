@@ -6,7 +6,6 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
-import net.akive.api.image.application.provided.ImageAssetDeleter;
 import net.akive.api.image.application.provided.ImageAssetReader;
 import net.akive.api.user.application.event.UserSignedUpEvent;
 import net.akive.api.user.application.event.UserWithdrawnEvent;
@@ -23,7 +22,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 import java.util.UUID;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
@@ -36,7 +34,6 @@ import static net.akive.api.image.domain.ImageType.PROFILE_IMAGE;
 class UserAccountService implements UserAccountManager {
 
     private final UserValidator userValidator;
-    private final ImageAssetDeleter imageAssetDeleter;
     private final ImageAssetReader imageAssetReader;
 
     private final UserRepository userRepository;
@@ -76,8 +73,6 @@ class UserAccountService implements UserAccountManager {
         userValidator.validateNicknameNotDuplicateExcludingUser(command.targetNickname(), command.userId());
         validateProfileImageAssetExists(command.targetProfileImageAssetId());
 
-        UUID existingProfileImageAssetId = user.getUserDetail().profileImageAssetId();
-
         user.updateUserDetail(
                 command.targetNickname(),
                 command.targetProfileImageAssetId(),
@@ -85,11 +80,6 @@ class UserAccountService implements UserAccountManager {
         );
 
         userRepository.save(user);
-
-        if (existingProfileImageAssetId != null
-                && !Objects.equals(existingProfileImageAssetId, command.targetProfileImageAssetId())) {
-            imageAssetDeleter.delete(existingProfileImageAssetId);
-        }
     }
 
     @Override
@@ -133,7 +123,7 @@ class UserAccountService implements UserAccountManager {
             return;
         }
 
-        imageAssetReader.find(imageAssetId)
+        imageAssetReader.findForUpdate(imageAssetId)
                 .filter(imageAsset -> imageAsset.isOfType(PROFILE_IMAGE))
                 .orElseThrow(() -> new ResourceNotFoundException(IMAGE_ASSET_NOT_FOUND));
     }
