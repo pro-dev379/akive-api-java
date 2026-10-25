@@ -1,6 +1,7 @@
 package net.akive.api.core.config.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -13,17 +14,21 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
+import static net.akive.api.core.config.security.CookieRequestProtectionFilter.CSRF_PROTECTION_HEADER_NAME;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableConfigurationProperties(CorsProperties.class)
 public class SecurityConfig {
 
     private final JwtDecoder accessTokenJwtDecoder;
     private final TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint;
+    private final CorsProperties corsProperties;
 
     @Bean
     @Order(1)
@@ -31,6 +36,7 @@ public class SecurityConfig {
         return httpSecurity
                 .securityMatcher(
                         "/auth/tokens",
+                        "/auth/tokens/**",
                         "/auth/login/**",
                         "/auth/email-verifications/**",
                         "/auth/password-reset",
@@ -38,6 +44,7 @@ public class SecurityConfig {
                         "/members/check-nickname"
                 )
                 .cors(Customizer.withDefaults())
+                .addFilterAfter(new CookieRequestProtectionFilter(), CorsFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -75,11 +82,8 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of(
-                "http://localhost:3001",
-                "https://dev-www.akive.net",
-                "https://www.akive.net"
-        ));
+        corsConfiguration.setAllowedOrigins(corsProperties.allowedOrigins());
+        corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedMethods(List.of(
                 "GET",
                 "POST",
@@ -91,7 +95,8 @@ public class SecurityConfig {
         corsConfiguration.setAllowedHeaders(List.of(
                 "Authorization",
                 "Content-Type",
-                "X-Client-Instance-Id"
+                "X-Client-Instance-Id",
+                CSRF_PROTECTION_HEADER_NAME
         ));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

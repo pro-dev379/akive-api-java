@@ -3,6 +3,7 @@ package net.akive.api.auth.application.token.service;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.application.token.provided.RefreshTokenSessionManager;
 import net.akive.api.auth.application.token.required.RefreshTokenCreator;
+import net.akive.api.auth.application.token.required.RefreshTokenParser;
 import net.akive.api.auth.application.token.required.RefreshTokenStore;
 import net.akive.api.auth.domain.token.RefreshToken;
 import net.akive.api.auth.domain.token.RefreshTokenPayload;
@@ -23,6 +24,7 @@ import static net.akive.api.common.exception.business.AuthenticationError.INVALI
 class RefreshTokenSessionService implements RefreshTokenSessionManager {
 
     private final RefreshTokenCreator refreshTokenCreator;
+    private final RefreshTokenParser refreshTokenParser;
     private final RefreshTokenStore refreshTokenStore;
 
     private final RefreshTokenRotationPolicy refreshTokenRotationPolicy;
@@ -74,13 +76,32 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
     }
 
     @Override
-    public void revokeByUserId(Long userId) {
-        refreshTokenStore.deleteByUserId(userId);
+    public void revokeCurrent(RefreshToken refreshToken) {
+        RefreshTokenPayload payload = refreshTokenParser.parse(refreshToken);
+
+        boolean deleted = refreshTokenStore.deleteIfMatches(
+                payload.userId(),
+                payload.clientInstanceId(),
+                refreshToken
+        );
+
+        if (!deleted) {
+            throw new AuthenticationException(INVALID_REFRESH_TOKEN);
+        }
     }
 
     @Override
-    public void revokeByUserIdAndClientInstanceId(Long userId, ClientInstanceId clientInstanceId) {
-        refreshTokenStore.deleteByUserIdAndClientInstanceId(userId, clientInstanceId);
+    public void revokeAll(RefreshToken refreshToken) {
+        RefreshTokenPayload payload = refreshTokenParser.parse(refreshToken);
+
+        validateCurrent(payload.userId(), payload.clientInstanceId(), refreshToken);
+
+        refreshTokenStore.deleteByUserId(payload.userId());
+    }
+
+    @Override
+    public void revokeAllByUserId(Long userId) {
+        refreshTokenStore.deleteByUserId(userId);
     }
 
     private void validateCurrent(Long userId, ClientInstanceId clientInstanceId, RefreshToken refreshToken) {

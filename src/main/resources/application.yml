@@ -24,12 +24,19 @@ spring:
       repositories:
         enabled: false
 
-jwt:
-  issuer: akive
-  access-token:
-    expiration-minutes: 30
-  refresh-token:
-    expiration-days: 14
+auth:
+  jwt:
+    issuer: akive
+    access-token:
+      expiration-minutes: 30
+    refresh-token:
+      expiration-days: 14
+  refresh-token-cookie:
+    same-site: Lax
+
+cors:
+  allowed-origins:
+    - https://www.akive.net
 
 email:
   from:

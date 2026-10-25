@@ -29,11 +29,16 @@ logging:
     org.springframework.jdbc.core.JdbcTemplate: debug
     org.springframework.jdbc.core.StatementCreatorUtils: trace
 
-jwt:
-  access-token:
-    secret: ${accessTokenSecret}
-  refresh-token:
-    secret: ${refreshTokenSecret}
+auth:
+  jwt:
+    access-token:
+      secret: ${accessTokenSecret}
+    refresh-token:
+      secret: ${refreshTokenSecret}
+
+cors:
+  allowed-origins:
+    - https://dev-www.akive.net
 
 event:
   sqs:

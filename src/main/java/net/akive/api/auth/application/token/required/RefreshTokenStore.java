@@ -25,5 +25,5 @@ public interface RefreshTokenStore {
 
     void deleteByUserId(Long userId);
 
-    void deleteByUserIdAndClientInstanceId(Long userId, ClientInstanceId clientInstanceId);
+    boolean deleteIfMatches(Long userId, ClientInstanceId clientInstanceId, RefreshToken refreshToken);
 }

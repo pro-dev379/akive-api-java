@@ -73,16 +73,32 @@ class RefreshTokenRedisAdapterTest extends RedisTestSupport {
     }
 
     @Test
-    void 회원_식별자와_클라이언트_식별자로_리프레시_토큰을_삭제한다() {
+    void 저장된_리프레시_토큰이_현재_토큰과_같으면_삭제한다() {
         RefreshToken refreshToken = createRefreshToken();
         ClientInstanceId clientInstanceId = createClientInstanceId();
         refreshTokenStore.save(USER_ID, clientInstanceId, refreshToken, TTL);
 
-        refreshTokenStore.deleteByUserIdAndClientInstanceId(USER_ID, clientInstanceId);
+        boolean deleted = refreshTokenStore.deleteIfMatches(USER_ID, clientInstanceId, refreshToken);
 
         Optional<RefreshToken> found = refreshTokenStore.findByUserIdAndClientInstantId(USER_ID, clientInstanceId);
 
+        assertThat(deleted).isTrue();
         assertThat(found).isEmpty();
+    }
+
+    @Test
+    void 저장된_리프레시_토큰이_현재_토큰과_다르면_삭제하지_않는다() {
+        RefreshToken savedRefreshToken = createRefreshToken("saved-refresh-token");
+        RefreshToken currentRefreshToken = createRefreshToken("current-refresh-token");
+        ClientInstanceId clientInstanceId = createClientInstanceId();
+        refreshTokenStore.save(USER_ID, clientInstanceId, savedRefreshToken, TTL);
+
+        boolean deleted = refreshTokenStore.deleteIfMatches(USER_ID, clientInstanceId, currentRefreshToken);
+
+        Optional<RefreshToken> found = refreshTokenStore.findByUserIdAndClientInstantId(USER_ID, clientInstanceId);
+
+        assertThat(deleted).isFalse();
+        assertThat(found).contains(savedRefreshToken);
     }
 
     @Test

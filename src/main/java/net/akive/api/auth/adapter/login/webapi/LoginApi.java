@@ -3,12 +3,17 @@ package net.akive.api.auth.adapter.login.webapi;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.adapter.login.webapi.dto.request.LoginByEmailRequest;
 import net.akive.api.auth.adapter.login.webapi.dto.response.LoginResponse;
+import net.akive.api.auth.adapter.token.cookie.RefreshTokenCookieManager;
 import net.akive.api.auth.application.login.provided.LoginProcessor;
 import net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand;
+import net.akive.api.auth.domain.token.IssuedToken;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RestController
 @RequestMapping("/auth/login")
@@ -16,9 +21,10 @@ import java.util.UUID;
 public class LoginApi {
 
     private final LoginProcessor loginProcessor;
+    private final RefreshTokenCookieManager refreshTokenCookieManager;
 
     @PostMapping("/email")
-    public LoginResponse loginByEmail(
+    public ResponseEntity<LoginResponse> loginByEmail(
             @RequestHeader("X-Client-Instance-Id") UUID clientInstanceIdHeader,
             @RequestBody @Validated LoginByEmailRequest request
     ) {
@@ -28,6 +34,10 @@ public class LoginApi {
                 request.password()
         );
 
-        return LoginResponse.from(loginProcessor.loginByEmail(command));
+        IssuedToken token = loginProcessor.loginByEmail(command);
+
+        return ResponseEntity.ok()
+                .header(SET_COOKIE, refreshTokenCookieManager.create(token.refreshToken()).toString())
+                .body(LoginResponse.from(token));
     }
 }

@@ -14,14 +14,14 @@ spring:
     username: ${username}
     password: ${password}
 
-  data:
-    redis:
-      host: localhost
-
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
+
+  data:
+    redis:
+      host: localhost
 
 logging:
   level:
@@ -30,13 +30,18 @@ logging:
     org.springframework.jdbc.core.JdbcTemplate: debug
     org.springframework.jdbc.core.StatementCreatorUtils: trace
 
-jwt:
-  access-token:
-    secret: local-access-secret-local-access-secret
-    expiration-minutes: 525600 # 1 year
-  refresh-token:
-    secret: local-refresh-secret-local-refresh-secret
-    expiration-days: 365
+auth:
+  jwt:
+    access-token:
+      secret: local-access-secret-local-access-secret
+      expiration-minutes: 525600 # 1 year
+    refresh-token:
+      secret: local-refresh-secret-local-refresh-secret
+      expiration-days: 365
+
+cors:
+  allowed-origins:
+    - http://localhost:3001
 
 event:
   sqs:

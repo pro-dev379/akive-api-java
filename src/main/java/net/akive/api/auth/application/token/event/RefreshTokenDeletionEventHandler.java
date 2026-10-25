@@ -16,6 +16,6 @@ class RefreshTokenDeletionEventHandler {
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
     void handle(UserWithdrawnEvent event) {
-        refreshTokenSessionManager.revokeByUserId(event.userId());
+        refreshTokenSessionManager.revokeAllByUserId(event.userId());
     }
 }

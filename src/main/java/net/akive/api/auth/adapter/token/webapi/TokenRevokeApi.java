@@ -1,14 +1,16 @@
 package net.akive.api.auth.adapter.token.webapi;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.auth.adapter.token.cookie.RefreshTokenCookieManager;
 import net.akive.api.auth.application.token.provided.RefreshTokenSessionManager;
-import net.akive.api.common.domain.ClientInstanceId;
-import net.akive.api.core.config.security.AuthenticatedUserId;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
-import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static net.akive.api.auth.adapter.token.cookie.RefreshTokenCookieManager.REFRESH_TOKEN_COOKIE_NAME;
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RestController
 @RequestMapping("/auth/tokens")
@@ -16,22 +18,29 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 public class TokenRevokeApi {
 
     private final RefreshTokenSessionManager refreshTokenSessionManager;
+    private final RefreshTokenCookieManager refreshTokenCookieManager;
 
     @DeleteMapping("/refresh")
-    @ResponseStatus(NO_CONTENT)
-    public void revokeAllRefreshTokens(@AuthenticatedUserId Long userId) {
-        refreshTokenSessionManager.revokeByUserId(userId);
+    public ResponseEntity<Void> revokeAllRefreshTokens(
+            @CookieValue(name = REFRESH_TOKEN_COOKIE_NAME, required = false) String refreshTokenCookie
+    ) {
+        refreshTokenSessionManager.revokeAll(refreshTokenCookieManager.read(refreshTokenCookie));
+
+        return expireRefreshTokenCookie();
     }
 
     @DeleteMapping("/refresh/current")
-    @ResponseStatus(NO_CONTENT)
-    public void revokeCurrentRefreshToken(
-            @RequestHeader("X-Client-Instance-Id") UUID clientInstanceIdHeader,
-            @AuthenticatedUserId Long userId
+    public ResponseEntity<Void> revokeCurrentRefreshToken(
+            @CookieValue(name = REFRESH_TOKEN_COOKIE_NAME, required = false) String refreshTokenCookie
     ) {
-        refreshTokenSessionManager.revokeByUserIdAndClientInstanceId(
-                userId,
-                new ClientInstanceId(clientInstanceIdHeader)
-        );
+        refreshTokenSessionManager.revokeCurrent(refreshTokenCookieManager.read(refreshTokenCookie));
+
+        return expireRefreshTokenCookie();
+    }
+
+    private ResponseEntity<Void> expireRefreshTokenCookie() {
+        return ResponseEntity.noContent()
+                .header(SET_COOKIE, refreshTokenCookieManager.expire().toString())
+                .build();
     }
 }

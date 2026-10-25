@@ -26,6 +26,6 @@ class RefreshTokenDeletionEventHandlerTest {
 
         refreshTokenDeletionEventHandler.handle(userWithdrawnEvent);
 
-        then(refreshTokenSessionManager).should().revokeByUserId(USER_ID);
+        then(refreshTokenSessionManager).should().revokeAllByUserId(USER_ID);
     }
 }

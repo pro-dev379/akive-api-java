@@ -20,17 +20,35 @@ class RefreshTokenRedisAdapter implements RefreshTokenStore {
 
     @Override
     public List<RefreshToken> findByUserId(Long userId) {
-        return redisTemplateClient.getByPattern(CacheKeyProvider.refreshTokenPattern(userId), RefreshToken.class);
+        return redisTemplateClient.getByPattern(
+                CacheKeyProvider.refreshTokenPattern(userId),
+                RefreshToken.class
+        );
     }
 
     @Override
-    public Optional<RefreshToken> findByUserIdAndClientInstantId(Long userId, ClientInstanceId clientInstanceId) {
-        return redisTemplateClient.get(CacheKeyProvider.refreshToken(userId, clientInstanceId), RefreshToken.class);
+    public Optional<RefreshToken> findByUserIdAndClientInstantId(
+            Long userId,
+            ClientInstanceId clientInstanceId
+    ) {
+        return redisTemplateClient.get(
+                CacheKeyProvider.refreshToken(userId, clientInstanceId),
+                RefreshToken.class
+        );
     }
 
     @Override
-    public void save(Long userId, ClientInstanceId clientInstanceId, RefreshToken refreshToken, Duration ttl) {
-        redisTemplateClient.set(CacheKeyProvider.refreshToken(userId, clientInstanceId), refreshToken, ttl);
+    public void save(
+            Long userId,
+            ClientInstanceId clientInstanceId,
+            RefreshToken refreshToken,
+            Duration ttl
+    ) {
+        redisTemplateClient.set(
+                CacheKeyProvider.refreshToken(userId, clientInstanceId),
+                refreshToken,
+                ttl
+        );
     }
 
     @Override
@@ -55,7 +73,14 @@ class RefreshTokenRedisAdapter implements RefreshTokenStore {
     }
 
     @Override
-    public void deleteByUserIdAndClientInstanceId(Long userId, ClientInstanceId clientInstanceId) {
-        redisTemplateClient.delete(CacheKeyProvider.refreshToken(userId, clientInstanceId));
+    public boolean deleteIfMatches(
+            Long userId,
+            ClientInstanceId clientInstanceId,
+            RefreshToken refreshToken
+    ) {
+        return redisTemplateClient.compareAndDelete(
+                CacheKeyProvider.refreshToken(userId, clientInstanceId),
+                refreshToken
+        );
     }
 }
