@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.akive.api.auth.domain.token.RefreshToken;
 import net.akive.api.common.exception.business.AuthenticationException;
 import net.akive.api.core.config.security.JwtProperties;
+import net.akive.api.core.config.security.RefreshTokenCookieExpirer;
 import net.akive.api.core.config.security.RefreshTokenCookieProperties;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,7 @@ import static net.akive.api.common.exception.business.AuthenticationError.INVALI
 
 @Component
 @RequiredArgsConstructor
-public class RefreshTokenCookieManager {
+public class RefreshTokenCookieManager implements RefreshTokenCookieExpirer {
 
     public static final String REFRESH_TOKEN_COOKIE_NAME = "__Host-akive_refresh_token";
     private static final String REFRESH_TOKEN_COOKIE_PATH = "/";
@@ -37,6 +38,7 @@ public class RefreshTokenCookieManager {
         return new RefreshToken(value);
     }
 
+    @Override
     public ResponseCookie expire() {
         return createCookie("", Duration.ZERO);
     }

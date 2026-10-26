@@ -3,6 +3,7 @@ package net.akive.api.user.adapter.webapi;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.core.config.security.RefreshTokenCookieExpirer;
 import net.akive.api.image.adapter.webapi.mapper.ImageResponseMapper;
 import net.akive.api.image.application.provided.ImageAssetReader;
 import net.akive.api.image.domain.ImageAsset;
@@ -22,13 +23,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static net.akive.api.auth.adapter.token.cookie.RefreshTokenCookieManager.REFRESH_TOKEN_COOKIE_NAME;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
@@ -50,9 +54,11 @@ import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.http.HttpStatus.*;
 
 @WebMvcTest(MemberPrivateApi.class)
@@ -78,6 +84,9 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
 
     @MockitoBean
     ImageResponseMapper imageResponseMapper;
+
+    @MockitoBean
+    RefreshTokenCookieExpirer refreshTokenCookieExpirer;
 
     @Test
     void 개인_정보를_조회한다() {
@@ -301,13 +310,21 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 회원을_탈퇴시킨다() {
+    void 회원을_탈퇴시키고_리프레시_토큰_쿠키를_만료시킨다() {
         UserWithdrawRequest request = createUserWithdrawRequest();
         UserWithdrawCommand command = UserWithdrawCommand.of(USER_ID, request.withdrawReason());
+        ResponseCookie expiredCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+                .maxAge(Duration.ZERO)
+                .build();
+        given(refreshTokenCookieExpirer.expire()).willReturn(expiredCookie);
 
-        postJson(MEMBER_WITHDRAW_URL, USER_ID, toJson(request)).hasStatus(NO_CONTENT);
+        MvcTestResultAssert result = postJson(MEMBER_WITHDRAW_URL, USER_ID, toJson(request))
+                .hasStatus(NO_CONTENT);
 
+        result.satisfies(testResult -> assertThat(testResult.getResponse().getHeader(SET_COOKIE))
+                .contains(REFRESH_TOKEN_COOKIE_NAME + "=", "Max-Age=0"));
         then(userAccountManager).should().withdraw(command);
+        then(refreshTokenCookieExpirer).should().expire();
     }
 
     @Test

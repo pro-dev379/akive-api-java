@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.core.config.security.RefreshTokenCookieExpirer;
 import net.akive.api.image.adapter.webapi.mapper.ImageResponseMapper;
 import net.akive.api.image.application.provided.ImageAssetReader;
 import net.akive.api.image.domain.ImageAsset;
@@ -17,6 +18,7 @@ import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.application.provided.UserNicknameChecker;
 import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.domain.User;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +27,7 @@ import java.util.UUID;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
 import static net.akive.api.image.domain.VariantType.DETAIL;
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @Validated
@@ -37,7 +40,9 @@ public class MemberPrivateApi {
     private final UserNicknameChecker userNicknameChecker;
     private final UserAccountManager userAccountManager;
     private final ImageAssetReader imageAssetReader;
+
     private final ImageResponseMapper imageResponseMapper;
+    private final RefreshTokenCookieExpirer refreshTokenCookieExpirer;
 
     @GetMapping
     public UserFindResponse find(@AuthenticatedUserId Long userId) {
@@ -66,14 +71,17 @@ public class MemberPrivateApi {
     }
 
     @PostMapping("/withdraw")
-    @ResponseStatus(NO_CONTENT)
-    public void withdraw(
+    public ResponseEntity<Void> withdraw(
             @AuthenticatedUserId Long userId,
             @Validated @RequestBody UserWithdrawRequest request
     ) {
         UserWithdrawCommand command = UserWithdrawCommand.of(userId, request.withdrawReason());
 
         userAccountManager.withdraw(command);
+
+        return ResponseEntity.noContent()
+                .header(SET_COOKIE, refreshTokenCookieExpirer.expire().toString())
+                .build();
     }
 
     private ProfileImageResponse findProfileImage(User user) {
