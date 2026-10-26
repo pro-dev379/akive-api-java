@@ -1,5 +1,6 @@
 package net.akive.api.core.config.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,7 @@ public class SecurityConfig {
     private final JwtDecoder accessTokenJwtDecoder;
     private final TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint;
     private final CorsProperties corsProperties;
+    private final ObjectMapper objectMapper;
 
     @Bean
     @Order(1)
@@ -44,7 +46,7 @@ public class SecurityConfig {
                         "/members/check-nickname"
                 )
                 .cors(Customizer.withDefaults())
-                .addFilterAfter(new CookieRequestProtectionFilter(), CorsFilter.class)
+                .addFilterAfter(new CookieRequestProtectionFilter(objectMapper), CorsFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)

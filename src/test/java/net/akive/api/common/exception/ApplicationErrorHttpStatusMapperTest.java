@@ -17,6 +17,7 @@ class ApplicationErrorHttpStatusMapperTest {
         assertThat(toHttpStatus(error(AUTHENTICATION_ERROR))).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(toHttpStatus(error(RATE_LIMIT_EXCEEDED))).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
         assertThat(toHttpStatus(error(UNEXPECTED_SERVER_ERROR))).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(toHttpStatus(error(FORBIDDEN))).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(toHttpStatus(error(METHOD_NOT_ALLOWED))).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
         assertThat(toHttpStatus(error(UNSUPPORTED_MEDIA_TYPE))).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }

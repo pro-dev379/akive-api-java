@@ -38,6 +38,7 @@ import static net.akive.api.auth.domain.token.RefreshTokenFixture.REFRESH_TOKEN_
 import static net.akive.api.auth.domain.token.RefreshTokenFixture.createRefreshToken;
 import static net.akive.api.auth.domain.token.ReissuedTokenFixture.createReissuedTokenWithoutRotatedRefreshToken;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_ACCESS_TOKEN;
+import static net.akive.api.common.exception.web.HttpRequestError.INVALID_CSRF_PROTECTION_HEADER;
 import static net.akive.api.core.config.security.CookieRequestProtectionFilter.CSRF_PROTECTION_HEADER_NAME;
 import static net.akive.api.core.config.security.CookieRequestProtectionFilter.CSRF_PROTECTION_HEADER_VALUE;
 import static org.mockito.ArgumentMatchers.any;
@@ -198,11 +199,13 @@ class SecurityConfigTest {
             "DELETE, /auth/tokens/refresh/current"
     })
     void 쿠키_인증_API는_CSRF_보호_헤더가_없으면_요청을_거부한다(String method, String url) {
-        mvcTester.method(org.springframework.http.HttpMethod.valueOf(method))
+        MvcTestResultAssert result = mvcTester.method(org.springframework.http.HttpMethod.valueOf(method))
                 .uri(url)
                 .cookie(new Cookie(REFRESH_TOKEN_COOKIE_NAME, REFRESH_TOKEN_VALUE))
                 .assertThat()
                 .hasStatus(FORBIDDEN);
+
+        assertErrorResponse(result, INVALID_CSRF_PROTECTION_HEADER);
     }
 
     @ParameterizedTest
@@ -213,12 +216,14 @@ class SecurityConfigTest {
             "DELETE, /auth/tokens/refresh/current"
     })
     void 쿠키_인증_API는_CSRF_보호_헤더_값이_유효하지_않으면_요청을_거부한다(String method, String url) {
-        mvcTester.method(org.springframework.http.HttpMethod.valueOf(method))
+        MvcTestResultAssert result = mvcTester.method(org.springframework.http.HttpMethod.valueOf(method))
                 .uri(url)
                 .header(CSRF_PROTECTION_HEADER_NAME, "Invalid")
                 .cookie(new Cookie(REFRESH_TOKEN_COOKIE_NAME, REFRESH_TOKEN_VALUE))
                 .assertThat()
                 .hasStatus(FORBIDDEN);
+
+        assertErrorResponse(result, INVALID_CSRF_PROTECTION_HEADER);
     }
 
     private void assertErrorResponse(MvcTestResultAssert result, ApplicationError error) {

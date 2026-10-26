@@ -1,9 +1,13 @@
 package net.akive.api.core.config.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.web.HttpRequestError;
+import net.akive.api.common.response.ApiErrorResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
@@ -13,12 +17,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Set;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static net.akive.api.common.exception.ApplicationErrorHttpStatusMapper.toHttpStatus;
+import static net.akive.api.common.exception.web.HttpRequestError.INVALID_CSRF_PROTECTION_HEADER;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+@RequiredArgsConstructor
 public class CookieRequestProtectionFilter extends OncePerRequestFilter {
 
     public static final String CSRF_PROTECTION_HEADER_NAME = "X-CSRF-Protection";
     public static final String CSRF_PROTECTION_HEADER_VALUE = "1";
-
     private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS", "TRACE");
+
+    private final ObjectMapper objectMapper;
     private final RequestMatcher protectedEndpoints = new OrRequestMatcher(
             PathPatternRequestMatcher.withDefaults().matcher("/auth/login/**"),
             PathPatternRequestMatcher.withDefaults().matcher("/auth/tokens"),
@@ -37,10 +48,19 @@ public class CookieRequestProtectionFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         if (!CSRF_PROTECTION_HEADER_VALUE.equals(request.getHeader(CSRF_PROTECTION_HEADER_NAME))) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            writeErrorResponse(response, INVALID_CSRF_PROTECTION_HEADER);
+
             return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, HttpRequestError error) throws IOException {
+        response.setStatus(toHttpStatus(error).value());
+        response.setContentType(APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(UTF_8.name());
+
+        objectMapper.writeValue(response.getWriter(), ApiErrorResponse.of(error));
     }
 }

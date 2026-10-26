@@ -16,6 +16,7 @@ public class ApplicationErrorHttpStatusMapper {
             case AUTHENTICATION_ERROR -> HttpStatus.UNAUTHORIZED;
             case RATE_LIMIT_EXCEEDED -> HttpStatus.TOO_MANY_REQUESTS;
             case UNEXPECTED_SERVER_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
             case METHOD_NOT_ALLOWED -> HttpStatus.METHOD_NOT_ALLOWED;
             case UNSUPPORTED_MEDIA_TYPE -> HttpStatus.UNSUPPORTED_MEDIA_TYPE;
         };
