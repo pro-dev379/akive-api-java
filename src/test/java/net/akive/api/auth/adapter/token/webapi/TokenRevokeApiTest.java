@@ -39,7 +39,7 @@ class TokenRevokeApiTest extends PublicApiTestSupport {
     RefreshTokenCookieManager refreshTokenCookieManager;
 
     @Test
-    void 리프레시_토큰으로_회원의_모든_리프레시_토큰_세션을_무효화하고_쿠키를_삭제한다() {
+    void 리프레시_토큰으로_회원의_모든_리프레시_토큰_세션을_무효화하고_쿠키를_만료시킨다() {
         RefreshToken refreshToken = createRefreshToken();
         ResponseCookie expiredCookie = expiredRefreshTokenCookie();
         given(refreshTokenCookieManager.read(REFRESH_TOKEN_VALUE)).willReturn(refreshToken);
@@ -54,7 +54,7 @@ class TokenRevokeApiTest extends PublicApiTestSupport {
     }
 
     @Test
-    void 리프레시_토큰으로_현재_클라이언트의_리프레시_토큰_세션만_무효화하고_쿠키를_삭제한다() {
+    void 리프레시_토큰으로_현재_클라이언트의_리프레시_토큰_세션만_무효화하고_쿠키를_만료시킨다() {
         RefreshToken refreshToken = createRefreshToken();
         ResponseCookie expiredCookie = expiredRefreshTokenCookie();
         given(refreshTokenCookieManager.read(REFRESH_TOKEN_VALUE)).willReturn(refreshToken);

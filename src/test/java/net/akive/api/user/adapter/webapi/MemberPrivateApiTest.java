@@ -28,7 +28,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.net.URI;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -54,7 +53,6 @@ import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -313,16 +311,13 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     void 회원을_탈퇴시키고_리프레시_토큰_쿠키를_만료시킨다() {
         UserWithdrawRequest request = createUserWithdrawRequest();
         UserWithdrawCommand command = UserWithdrawCommand.of(USER_ID, request.withdrawReason());
-        ResponseCookie expiredCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
-                .maxAge(Duration.ZERO)
-                .build();
+        ResponseCookie expiredCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "").build();
         given(refreshTokenCookieExpirer.expire()).willReturn(expiredCookie);
 
-        MvcTestResultAssert result = postJson(MEMBER_WITHDRAW_URL, USER_ID, toJson(request))
-                .hasStatus(NO_CONTENT);
+        postJson(MEMBER_WITHDRAW_URL, USER_ID, toJson(request))
+                .hasStatus(NO_CONTENT)
+                .hasHeader(SET_COOKIE, expiredCookie.toString());
 
-        result.satisfies(testResult -> assertThat(testResult.getResponse().getHeader(SET_COOKIE))
-                .contains(REFRESH_TOKEN_COOKIE_NAME + "=", "Max-Age=0"));
         then(userAccountManager).should().withdraw(command);
         then(refreshTokenCookieExpirer).should().expire();
     }
