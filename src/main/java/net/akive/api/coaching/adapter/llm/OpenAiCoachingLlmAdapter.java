@@ -116,6 +116,7 @@ class OpenAiCoachingLlmAdapter implements CoachingLlm {
                 .instructions(coachingPrompt.instructions())
                 .input(coachingPrompt.input())
                 .maxOutputTokens(COACHING_OUTPUT_TOKEN_MAX_COUNT)
+                .store(false)
                 .build();
     }
 

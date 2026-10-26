@@ -373,6 +373,6 @@ class OpenAiCoachingLlmAdapterTest {
         assertThat(params.instructions()).contains(coachingPrompt.instructions());
         assertThat(params.input().orElseThrow().asText()).isEqualTo(coachingPrompt.input());
         assertThat(params.maxOutputTokens()).contains(COACHING_OUTPUT_TOKEN_MAX_COUNT);
+        assertThat(params.store()).contains(false);
     }
-
 }
