@@ -13,6 +13,7 @@ import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
 import net.akive.api.user.adapter.webapi.dto.response.UserFindResponse;
 import net.akive.api.user.adapter.webapi.dto.response.UserFindResponse.ProfileImageResponse;
 import net.akive.api.user.adapter.webapi.dto.response.UserNicknameCheckResponse;
+import net.akive.api.user.adapter.webapi.dto.response.WithdrawalReasonsFindResponse;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.application.provided.UserNicknameChecker;
@@ -82,6 +83,11 @@ public class MemberPrivateApi {
         return ResponseEntity.noContent()
                 .header(SET_COOKIE, refreshTokenCookieExpirer.expire().toString())
                 .build();
+    }
+
+    @GetMapping("/withdrawal-reasons")
+    public WithdrawalReasonsFindResponse findWithdrawalReasons() {
+        return WithdrawalReasonsFindResponse.from(userFinder.findWithdrawalReasons());
     }
 
     private ProfileImageResponse findProfileImage(User user) {

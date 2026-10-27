@@ -1,8 +1,7 @@
 package net.akive.api.user.adapter.webapi.dto.request;
 
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import net.akive.api.user.domain.WithdrawalReason;
 
-import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
-
-public record UserWithdrawRequest(@Size(max = WITHDRAWAL_REASON_MAX_LENGTH) String withdrawReason) {
+public record UserWithdrawRequest(@NotNull WithdrawalReason withdrawReason) {
 }

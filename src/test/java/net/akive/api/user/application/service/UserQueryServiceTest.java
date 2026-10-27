@@ -4,12 +4,14 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.User;
+import net.akive.api.user.domain.WithdrawalReason;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.MAX_LENGTH_EXCEEDED;
@@ -17,6 +19,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.USER
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
+import static net.akive.api.user.domain.WithdrawalReason.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -77,6 +80,20 @@ class UserQueryServiceTest {
         assertThat(foundUser).contains(user);
 
         then(userRepository).should().findByEmailAndNotWithdrawn(EMAIL);
+    }
+
+    @Test
+    void 회원_탈퇴_사유_목록을_조회한다() {
+        List<WithdrawalReason> withdrawalReasons = userQueryService.findWithdrawalReasons();
+
+        assertThat(withdrawalReasons).containsExactly(
+                INCONVENIENT_TO_USE,
+                MISSING_DESIRED_FEATURES,
+                NO_LONGER_NEEDED,
+                WANT_NEW_ACCOUNT,
+                OTHER
+        );
+        then(userRepository).shouldHaveNoInteractions();
     }
 
     @Test

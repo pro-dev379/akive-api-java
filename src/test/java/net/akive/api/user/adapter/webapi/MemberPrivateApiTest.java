@@ -18,6 +18,7 @@ import net.akive.api.user.application.provided.dto.UserDetailUpdateCommand;
 import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.domain.User;
 import net.akive.api.user.domain.UserDetail;
+import net.akive.api.user.domain.WithdrawalReason;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,6 +29,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -50,9 +52,9 @@ import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixt
 import static net.akive.api.user.adapter.webapi.fixture.MemberAccountRequestFixture.createUserWithdrawRequest;
 import static net.akive.api.user.application.fixture.UserAccountCommandFixture.createUserDetailUpdateCommand;
 import static net.akive.api.user.domain.UserPolicy.NICKNAME_MAX_LENGTH;
-import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
+import static net.akive.api.user.domain.WithdrawalReason.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.never;
@@ -64,6 +66,7 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
 
     private static final String MEMBER_ME_URL = "/members/me";
     private static final String MEMBER_WITHDRAW_URL = "/members/me/withdraw";
+    private static final String MEMBER_WITHDRAWAL_REASONS_URL = "/members/me/withdrawal-reasons";
     private static final String MEMBER_CHECK_NICKNAME_URL = "/members/me/check-nickname";
     private static final URI PROFILE_IMAGE_URL =
             URI.create("https://dev-cdn.akive.net/variants/profile-images/1/detail.webp");
@@ -322,13 +325,44 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
         then(refreshTokenCookieExpirer).should().expire();
     }
 
-    @Test
-    void 회원_탈퇴_요청값이_올바르지_않으면_400을_응답한다() {
-        UserWithdrawRequest request = createUserWithdrawRequest("a".repeat(WITHDRAWAL_REASON_MAX_LENGTH + 1));
-
-        postJson(MEMBER_WITHDRAW_URL, USER_ID, toJson(request)).hasStatus(BAD_REQUEST);
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "{}",
+            "{\"withdrawReason\":null}",
+            "{\"withdrawReason\":\"UNKNOWN\"}"
+    })
+    void 회원_탈퇴_요청값이_올바르지_않으면_400을_응답한다(String requestBody) {
+        postJson(MEMBER_WITHDRAW_URL, USER_ID, requestBody)
+                .hasStatus(BAD_REQUEST);
 
         then(userAccountManager).should(never()).withdraw(any(UserWithdrawCommand.class));
+    }
+
+    @Test
+    void 회원_탈퇴_사유_목록을_조회한다() {
+        List<WithdrawalReason> withdrawalReasons = List.of(
+                INCONVENIENT_TO_USE,
+                MISSING_DESIRED_FEATURES,
+                NO_LONGER_NEEDED,
+                WANT_NEW_ACCOUNT,
+                OTHER
+        );
+        given(userFinder.findWithdrawalReasons()).willReturn(withdrawalReasons);
+
+        MvcTestResultAssert result = get(MEMBER_WITHDRAWAL_REASONS_URL, USER_ID).hasStatus(OK);
+
+        result.bodyJson().extractingPath("$.withdrawalReasons.length()")
+                .isEqualTo(withdrawalReasons.size());
+        result.bodyJson().extractingPath("$.withdrawalReasons[0].code")
+                .isEqualTo(INCONVENIENT_TO_USE.name());
+        result.bodyJson().extractingPath("$.withdrawalReasons[0].label")
+                .isEqualTo(INCONVENIENT_TO_USE.getLabel());
+        result.bodyJson().extractingPath("$.withdrawalReasons[4].code")
+                .isEqualTo(OTHER.name());
+        result.bodyJson().extractingPath("$.withdrawalReasons[4].label")
+                .isEqualTo(OTHER.getLabel());
+
+        then(userFinder).should().findWithdrawalReasons();
     }
 
     @Test

@@ -3,6 +3,7 @@ package net.akive.api.user.adapter.webapi.fixture;
 import net.akive.api.user.adapter.webapi.dto.request.UserDetailUpdateRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserSignUpByEmailRequest;
 import net.akive.api.user.adapter.webapi.dto.request.UserWithdrawRequest;
+import net.akive.api.user.domain.WithdrawalReason;
 
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -90,7 +91,7 @@ public class MemberAccountRequestFixture {
         return createUserWithdrawRequest(WITHDRAWAL_REASON);
     }
 
-    public static UserWithdrawRequest createUserWithdrawRequest(String withdrawReason) {
+    public static UserWithdrawRequest createUserWithdrawRequest(WithdrawalReason withdrawReason) {
         return new UserWithdrawRequest(withdrawReason);
     }
 }

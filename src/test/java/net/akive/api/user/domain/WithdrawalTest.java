@@ -3,8 +3,8 @@ package net.akive.api.user.domain;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 
-import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
-import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.REQUIRED_VALUE_MISSING;
 import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWAL_REASON;
 import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWN_AT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,42 +29,11 @@ class WithdrawalTest {
     }
 
     @Test
-    void 탈퇴_사유의_앞뒤에_공백이_있으면_제거된다() {
-        Withdrawal withdrawal = Withdrawal.completedWith(WITHDRAWN_AT, "  탈퇴 사유  ");
-
-        assertThat(withdrawal.withdrawalReason()).isEqualTo("탈퇴 사유");
-    }
-
-    @Test
-    void 탈퇴_사유는_최대_글자_수일_수_있다() {
-        String reason = "a".repeat(WITHDRAWAL_REASON_MAX_LENGTH);
-
-        Withdrawal withdrawal = Withdrawal.completedWith(WITHDRAWN_AT, reason);
-
-        assertThat(withdrawal.withdrawalReason()).isEqualTo(reason);
-    }
-
-    @Test
     void 탈퇴_상태에서_탈퇴_사유가_없으면_생성에_실패한다() {
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> Withdrawal.completedWith(WITHDRAWN_AT, null))
                 .extracting(BusinessRuleViolationException::getError)
                 .isEqualTo(REQUIRED_VALUE_MISSING);
-
-        assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> Withdrawal.completedWith(WITHDRAWN_AT, "   "))
-                .extracting(BusinessRuleViolationException::getError)
-                .isEqualTo(BLANK_VALUE);
-    }
-
-    @Test
-    void 탈퇴_사유가_최대_글자_수를_초과하면_생성에_실패한다() {
-        String reason = "a".repeat(WITHDRAWAL_REASON_MAX_LENGTH + 1);
-
-        assertThatExceptionOfType(BusinessRuleViolationException.class)
-                .isThrownBy(() -> Withdrawal.completedWith(WITHDRAWN_AT, reason))
-                .extracting(BusinessRuleViolationException::getError)
-                .isEqualTo(MAX_LENGTH_EXCEEDED);
     }
 
     @Test

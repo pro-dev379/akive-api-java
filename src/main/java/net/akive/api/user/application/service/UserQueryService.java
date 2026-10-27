@@ -7,9 +7,12 @@ import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.application.provided.UserNicknameChecker;
 import net.akive.api.user.application.required.UserRepository;
 import net.akive.api.user.domain.User;
+import net.akive.api.user.domain.WithdrawalReason;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static net.akive.api.common.domain.DomainValidator.*;
@@ -37,6 +40,11 @@ class UserQueryService implements UserFinder, UserNicknameChecker {
     @Override
     public Optional<User> findByEmail(Email email) {
         return userRepository.findByEmailAndNotWithdrawn(email);
+    }
+
+    @Override
+    public List<WithdrawalReason> findWithdrawalReasons() {
+        return Arrays.stream(WithdrawalReason.values()).toList();
     }
 
     @Override

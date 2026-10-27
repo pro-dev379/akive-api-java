@@ -82,7 +82,7 @@ public class User {
         this.userDetail = new UserDetail(targetNickname, targetProfileImageAssetId, targetAim);
     }
 
-    public void withdraw(Instant withdrawnAt, String reason) {
+    public void withdraw(Instant withdrawnAt, WithdrawalReason reason) {
         this.withdrawal = Withdrawal.completedWith(withdrawnAt, reason);
     }
 

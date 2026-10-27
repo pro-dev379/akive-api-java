@@ -3,6 +3,7 @@ package net.akive.api.user.domain.fixture;
 import net.akive.api.common.domain.Email;
 import net.akive.api.user.domain.User;
 import net.akive.api.user.domain.Withdrawal;
+import net.akive.api.user.domain.WithdrawalReason;
 
 import java.time.Instant;
 
@@ -10,6 +11,7 @@ import static net.akive.api.common.domain.EmailFixture.createEmail;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.NICKNAME;
 import static net.akive.api.user.domain.fixture.UserFixture.EMAIL;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
+import static net.akive.api.user.domain.WithdrawalReason.INCONVENIENT_TO_USE;
 
 public class WithdrawalFixture {
 
@@ -17,7 +19,7 @@ public class WithdrawalFixture {
     }
 
     public static final Email WITHDRAWN_USER_EMAIL = createEmail("withdrawn-user@test.com");
-    public static final String WITHDRAWAL_REASON = "탈퇴 사유";
+    public static final WithdrawalReason WITHDRAWAL_REASON = INCONVENIENT_TO_USE;
     public static final Instant WITHDRAWN_AT = Instant.parse("2026-09-09T03:00:00Z");
 
     public static User createWithdrawnUser() {

@@ -4,12 +4,10 @@ import net.akive.api.common.exception.business.BusinessRuleViolationException;
 
 import java.time.Instant;
 
-import static net.akive.api.common.domain.DomainValidator.requireMaxLength;
-import static net.akive.api.common.domain.DomainValidator.requireNotBlank;
+import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
-import static net.akive.api.user.domain.UserPolicy.WITHDRAWAL_REASON_MAX_LENGTH;
 
-public record Withdrawal(Instant withdrawnAt, String withdrawalReason) {
+public record Withdrawal(Instant withdrawnAt, WithdrawalReason withdrawalReason) {
 
     public Withdrawal {
         withdrawalReason = validateWithdrawal(withdrawnAt, withdrawalReason);
@@ -19,7 +17,7 @@ public record Withdrawal(Instant withdrawnAt, String withdrawalReason) {
         return new Withdrawal(null, null);
     }
 
-    public static Withdrawal completedWith(Instant withdrawnAt, String reason) {
+    public static Withdrawal completedWith(Instant withdrawnAt, WithdrawalReason reason) {
         return new Withdrawal(withdrawnAt, reason);
     }
 
@@ -27,9 +25,12 @@ public record Withdrawal(Instant withdrawnAt, String withdrawalReason) {
         return this.withdrawnAt != null;
     }
 
-    private static String validateWithdrawal(Instant withdrawnAt, String withdrawalReason) {
+    private static WithdrawalReason validateWithdrawal(
+            Instant withdrawnAt,
+            WithdrawalReason withdrawalReason
+    ) {
         if (withdrawnAt != null) {
-            return requireMaxLength(requireNotBlank(withdrawalReason), WITHDRAWAL_REASON_MAX_LENGTH);
+            return requireNonNull(withdrawalReason);
         }
 
         if (withdrawalReason != null) {
