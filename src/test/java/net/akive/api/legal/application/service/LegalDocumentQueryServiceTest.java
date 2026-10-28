@@ -58,7 +58,7 @@ class LegalDocumentQueryServiceTest {
 
     @ParameterizedTest
     @MethodSource("contextAndDocumentTypes")
-    void 응답_컨텍스트에_맞는_약관_및_정책_문서를_정해진_순서대로_조회한다(
+    void 응답_컨텍스트에_맞는_현행_약관_및_정책_문서를_정해진_순서대로_조회한다(
             LegalDocumentActionContext context,
             List<LegalDocumentType> documentTypes
     ) {
@@ -76,7 +76,7 @@ class LegalDocumentQueryServiceTest {
     }
 
     @Test
-    void 응답_컨텍스트에_맞는_약관_및_정책_문서가_없으면_예외를_던진다() {
+    void 응답_컨텍스트에_맞는_현행_약관_및_정책_문서가_없으면_예외를_던진다() {
         List<LegalDocument> legalDocuments = reconstructLegalDocuments(SIGN_UP_DOCUMENT_TYPES).stream()
                 .filter(legalDocument -> legalDocument.getDocumentType() != PRIVACY_POLICY)
                 .toList();
@@ -94,7 +94,7 @@ class LegalDocumentQueryServiceTest {
     }
 
     @Test
-    void 같은_타입의_유효한_약관_및_정책_문서가_여러_개면_예외를_던진다() {
+    void 같은_타입의_현행_약관_및_정책_문서가_여러_개면_예외를_던진다() {
         LegalDocument legalDocument = reconstructLegalDocument(LEGAL_DOCUMENT_ID, SERVICE_TERMS);
         LegalDocument anotherLegalDocument = reconstructLegalDocument(ANOTHER_LEGAL_DOCUMENT_ID, SERVICE_TERMS);
         given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);

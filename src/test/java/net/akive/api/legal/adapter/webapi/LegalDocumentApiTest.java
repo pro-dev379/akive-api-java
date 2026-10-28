@@ -30,7 +30,7 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
     LegalDocumentFinder legalDocumentFinder;
 
     @Test
-    void 응답_컨텍스트에_맞는_약관_및_정책_문서_목록을_조회한다() {
+    void 현행_약관_및_정책_문서_목록을_조회한다() {
         LegalDocument legalDocument = reconstructLegalDocument();
         given(legalDocumentFinder.findAllCurrentByContext(SIGN_UP))
                 .willReturn(List.of(legalDocument));
@@ -47,7 +47,7 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
 
     @ParameterizedTest
     @ValueSource(strings = {"", "?context=UNKNOWN"})
-    void 응답_컨텍스트_요청값이_올바르지_않으면_400을_응답한다(String queryString) {
+    void 현행_약관_및_정책_문서_목록_조회_시_응답_컨텍스트_요청값이_올바르지_않으면_400을_응답한다(String queryString) {
         mvcTester.get()
                 .uri(LEGAL_DOCUMENTS_URL + queryString)
                 .assertThat()
