@@ -31,18 +31,19 @@ public class GoalEntity {
     private Long goalId;
 
     @ManyToOne(fetch = LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private UserEntity user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalTime attendOn;
 
-    @Column(name = "rest_10min_sec")
+    @Column(name = "rest_10min_sec", updatable = false)
     private long rest10MinSec;
 
+    @Column(updatable = false)
     private int mealNum;
 
-    @Column(name = "meal_1time_sec")
+    @Column(name = "meal_1time_sec", updatable = false)
     private long meal1TimeSec;
 
     @CreatedDate
