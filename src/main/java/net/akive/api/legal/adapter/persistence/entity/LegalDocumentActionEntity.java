@@ -75,7 +75,7 @@ public class LegalDocumentActionEntity {
                 UserEntity.from(legalDocumentAction.getUser()),
                 LegalDocumentEntity.from(legalDocumentAction.getLegalDocument()),
                 legalDocumentAction.getActionType(),
-                legalDocumentAction.getActionContext(),
+                legalDocumentAction.getContext(),
                 legalDocumentAction.getRequestId(),
                 legalDocumentAction.getActedAt(),
                 legalDocumentAction.getCreatedAt()

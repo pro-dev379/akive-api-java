@@ -42,7 +42,7 @@ class LegalDocumentActionTest {
         assertThat(legalDocumentAction.getUser()).isEqualTo(user);
         assertThat(legalDocumentAction.getLegalDocument()).isEqualTo(legalDocument);
         assertThat(legalDocumentAction.getActionType()).isEqualTo(AGREED);
-        assertThat(legalDocumentAction.getActionContext()).isEqualTo(SIGN_UP);
+        assertThat(legalDocumentAction.getContext()).isEqualTo(SIGN_UP);
         assertThat(legalDocumentAction.getRequestId()).isEqualTo(REQUEST_ID);
         assertThat(legalDocumentAction.getActedAt()).isEqualTo(ACTED_AT);
         assertThat(legalDocumentAction.getCreatedAt()).isEqualTo(CREATED_AT);
@@ -66,7 +66,7 @@ class LegalDocumentActionTest {
         assertThat(legalDocumentAction.getUser()).isEqualTo(user);
         assertThat(legalDocumentAction.getLegalDocument()).isEqualTo(legalDocument);
         assertThat(legalDocumentAction.getActionType()).isEqualTo(AGREED);
-        assertThat(legalDocumentAction.getActionContext()).isEqualTo(SIGN_UP);
+        assertThat(legalDocumentAction.getContext()).isEqualTo(SIGN_UP);
         assertThat(legalDocumentAction.getRequestId()).isEqualTo(REQUEST_ID);
         assertThat(legalDocumentAction.getActedAt()).isEqualTo(ACTED_AT);
         assertThat(legalDocumentAction.getCreatedAt()).isNull();

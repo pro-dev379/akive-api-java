@@ -32,7 +32,7 @@ public class LegalDocumentAction {
 
     private LegalDocumentActionType actionType;
 
-    private LegalDocumentActionContext actionContext;
+    private LegalDocumentActionContext context;
 
     private UUID requestId;
 
@@ -55,7 +55,7 @@ public class LegalDocumentAction {
                 .user(requireNonNull(user))
                 .legalDocument(requireNonNull(legalDocument))
                 .actionType(requireNonNull(actionType))
-                .actionContext(requireNonNull(actionContext))
+                .context(requireNonNull(actionContext))
                 .requestId(requireNonNull(requestId))
                 .actedAt(requireNonNull(actedAt))
                 .createdAt(requireNonNull(createdAt))
@@ -78,7 +78,7 @@ public class LegalDocumentAction {
                 .user(requireNonNull(user))
                 .legalDocument(requireNonNull(legalDocument))
                 .actionType(requireNonNull(actionType))
-                .actionContext(requireNonNull(actionContext))
+                .context(requireNonNull(actionContext))
                 .requestId(requireNonNull(requestId))
                 .actedAt(requireNonNull(actedAt))
                 .build();
