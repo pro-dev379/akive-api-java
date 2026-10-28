@@ -56,7 +56,7 @@ public class LegalDocumentActionEntity {
 
     @Enumerated(STRING)
     @Column(nullable = false, updatable = false, columnDefinition = "VARCHAR(50)")
-    private LegalDocumentActionContext actionContext;
+    private LegalDocumentActionContext context;
 
     @JdbcTypeCode(BINARY)
     @Column(nullable = false, updatable = false, columnDefinition = "BINARY(16)")
@@ -89,7 +89,7 @@ public class LegalDocumentActionEntity {
                     this.user.to(),
                     this.legalDocument.to(),
                     this.actionType,
-                    this.actionContext,
+                    this.context,
                     this.requestId,
                     this.actedAt,
                     this.createdAt
