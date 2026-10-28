@@ -43,7 +43,9 @@ public class SecurityConfig {
                         "/auth/email-verifications/**",
                         "/auth/password-reset",
                         "/members/email",
-                        "/members/check-nickname"
+                        "/members/check-nickname",
+                        "/legal-documents",
+                        "/legal-documents/**"
                 )
                 .cors(Customizer.withDefaults())
                 .addFilterAfter(new CookieRequestProtectionFilter(objectMapper), CorsFilter.class)

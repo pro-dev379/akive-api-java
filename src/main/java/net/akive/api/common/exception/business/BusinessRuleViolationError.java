@@ -90,6 +90,12 @@ public enum BusinessRuleViolationError implements ApplicationError {
 
     LLM_USAGE_USER_ID_REQUIRED("User ID is required for user-scoped LLM usage."),
 
+    INVALID_LEGAL_DOCUMENT_DATE_RANGE("Invalid legal document date range."),
+    LEGAL_DOCUMENT_EXPIRATION_ALREADY_SET("Legal document expiration is already set."),
+    INVALID_LEGAL_DOCUMENT_ACTION_TYPE_FOR_INTERACTION_TYPE(
+            "Invalid legal document action type for interaction type."
+    ),
+
     ATTENDANCE_PROOF_DATE_IN_FUTURE("Attendance proof date must not be in future."),
     ATTENDANCE_PROOF_NOT_YET_ALLOWED("Attendance proof is not allowed yet."),
     ATTENDANCE_PROOF_IMAGE_NOT_UPLOADED( "Attendance proof image has not been uploaded."),

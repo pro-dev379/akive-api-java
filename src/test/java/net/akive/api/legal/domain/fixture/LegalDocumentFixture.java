@@ -1,0 +1,103 @@
+package net.akive.api.legal.domain.fixture;
+
+import net.akive.api.legal.domain.LegalDocument;
+import net.akive.api.legal.domain.LegalDocumentType;
+import net.akive.api.legal.domain.LegalInteractionType;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import static net.akive.api.legal.domain.LegalDocumentType.SERVICE_TERMS;
+import static net.akive.api.legal.domain.LegalInteractionType.AGREEMENT;
+
+public final class LegalDocumentFixture {
+
+    public static final Long LEGAL_DOCUMENT_ID = 1L;
+    public static final Long ANOTHER_LEGAL_DOCUMENT_ID = 2L;
+    public static final String VERSION = "20261028";
+    public static final String TITLE = "서비스 이용약관";
+    public static final String CONTENT = "약관 내용";
+    public static final LocalDate ANNOUNCED_ON = LocalDate.of(2026, 10, 29);
+    public static final LocalDate EFFECTIVE_ON = LocalDate.of(2026, 10, 29);
+    public static final Instant CREATED_AT = Instant.parse("2026-10-28T12:00:00Z");
+
+    private LegalDocumentFixture() {
+    }
+
+    public static LegalDocument createLegalDocument() {
+        return LegalDocument.create(
+                SERVICE_TERMS,
+                VERSION,
+                TITLE,
+                AGREEMENT,
+                false,
+                CONTENT,
+                ANNOUNCED_ON,
+                EFFECTIVE_ON,
+                null
+        );
+    }
+
+    public static LegalDocument reconstructLegalDocument() {
+        return reconstructLegalDocument(LEGAL_DOCUMENT_ID);
+    }
+
+    public static LegalDocument reconstructLegalDocument(Long legalDocumentId) {
+        return LegalDocument.reconstruct(
+                legalDocumentId,
+                SERVICE_TERMS,
+                VERSION,
+                TITLE,
+                AGREEMENT,
+                false,
+                CONTENT,
+                ANNOUNCED_ON,
+                EFFECTIVE_ON,
+                null,
+                CREATED_AT
+        );
+    }
+
+    public static LegalDocument reconstructLegalDocument(
+            Long legalDocumentId,
+            LegalDocumentType documentType
+    ) {
+        return LegalDocument.reconstruct(
+                legalDocumentId,
+                documentType,
+                VERSION,
+                documentType.name(),
+                AGREEMENT,
+                false,
+                CONTENT,
+                ANNOUNCED_ON,
+                EFFECTIVE_ON,
+                null,
+                CREATED_AT
+        );
+    }
+
+    public static List<LegalDocument> reconstructLegalDocuments(List<LegalDocumentType> documentTypes) {
+        return IntStream.range(0, documentTypes.size())
+                .mapToObj(index -> reconstructLegalDocument(index + 1L, documentTypes.get(index)))
+                .toList();
+    }
+
+    public static LegalDocument reconstructLegalDocument(LegalInteractionType interactionType) {
+        return LegalDocument.reconstruct(
+                LEGAL_DOCUMENT_ID,
+                SERVICE_TERMS,
+                VERSION,
+                TITLE,
+                interactionType,
+                false,
+                CONTENT,
+                ANNOUNCED_ON,
+                EFFECTIVE_ON,
+                null,
+                CREATED_AT
+        );
+    }
+}

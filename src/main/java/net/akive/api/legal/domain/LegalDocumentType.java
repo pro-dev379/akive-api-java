@@ -1,0 +1,14 @@
+package net.akive.api.legal.domain;
+
+public enum LegalDocumentType {
+    SERVICE_TERMS,
+    PRIVACY_POLICY,
+    AGE_14_CONFIRMATION,
+
+    POSTHOG_ANALYTICS,
+    POSTHOG_OVERSEAS_TRANSFER,
+
+    AI_LIMITATIONS,
+    AI_PERSONAL_DATA,
+    OPENAI_OVERSEAS_TRANSFER
+}
