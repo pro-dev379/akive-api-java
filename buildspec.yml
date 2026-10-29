@@ -33,4 +33,3 @@ phases:
 artifacts:
   files:
     - Dockerrun.aws.json
-    - .platform/**/*
