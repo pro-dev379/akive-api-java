@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.CURRENT_LEGAL_DOCUMENT_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.LEGAL_DOCUMENT_NOT_FOUND;
 import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 
 @Service
@@ -29,7 +30,29 @@ class LegalDocumentQueryService implements LegalDocumentFinder {
     private final CurrentTimeProvider currentTimeProvider;
 
     @Override
-    public Long findCurrentIdByDocumentType(LegalDocumentType documentType) {
+    public LegalDocument findOrThrow(Long legalDocumentId) throws ResourceNotFoundException {
+        return legalDocumentRepository.findById(legalDocumentId)
+                .orElseThrow(() -> new ResourceNotFoundException(LEGAL_DOCUMENT_NOT_FOUND));
+    }
+
+    @Override
+    public List<LegalDocument> findAllCurrentByContext(LegalDocumentActionContext context) {
+        List<LegalDocumentType> documentTypes = LegalPolicy.documentTypesFor(context);
+        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
+        List<LegalDocument> legalDocuments = legalDocumentRepository.findAllCurrentByDocumentTypeIn(
+                documentTypes,
+                currentDate
+        );
+
+        Map<LegalDocumentType, LegalDocument> legalDocumentByType = toDocumentByType(legalDocuments);
+
+        return documentTypes.stream()
+                .map(documentType -> findRequiredDocument(legalDocumentByType, documentType, context))
+                .toList();
+    }
+
+    @Override
+    public Long findCurrentIdByDocumentType(LegalDocumentType documentType) throws ResourceNotFoundException {
         LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
         List<Long> legalDocumentIds = legalDocumentRepository.findAllCurrentIdsByDocumentType(
                 documentType,
@@ -47,22 +70,6 @@ class LegalDocumentQueryService implements LegalDocumentFinder {
         }
 
         return legalDocumentIds.getFirst();
-    }
-
-    @Override
-    public List<LegalDocument> findAllCurrentByContext(LegalDocumentActionContext context) {
-        List<LegalDocumentType> documentTypes = LegalPolicy.documentTypesFor(context);
-        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
-        List<LegalDocument> legalDocuments = legalDocumentRepository.findAllCurrentByDocumentTypeIn(
-                documentTypes,
-                currentDate
-        );
-
-        Map<LegalDocumentType, LegalDocument> legalDocumentByType = toDocumentByType(legalDocuments);
-
-        return documentTypes.stream()
-                .map(documentType -> findRequiredDocument(legalDocumentByType, documentType, context))
-                .toList();
     }
 
     private Map<LegalDocumentType, LegalDocument> toDocumentByType(List<LegalDocument> legalDocuments) {

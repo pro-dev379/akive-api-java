@@ -20,9 +20,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.CURRENT_LEGAL_DOCUMENT_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.LEGAL_DOCUMENT_NOT_FOUND;
 import static net.akive.api.legal.domain.LegalDocumentActionContext.*;
 import static net.akive.api.legal.domain.LegalDocumentType.*;
 import static net.akive.api.legal.domain.fixture.LegalDocumentFixture.*;
@@ -59,42 +61,28 @@ class LegalDocumentQueryServiceTest {
     LegalDocumentQueryService legalDocumentQueryService;
 
     @Test
-    void 특정_타입의_현행_약관_및_정책_문서_식별자를_조회한다() {
-        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
-        given(legalDocumentRepository.findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE))
-                .willReturn(List.of(LEGAL_DOCUMENT_ID));
+    void 약관_및_정책_식별자로_약관_및_정책_문서를_조회한다() {
+        LegalDocument legalDocument = reconstructLegalDocument();
+        given(legalDocumentRepository.findById(LEGAL_DOCUMENT_ID))
+                .willReturn(Optional.of(legalDocument));
 
-        Long legalDocumentId = legalDocumentQueryService.findCurrentIdByDocumentType(SERVICE_TERMS);
+        LegalDocument foundLegalDocument = legalDocumentQueryService.findOrThrow(LEGAL_DOCUMENT_ID);
 
-        assertThat(legalDocumentId).isEqualTo(LEGAL_DOCUMENT_ID);
-        then(legalDocumentRepository).should().findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE);
+        assertThat(foundLegalDocument).isEqualTo(legalDocument);
+        then(legalDocumentRepository).should().findById(LEGAL_DOCUMENT_ID);
     }
 
     @Test
-    void 특정_타입의_현행_약관_및_정책_문서가_없으면_예외를_던진다() {
-        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
-        given(legalDocumentRepository.findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE))
-                .willReturn(List.of());
+    void 약관_및_정책_식별자로_약관_및_정책_문서를_조회할_수_없으면_예외를_던진다() {
+        given(legalDocumentRepository.findById(UNKNOWN_LEGAL_DOCUMENT_ID))
+                .willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> legalDocumentQueryService.findCurrentIdByDocumentType(SERVICE_TERMS))
+                .isThrownBy(() -> legalDocumentQueryService.findOrThrow(UNKNOWN_LEGAL_DOCUMENT_ID))
                 .extracting(ResourceNotFoundException::getError)
-                .isEqualTo(CURRENT_LEGAL_DOCUMENT_NOT_FOUND);
+                .isEqualTo(LEGAL_DOCUMENT_NOT_FOUND);
 
-        then(legalDocumentRepository).should().findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE);
-    }
-
-    @Test
-    void 같은_타입의_현행_약관_및_정책_문서가_여러_개면_식별자_조회_시_예외를_던진다() {
-        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
-        given(legalDocumentRepository.findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE))
-                .willReturn(List.of(LEGAL_DOCUMENT_ID, ANOTHER_LEGAL_DOCUMENT_ID));
-
-        assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(() -> legalDocumentQueryService.findCurrentIdByDocumentType(SERVICE_TERMS))
-                .withMessage("Multiple current legal documents found for type: %s", SERVICE_TERMS);
-
-        then(legalDocumentRepository).should().findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE);
+        then(legalDocumentRepository).should().findById(UNKNOWN_LEGAL_DOCUMENT_ID);
     }
 
     @ParameterizedTest
@@ -145,6 +133,45 @@ class LegalDocumentQueryServiceTest {
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> legalDocumentQueryService.findAllCurrentByContext(SIGN_UP))
                 .withMessage("Multiple current legal documents found for type: %s", SERVICE_TERMS);
+    }
+
+    @Test
+    void 특정_타입의_현행_약관_및_정책_문서_식별자를_조회한다() {
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
+        given(legalDocumentRepository.findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE))
+                .willReturn(List.of(LEGAL_DOCUMENT_ID));
+
+        Long legalDocumentId = legalDocumentQueryService.findCurrentIdByDocumentType(SERVICE_TERMS);
+
+        assertThat(legalDocumentId).isEqualTo(LEGAL_DOCUMENT_ID);
+        then(legalDocumentRepository).should().findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE);
+    }
+
+    @Test
+    void 특정_타입의_현행_약관_및_정책_문서가_없으면_예외를_던진다() {
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
+        given(legalDocumentRepository.findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE))
+                .willReturn(List.of());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> legalDocumentQueryService.findCurrentIdByDocumentType(SERVICE_TERMS))
+                .extracting(ResourceNotFoundException::getError)
+                .isEqualTo(CURRENT_LEGAL_DOCUMENT_NOT_FOUND);
+
+        then(legalDocumentRepository).should().findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE);
+    }
+
+    @Test
+    void 같은_타입의_현행_약관_및_정책_문서가_여러_개면_식별자_조회_시_예외를_던진다() {
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
+        given(legalDocumentRepository.findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE))
+                .willReturn(List.of(LEGAL_DOCUMENT_ID, ANOTHER_LEGAL_DOCUMENT_ID));
+
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> legalDocumentQueryService.findCurrentIdByDocumentType(SERVICE_TERMS))
+                .withMessage("Multiple current legal documents found for type: %s", SERVICE_TERMS);
+
+        then(legalDocumentRepository).should().findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE);
     }
 
     private static Stream<Arguments> contextAndDocumentTypes() {

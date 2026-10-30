@@ -35,6 +35,7 @@ public enum ResourceNotFoundError implements ApplicationError {
 
     ATTENDANCE_PROOF_NOT_FOUND("Attendance proof not found"),
 
+    LEGAL_DOCUMENT_NOT_FOUND("Legal document not found."),
     CURRENT_LEGAL_DOCUMENT_NOT_FOUND("Current legal document not found."),
     ;
 

@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import java.util.List;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.CURRENT_LEGAL_DOCUMENT_NOT_FOUND;
+import static net.akive.api.common.exception.business.ResourceNotFoundError.LEGAL_DOCUMENT_NOT_FOUND;
 import static net.akive.api.legal.domain.LegalDocumentActionContext.SIGN_UP;
 import static net.akive.api.legal.domain.LegalDocumentType.SERVICE_TERMS;
 import static net.akive.api.legal.domain.fixture.LegalDocumentFixture.LEGAL_DOCUMENT_ID;
@@ -37,6 +38,34 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
     LegalDocumentFinder legalDocumentFinder;
 
     @Test
+    void 약관_및_정책_문서_상세를_조회한다() {
+        LegalDocument legalDocument = reconstructLegalDocument();
+        given(legalDocumentFinder.findOrThrow(LEGAL_DOCUMENT_ID)).willReturn(legalDocument);
+
+        MvcTestResultAssert result = mvcTester.get()
+                .uri(LEGAL_DOCUMENTS_URL + "/{legalDocumentId}", LEGAL_DOCUMENT_ID)
+                .assertThat()
+                .hasStatus(OK);
+
+        assertLegalDocumentResponse(result, legalDocument);
+        then(legalDocumentFinder).should().findOrThrow(LEGAL_DOCUMENT_ID);
+    }
+
+    @Test
+    void 약관_및_정책_식별자에_해당하는_약관_및_정책_문서가_없으면_404를_응답한다() {
+        given(legalDocumentFinder.findOrThrow(LEGAL_DOCUMENT_ID))
+                .willThrow(new ResourceNotFoundException(LEGAL_DOCUMENT_NOT_FOUND));
+
+        MvcTestResultAssert result = mvcTester.get()
+                .uri(LEGAL_DOCUMENTS_URL + "/{legalDocumentId}", LEGAL_DOCUMENT_ID)
+                .assertThat()
+                .hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, LEGAL_DOCUMENT_NOT_FOUND);
+        then(legalDocumentFinder).should().findOrThrow(LEGAL_DOCUMENT_ID);
+    }
+
+    @Test
     void 특정_타입의_현행_약관_및_정책_문서_식별자를_조회한다() {
         given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
                 .willReturn(LEGAL_DOCUMENT_ID);
@@ -53,7 +82,7 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
     }
 
     @Test
-    void 현행_약관_및_정책_문서_식별자_조회_시_문서_타입이_올바르지_않으면_400을_응답한다() {
+    void 현행_약관_및_정책_문서_식별자_조회_시_약관_및_정책_문서_타입이_올바르지_않으면_400을_응답한다() {
         mvcTester.get()
                 .uri(CURRENT_LEGAL_DOCUMENT_ID_URL, "UNKNOWN")
                 .assertThat()
@@ -124,5 +153,38 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
         result.bodyJson()
                 .extractingPath("$.legalDocumentHeaders[0].effectiveOn")
                 .isEqualTo(legalDocument.getEffectiveOn().toString());
+    }
+
+    private void assertLegalDocumentResponse(MvcTestResultAssert result, LegalDocument legalDocument) {
+        result.bodyJson()
+                .extractingPath("$.legalDocumentId")
+                .isEqualTo(legalDocument.getLegalDocumentId().intValue());
+        result.bodyJson()
+                .extractingPath("$.documentType")
+                .isEqualTo(legalDocument.getDocumentType().name());
+        result.bodyJson()
+                .extractingPath("$.version")
+                .isEqualTo(legalDocument.getVersion());
+        result.bodyJson()
+                .extractingPath("$.title")
+                .isEqualTo(legalDocument.getTitle());
+        result.bodyJson()
+                .extractingPath("$.interactionType")
+                .isEqualTo(legalDocument.getInteractionType().name());
+        result.bodyJson()
+                .extractingPath("$.isOptional")
+                .isEqualTo(legalDocument.isOptional());
+        result.bodyJson()
+                .extractingPath("$.content")
+                .isEqualTo(legalDocument.getContent());
+        result.bodyJson()
+                .extractingPath("$.announcedOn")
+                .isEqualTo(legalDocument.getAnnouncedOn().toString());
+        result.bodyJson()
+                .extractingPath("$.effectiveOn")
+                .isEqualTo(legalDocument.getEffectiveOn().toString());
+        result.bodyJson()
+                .extractingPath("$.expiresOn")
+                .isNull();
     }
 }

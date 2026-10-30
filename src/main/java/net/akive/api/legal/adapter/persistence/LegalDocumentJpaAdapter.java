@@ -10,12 +10,24 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 class LegalDocumentJpaAdapter implements LegalDocumentRepository {
 
     private final LegalDocumentJpaRepository legalDocumentJpaRepository;
+
+    @Override
+    public LegalDocument save(LegalDocument legalDocument) {
+        return legalDocumentJpaRepository.save(LegalDocumentEntity.from(legalDocument)).to();
+    }
+
+    @Override
+    public Optional<LegalDocument> findById(Long legalDocumentId) {
+        return legalDocumentJpaRepository.findById(legalDocumentId)
+                .map(LegalDocumentEntity::to);
+    }
 
     @Override
     public List<LegalDocument> findAllCurrentByDocumentTypeIn(
