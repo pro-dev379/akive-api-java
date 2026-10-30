@@ -240,10 +240,9 @@ class SecurityConfigTest {
             "DELETE, /auth/tokens/refresh",
             "DELETE, /auth/tokens/refresh/current"
     })
-    void 쿠키_인증_API는_CSRF_보호_헤더가_없으면_요청을_거부한다(String method, String url) {
+    void CSRF_보호_대상_API는_CSRF_보호_헤더가_없으면_요청을_거부한다(String method, String url) {
         MvcTestResultAssert result = mvcTester.method(org.springframework.http.HttpMethod.valueOf(method))
                 .uri(url)
-                .cookie(new Cookie(REFRESH_TOKEN_COOKIE_NAME, REFRESH_TOKEN_VALUE))
                 .assertThat()
                 .hasStatus(FORBIDDEN);
 
@@ -257,11 +256,10 @@ class SecurityConfigTest {
             "DELETE, /auth/tokens/refresh",
             "DELETE, /auth/tokens/refresh/current"
     })
-    void 쿠키_인증_API는_CSRF_보호_헤더_값이_유효하지_않으면_요청을_거부한다(String method, String url) {
+    void CSRF_보호_대상_API는_CSRF_보호_헤더_값이_유효하지_않으면_요청을_거부한다(String method, String url) {
         MvcTestResultAssert result = mvcTester.method(org.springframework.http.HttpMethod.valueOf(method))
                 .uri(url)
                 .header(CSRF_PROTECTION_HEADER_NAME, "Invalid")
-                .cookie(new Cookie(REFRESH_TOKEN_COOKIE_NAME, REFRESH_TOKEN_VALUE))
                 .assertThat()
                 .hasStatus(FORBIDDEN);
 
