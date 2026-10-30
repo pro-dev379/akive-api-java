@@ -1,8 +1,10 @@
 package net.akive.api.legal.domain.fixture;
 
 import net.akive.api.legal.domain.LegalDocumentAction;
+import net.akive.api.legal.domain.LegalDocument;
 import net.akive.api.legal.domain.LegalDocumentActionType;
 import net.akive.api.legal.domain.LegalInteractionType;
+import net.akive.api.user.domain.User;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,6 +22,22 @@ public final class LegalDocumentActionFixture {
     public static final Instant CREATED_AT = Instant.parse("2026-10-29T03:00:01Z");
 
     private LegalDocumentActionFixture() {
+    }
+
+    public static LegalDocumentAction createLegalDocumentAction(
+            User user,
+            LegalDocument legalDocument,
+            UUID requestId,
+            Instant actedAt
+    ) {
+        return LegalDocumentAction.create(
+                user,
+                legalDocument,
+                LegalDocumentActionType.AGREED,
+                SIGN_UP,
+                requestId,
+                actedAt
+        );
     }
 
     public static LegalDocumentAction reconstructLegalDocumentAction(

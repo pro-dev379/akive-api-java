@@ -44,8 +44,9 @@ public class SecurityConfig {
                         "/auth/password-reset",
                         "/members/email",
                         "/members/check-nickname",
-                        "/legal-documents",
-                        "/legal-documents/**",
+                        "/legal-documents/*",
+                        "/legal-documents/types/**",
+                        "/legal-documents/action-contexts/*/current/headers",
                         "/actuator/health",
                         "/actuator/health/**"
                 )

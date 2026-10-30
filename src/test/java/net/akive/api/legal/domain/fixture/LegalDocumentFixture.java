@@ -29,10 +29,21 @@ public final class LegalDocumentFixture {
     }
 
     public static LegalDocument createLegalDocument() {
+        return createLegalDocument(SERVICE_TERMS, TITLE);
+    }
+
+    public static LegalDocument createLegalDocument(LegalDocumentType documentType) {
+        return createLegalDocument(documentType, documentType.name());
+    }
+
+    private static LegalDocument createLegalDocument(
+            LegalDocumentType documentType,
+            String title
+    ) {
         return LegalDocument.create(
-                SERVICE_TERMS,
+                documentType,
                 VERSION,
-                TITLE,
+                title,
                 AGREEMENT,
                 false,
                 CONTENT,
