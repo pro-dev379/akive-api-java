@@ -26,8 +26,6 @@ class LegalDocumentActionJpaAdapterTest extends RepositoryTestSupport {
 
     private static final UUID LATEST_REQUEST_ID =
             UUID.fromString("364c1293-d821-42aa-950b-e574949bfb49");
-    private static final UUID ANOTHER_USER_REQUEST_ID =
-            UUID.fromString("e2246495-a42a-4903-83b8-637ae68ab5a6");
     private static final UUID ANOTHER_LEGAL_DOCUMENT_REQUEST_ID =
             UUID.fromString("aab6faf8-10bd-4e55-982d-2ae9a71c3327");
 
@@ -52,10 +50,7 @@ class LegalDocumentActionJpaAdapterTest extends RepositoryTestSupport {
         flushAndClear();
 
         LegalDocumentAction foundLegalDocumentAction = legalDocumentActionRepository
-                .findLatestByUserIdAndLegalDocumentId(
-                        savedUser.getUserId(),
-                        savedLegalDocument.getLegalDocumentId()
-                )
+                .findByRequestId(REQUEST_ID)
                 .orElseThrow();
 
         assertThat(foundLegalDocumentAction).isEqualTo(savedLegalDocumentAction);
@@ -115,7 +110,7 @@ class LegalDocumentActionJpaAdapterTest extends RepositoryTestSupport {
         legalDocumentActionRepository.save(createLegalDocumentAction(
                 anotherSavedUser,
                 savedLegalDocument,
-                ANOTHER_USER_REQUEST_ID,
+                ANOTHER_REQUEST_ID,
                 latestActedAt.plusSeconds(1)
         ));
         legalDocumentActionRepository.save(createLegalDocumentAction(

@@ -17,6 +17,7 @@ import net.akive.api.common.exception.ApplicationError;
 import net.akive.api.legal.adapter.webapi.LegalDocumentActionApi;
 import net.akive.api.legal.adapter.webapi.LegalDocumentApi;
 import net.akive.api.legal.application.provided.LegalDocumentActionFinder;
+import net.akive.api.legal.application.provided.LegalDocumentActionRecorder;
 import net.akive.api.legal.application.provided.LegalDocumentFinder;
 import net.akive.api.legal.domain.LegalDocument;
 import org.junit.jupiter.api.Test;
@@ -100,6 +101,9 @@ class SecurityConfigTest {
 
     @MockitoBean
     LegalDocumentActionFinder legalDocumentActionFinder;
+
+    @MockitoBean
+    LegalDocumentActionRecorder legalDocumentActionRecorder;
 
     @MockitoBean
     LegalDocumentFinder legalDocumentFinder;

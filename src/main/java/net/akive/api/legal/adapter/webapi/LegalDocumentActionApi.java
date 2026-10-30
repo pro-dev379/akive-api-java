@@ -2,21 +2,23 @@ package net.akive.api.legal.adapter.webapi;
 
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
+import net.akive.api.legal.adapter.webapi.dto.request.LegalDocumentActionsRecordRequest;
 import net.akive.api.legal.adapter.webapi.dto.response.LegalDocumentActionFindResponse;
 import net.akive.api.legal.application.provided.LegalDocumentActionFinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import net.akive.api.legal.application.provided.LegalDocumentActionRecorder;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
-@RequestMapping("/legal-documents/{legalDocumentId}/legal-document-actions")
 @RequiredArgsConstructor
 public class LegalDocumentActionApi {
 
     private final LegalDocumentActionFinder legalDocumentActionFinder;
+    private final LegalDocumentActionRecorder legalDocumentActionRecorder;
 
-    @GetMapping("/current")
+    @GetMapping("/legal-documents/{legalDocumentId}/legal-document-actions/current")
     public LegalDocumentActionFindResponse findCurrent(
             @AuthenticatedUserId Long userId,
             @PathVariable Long legalDocumentId
@@ -24,5 +26,14 @@ public class LegalDocumentActionApi {
         return LegalDocumentActionFindResponse.from(
                 legalDocumentActionFinder.findCurrentOrThrow(userId, legalDocumentId)
         );
+    }
+
+    @PostMapping("/legal-document-actions")
+    @ResponseStatus(NO_CONTENT)
+    public void record(
+            @AuthenticatedUserId Long userId,
+            @Validated @RequestBody LegalDocumentActionsRecordRequest request
+    ) {
+        legalDocumentActionRecorder.record(request.to(userId));
     }
 }

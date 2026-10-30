@@ -95,6 +95,9 @@ public enum BusinessRuleViolationError implements ApplicationError {
     INVALID_LEGAL_DOCUMENT_ACTION_TYPE_FOR_INTERACTION_TYPE(
             "Invalid legal document action type for interaction type."
     ),
+    DUPLICATE_LEGAL_DOCUMENT_ACTION_REQUEST("Duplicate legal document action request."),
+    INVALID_LEGAL_DOCUMENT_ACTION_FOR_CONTEXT("Invalid legal document action for context."),
+    REQUIRED_LEGAL_DOCUMENT_ACTION_MISSING("Required legal document action is missing."),
 
     ATTENDANCE_PROOF_DATE_IN_FUTURE("Attendance proof date must not be in future."),
     ATTENDANCE_PROOF_NOT_YET_ALLOWED("Attendance proof is not allowed yet."),

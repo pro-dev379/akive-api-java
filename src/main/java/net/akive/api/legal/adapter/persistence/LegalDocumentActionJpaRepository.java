@@ -5,8 +5,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
+import java.util.UUID;
 
 interface LegalDocumentActionJpaRepository extends JpaRepository<LegalDocumentActionEntity, Long> {
+
+    @Query("""
+        select legalDocumentAction
+        from LegalDocumentActionEntity legalDocumentAction
+        join fetch legalDocumentAction.user
+        join fetch legalDocumentAction.legalDocument
+        where legalDocumentAction.requestId = :requestId
+    """)
+    Optional<LegalDocumentActionEntity> findByRequestId(UUID requestId);
 
     @Query("""
         select legalDocumentAction

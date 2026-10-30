@@ -25,7 +25,9 @@ public enum ResourceConflictError implements ApplicationError {
 
     REPORT_ALREADY_EXISTS("Report already exists."),
 
-    COACHING_RESPONSE_ALREADY_IN_PROGRESS("A coaching response is already in progress.");
+    COACHING_RESPONSE_ALREADY_IN_PROGRESS("A coaching response is already in progress."),
+
+    LEGAL_DOCUMENT_ACTION_REQUEST_CONFLICT("Legal document action request conflicts with existing action.");
 
     private final String message;
 
