@@ -4,8 +4,6 @@ import net.akive.api.legal.application.provided.LegalDocumentFinder;
 import net.akive.api.legal.domain.LegalDocument;
 import net.akive.api.support.PublicApiTestSupport;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -25,67 +23,59 @@ import static org.springframework.http.HttpStatus.OK;
 class LegalDocumentApiTest extends PublicApiTestSupport {
 
     private static final String LEGAL_DOCUMENTS_URL = "/legal-documents";
+    private static final String CURRENT_LEGAL_DOCUMENT_HEADERS_URL =
+            LEGAL_DOCUMENTS_URL + "/action-contexts/{actionContext}/current";
 
     @MockitoBean
     LegalDocumentFinder legalDocumentFinder;
 
     @Test
-    void 현행_약관_및_정책_문서_목록을_조회한다() {
+    void 응답_컨텍스트에_맞는_현행_약관_및_정책_문서_헤더_목록을_조회한다() {
         LegalDocument legalDocument = reconstructLegalDocument();
         given(legalDocumentFinder.findAllCurrentByContext(SIGN_UP))
                 .willReturn(List.of(legalDocument));
 
         MvcTestResultAssert result = mvcTester.get()
-                .uri(LEGAL_DOCUMENTS_URL + "?context={context}", SIGN_UP)
+                .uri(CURRENT_LEGAL_DOCUMENT_HEADERS_URL, SIGN_UP)
                 .assertThat()
                 .hasStatus(OK);
 
-        assertLegalDocumentResponse(result, legalDocument);
+        assertLegalDocumentHeaderResponse(result, legalDocument);
 
         then(legalDocumentFinder).should().findAllCurrentByContext(SIGN_UP);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"", "?context=UNKNOWN"})
-    void 현행_약관_및_정책_문서_목록_조회_시_응답_컨텍스트_요청값이_올바르지_않으면_400을_응답한다(String queryString) {
+    @Test
+    void 현행_약관_및_정책_문서_헤더_목록_조회_시_응답_컨텍스트가_올바르지_않으면_400을_응답한다() {
         mvcTester.get()
-                .uri(LEGAL_DOCUMENTS_URL + queryString)
+                .uri(CURRENT_LEGAL_DOCUMENT_HEADERS_URL, "UNKNOWN")
                 .assertThat()
                 .hasStatus(BAD_REQUEST);
 
         then(legalDocumentFinder).shouldHaveNoInteractions();
     }
 
-    private void assertLegalDocumentResponse(MvcTestResultAssert result, LegalDocument legalDocument) {
+    private void assertLegalDocumentHeaderResponse(MvcTestResultAssert result, LegalDocument legalDocument) {
         result.bodyJson()
-                .extractingPath("$.legalDocuments[0].legalDocumentId")
+                .extractingPath("$.legalDocumentHeaders[0].legalDocumentId")
                 .isEqualTo(legalDocument.getLegalDocumentId().intValue());
         result.bodyJson()
-                .extractingPath("$.legalDocuments[0].documentType")
+                .extractingPath("$.legalDocumentHeaders[0].documentType")
                 .isEqualTo(legalDocument.getDocumentType().name());
         result.bodyJson()
-                .extractingPath("$.legalDocuments[0].version")
+                .extractingPath("$.legalDocumentHeaders[0].version")
                 .isEqualTo(legalDocument.getVersion());
         result.bodyJson()
-                .extractingPath("$.legalDocuments[0].title")
+                .extractingPath("$.legalDocumentHeaders[0].title")
                 .isEqualTo(legalDocument.getTitle());
         result.bodyJson()
-                .extractingPath("$.legalDocuments[0].interactionType")
+                .extractingPath("$.legalDocumentHeaders[0].interactionType")
                 .isEqualTo(legalDocument.getInteractionType().name());
         result.bodyJson()
-                .extractingPath("$.legalDocuments[0].isOptional")
+                .extractingPath("$.legalDocumentHeaders[0].isOptional")
                 .isEqualTo(legalDocument.isOptional());
         result.bodyJson()
-                .extractingPath("$.legalDocuments[0].content")
-                .isEqualTo(legalDocument.getContent());
-        result.bodyJson()
-                .extractingPath("$.legalDocuments[0].announcedOn")
-                .isEqualTo(legalDocument.getAnnouncedOn().toString());
-        result.bodyJson()
-                .extractingPath("$.legalDocuments[0].effectiveOn")
+                .extractingPath("$.legalDocumentHeaders[0].effectiveOn")
                 .isEqualTo(legalDocument.getEffectiveOn().toString());
-        result.bodyJson()
-                .extractingPath("$.legalDocuments[0].expiresOn")
-                .isNull();
     }
 }
