@@ -136,6 +136,28 @@ class LegalDocumentQueryServiceTest {
     }
 
     @Test
+    void 특정_타입의_시행_약관_및_정책_문서_이력을_조회한다() {
+        List<LegalDocument> legalDocuments = List.of(
+                reconstructLegalDocument(ANOTHER_LEGAL_DOCUMENT_ID),
+                reconstructLegalDocument(LEGAL_DOCUMENT_ID)
+        );
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
+        given(legalDocumentRepository.findAllHistoryByDocumentTypeOrderByEffectiveOnDesc(
+                SERVICE_TERMS,
+                CURRENT_DATE
+        )).willReturn(legalDocuments);
+
+        List<LegalDocument> foundLegalDocuments =
+                legalDocumentQueryService.findAllHistoryByDocumentType(SERVICE_TERMS);
+
+        assertThat(foundLegalDocuments).containsExactlyElementsOf(legalDocuments);
+        then(legalDocumentRepository).should().findAllHistoryByDocumentTypeOrderByEffectiveOnDesc(
+                SERVICE_TERMS,
+                CURRENT_DATE
+        );
+    }
+
+    @Test
     void 특정_타입의_현행_약관_및_정책_문서_식별자를_조회한다() {
         given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
         given(legalDocumentRepository.findAllCurrentIdsByDocumentType(SERVICE_TERMS, CURRENT_DATE))

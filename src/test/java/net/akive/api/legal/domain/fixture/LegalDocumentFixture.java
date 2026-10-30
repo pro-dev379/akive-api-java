@@ -22,6 +22,7 @@ public final class LegalDocumentFixture {
     public static final String CONTENT = "약관 내용";
     public static final LocalDate ANNOUNCED_ON = LocalDate.of(2026, 10, 29);
     public static final LocalDate EFFECTIVE_ON = LocalDate.of(2026, 10, 29);
+    public static final LocalDate EXPIRES_ON = LocalDate.of(2026, 10, 30);
     public static final Instant CREATED_AT = Instant.parse("2026-10-28T12:00:00Z");
 
     private LegalDocumentFixture() {
@@ -46,18 +47,12 @@ public final class LegalDocumentFixture {
     }
 
     public static LegalDocument reconstructLegalDocument(Long legalDocumentId) {
-        return LegalDocument.reconstruct(
+        return reconstructLegalDocument(
                 legalDocumentId,
                 SERVICE_TERMS,
-                VERSION,
                 TITLE,
                 AGREEMENT,
-                false,
-                CONTENT,
-                ANNOUNCED_ON,
-                EFFECTIVE_ON,
-                null,
-                CREATED_AT
+                null
         );
     }
 
@@ -65,18 +60,32 @@ public final class LegalDocumentFixture {
             Long legalDocumentId,
             LegalDocumentType documentType
     ) {
-        return LegalDocument.reconstruct(
+        return reconstructLegalDocument(
                 legalDocumentId,
                 documentType,
-                VERSION,
                 documentType.name(),
                 AGREEMENT,
-                false,
-                CONTENT,
-                ANNOUNCED_ON,
-                EFFECTIVE_ON,
-                null,
-                CREATED_AT
+                null
+        );
+    }
+
+    public static LegalDocument reconstructLegalDocument(LegalInteractionType interactionType) {
+        return reconstructLegalDocument(
+                LEGAL_DOCUMENT_ID,
+                SERVICE_TERMS,
+                TITLE,
+                interactionType,
+                null
+        );
+    }
+
+    public static LegalDocument reconstructExpiredLegalDocument() {
+        return reconstructLegalDocument(
+                LEGAL_DOCUMENT_ID,
+                SERVICE_TERMS,
+                TITLE,
+                AGREEMENT,
+                EXPIRES_ON
         );
     }
 
@@ -86,18 +95,24 @@ public final class LegalDocumentFixture {
                 .toList();
     }
 
-    public static LegalDocument reconstructLegalDocument(LegalInteractionType interactionType) {
+    private static LegalDocument reconstructLegalDocument(
+            Long legalDocumentId,
+            LegalDocumentType documentType,
+            String title,
+            LegalInteractionType interactionType,
+            LocalDate expiresOn
+    ) {
         return LegalDocument.reconstruct(
-                LEGAL_DOCUMENT_ID,
-                SERVICE_TERMS,
+                legalDocumentId,
+                documentType,
                 VERSION,
-                TITLE,
+                title,
                 interactionType,
                 false,
                 CONTENT,
                 ANNOUNCED_ON,
                 EFFECTIVE_ON,
-                null,
+                expiresOn,
                 CREATED_AT
         );
     }

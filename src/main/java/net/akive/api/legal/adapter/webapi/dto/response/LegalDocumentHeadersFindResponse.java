@@ -26,7 +26,8 @@ public record LegalDocumentHeadersFindResponse(
             String title,
             LegalInteractionType interactionType,
             boolean isOptional,
-            LocalDate effectiveOn
+            LocalDate effectiveOn,
+            LocalDate expiresOn
     ) {
 
         public static LegalDocumentHeaderResponse from(LegalDocument legalDocument) {
@@ -37,7 +38,8 @@ public record LegalDocumentHeadersFindResponse(
                     legalDocument.getTitle(),
                     legalDocument.getInteractionType(),
                     legalDocument.isOptional(),
-                    legalDocument.getEffectiveOn()
+                    legalDocument.getEffectiveOn(),
+                    legalDocument.getExpiresOn()
             );
         }
     }

@@ -19,6 +19,11 @@ public interface LegalDocumentRepository {
             LocalDate currentDate
     );
 
+    List<LegalDocument> findAllHistoryByDocumentTypeOrderByEffectiveOnDesc(
+            LegalDocumentType documentType,
+            LocalDate currentDate
+    );
+
     List<Long> findAllCurrentIdsByDocumentType(
             LegalDocumentType documentType,
             LocalDate currentDate

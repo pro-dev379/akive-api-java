@@ -41,6 +41,18 @@ class LegalDocumentJpaAdapter implements LegalDocumentRepository {
     }
 
     @Override
+    public List<LegalDocument> findAllHistoryByDocumentTypeOrderByEffectiveOnDesc(
+            LegalDocumentType documentType,
+            LocalDate currentDate
+    ) {
+        return legalDocumentJpaRepository
+                .findAllHistoryByDocumentTypeOrderByEffectiveOnDesc(documentType, currentDate)
+                .stream()
+                .map(LegalDocumentEntity::to)
+                .toList();
+    }
+
+    @Override
     public List<Long> findAllCurrentIdsByDocumentType(
             LegalDocumentType documentType,
             LocalDate currentDate

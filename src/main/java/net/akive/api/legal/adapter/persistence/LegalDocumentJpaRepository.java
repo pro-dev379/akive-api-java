@@ -24,6 +24,18 @@ interface LegalDocumentJpaRepository extends JpaRepository<LegalDocumentEntity, 
     );
 
     @Query("""
+        select legalDocument
+        from LegalDocumentEntity legalDocument
+        where legalDocument.documentType = :documentType
+          and legalDocument.effectiveOn <= :currentDate
+        order by legalDocument.effectiveOn desc, legalDocument.legalDocumentId desc
+    """)
+    List<LegalDocumentEntity> findAllHistoryByDocumentTypeOrderByEffectiveOnDesc(
+            LegalDocumentType documentType,
+            LocalDate currentDate
+    );
+
+    @Query("""
         select legalDocument.legalDocumentId
         from LegalDocumentEntity legalDocument
         where legalDocument.documentType = :documentType

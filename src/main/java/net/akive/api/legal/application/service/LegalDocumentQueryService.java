@@ -52,6 +52,16 @@ class LegalDocumentQueryService implements LegalDocumentFinder {
     }
 
     @Override
+    public List<LegalDocument> findAllHistoryByDocumentType(LegalDocumentType documentType) {
+        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
+
+        return legalDocumentRepository.findAllHistoryByDocumentTypeOrderByEffectiveOnDesc(
+                documentType,
+                currentDate
+        );
+    }
+
+    @Override
     public Long findCurrentIdByDocumentType(LegalDocumentType documentType) throws ResourceNotFoundException {
         LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
         List<Long> legalDocumentIds = legalDocumentRepository.findAllCurrentIdsByDocumentType(

@@ -16,19 +16,18 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.CURR
 import static net.akive.api.common.exception.business.ResourceNotFoundError.LEGAL_DOCUMENT_NOT_FOUND;
 import static net.akive.api.legal.domain.LegalDocumentActionContext.SIGN_UP;
 import static net.akive.api.legal.domain.LegalDocumentType.SERVICE_TERMS;
-import static net.akive.api.legal.domain.fixture.LegalDocumentFixture.LEGAL_DOCUMENT_ID;
-import static net.akive.api.legal.domain.fixture.LegalDocumentFixture.reconstructLegalDocument;
+import static net.akive.api.legal.domain.fixture.LegalDocumentFixture.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @WebMvcTest(LegalDocumentApi.class)
 @AutoConfigureMockMvc(addFilters = false)
 class LegalDocumentApiTest extends PublicApiTestSupport {
 
     private static final String LEGAL_DOCUMENTS_URL = "/legal-documents";
+    private static final String LEGAL_DOCUMENT_HISTORY_URL =
+            LEGAL_DOCUMENTS_URL + "/types/{documentType}/history/headers";
     private static final String CURRENT_LEGAL_DOCUMENT_HEADERS_URL =
             LEGAL_DOCUMENTS_URL + "/action-contexts/{actionContext}/current/headers";
     private static final String CURRENT_LEGAL_DOCUMENT_ID_URL =
@@ -66,6 +65,31 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
     }
 
     @Test
+    void 특정_타입의_시행_약관_및_정책_문서_이력의_헤더_목록을_조회한다() {
+        LegalDocument legalDocument = reconstructExpiredLegalDocument();
+        given(legalDocumentFinder.findAllHistoryByDocumentType(SERVICE_TERMS))
+                .willReturn(List.of(legalDocument));
+
+        MvcTestResultAssert result = mvcTester.get()
+                .uri(LEGAL_DOCUMENT_HISTORY_URL, SERVICE_TERMS)
+                .assertThat()
+                .hasStatus(OK);
+
+        assertLegalDocumentHeaderResponse(result, legalDocument);
+        then(legalDocumentFinder).should().findAllHistoryByDocumentType(SERVICE_TERMS);
+    }
+
+    @Test
+    void 특정_타입의_시행_약관_및_정책_문서_이력의_헤더_목록_조회_시_문서_타입이_올바르지_않으면_400을_응답한다() {
+        mvcTester.get()
+                .uri(LEGAL_DOCUMENT_HISTORY_URL, "INVALID_DOCUMENT_TYPE")
+                .assertThat()
+                .hasStatus(BAD_REQUEST);
+
+        then(legalDocumentFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 특정_타입의_현행_약관_및_정책_문서_식별자를_조회한다() {
         given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
                 .willReturn(LEGAL_DOCUMENT_ID);
@@ -84,7 +108,7 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
     @Test
     void 현행_약관_및_정책_문서_식별자_조회_시_약관_및_정책_문서_타입이_올바르지_않으면_400을_응답한다() {
         mvcTester.get()
-                .uri(CURRENT_LEGAL_DOCUMENT_ID_URL, "UNKNOWN")
+                .uri(CURRENT_LEGAL_DOCUMENT_ID_URL, "INVALID_DOCUMENT_TYPE")
                 .assertThat()
                 .hasStatus(BAD_REQUEST);
 
@@ -124,7 +148,7 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
     @Test
     void 현행_약관_및_정책_문서_헤더_목록_조회_시_응답_컨텍스트가_올바르지_않으면_400을_응답한다() {
         mvcTester.get()
-                .uri(CURRENT_LEGAL_DOCUMENT_HEADERS_URL, "UNKNOWN")
+                .uri(CURRENT_LEGAL_DOCUMENT_HEADERS_URL, "INVALID_ACTION_CONTEXT")
                 .assertThat()
                 .hasStatus(BAD_REQUEST);
 
@@ -153,6 +177,15 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
         result.bodyJson()
                 .extractingPath("$.legalDocumentHeaders[0].effectiveOn")
                 .isEqualTo(legalDocument.getEffectiveOn().toString());
+        if (legalDocument.getExpiresOn() == null) {
+            result.bodyJson()
+                    .extractingPath("$.legalDocumentHeaders[0].expiresOn")
+                    .isNull();
+        } else {
+            result.bodyJson()
+                    .extractingPath("$.legalDocumentHeaders[0].expiresOn")
+                    .isEqualTo(legalDocument.getExpiresOn().toString());
+        }
     }
 
     private void assertLegalDocumentResponse(MvcTestResultAssert result, LegalDocument legalDocument) {

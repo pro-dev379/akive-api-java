@@ -24,13 +24,20 @@ public class LegalDocumentApi {
         return LegalDocumentFindResponse.from(legalDocumentFinder.findOrThrow(legalDocumentId));
     }
 
+    @GetMapping("/types/{documentType}/history/headers")
+    public LegalDocumentHeadersFindResponse findHistoryHeaders(@PathVariable LegalDocumentType documentType) {
+        return LegalDocumentHeadersFindResponse.from(
+                legalDocumentFinder.findAllHistoryByDocumentType(documentType)
+        );
+    }
+
     @GetMapping("/types/{documentType}/current/id")
     public LegalDocumentIdFindResponse findCurrentId(@PathVariable LegalDocumentType documentType) {
         return new LegalDocumentIdFindResponse(legalDocumentFinder.findCurrentIdByDocumentType(documentType));
     }
 
     @GetMapping("/action-contexts/{actionContext}/current/headers")
-    public LegalDocumentHeadersFindResponse findAllCurrentHeaders(
+    public LegalDocumentHeadersFindResponse findCurrentHeaders(
             @PathVariable LegalDocumentActionContext actionContext
     ) {
         return LegalDocumentHeadersFindResponse.from(

@@ -108,6 +108,55 @@ class LegalDocumentJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
+    void 특정_타입의_시행_약관_및_정책_문서를_최신_시행일순으로_모두_조회한다() {
+        LegalDocument recentPastLegalDocument = saveLegalDocument(
+                SERVICE_TERMS,
+                "20261027",
+                CURRENT_DATE.minusDays(2),
+                CURRENT_DATE
+        );
+        LegalDocument oldPastLegalDocument = saveLegalDocument(
+                SERVICE_TERMS,
+                "20261025",
+                CURRENT_DATE.minusDays(4),
+                CURRENT_DATE.minusDays(2)
+        );
+        LegalDocument currentLegalDocument = saveLegalDocument(
+                SERVICE_TERMS,
+                "20261029",
+                CURRENT_DATE,
+                null
+        );
+        saveLegalDocument(
+                SERVICE_TERMS,
+                "20261030",
+                CURRENT_DATE.plusDays(1),
+                null
+        );
+        saveLegalDocument(
+                PRIVACY_POLICY,
+                "20261027",
+                CURRENT_DATE.minusDays(2),
+                CURRENT_DATE
+        );
+        flushAndClear();
+
+        List<LegalDocument> legalDocuments =
+                legalDocumentRepository.findAllHistoryByDocumentTypeOrderByEffectiveOnDesc(
+                        SERVICE_TERMS,
+                        CURRENT_DATE
+                );
+
+        assertThat(legalDocuments)
+                .extracting(LegalDocument::getLegalDocumentId)
+                .containsExactly(
+                        currentLegalDocument.getLegalDocumentId(),
+                        recentPastLegalDocument.getLegalDocumentId(),
+                        oldPastLegalDocument.getLegalDocumentId()
+                );
+    }
+
+    @Test
     void 특정_타입의_현행_약관_및_정책_문서_식별자를_조회한다() {
         LegalDocument currentLegalDocument = saveLegalDocument(
                 SERVICE_TERMS,
