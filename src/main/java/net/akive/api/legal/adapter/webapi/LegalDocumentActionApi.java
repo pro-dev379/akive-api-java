@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
+@RequestMapping("/legal-documents")
 @RequiredArgsConstructor
 public class LegalDocumentActionApi {
 
     private final LegalDocumentActionFinder legalDocumentActionFinder;
     private final LegalDocumentActionRecorder legalDocumentActionRecorder;
 
-    @GetMapping("/legal-documents/{legalDocumentId}/legal-document-actions/current")
+    @GetMapping("/{legalDocumentId}/actions/current")
     public LegalDocumentActionFindResponse findCurrent(
             @AuthenticatedUserId Long userId,
             @PathVariable Long legalDocumentId
@@ -28,7 +29,7 @@ public class LegalDocumentActionApi {
         );
     }
 
-    @PostMapping("/legal-document-actions")
+    @PostMapping("/actions")
     @ResponseStatus(NO_CONTENT)
     public void record(
             @AuthenticatedUserId Long userId,

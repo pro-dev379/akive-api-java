@@ -147,7 +147,15 @@ class SecurityConfigTest {
     @Test
     void 회원의_현재_약관_및_정책_문서_응답_조회_API는_액세스_토큰이_필요하다() {
         mvcTester.get()
-                .uri("/legal-documents/1/legal-document-actions/current")
+                .uri("/legal-documents/1/actions/current")
+                .assertThat()
+                .hasStatus(UNAUTHORIZED);
+    }
+
+    @Test
+    void 약관_및_정책_문서에_대한_회원_응답_기록_API는_액세스_토큰이_필요하다() {
+        mvcTester.post()
+                .uri("/legal-documents/actions")
                 .assertThat()
                 .hasStatus(UNAUTHORIZED);
     }

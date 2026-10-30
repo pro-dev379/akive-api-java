@@ -32,8 +32,8 @@ import static org.springframework.http.HttpStatus.*;
 class LegalDocumentActionApiTest extends PrivateApiTestSupport {
 
     private static final String CURRENT_LEGAL_DOCUMENT_ACTION_URL =
-            "/legal-documents/{legalDocumentId}/legal-document-actions/current";
-    private static final String LEGAL_DOCUMENT_ACTIONS_URL = "/legal-document-actions";
+            "/legal-documents/{legalDocumentId}/actions/current";
+    private static final String LEGAL_DOCUMENT_ACTIONS_URL = "/legal-documents/actions";
 
     @MockitoBean
     LegalDocumentActionFinder legalDocumentActionFinder;

@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -20,6 +22,7 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.List;
 
 import static net.akive.api.core.config.security.CookieRequestProtectionFilter.CSRF_PROTECTION_HEADER_NAME;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
@@ -35,21 +38,23 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain publicSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        PathPatternRequestMatcher.Builder matcher = PathPatternRequestMatcher.withDefaults();
+
         return httpSecurity
-                .securityMatcher(
-                        "/auth/tokens",
-                        "/auth/tokens/**",
-                        "/auth/login/**",
-                        "/auth/email-verifications/**",
-                        "/auth/password-reset",
-                        "/members/email",
-                        "/members/check-nickname",
-                        "/legal-documents/*",
-                        "/legal-documents/types/**",
-                        "/legal-documents/action-contexts/*/current/headers",
-                        "/actuator/health",
-                        "/actuator/health/**"
-                )
+                .securityMatcher(new OrRequestMatcher(
+                        matcher.matcher("/auth/tokens"),
+                        matcher.matcher("/auth/tokens/**"),
+                        matcher.matcher("/auth/login/**"),
+                        matcher.matcher("/auth/email-verifications/**"),
+                        matcher.matcher("/auth/password-reset"),
+                        matcher.matcher("/members/email"),
+                        matcher.matcher("/members/check-nickname"),
+                        matcher.matcher(GET, "/legal-documents/{legalDocumentId}"),
+                        matcher.matcher(GET, "/legal-documents/types/**"),
+                        matcher.matcher(GET, "/legal-documents/action-contexts/{actionContext}/current/headers"),
+                        matcher.matcher("/actuator/health"),
+                        matcher.matcher("/actuator/health/**")
+                ))
                 .cors(Customizer.withDefaults())
                 .addFilterAfter(new CookieRequestProtectionFilter(objectMapper), CorsFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
