@@ -1,6 +1,7 @@
 package net.akive.api.legal.application.service;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.time.CurrentTimeProvider;
 import net.akive.api.legal.application.provided.LegalDocumentFinder;
 import net.akive.api.legal.application.required.LegalDocumentRepository;
@@ -16,6 +17,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import static net.akive.api.common.exception.business.ResourceNotFoundError.CURRENT_LEGAL_DOCUMENT_NOT_FOUND;
 import static net.akive.api.common.time.ServiceDayPolicy.toKoreanDate;
 
 @Service
@@ -25,6 +27,27 @@ class LegalDocumentQueryService implements LegalDocumentFinder {
 
     private final LegalDocumentRepository legalDocumentRepository;
     private final CurrentTimeProvider currentTimeProvider;
+
+    @Override
+    public Long findCurrentIdByDocumentType(LegalDocumentType documentType) {
+        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
+        List<Long> legalDocumentIds = legalDocumentRepository.findAllCurrentIdsByDocumentType(
+                documentType,
+                currentDate
+        );
+
+        if (legalDocumentIds.isEmpty()) {
+            throw new ResourceNotFoundException(CURRENT_LEGAL_DOCUMENT_NOT_FOUND);
+        }
+
+        if (legalDocumentIds.size() > 1) {
+            throw new IllegalStateException(
+                    "Multiple current legal documents found for type: " + documentType
+            );
+        }
+
+        return legalDocumentIds.getFirst();
+    }
 
     @Override
     public List<LegalDocument> findAllCurrentByContext(LegalDocumentActionContext context) {

@@ -22,4 +22,13 @@ interface LegalDocumentJpaRepository extends JpaRepository<LegalDocumentEntity, 
             Collection<LegalDocumentType> documentTypes,
             LocalDate currentDate
     );
+
+    @Query("""
+        select legalDocument.legalDocumentId
+        from LegalDocumentEntity legalDocument
+        where legalDocument.documentType = :documentType
+          and legalDocument.effectiveOn <= :currentDate
+          and (legalDocument.expiresOn is null or legalDocument.expiresOn > :currentDate)
+    """)
+    List<Long> findAllCurrentIdsByDocumentType(LegalDocumentType documentType, LocalDate currentDate);
 }

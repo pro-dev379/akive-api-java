@@ -13,4 +13,9 @@ public interface LegalDocumentRepository {
             Collection<LegalDocumentType> documentTypes,
             LocalDate currentDate
     );
+
+    List<Long> findAllCurrentIdsByDocumentType(
+            LegalDocumentType documentType,
+            LocalDate currentDate
+    );
 }

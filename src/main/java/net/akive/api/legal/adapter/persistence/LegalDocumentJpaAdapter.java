@@ -27,4 +27,12 @@ class LegalDocumentJpaAdapter implements LegalDocumentRepository {
                 .map(LegalDocumentEntity::to)
                 .toList();
     }
+
+    @Override
+    public List<Long> findAllCurrentIdsByDocumentType(
+            LegalDocumentType documentType,
+            LocalDate currentDate
+    ) {
+        return legalDocumentJpaRepository.findAllCurrentIdsByDocumentType(documentType, currentDate);
+    }
 }

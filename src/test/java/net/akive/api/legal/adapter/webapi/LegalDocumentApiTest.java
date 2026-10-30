@@ -1,5 +1,6 @@
 package net.akive.api.legal.adapter.webapi;
 
+import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.legal.application.provided.LegalDocumentFinder;
 import net.akive.api.legal.domain.LegalDocument;
 import net.akive.api.support.PublicApiTestSupport;
@@ -11,11 +12,15 @@ import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
 import java.util.List;
 
+import static net.akive.api.common.exception.business.ResourceNotFoundError.CURRENT_LEGAL_DOCUMENT_NOT_FOUND;
 import static net.akive.api.legal.domain.LegalDocumentActionContext.SIGN_UP;
+import static net.akive.api.legal.domain.LegalDocumentType.SERVICE_TERMS;
+import static net.akive.api.legal.domain.fixture.LegalDocumentFixture.LEGAL_DOCUMENT_ID;
 import static net.akive.api.legal.domain.fixture.LegalDocumentFixture.reconstructLegalDocument;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
 @WebMvcTest(LegalDocumentApi.class)
@@ -25,9 +30,51 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
     private static final String LEGAL_DOCUMENTS_URL = "/legal-documents";
     private static final String CURRENT_LEGAL_DOCUMENT_HEADERS_URL =
             LEGAL_DOCUMENTS_URL + "/action-contexts/{actionContext}/current";
+    private static final String CURRENT_LEGAL_DOCUMENT_ID_URL =
+            LEGAL_DOCUMENTS_URL + "/types/{documentType}/current";
 
     @MockitoBean
     LegalDocumentFinder legalDocumentFinder;
+
+    @Test
+    void 특정_타입의_현행_약관_및_정책_문서_식별자를_조회한다() {
+        given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
+                .willReturn(LEGAL_DOCUMENT_ID);
+
+        MvcTestResultAssert result = mvcTester.get()
+                .uri(CURRENT_LEGAL_DOCUMENT_ID_URL, SERVICE_TERMS)
+                .assertThat()
+                .hasStatus(OK);
+
+        result.bodyJson()
+                .extractingPath("$.legalDocumentId")
+                .isEqualTo(LEGAL_DOCUMENT_ID.intValue());
+        then(legalDocumentFinder).should().findCurrentIdByDocumentType(SERVICE_TERMS);
+    }
+
+    @Test
+    void 현행_약관_및_정책_문서_식별자_조회_시_문서_타입이_올바르지_않으면_400을_응답한다() {
+        mvcTester.get()
+                .uri(CURRENT_LEGAL_DOCUMENT_ID_URL, "UNKNOWN")
+                .assertThat()
+                .hasStatus(BAD_REQUEST);
+
+        then(legalDocumentFinder).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 특정_타입의_현행_약관_및_정책_문서가_없으면_404를_응답한다() {
+        given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
+                .willThrow(new ResourceNotFoundException(CURRENT_LEGAL_DOCUMENT_NOT_FOUND));
+
+        MvcTestResultAssert result = mvcTester.get()
+                .uri(CURRENT_LEGAL_DOCUMENT_ID_URL, SERVICE_TERMS)
+                .assertThat()
+                .hasStatus(NOT_FOUND);
+
+        assertErrorResponse(result, CURRENT_LEGAL_DOCUMENT_NOT_FOUND);
+        then(legalDocumentFinder).should().findCurrentIdByDocumentType(SERVICE_TERMS);
+    }
 
     @Test
     void 응답_컨텍스트에_맞는_현행_약관_및_정책_문서_헤더_목록을_조회한다() {
