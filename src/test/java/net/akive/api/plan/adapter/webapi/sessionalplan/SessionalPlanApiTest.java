@@ -169,7 +169,7 @@ class SessionalPlanApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 세셔널_플랜_조회_시_세셔널_플랜이_없으면_404를_응답한다() {
+    void 세셔널_플랜_상세_조회_시_세셔널_플랜이_없으면_404를_응답한다() {
         SessionalPlanDetailFindQuery query = new SessionalPlanDetailFindQuery(USER_ID, SESSIONAL_PLAN_ID);
         given(sessionalPlanFinder.findDetail(query))
                 .willThrow(new ResourceNotFoundException(SESSIONAL_PLAN_NOT_FOUND));

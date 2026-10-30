@@ -51,7 +51,7 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
     }
 
     @Test
-    void 약관_및_정책_식별자에_해당하는_약관_및_정책_문서가_없으면_404를_응답한다() {
+    void 약관_및_정책_문서_상세_조회_시_약관_및_정책_문서가_없으면_404를_응답한다() {
         given(legalDocumentFinder.findOrThrow(LEGAL_DOCUMENT_ID))
                 .willThrow(new ResourceNotFoundException(LEGAL_DOCUMENT_NOT_FOUND));
 
