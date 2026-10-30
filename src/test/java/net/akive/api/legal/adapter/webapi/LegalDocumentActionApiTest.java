@@ -42,7 +42,7 @@ class LegalDocumentActionApiTest extends PrivateApiTestSupport {
     LegalDocumentActionRecorder legalDocumentActionRecorder;
 
     @Test
-    void 회원의_현재_약관_및_정책_문서_응답을_조회한다() {
+    void 회원의_현행_약관_및_정책_문서_응답을_조회한다() {
         LegalDocumentAction legalDocumentAction = reconstructLegalDocumentAction(
                 LEGAL_DOCUMENT_ACTION_ID,
                 CONSENT,
@@ -76,7 +76,7 @@ class LegalDocumentActionApiTest extends PrivateApiTestSupport {
     }
 
     @Test
-    void 회원의_현재_약관_및_정책_문서_응답이_없으면_404를_응답한다() {
+    void 회원의_현행_약관_및_정책_문서_응답이_없으면_404를_응답한다() {
         given(legalDocumentActionFinder.findCurrentOrThrow(USER_ID, LEGAL_DOCUMENT_ID))
                 .willThrow(new ResourceNotFoundException(LEGAL_DOCUMENT_ACTION_NOT_FOUND));
 
