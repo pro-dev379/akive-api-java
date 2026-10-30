@@ -30,9 +30,9 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
 
     private static final String LEGAL_DOCUMENTS_URL = "/legal-documents";
     private static final String CURRENT_LEGAL_DOCUMENT_HEADERS_URL =
-            LEGAL_DOCUMENTS_URL + "/action-contexts/{actionContext}/current";
+            LEGAL_DOCUMENTS_URL + "/action-contexts/{actionContext}/current/headers";
     private static final String CURRENT_LEGAL_DOCUMENT_ID_URL =
-            LEGAL_DOCUMENTS_URL + "/types/{documentType}/current";
+            LEGAL_DOCUMENTS_URL + "/types/{documentType}/current/id";
 
     @MockitoBean
     LegalDocumentFinder legalDocumentFinder;

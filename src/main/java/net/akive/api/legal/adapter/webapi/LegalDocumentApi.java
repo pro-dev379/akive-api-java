@@ -24,12 +24,12 @@ public class LegalDocumentApi {
         return LegalDocumentFindResponse.from(legalDocumentFinder.findOrThrow(legalDocumentId));
     }
 
-    @GetMapping("/types/{documentType}/current")
+    @GetMapping("/types/{documentType}/current/id")
     public LegalDocumentIdFindResponse findCurrentId(@PathVariable LegalDocumentType documentType) {
         return new LegalDocumentIdFindResponse(legalDocumentFinder.findCurrentIdByDocumentType(documentType));
     }
 
-    @GetMapping("/action-contexts/{actionContext}/current")
+    @GetMapping("/action-contexts/{actionContext}/current/headers")
     public LegalDocumentHeadersFindResponse findAllCurrentHeaders(
             @PathVariable LegalDocumentActionContext actionContext
     ) {
