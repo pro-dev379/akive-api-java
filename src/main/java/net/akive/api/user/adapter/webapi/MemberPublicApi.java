@@ -6,7 +6,6 @@ import net.akive.api.user.adapter.webapi.dto.request.UserSignUpByEmailRequest;
 import net.akive.api.user.adapter.webapi.dto.response.UserNicknameCheckResponse;
 import net.akive.api.user.application.provided.UserAccountManager;
 import net.akive.api.user.application.provided.UserNicknameChecker;
-import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,19 +17,13 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequiredArgsConstructor
 public class MemberPublicApi {
 
-    private final UserNicknameChecker userNicknameChecker;
     private final UserAccountManager userAccountManager;
+    private final UserNicknameChecker userNicknameChecker;
 
     @PostMapping("/email")
     @ResponseStatus(CREATED)
-    public void signUpMemberByEmail(@Validated @RequestBody UserSignUpByEmailRequest request) {
-        UserSignUpByEmailCommand command = UserSignUpByEmailCommand.of(
-                request.email(),
-                request.password(),
-                request.nickname()
-        );
-
-        userAccountManager.signUpMemberByEmail(command);
+    public void signUpByEmail(@Validated @RequestBody UserSignUpByEmailRequest request) {
+        userAccountManager.signUpMemberByEmail(request.to());
     }
 
     @GetMapping("/check-nickname")

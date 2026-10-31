@@ -12,7 +12,7 @@ import net.akive.api.user.domain.User;
 public interface UserAccountManager {
 
     User signUpMemberByEmail(UserSignUpByEmailCommand command)
-            throws BusinessRuleViolationException, ResourceConflictException;
+            throws BusinessRuleViolationException, ResourceConflictException, ResourceNotFoundException;
 
     void updateUserDetail(UserDetailUpdateCommand command)
             throws ResourceNotFoundException, ResourceConflictException;

@@ -311,6 +311,33 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
     }
 
     @Test
+    void 회원_탈퇴_사유_목록을_조회한다() {
+        List<WithdrawalReason> withdrawalReasons = List.of(
+                INCONVENIENT_TO_USE,
+                MISSING_DESIRED_FEATURES,
+                NO_LONGER_NEEDED,
+                WANT_NEW_ACCOUNT,
+                OTHER
+        );
+        given(userFinder.findWithdrawalReasons()).willReturn(withdrawalReasons);
+
+        MvcTestResultAssert result = get(MEMBER_WITHDRAWAL_REASONS_URL, USER_ID).hasStatus(OK);
+
+        result.bodyJson().extractingPath("$.withdrawalReasons.length()")
+                .isEqualTo(withdrawalReasons.size());
+        result.bodyJson().extractingPath("$.withdrawalReasons[0].code")
+                .isEqualTo(INCONVENIENT_TO_USE.name());
+        result.bodyJson().extractingPath("$.withdrawalReasons[0].label")
+                .isEqualTo(INCONVENIENT_TO_USE.getLabel());
+        result.bodyJson().extractingPath("$.withdrawalReasons[4].code")
+                .isEqualTo(OTHER.name());
+        result.bodyJson().extractingPath("$.withdrawalReasons[4].label")
+                .isEqualTo(OTHER.getLabel());
+
+        then(userFinder).should().findWithdrawalReasons();
+    }
+
+    @Test
     void 회원을_탈퇴시키고_리프레시_토큰_쿠키를_만료시킨다() {
         UserWithdrawRequest request = createUserWithdrawRequest();
         UserWithdrawCommand command = UserWithdrawCommand.of(USER_ID, request.withdrawReason());
@@ -336,33 +363,6 @@ class MemberPrivateApiTest extends PrivateApiTestSupport {
                 .hasStatus(BAD_REQUEST);
 
         then(userAccountManager).should(never()).withdraw(any(UserWithdrawCommand.class));
-    }
-
-    @Test
-    void 회원_탈퇴_사유_목록을_조회한다() {
-        List<WithdrawalReason> withdrawalReasons = List.of(
-                INCONVENIENT_TO_USE,
-                MISSING_DESIRED_FEATURES,
-                NO_LONGER_NEEDED,
-                WANT_NEW_ACCOUNT,
-                OTHER
-        );
-        given(userFinder.findWithdrawalReasons()).willReturn(withdrawalReasons);
-
-        MvcTestResultAssert result = get(MEMBER_WITHDRAWAL_REASONS_URL, USER_ID).hasStatus(OK);
-
-        result.bodyJson().extractingPath("$.withdrawalReasons.length()")
-                .isEqualTo(withdrawalReasons.size());
-        result.bodyJson().extractingPath("$.withdrawalReasons[0].code")
-                .isEqualTo(INCONVENIENT_TO_USE.name());
-        result.bodyJson().extractingPath("$.withdrawalReasons[0].label")
-                .isEqualTo(INCONVENIENT_TO_USE.getLabel());
-        result.bodyJson().extractingPath("$.withdrawalReasons[4].code")
-                .isEqualTo(OTHER.name());
-        result.bodyJson().extractingPath("$.withdrawalReasons[4].label")
-                .isEqualTo(OTHER.getLabel());
-
-        then(userFinder).should().findWithdrawalReasons();
     }
 
     @Test

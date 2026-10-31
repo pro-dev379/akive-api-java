@@ -156,9 +156,7 @@ class LegalDocumentActionCommandServiceTest {
             value = LegalDocumentActionContext.class,
             names = {"SETTINGS", "POLICY_UPDATE"}
     )
-    void 현행이_아닌_약관_및_정책_문서에_응답하면_예외를_던진다(
-            LegalDocumentActionContext actionContext
-    ) {
+    void 현행이_아닌_약관_및_정책_문서에_응답하면_예외를_던진다(LegalDocumentActionContext actionContext) {
         Long nonCurrentLegalDocumentId = 1L;
         Long currentLegalDocumentId = 2L;
         LegalDocument nonCurrentLegalDocument = reconstructLegalDocument(

@@ -15,13 +15,16 @@ import net.akive.api.user.application.provided.dto.UserDetailUpdateCommand;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.application.required.GoalRepository;
+import net.akive.api.user.application.required.SignUpLegalDocumentActionRecorder;
 import net.akive.api.user.application.required.UserRepository;
+import net.akive.api.user.application.required.data.SignUpLegalDocumentActionData;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
@@ -38,6 +41,7 @@ class UserAccountService implements UserAccountManager {
 
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
+    private final SignUpLegalDocumentActionRecorder signUpLegalDocumentActionRecorder;
 
     private final UserSignUpDomainService userSignUpDomainService;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -51,9 +55,11 @@ class UserAccountService implements UserAccountManager {
                 command.password(),
                 command.nickname()
         );
-
         User savedUser = userRepository.save(user);
-
+        signUpLegalDocumentActionRecorder.record(
+                savedUser.getUserId(),
+                toSignUpLegalDocumentActionData(command)
+        );
         goalRepository.save(Goal.createDefault(savedUser));
 
         applicationEventPublisher.publishEvent(new UserSignedUpEvent(
@@ -111,6 +117,18 @@ class UserAccountService implements UserAccountManager {
         userRepository.save(user);
 
         applicationEventPublisher.publishEvent(new UserWithdrawnEvent(command.userId()));
+    }
+
+    private List<SignUpLegalDocumentActionData> toSignUpLegalDocumentActionData(
+            UserSignUpByEmailCommand command
+    ) {
+        return command.legalDocumentActions().stream()
+                .map(action -> new SignUpLegalDocumentActionData(
+                        action.requestId(),
+                        action.legalDocumentId(),
+                        action.actionType()
+                ))
+                .toList();
     }
 
     private User findNotWithdrawnUserByUserIdOrThrow(Long userId) {

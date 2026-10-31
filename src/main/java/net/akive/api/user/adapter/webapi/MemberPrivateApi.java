@@ -71,6 +71,11 @@ public class MemberPrivateApi {
         return new UserNicknameCheckResponse(isDuplicated);
     }
 
+    @GetMapping("/withdrawal-reasons")
+    public WithdrawalReasonsFindResponse findWithdrawalReasons() {
+        return WithdrawalReasonsFindResponse.from(userFinder.findWithdrawalReasons());
+    }
+
     @PostMapping("/withdraw")
     public ResponseEntity<Void> withdraw(
             @AuthenticatedUserId Long userId,
@@ -83,11 +88,6 @@ public class MemberPrivateApi {
         return ResponseEntity.noContent()
                 .header(SET_COOKIE, refreshTokenCookieExpirer.expire().toString())
                 .build();
-    }
-
-    @GetMapping("/withdrawal-reasons")
-    public WithdrawalReasonsFindResponse findWithdrawalReasons() {
-        return WithdrawalReasonsFindResponse.from(userFinder.findWithdrawalReasons());
     }
 
     private ProfileImageResponse findProfileImage(User user) {

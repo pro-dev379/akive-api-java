@@ -14,7 +14,9 @@ import net.akive.api.user.application.provided.dto.UserDetailUpdateCommand;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
 import net.akive.api.user.application.required.GoalRepository;
+import net.akive.api.user.application.required.SignUpLegalDocumentActionRecorder;
 import net.akive.api.user.application.required.UserRepository;
+import net.akive.api.user.application.required.data.SignUpLegalDocumentActionData;
 import net.akive.api.user.domain.Goal;
 import net.akive.api.user.domain.User;
 import net.akive.api.user.domain.UserDetail;
@@ -26,9 +28,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.List;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.EMAIL_NOT_VERIFIED;
+import static net.akive.api.common.exception.business.BusinessRuleViolationError.REQUIRED_LEGAL_DOCUMENT_ACTION_MISSING;
 import static net.akive.api.common.exception.business.ResourceConflictError.NICKNAME_ALREADY_EXISTS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
@@ -55,6 +59,9 @@ class UserAccountServiceTest {
     GoalRepository goalRepository;
 
     @Mock
+    SignUpLegalDocumentActionRecorder signUpLegalDocumentActionRecorder;
+
+    @Mock
     ImageAssetDeleter imageAssetDeleter;
 
     @Mock
@@ -76,7 +83,7 @@ class UserAccountServiceTest {
     UserAccountService userAccountService;
 
     @Test
-    void 이메일로_회원을_가입시키고_기본_목표를_생성한_뒤_회원_가입_이벤트를_발행한다() {
+    void 이메일로_회원을_가입시키고_약관_및_정책_문서에_대한_응답과_기본_목표를_생성한_뒤_회원_가입_이벤트를_발행한다() {
         UserSignUpByEmailCommand command = createUserSignUpByEmailCommand();
         User user = createUser();
         User savedUser = createReconstructedUser();
@@ -92,6 +99,8 @@ class UserAccountServiceTest {
         then(userSignUpDomainService).should()
                 .signUpMemberByEmail(command.email(), command.password(), command.nickname());
         then(userRepository).should().save(user);
+        then(signUpLegalDocumentActionRecorder).should()
+                .record(savedUser.getUserId(), createSignUpLegalDocumentActionData(command));
 
         ArgumentCaptor<Goal> goalCaptor = ArgumentCaptor.forClass(Goal.class);
         then(goalRepository).should().save(goalCaptor.capture());
@@ -122,6 +131,29 @@ class UserAccountServiceTest {
                 .isEqualTo(EMAIL_NOT_VERIFIED);
 
         then(userRepository).should(never()).save(any(User.class));
+        then(signUpLegalDocumentActionRecorder).shouldHaveNoInteractions();
+        then(goalRepository).shouldHaveNoInteractions();
+        then(applicationEventPublisher).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 가입_시점의_약관_및_정책_문서에_대한_응답_기록에_실패하면_기본_목표와_회원_가입_이벤트를_생성하지_않는다() {
+        UserSignUpByEmailCommand command = createUserSignUpByEmailCommand();
+        User user = createUser();
+        User savedUser = createReconstructedUser();
+
+        given(userSignUpDomainService.signUpMemberByEmail(command.email(), command.password(), command.nickname()))
+                .willReturn(user);
+        given(userRepository.save(user)).willReturn(savedUser);
+        willThrow(new BusinessRuleViolationException(REQUIRED_LEGAL_DOCUMENT_ACTION_MISSING))
+                .given(signUpLegalDocumentActionRecorder)
+                .record(savedUser.getUserId(), createSignUpLegalDocumentActionData(command));
+
+        assertThatExceptionOfType(BusinessRuleViolationException.class)
+                .isThrownBy(() -> userAccountService.signUpMemberByEmail(command))
+                .extracting(BusinessRuleViolationException::getError)
+                .isEqualTo(REQUIRED_LEGAL_DOCUMENT_ACTION_MISSING);
+
         then(goalRepository).shouldHaveNoInteractions();
         then(applicationEventPublisher).shouldHaveNoInteractions();
     }
@@ -373,5 +405,17 @@ class UserAccountServiceTest {
         then(currentTimeProvider).shouldHaveNoInteractions();
         then(userRepository).should(never()).save(any(User.class));
         then(applicationEventPublisher).shouldHaveNoInteractions();
+    }
+
+    private List<SignUpLegalDocumentActionData> createSignUpLegalDocumentActionData(
+            UserSignUpByEmailCommand command
+    ) {
+        return command.legalDocumentActions().stream()
+                .map(action -> new SignUpLegalDocumentActionData(
+                        action.requestId(),
+                        action.legalDocumentId(),
+                        action.actionType()
+                ))
+                .toList();
     }
 }

@@ -3,9 +3,14 @@ package net.akive.api.user.application.fixture;
 import net.akive.api.user.application.provided.dto.UserDetailUpdateCommand;
 import net.akive.api.user.application.provided.dto.UserSignUpByEmailCommand;
 import net.akive.api.user.application.provided.dto.UserWithdrawCommand;
+import net.akive.api.user.application.provided.dto.SignUpLegalDocumentActionCommand;
 
+import java.util.List;
 import java.util.UUID;
 
+import static net.akive.api.legal.domain.fixture.LegalDocumentActionFixture.REQUEST_ID;
+import static net.akive.api.legal.domain.fixture.LegalDocumentFixture.LEGAL_DOCUMENT_ID;
+import static net.akive.api.user.domain.SignUpLegalDocumentActionType.AGREED;
 import static net.akive.api.user.domain.fixture.UserDetailFixture.*;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static net.akive.api.user.domain.fixture.WithdrawalFixture.WITHDRAWAL_REASON;
@@ -16,7 +21,12 @@ public class UserAccountCommandFixture {
     }
 
     public static UserSignUpByEmailCommand createUserSignUpByEmailCommand() {
-        return new UserSignUpByEmailCommand(EMAIL, PASSWORD, NICKNAME);
+        return new UserSignUpByEmailCommand(
+                EMAIL,
+                PASSWORD,
+                NICKNAME,
+                List.of(new SignUpLegalDocumentActionCommand(REQUEST_ID, LEGAL_DOCUMENT_ID, AGREED))
+        );
     }
 
     public static UserDetailUpdateCommand createUserDetailUpdateCommand() {
