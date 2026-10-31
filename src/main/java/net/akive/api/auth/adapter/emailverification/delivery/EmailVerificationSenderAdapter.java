@@ -24,7 +24,7 @@ class EmailVerificationSenderAdapter implements EmailVerificationSender {
         EmailSendCommand command = new EmailSendCommand(
                 emailProperties.from().verification(),
                 List.of(emailVerification.getEmail().value()),
-                "[AKIVE] 인증 코드가 도착했어요.",
+                "[akive] 이메일 인증 코드가 도착했어요",
                 "email/verification-code",
                 Map.of(
                         "verificationCode", emailVerification.getVerificationCode().value(),

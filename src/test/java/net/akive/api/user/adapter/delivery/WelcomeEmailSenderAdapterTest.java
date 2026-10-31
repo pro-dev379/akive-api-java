@@ -54,7 +54,7 @@ class WelcomeEmailSenderAdapterTest {
 
         assertThat(command.from()).isEqualTo(FROM);
         assertThat(command.to()).containsExactly(EMAIL.value());
-        assertThat(command.subject()).isEqualTo("[AKIVE] AKIVE에 오신 것을 환영합니다!");
+        assertThat(command.subject()).isEqualTo("akive와 함께 학습의 모든 순간을 이어가세요");
         assertThat(command.templatePath()).isEqualTo("email/welcome");
         assertThat(command.variables())
                 .containsEntry("nickname", NICKNAME)

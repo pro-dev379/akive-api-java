@@ -23,7 +23,7 @@ public class WelcomeEmailSenderAdapter implements WelcomeEmailSender {
         EmailSendCommand command = new EmailSendCommand(
                 emailProperties.from().welcome(),
                 List.of(email.value()),
-                "[AKIVE] AKIVE에 오신 것을 환영합니다!",
+                "akive와 함께 학습의 모든 순간을 이어가세요",
                 "email/welcome",
                 Map.of(
                         "nickname", nickname,

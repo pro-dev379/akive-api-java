@@ -54,7 +54,7 @@ class EmailVerificationSenderAdapterTest {
 
         assertThat(command.from()).isEqualTo(FROM);
         assertThat(command.to()).containsExactly(emailVerification.getEmail().value());
-        assertThat(command.subject()).isEqualTo("[AKIVE] 인증 코드가 도착했어요.");
+        assertThat(command.subject()).isEqualTo("[akive] 이메일 인증 코드가 도착했어요");
         assertThat(command.templatePath()).isEqualTo("email/verification-code");
         assertThat(command.variables())
                 .containsEntry("verificationCode", emailVerification.getVerificationCode().value())

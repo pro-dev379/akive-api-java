@@ -24,7 +24,7 @@ class ThymeleafEmailTemplateRendererTest extends IntegrationTestSupport {
         String result = thymeleafEmailTemplateRenderer.render(templatePath, variables);
 
         assertThat(result)
-                .contains("이메일 인증 코드 안내")
+                .contains("이메일을 인증해 주세요")
                 .contains("123456")
                 .contains("5분")
                 .doesNotContain("th:text");
