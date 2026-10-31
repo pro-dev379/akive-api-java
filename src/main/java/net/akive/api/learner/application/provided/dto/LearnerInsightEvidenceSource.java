@@ -7,13 +7,13 @@ import java.time.Instant;
 import static net.akive.api.common.domain.DomainValidator.requireNonNull;
 import static net.akive.api.common.domain.DomainValidator.requirePositive;
 
-public record LearnerInsightEvidenceSourceData(
+public record LearnerInsightEvidenceSource(
         EvidenceSourceType sourceType,
         Long sourceId,
         Instant observedAt
 ) {
 
-    public LearnerInsightEvidenceSourceData {
+    public LearnerInsightEvidenceSource {
         requireNonNull(sourceType);
         requirePositive(sourceId);
         requireNonNull(observedAt);

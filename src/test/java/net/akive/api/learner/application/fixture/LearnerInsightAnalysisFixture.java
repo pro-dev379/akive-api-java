@@ -2,8 +2,8 @@ package net.akive.api.learner.application.fixture;
 
 import net.akive.api.eventprocessing.domain.EventType;
 import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisCommand;
-import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisMaterialData;
-import net.akive.api.learner.application.provided.dto.LearnerInsightEvidenceSourceData;
+import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisMaterial;
+import net.akive.api.learner.application.provided.dto.LearnerInsightEvidenceSource;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisRequestData;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisResultData;
 import net.akive.api.learner.application.required.data.InsightSuggestionData;
@@ -112,14 +112,14 @@ public final class LearnerInsightAnalysisFixture {
                 eventId,
                 eventType,
                 List.of(
-                        new LearnerInsightAnalysisMaterialData(EVIDENCE, MESSAGE_CONTENT),
-                        new LearnerInsightAnalysisMaterialData(REFERENCE, COACHING_RESPONSE_CONTENT)
+                        new LearnerInsightAnalysisMaterial(EVIDENCE, MESSAGE_CONTENT),
+                        new LearnerInsightAnalysisMaterial(REFERENCE, COACHING_RESPONSE_CONTENT)
                 )
         );
     }
 
     public static LearnerInsightAnalysisCommand createLearnerInsightAnalysisCommand(
-            List<LearnerInsightAnalysisMaterialData> materials
+            List<LearnerInsightAnalysisMaterial> materials
     ) {
         return createLearnerInsightAnalysisCommand(EVENT_ID, COACHING_TURN_DONE, materials);
     }
@@ -127,13 +127,13 @@ public final class LearnerInsightAnalysisFixture {
     private static LearnerInsightAnalysisCommand createLearnerInsightAnalysisCommand(
             UUID eventId,
             EventType eventType,
-            List<LearnerInsightAnalysisMaterialData> materials
+            List<LearnerInsightAnalysisMaterial> materials
     ) {
         return new LearnerInsightAnalysisCommand(
                 eventId,
                 eventType,
                 USER_ID,
-                new LearnerInsightEvidenceSourceData(
+                new LearnerInsightEvidenceSource(
                         COACHING_MESSAGE,
                         COACHING_MESSAGE_ID,
                         COACHING_TURN_COMPLETED_AT

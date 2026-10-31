@@ -9,7 +9,7 @@ import net.akive.api.learner.application.event.LearnerInsightChangedEvent;
 import net.akive.api.learner.application.exception.InvalidLearnerInsightAnalysisResultException;
 import net.akive.api.learner.application.exception.LearnerInsightAnalysisException;
 import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisCommand;
-import net.akive.api.learner.application.provided.dto.LearnerInsightEvidenceSourceData;
+import net.akive.api.learner.application.provided.dto.LearnerInsightEvidenceSource;
 import net.akive.api.learner.application.required.LearnerInsightRepository;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisResultData;
 import net.akive.api.learner.domain.EvidenceStance;
@@ -312,7 +312,7 @@ class LearnerInsightSuggestionServiceTest {
     }
 
     private void assertSavedEvidence(
-            LearnerInsightEvidenceSourceData expectedSource,
+            LearnerInsightEvidenceSource expectedSource,
             LearnerInsight expectedLearnerInsight,
             EvidenceStance expectedStance
     ) {
@@ -329,7 +329,7 @@ class LearnerInsightSuggestionServiceTest {
 
     private void assertEvidence(
             LearnerInsightEvidence actual,
-            LearnerInsightEvidenceSourceData expectedSource,
+            LearnerInsightEvidenceSource expectedSource,
             LearnerInsight expectedLearnerInsight,
             EvidenceStance expectedStance
     ) {

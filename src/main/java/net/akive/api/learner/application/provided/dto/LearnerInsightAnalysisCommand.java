@@ -14,8 +14,8 @@ public record LearnerInsightAnalysisCommand(
         UUID eventId,
         EventType eventType,
         Long userId,
-        LearnerInsightEvidenceSourceData evidenceSource,
-        List<LearnerInsightAnalysisMaterialData> materials
+        LearnerInsightEvidenceSource evidenceSource,
+        List<LearnerInsightAnalysisMaterial> materials
 ) {
 
     public LearnerInsightAnalysisCommand {

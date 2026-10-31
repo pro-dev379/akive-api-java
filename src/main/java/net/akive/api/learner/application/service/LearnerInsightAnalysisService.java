@@ -6,7 +6,7 @@ import net.akive.api.learner.application.provided.LearnerInsightAnalyzer;
 import net.akive.api.learner.application.provided.LearnerInsightFinder;
 import net.akive.api.learner.application.provided.dto.AnalysisMaterialRole;
 import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisCommand;
-import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisMaterialData;
+import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisMaterial;
 import net.akive.api.learner.application.required.LearnerInsightLlm;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisRequestData;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisResultData;
@@ -67,7 +67,7 @@ class LearnerInsightAnalysisService implements LearnerInsightAnalyzer {
         return command.materials()
                 .stream()
                 .filter(material -> material.role() == role)
-                .map(LearnerInsightAnalysisMaterialData::content)
+                .map(LearnerInsightAnalysisMaterial::content)
                 .toList();
     }
 }

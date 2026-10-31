@@ -3,7 +3,7 @@ package net.akive.api.learner.application.service;
 import net.akive.api.eventprocessing.application.provided.EventProcessingTracker;
 import net.akive.api.learner.application.provided.LearnerInsightFinder;
 import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisCommand;
-import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisMaterialData;
+import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisMaterial;
 import net.akive.api.learner.application.required.LearnerInsightLlm;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisRequestData;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisResultData;
@@ -52,9 +52,9 @@ class LearnerInsightAnalysisServiceTest {
     @Test
     void Evidence_자료로_관련_학습자_인사이트를_조회하고_Reference_자료와_함께_LLM_분석한다() {
         LearnerInsightAnalysisCommand command = createLearnerInsightAnalysisCommand(List.of(
-                new LearnerInsightAnalysisMaterialData(EVIDENCE, MESSAGE_CONTENT),
-                new LearnerInsightAnalysisMaterialData(REFERENCE, COACHING_RESPONSE_CONTENT),
-                new LearnerInsightAnalysisMaterialData(EVIDENCE, ANOTHER_EVIDENCE_CONTENT)
+                new LearnerInsightAnalysisMaterial(EVIDENCE, MESSAGE_CONTENT),
+                new LearnerInsightAnalysisMaterial(REFERENCE, COACHING_RESPONSE_CONTENT),
+                new LearnerInsightAnalysisMaterial(EVIDENCE, ANOTHER_EVIDENCE_CONTENT)
         ));
         List<String> evidenceContents = List.of(MESSAGE_CONTENT, ANOTHER_EVIDENCE_CONTENT);
         List<String> referenceContents = List.of(COACHING_RESPONSE_CONTENT);

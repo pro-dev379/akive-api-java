@@ -12,8 +12,8 @@ import net.akive.api.eventprocessing.application.event.IntegrationEventMessage;
 import net.akive.api.eventprocessing.domain.EventType;
 import net.akive.api.learner.application.exception.LearnerInsightMessageException;
 import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisCommand;
-import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisMaterialData;
-import net.akive.api.learner.application.provided.dto.LearnerInsightEvidenceSourceData;
+import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisMaterial;
+import net.akive.api.learner.application.provided.dto.LearnerInsightEvidenceSource;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -48,14 +48,14 @@ class CoachingTurnCompletedAnalysisCommandMapper implements LearnerInsightAnalys
                 event.eventId(),
                 event.eventType(),
                 event.userId(),
-                new LearnerInsightEvidenceSourceData(
+                new LearnerInsightEvidenceSource(
                         COACHING_MESSAGE,
                         event.userMessageId(),
                         event.completedAt()
                 ),
                 List.of(
-                        new LearnerInsightAnalysisMaterialData(EVIDENCE, coachingTurn.userMessage()),
-                        new LearnerInsightAnalysisMaterialData(REFERENCE, coachingTurn.assistantMessage())
+                        new LearnerInsightAnalysisMaterial(EVIDENCE, coachingTurn.userMessage()),
+                        new LearnerInsightAnalysisMaterial(REFERENCE, coachingTurn.assistantMessage())
                 )
         );
     }

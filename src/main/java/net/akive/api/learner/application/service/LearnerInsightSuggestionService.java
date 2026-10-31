@@ -9,7 +9,7 @@ import net.akive.api.learner.application.event.LearnerInsightChangedEvent;
 import net.akive.api.learner.application.exception.InvalidLearnerInsightAnalysisResultException;
 import net.akive.api.learner.application.exception.LearnerInsightAnalysisException;
 import net.akive.api.learner.application.provided.dto.LearnerInsightAnalysisCommand;
-import net.akive.api.learner.application.provided.dto.LearnerInsightEvidenceSourceData;
+import net.akive.api.learner.application.provided.dto.LearnerInsightEvidenceSource;
 import net.akive.api.learner.application.required.LearnerInsightRepository;
 import net.akive.api.learner.application.required.data.InsightSuggestionData;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisResultData;
@@ -88,7 +88,7 @@ class LearnerInsightSuggestionService {
     }
 
     private void applySuggestionByAction(
-            LearnerInsightEvidenceSourceData evidenceSource,
+            LearnerInsightEvidenceSource evidenceSource,
             InsightSuggestionData suggestion,
             Map<Long, LearnerInsight> analysisTargetById,
             Set<Long> processedAnalysisTargetIds,
@@ -127,7 +127,7 @@ class LearnerInsightSuggestionService {
     }
 
     private void createInsight(
-            LearnerInsightEvidenceSourceData evidenceSource,
+            LearnerInsightEvidenceSource evidenceSource,
             InsightSuggestionData suggestion,
             User user
     ) {
@@ -145,7 +145,7 @@ class LearnerInsightSuggestionService {
     }
 
     private void updateInsightWithEvidence(
-            LearnerInsightEvidenceSourceData evidenceSource,
+            LearnerInsightEvidenceSource evidenceSource,
             InsightSuggestionData suggestion,
             Map<Long, LearnerInsight> analysisTargetById,
             Set<Long> processedAnalysisTargetIds,
@@ -172,7 +172,7 @@ class LearnerInsightSuggestionService {
     }
 
     private void supersedeInsight(
-            LearnerInsightEvidenceSourceData evidenceSource,
+            LearnerInsightEvidenceSource evidenceSource,
             InsightSuggestionData suggestion,
             Map<Long, LearnerInsight> analysisTargetById,
             Set<Long> processedAnalysisTargetIds,
@@ -228,7 +228,7 @@ class LearnerInsightSuggestionService {
     }
 
     private void saveEvidence(
-            LearnerInsightEvidenceSourceData evidenceSource,
+            LearnerInsightEvidenceSource evidenceSource,
             InsightSuggestionData suggestion,
             EvidenceStance stance,
             LearnerInsight learnerInsight
@@ -245,7 +245,7 @@ class LearnerInsightSuggestionService {
 
     private void validateEvidenceNotDuplicated(
             LearnerInsight learnerInsight,
-            LearnerInsightEvidenceSourceData evidenceSource
+            LearnerInsightEvidenceSource evidenceSource
     ) {
         if (learnerInsightRepository.existsEvidenceByLearnerInsightIdAndSourceTypeAndSourceId(
                 learnerInsight.getLearnerInsightId(),
