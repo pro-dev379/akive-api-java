@@ -70,7 +70,7 @@ openai:
   streaming-timeout: 2m
   model:
     coaching: gpt-5.2
-    conversation-title: gpt-4.1-nano
+    conversation-title: gpt-6-luna
     learner-insight: gpt-5.4-mini
     embed: text-embedding-3-small
   embedding:
