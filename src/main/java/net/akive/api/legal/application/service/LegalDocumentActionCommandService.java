@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.*;
 import static net.akive.api.common.exception.business.ResourceConflictError.LEGAL_DOCUMENT_ACTION_REQUEST_CONFLICT;
 import static net.akive.api.legal.domain.LegalDocumentActionContext.POLICY_UPDATE;
-import static net.akive.api.legal.domain.LegalDocumentActionContext.SETTINGS;
+import static net.akive.api.legal.domain.LegalDocumentActionContext.CONSENT_MANAGEMENT;
 import static net.akive.api.legal.domain.LegalInteractionType.CONSENT;
 
 @Service
@@ -121,19 +121,21 @@ class LegalDocumentActionCommandService implements LegalDocumentActionRecorder {
             LegalDocumentActionsRecordCommand command,
             Collection<LegalDocument> requestedDocuments
     ) {
-        if (command.actionContext() != SETTINGS && command.actionContext() != POLICY_UPDATE) {
+        if (command.actionContext() != CONSENT_MANAGEMENT && command.actionContext() != POLICY_UPDATE) {
             return legalDocumentFinder.findAllCurrentByContext(command.actionContext());
         }
 
         for (LegalDocument legalDocument : requestedDocuments) {
-            Long currentLegalDocumentId =
-                    legalDocumentFinder.findCurrentIdByDocumentType(legalDocument.getDocumentType());
+            Long currentLegalDocumentId = legalDocumentFinder
+                    .findCurrentByDocumentType(legalDocument.getDocumentType())
+                    .getLegalDocumentId();
 
             if (!legalDocument.getLegalDocumentId().equals(currentLegalDocumentId)) {
                 throw new BusinessRuleViolationException(INVALID_LEGAL_DOCUMENT_ACTION_FOR_CONTEXT);
             }
 
-            if (command.actionContext() == SETTINGS && legalDocument.getInteractionType() != CONSENT) {
+            if (command.actionContext() == CONSENT_MANAGEMENT
+                    && legalDocument.getInteractionType() != CONSENT) {
                 throw new BusinessRuleViolationException(INVALID_LEGAL_DOCUMENT_ACTION_FOR_CONTEXT);
             }
         }

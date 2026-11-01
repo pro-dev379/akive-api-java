@@ -156,42 +156,6 @@ class LegalDocumentJpaAdapterTest extends RepositoryTestSupport {
                 );
     }
 
-    @Test
-    void 특정_타입의_현행_약관_및_정책_문서_식별자를_조회한다() {
-        LegalDocument currentLegalDocument = saveLegalDocument(
-                SERVICE_TERMS,
-                "20261029",
-                CURRENT_DATE,
-                null
-        );
-        saveLegalDocument(
-                SERVICE_TERMS,
-                "20261030",
-                CURRENT_DATE.plusDays(1),
-                null
-        );
-        saveLegalDocument(
-                SERVICE_TERMS,
-                "20261028",
-                CURRENT_DATE.minusDays(1),
-                CURRENT_DATE
-        );
-        saveLegalDocument(
-                PRIVACY_POLICY,
-                "20261029",
-                CURRENT_DATE,
-                null
-        );
-        flushAndClear();
-
-        List<Long> legalDocumentIds = legalDocumentRepository.findAllCurrentIdsByDocumentType(
-                SERVICE_TERMS,
-                CURRENT_DATE
-        );
-
-        assertThat(legalDocumentIds).containsExactly(currentLegalDocument.getLegalDocumentId());
-    }
-
     private LegalDocument saveLegalDocument(
             LegalDocumentType documentType,
             String version,

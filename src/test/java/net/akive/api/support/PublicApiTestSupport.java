@@ -2,12 +2,13 @@ package net.akive.api.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.common.exception.ApplicationError;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @AutoConfigureMockMvc(addFilters = false)
@@ -19,6 +20,9 @@ public abstract class PublicApiTestSupport {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @MockitoBean
+    protected LegalRequirementChecker legalRequirementChecker;
+
     protected MvcTestResultAssert postJson(String url, Object body) throws Exception {
         return postJson(url, objectMapper.writeValueAsString(body));
     }
@@ -28,13 +32,6 @@ public abstract class PublicApiTestSupport {
                 .uri(url)
                 .contentType(APPLICATION_JSON)
                 .content(json)
-                .assertThat();
-    }
-
-    protected MvcTestResultAssert postWithAuthorization(String url, String authorizationHeader) {
-        return mvcTester.post()
-                .uri(url)
-                .header(AUTHORIZATION, authorizationHeader)
                 .assertThat();
     }
 

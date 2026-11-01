@@ -11,9 +11,9 @@ public interface LegalDocumentFinder {
 
     LegalDocument findOrThrow(Long legalDocumentId) throws ResourceNotFoundException;
 
+    LegalDocument findCurrentByDocumentType(LegalDocumentType documentType) throws ResourceNotFoundException;
+
     List<LegalDocument> findAllCurrentByContext(LegalDocumentActionContext context);
 
     List<LegalDocument> findAllHistoryByDocumentType(LegalDocumentType documentType);
-
-    Long findCurrentIdByDocumentType(LegalDocumentType documentType) throws ResourceNotFoundException;
 }

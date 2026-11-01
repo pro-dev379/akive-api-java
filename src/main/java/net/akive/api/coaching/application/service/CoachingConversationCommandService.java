@@ -10,14 +10,18 @@ import net.akive.api.coaching.application.required.CoachingConversationRepositor
 import net.akive.api.coaching.application.required.CoachingLlm;
 import net.akive.api.coaching.application.required.CoachingResponseRecoveryStore;
 import net.akive.api.coaching.domain.CoachingConversation;
+import net.akive.api.common.exception.business.AuthorizationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.User;
 import org.springframework.stereotype.Service;
 
+import static net.akive.api.common.exception.business.AuthorizationError.AI_FEATURE_LEGAL_REQUIREMENTS_NOT_SATISFIED;
 import static net.akive.api.common.exception.business.ResourceConflictError.COACHING_RESPONSE_ALREADY_IN_PROGRESS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.COACHING_CONVERSATION_NOT_FOUND;
+import static net.akive.api.legal.domain.LegalRequirementScope.AI_FEATURE;
 
 @Service
 @Slf4j
@@ -25,6 +29,8 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.COAC
 class CoachingConversationCommandService implements CoachingConversationCreator {
 
     private final UserFinder userFinder;
+    private final LegalRequirementChecker legalRequirementChecker;
+
     private final CoachingLlm coachingLlm;
     private final CoachingConversationRepository coachingConversationRepository;
     private final CoachingConversationLock coachingConversationLock;
@@ -33,6 +39,7 @@ class CoachingConversationCommandService implements CoachingConversationCreator 
     @Override
     public Long create(CoachingConversationCreateCommand command) throws ResourceNotFoundException {
         User user = userFinder.findOrThrow(command.userId());
+        validateAiFeatureRequirements(command.userId());
         String llmConversationId = coachingLlm.createConversation();
 
         return coachingConversationRepository
@@ -56,6 +63,12 @@ class CoachingConversationCommandService implements CoachingConversationCreator 
             deleteRecoveryDataSafely(coachingConversation.getCoachingConversationId());
         } finally {
             lease.release();
+        }
+    }
+
+    private void validateAiFeatureRequirements(Long userId) {
+        if (!legalRequirementChecker.check(userId, AI_FEATURE).satisfied()) {
+            throw new AuthorizationException(AI_FEATURE_LEGAL_REQUIREMENTS_NOT_SATISFIED);
         }
     }
 

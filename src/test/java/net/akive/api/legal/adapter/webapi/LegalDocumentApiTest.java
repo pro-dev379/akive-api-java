@@ -30,8 +30,8 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
             LEGAL_DOCUMENTS_URL + "/types/{documentType}/history/headers";
     private static final String CURRENT_LEGAL_DOCUMENT_HEADERS_URL =
             LEGAL_DOCUMENTS_URL + "/action-contexts/{actionContext}/current/headers";
-    private static final String CURRENT_LEGAL_DOCUMENT_ID_URL =
-            LEGAL_DOCUMENTS_URL + "/types/{documentType}/current/id";
+    private static final String CURRENT_LEGAL_DOCUMENT_URL =
+            LEGAL_DOCUMENTS_URL + "/types/{documentType}/current";
 
     @MockitoBean
     LegalDocumentFinder legalDocumentFinder;
@@ -90,25 +90,24 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
     }
 
     @Test
-    void 특정_타입의_현행_약관_및_정책_문서_식별자를_조회한다() {
-        given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
-                .willReturn(LEGAL_DOCUMENT_ID);
+    void 특정_타입의_현행_약관_및_정책_문서를_조회한다() {
+        LegalDocument legalDocument = reconstructLegalDocument();
+        given(legalDocumentFinder.findCurrentByDocumentType(SERVICE_TERMS))
+                .willReturn(legalDocument);
 
         MvcTestResultAssert result = mvcTester.get()
-                .uri(CURRENT_LEGAL_DOCUMENT_ID_URL, SERVICE_TERMS)
+                .uri(CURRENT_LEGAL_DOCUMENT_URL, SERVICE_TERMS)
                 .assertThat()
                 .hasStatus(OK);
 
-        result.bodyJson()
-                .extractingPath("$.legalDocumentId")
-                .isEqualTo(LEGAL_DOCUMENT_ID.intValue());
-        then(legalDocumentFinder).should().findCurrentIdByDocumentType(SERVICE_TERMS);
+        assertLegalDocumentResponse(result, legalDocument);
+        then(legalDocumentFinder).should().findCurrentByDocumentType(SERVICE_TERMS);
     }
 
     @Test
-    void 현행_약관_및_정책_문서_식별자_조회_시_약관_및_정책_문서_타입이_올바르지_않으면_400을_응답한다() {
+    void 현행_약관_및_정책_문서_조회_시_약관_및_정책_문서_타입이_올바르지_않으면_400을_응답한다() {
         mvcTester.get()
-                .uri(CURRENT_LEGAL_DOCUMENT_ID_URL, "INVALID_DOCUMENT_TYPE")
+                .uri(CURRENT_LEGAL_DOCUMENT_URL, "INVALID_DOCUMENT_TYPE")
                 .assertThat()
                 .hasStatus(BAD_REQUEST);
 
@@ -117,16 +116,16 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
 
     @Test
     void 특정_타입의_현행_약관_및_정책_문서가_없으면_404를_응답한다() {
-        given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
+        given(legalDocumentFinder.findCurrentByDocumentType(SERVICE_TERMS))
                 .willThrow(new ResourceNotFoundException(CURRENT_LEGAL_DOCUMENT_NOT_FOUND));
 
         MvcTestResultAssert result = mvcTester.get()
-                .uri(CURRENT_LEGAL_DOCUMENT_ID_URL, SERVICE_TERMS)
+                .uri(CURRENT_LEGAL_DOCUMENT_URL, SERVICE_TERMS)
                 .assertThat()
                 .hasStatus(NOT_FOUND);
 
         assertErrorResponse(result, CURRENT_LEGAL_DOCUMENT_NOT_FOUND);
-        then(legalDocumentFinder).should().findCurrentIdByDocumentType(SERVICE_TERMS);
+        then(legalDocumentFinder).should().findCurrentByDocumentType(SERVICE_TERMS);
     }
 
     @Test

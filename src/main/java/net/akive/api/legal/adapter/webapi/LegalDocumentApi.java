@@ -3,7 +3,6 @@ package net.akive.api.legal.adapter.webapi;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.legal.adapter.webapi.dto.response.LegalDocumentFindResponse;
 import net.akive.api.legal.adapter.webapi.dto.response.LegalDocumentHeadersFindResponse;
-import net.akive.api.legal.adapter.webapi.dto.response.LegalDocumentIdFindResponse;
 import net.akive.api.legal.application.provided.LegalDocumentFinder;
 import net.akive.api.legal.domain.LegalDocumentActionContext;
 import net.akive.api.legal.domain.LegalDocumentType;
@@ -31,9 +30,9 @@ public class LegalDocumentApi {
         );
     }
 
-    @GetMapping("/types/{documentType}/current/id")
-    public LegalDocumentIdFindResponse findCurrentId(@PathVariable LegalDocumentType documentType) {
-        return new LegalDocumentIdFindResponse(legalDocumentFinder.findCurrentIdByDocumentType(documentType));
+    @GetMapping("/types/{documentType}/current")
+    public LegalDocumentFindResponse findCurrent(@PathVariable LegalDocumentType documentType) {
+        return LegalDocumentFindResponse.from(legalDocumentFinder.findCurrentByDocumentType(documentType));
     }
 
     @GetMapping("/action-contexts/{actionContext}/current/headers")

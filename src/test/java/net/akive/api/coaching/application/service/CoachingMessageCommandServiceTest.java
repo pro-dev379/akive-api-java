@@ -10,11 +10,14 @@ import net.akive.api.coaching.application.required.data.CoachingTurnRecoveryData
 import net.akive.api.coaching.application.stream.CoachingResponseStream;
 import net.akive.api.coaching.domain.CoachingConversation;
 import net.akive.api.coaching.domain.CoachingMessage;
+import net.akive.api.common.exception.business.AuthorizationException;
 import net.akive.api.common.exception.business.RateLimitExceededException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.id.UuidGenerator;
+import net.akive.api.legal.application.provided.dto.LegalRequirementCheckResult;
 import net.akive.api.llmusage.application.provided.LlmUsageQuotaChecker;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,9 +41,12 @@ import static net.akive.api.coaching.domain.MessageCompletionStatus.TRUNCATED;
 import static net.akive.api.coaching.domain.MessageRole.USER;
 import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.*;
 import static net.akive.api.coaching.domain.fixture.CoachingMessageFixture.*;
+import static net.akive.api.common.exception.business.AuthorizationError.AI_FEATURE_LEGAL_REQUIREMENTS_NOT_SATISFIED;
 import static net.akive.api.common.exception.business.ResourceConflictError.COACHING_RESPONSE_ALREADY_IN_PROGRESS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.COACHING_CONVERSATION_NOT_FOUND;
 import static net.akive.api.common.exception.business.RateLimitError.LLM_DAILY_TOKEN_QUOTA_EXCEEDED;
+import static net.akive.api.legal.domain.LegalDocumentType.AI_PERSONAL_DATA;
+import static net.akive.api.legal.domain.LegalRequirementScope.AI_FEATURE;
 import static net.akive.api.user.domain.fixture.UserFixture.createUser;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +62,9 @@ class CoachingMessageCommandServiceTest {
 
     @Mock
     LlmUsageQuotaChecker llmUsageQuotaChecker;
+
+    @Mock
+    LegalRequirementChecker legalRequirementChecker;
 
     @Mock
     CoachingLlm coachingLlm;
@@ -90,6 +99,7 @@ class CoachingMessageCommandServiceTest {
         lease = new TestLease();
         coachingMessageCommandService = new CoachingMessageCommandService(
                 llmUsageQuotaChecker,
+                legalRequirementChecker,
                 coachingLlm,
                 coachingConversationRepository,
                 coachingConversationLock,
@@ -240,6 +250,30 @@ class CoachingMessageCommandServiceTest {
     }
 
     @Test
+    void AI_기능_이용_요건을_충족하지_않으면_코칭_메시지를_전송할_수_없다() {
+        CoachingMessageSendCommand command = createCoachingMessageSendCommand();
+        CoachingConversation coachingConversation = reconstructCoachingConversation();
+        given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
+                .willReturn(Optional.of(lease));
+        given(coachingConversationRepository.findByCoachingConversationIdAndUserId(
+                command.coachingConversationId(),
+                command.userId()
+        )).willReturn(Optional.of(coachingConversation));
+        given(legalRequirementChecker.check(command.userId(), AI_FEATURE))
+                .willReturn(LegalRequirementCheckResult.withUnsatisfiedDocuments(java.util.Set.of(AI_PERSONAL_DATA)));
+
+        assertThatExceptionOfType(AuthorizationException.class)
+                .isThrownBy(() -> coachingMessageCommandService.send(command))
+                .extracting(AuthorizationException::getError)
+                .isEqualTo(AI_FEATURE_LEGAL_REQUIREMENTS_NOT_SATISFIED);
+
+        assertThat(lease.isReleased()).isTrue();
+        then(llmUsageQuotaChecker).shouldHaveNoInteractions();
+        then(coachingLlm).shouldHaveNoInteractions();
+        then(coachingConversationRepository).should(never()).saveCoachingMessage(any());
+    }
+
+    @Test
     void AI_코치_응답_메시지_생성_중에는_회원이_메시지를_전송할_수_없다() {
         CoachingMessageSendCommand command = createCoachingMessageSendCommand();
         given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
@@ -267,6 +301,7 @@ class CoachingMessageCommandServiceTest {
                 command.coachingConversationId(),
                 command.userId()
         )).willReturn(Optional.of(coachingConversation));
+        givenAiFeatureRequirementsSatisfied(command);
         willThrow(new RateLimitExceededException(LLM_DAILY_TOKEN_QUOTA_EXCEEDED))
                 .given(llmUsageQuotaChecker)
                 .checkUserDailyQuota(command.userId());
@@ -318,6 +353,7 @@ class CoachingMessageCommandServiceTest {
         )).willReturn(Optional.of(coachingConversation));
         given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
                 .willReturn(Optional.of(lease));
+        givenAiFeatureRequirementsSatisfied(command);
         given(coachingResponseRecoveryStore.find(command.coachingConversationId()))
                 .willReturn(Optional.of(recoveryData));
         willThrow(recoveryException)
@@ -568,10 +604,16 @@ class CoachingMessageCommandServiceTest {
         )).willReturn(Optional.of(coachingConversation));
         given(coachingConversationLock.tryAcquire(command.coachingConversationId(), command.userId()))
                 .willReturn(Optional.of(lease));
+        givenAiFeatureRequirementsSatisfied(command);
         given(coachingConversationRepository.saveCoachingMessage(any(CoachingMessage.class)))
                 .willReturn(savedUserMessage);
 
         return savedUserMessage;
+    }
+
+    private void givenAiFeatureRequirementsSatisfied(CoachingMessageSendCommand command) {
+        given(legalRequirementChecker.check(command.userId(), AI_FEATURE))
+                .willReturn(LegalRequirementCheckResult.allSatisfied());
     }
 
     private CoachingConversation coachingConversationWithoutTitle() {

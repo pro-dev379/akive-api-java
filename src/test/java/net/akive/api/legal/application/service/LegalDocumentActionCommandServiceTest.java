@@ -154,7 +154,7 @@ class LegalDocumentActionCommandServiceTest {
     @ParameterizedTest
     @EnumSource(
             value = LegalDocumentActionContext.class,
-            names = {"SETTINGS", "POLICY_UPDATE"}
+            names = {"CONSENT_MANAGEMENT", "POLICY_UPDATE"}
     )
     void 현행이_아닌_약관_및_정책_문서에_응답하면_예외를_던진다(LegalDocumentActionContext actionContext) {
         Long nonCurrentLegalDocumentId = 1L;
@@ -168,8 +168,8 @@ class LegalDocumentActionCommandServiceTest {
                 new LegalDocumentActionRecordItem(REQUEST_ID, nonCurrentLegalDocumentId, AGREED)
         );
         givenUnrecordedActionRequest(createReconstructedUser(), nonCurrentLegalDocument);
-        given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
-                .willReturn(currentLegalDocumentId);
+        given(legalDocumentFinder.findCurrentByDocumentType(SERVICE_TERMS))
+                .willReturn(reconstructLegalDocument(currentLegalDocumentId, SERVICE_TERMS));
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> legalDocumentActionCommandService.record(command))
@@ -181,16 +181,16 @@ class LegalDocumentActionCommandServiceTest {
     }
 
     @Test
-    void SETTINGS_컨텍스트에서_상호작용_타입이_CONSENT가_아닌_약관_및_정책_문서에_응답하면_예외를_던진다() {
+    void CONSENT_MANAGEMENT_컨텍스트에서_CONSENT_타입이_아닌_약관_및_정책_문서에_응답하면_예외를_던진다() {
         User user = createReconstructedUser();
         LegalDocument agreementLegalDocument = reconstructLegalDocument(AGREEMENT);
         LegalDocumentActionsRecordCommand command = createCommand(
-                SETTINGS,
+                CONSENT_MANAGEMENT,
                 new LegalDocumentActionRecordItem(REQUEST_ID, LEGAL_DOCUMENT_ID, AGREED)
         );
         givenUnrecordedActionRequest(user, agreementLegalDocument);
-        given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
-                .willReturn(LEGAL_DOCUMENT_ID);
+        given(legalDocumentFinder.findCurrentByDocumentType(SERVICE_TERMS))
+                .willReturn(agreementLegalDocument);
 
         assertThatExceptionOfType(BusinessRuleViolationException.class)
                 .isThrownBy(() -> legalDocumentActionCommandService.record(command))
@@ -210,7 +210,7 @@ class LegalDocumentActionCommandServiceTest {
                 new LegalDocumentActionRecordItem(REQUEST_ID, LEGAL_DOCUMENT_ID, AGREED)
         );
         givenUnrecordedActionRequest(user, requestedLegalDocument);
-        given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
+        given(legalDocumentFinder.findCurrentByDocumentType(SERVICE_TERMS))
                 .willThrow(new ResourceNotFoundException(CURRENT_LEGAL_DOCUMENT_NOT_FOUND));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)

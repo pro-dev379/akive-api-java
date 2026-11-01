@@ -8,6 +8,8 @@ import net.akive.api.learner.application.required.LearnerInsightLlm;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisRequestData;
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisResultData;
 import net.akive.api.learner.domain.LearnerInsight;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
+import net.akive.api.legal.application.provided.dto.LegalRequirementCheckResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +30,8 @@ import static net.akive.api.learner.domain.InsightStatus.CANDIDATE;
 import static net.akive.api.learner.domain.LearnerPolicy.ANALYSIS_TARGET_MAX_COUNT;
 import static net.akive.api.learner.domain.fixture.LearnerInsightEvidenceFixture.ANOTHER_EVIDENCE_CONTENT;
 import static net.akive.api.learner.domain.fixture.LearnerInsightFixture.reconstructLearnerInsight;
+import static net.akive.api.legal.domain.LegalDocumentType.AI_PERSONAL_DATA;
+import static net.akive.api.legal.domain.LegalRequirementScope.AI_FEATURE;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -39,6 +43,9 @@ class LearnerInsightAnalysisServiceTest {
 
     @Mock
     EventProcessingTracker eventProcessingTracker;
+
+    @Mock
+    LegalRequirementChecker legalRequirementChecker;
 
     @Mock
     LearnerInsightLlm learnerInsightLlm;
@@ -66,6 +73,8 @@ class LearnerInsightAnalysisServiceTest {
         );
         LearnerInsightAnalysisResultData analysisResult = new LearnerInsightAnalysisResultData(List.of());
         given(eventProcessingTracker.isProcessed(command.eventId(), LEARNER_INSIGHT)).willReturn(false);
+        given(legalRequirementChecker.check(command.userId(), AI_FEATURE))
+                .willReturn(LegalRequirementCheckResult.allSatisfied());
         given(learnerInsightFinder.findRelevantInsights(
                 command.userId(),
                 String.join("\n\n", evidenceContents),
@@ -87,6 +96,25 @@ class LearnerInsightAnalysisServiceTest {
 
         learnerInsightAnalysisService.analyze(command);
 
+        then(learnerInsightFinder).shouldHaveNoInteractions();
+        then(learnerInsightLlm).shouldHaveNoInteractions();
+        then(learnerInsightSuggestionService).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void AI_기능_이용_요건을_충족하지_않으면_학습자_인사이트를_분석하지_않는다() {
+        LearnerInsightAnalysisCommand command = createLearnerInsightAnalysisCommand();
+        given(eventProcessingTracker.isProcessed(command.eventId(), LEARNER_INSIGHT)).willReturn(false);
+        given(legalRequirementChecker.check(command.userId(), AI_FEATURE))
+                .willReturn(LegalRequirementCheckResult.withUnsatisfiedDocuments(Set.of(AI_PERSONAL_DATA)));
+
+        learnerInsightAnalysisService.analyze(command);
+
+        then(eventProcessingTracker).should().markProcessed(
+                command.eventId(),
+                command.eventType(),
+                LEARNER_INSIGHT
+        );
         then(learnerInsightFinder).shouldHaveNoInteractions();
         then(learnerInsightLlm).shouldHaveNoInteractions();
         then(learnerInsightSuggestionService).shouldHaveNoInteractions();

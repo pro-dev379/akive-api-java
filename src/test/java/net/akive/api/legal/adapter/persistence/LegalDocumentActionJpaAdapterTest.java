@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static net.akive.api.legal.domain.LegalDocumentType.AGE_14_CONFIRMATION;
 import static net.akive.api.legal.domain.LegalDocumentType.PRIVACY_POLICY;
 import static net.akive.api.legal.domain.fixture.LegalDocumentActionFixture.*;
 import static net.akive.api.legal.domain.fixture.LegalDocumentFixture.createLegalDocument;
@@ -87,7 +89,7 @@ class LegalDocumentActionJpaAdapterTest extends RepositoryTestSupport {
     }
 
     @Test
-    void 회원의_특정_약관_및_정책_문서에_대한_가장_최근_응답을_조회한다() {
+    void 특정_약관_및_정책_문서에_대한_회원의_최신_응답을_조회한다() {
         User savedUser = saveUser();
         User anotherSavedUser = saveUser(ANOTHER_EMAIL, ANOTHER_NICKNAME);
         LegalDocument savedLegalDocument = legalDocumentRepository.save(createLegalDocument());
@@ -128,5 +130,47 @@ class LegalDocumentActionJpaAdapterTest extends RepositoryTestSupport {
                 );
 
         assertThat(foundLegalDocumentAction).contains(latestLegalDocumentAction);
+    }
+
+    @Test
+    void 약관_및_정책_문서별_회원의_최신_응답을_조회한다() {
+        User savedUser = saveUser();
+        LegalDocument savedLegalDocument = legalDocumentRepository.save(createLegalDocument(AGE_14_CONFIRMATION));
+        LegalDocument anotherSavedLegalDocument = legalDocumentRepository.save(createLegalDocument(PRIVACY_POLICY));
+        LegalDocumentAction latestLegalDocumentAction = legalDocumentActionRepository.save(
+                createLegalDocumentAction(
+                        savedUser,
+                        savedLegalDocument,
+                        LATEST_REQUEST_ID,
+                        ACTED_AT.plusSeconds(1)
+                )
+        );
+        LegalDocumentAction anotherLegalDocumentAction = legalDocumentActionRepository.save(
+                createLegalDocumentAction(
+                        savedUser,
+                        anotherSavedLegalDocument,
+                        ANOTHER_LEGAL_DOCUMENT_REQUEST_ID,
+                        ACTED_AT
+                )
+        );
+        legalDocumentActionRepository.save(createLegalDocumentAction(
+                savedUser,
+                savedLegalDocument,
+                REQUEST_ID,
+                ACTED_AT
+        ));
+        flushAndClear();
+
+        List<LegalDocumentAction> legalDocumentActions = legalDocumentActionRepository
+                .findAllLatestByUserIdAndLegalDocumentIdIn(
+                        savedUser.getUserId(),
+                        List.of(
+                                savedLegalDocument.getLegalDocumentId(),
+                                anotherSavedLegalDocument.getLegalDocumentId()
+                        )
+                );
+
+        assertThat(legalDocumentActions)
+                .containsExactlyInAnyOrder(latestLegalDocumentAction, anotherLegalDocumentAction);
     }
 }

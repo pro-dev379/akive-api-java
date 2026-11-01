@@ -4,7 +4,10 @@ import net.akive.api.coaching.application.provided.dto.CoachingConversationCreat
 import net.akive.api.coaching.application.required.CoachingConversationRepository;
 import net.akive.api.coaching.application.required.CoachingLlm;
 import net.akive.api.coaching.domain.CoachingConversation;
+import net.akive.api.common.exception.business.AuthorizationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
+import net.akive.api.legal.application.provided.dto.LegalRequirementCheckResult;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.User;
 import org.junit.jupiter.api.Test;
@@ -14,9 +17,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Set;
+
 import static net.akive.api.coaching.application.fixture.CoachingConversationCommandFixture.createCoachingConversationCreateCommand;
 import static net.akive.api.coaching.domain.fixture.CoachingConversationFixture.*;
+import static net.akive.api.common.exception.business.AuthorizationError.AI_FEATURE_LEGAL_REQUIREMENTS_NOT_SATISFIED;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.USER_NOT_FOUND;
+import static net.akive.api.legal.domain.LegalDocumentType.AI_PERSONAL_DATA;
+import static net.akive.api.legal.domain.LegalRequirementScope.AI_FEATURE;
 import static net.akive.api.user.domain.fixture.UserFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -29,6 +37,9 @@ class CoachingConversationCommandServiceTest {
 
     @Mock
     UserFinder userFinder;
+
+    @Mock
+    LegalRequirementChecker legalRequirementChecker;
 
     @Mock
     CoachingLlm coachingLlm;
@@ -52,6 +63,7 @@ class CoachingConversationCommandServiceTest {
         );
 
         given(userFinder.findOrThrow(USER_ID)).willReturn(user);
+        givenAiFeatureRequirementsSatisfied();
         given(coachingLlm.createConversation()).willReturn(LLM_CONVERSATION_ID);
         given(coachingConversationRepository.save(any(CoachingConversation.class)))
                 .willReturn(savedCoachingConversation);
@@ -90,10 +102,28 @@ class CoachingConversationCommandServiceTest {
     }
 
     @Test
+    void AI_기능_이용_요건을_충족하지_않으면_코칭_대화를_생성할_수_없다() {
+        User user = createReconstructedUser(USER_ID);
+        CoachingConversationCreateCommand command = createCoachingConversationCreateCommand(USER_ID);
+        given(userFinder.findOrThrow(USER_ID)).willReturn(user);
+        given(legalRequirementChecker.check(USER_ID, AI_FEATURE))
+                .willReturn(LegalRequirementCheckResult.withUnsatisfiedDocuments(Set.of(AI_PERSONAL_DATA)));
+
+        assertThatExceptionOfType(AuthorizationException.class)
+                .isThrownBy(() -> coachingConversationCommandService.create(command))
+                .extracting(AuthorizationException::getError)
+                .isEqualTo(AI_FEATURE_LEGAL_REQUIREMENTS_NOT_SATISFIED);
+
+        then(coachingLlm).shouldHaveNoInteractions();
+        then(coachingConversationRepository).shouldHaveNoInteractions();
+    }
+
+    @Test
     void LLM_대화를_생성할_수_없으면_코칭_대화를_생성할_수_없다() {
         User user = createReconstructedUser(USER_ID);
         CoachingConversationCreateCommand command = createCoachingConversationCreateCommand(USER_ID);
         given(userFinder.findOrThrow(command.userId())).willReturn(user);
+        givenAiFeatureRequirementsSatisfied();
         given(coachingLlm.createConversation())
                 .willThrow(new IllegalStateException("LLM conversation creation failed."));
 
@@ -104,5 +134,10 @@ class CoachingConversationCommandServiceTest {
         then(userFinder).should().findOrThrow(command.userId());
         then(coachingLlm).should().createConversation();
         then(coachingConversationRepository).shouldHaveNoInteractions();
+    }
+
+    private void givenAiFeatureRequirementsSatisfied() {
+        given(legalRequirementChecker.check(USER_ID, AI_FEATURE))
+                .willReturn(LegalRequirementCheckResult.allSatisfied());
     }
 }

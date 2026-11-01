@@ -3,9 +3,10 @@ package net.akive.api.legal.adapter.webapi;
 import lombok.RequiredArgsConstructor;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.legal.adapter.webapi.dto.request.LegalDocumentActionsRecordRequest;
-import net.akive.api.legal.adapter.webapi.dto.response.LegalDocumentActionFindResponse;
+import net.akive.api.legal.adapter.webapi.dto.response.LegalDocumentActionStatusesFindResponse;
 import net.akive.api.legal.application.provided.LegalDocumentActionFinder;
 import net.akive.api.legal.application.provided.LegalDocumentActionRecorder;
+import net.akive.api.legal.domain.LegalDocumentActionContext;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,22 +20,23 @@ public class LegalDocumentActionApi {
     private final LegalDocumentActionFinder legalDocumentActionFinder;
     private final LegalDocumentActionRecorder legalDocumentActionRecorder;
 
-    @GetMapping("/{legalDocumentId}/actions/current")
-    public LegalDocumentActionFindResponse findCurrent(
+    @GetMapping("/action-contexts/{actionContext}/current/action-statuses")
+    public LegalDocumentActionStatusesFindResponse findAllCurrentStatuses(
             @AuthenticatedUserId Long userId,
-            @PathVariable Long legalDocumentId
+            @PathVariable LegalDocumentActionContext actionContext
     ) {
-        return LegalDocumentActionFindResponse.from(
-                legalDocumentActionFinder.findCurrentOrThrow(userId, legalDocumentId)
+        return LegalDocumentActionStatusesFindResponse.from(
+                legalDocumentActionFinder.findAllCurrentByContext(userId, actionContext)
         );
     }
 
-    @PostMapping("/actions")
+    @PostMapping("/action-contexts/{actionContext}/actions")
     @ResponseStatus(NO_CONTENT)
     public void record(
             @AuthenticatedUserId Long userId,
+            @PathVariable LegalDocumentActionContext actionContext,
             @Validated @RequestBody LegalDocumentActionsRecordRequest request
     ) {
-        legalDocumentActionRecorder.record(request.to(userId));
+        legalDocumentActionRecorder.record(request.to(userId, actionContext));
     }
 }

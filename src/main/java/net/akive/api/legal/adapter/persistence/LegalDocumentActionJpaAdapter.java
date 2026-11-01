@@ -6,6 +6,8 @@ import net.akive.api.legal.application.required.LegalDocumentActionRepository;
 import net.akive.api.legal.domain.LegalDocumentAction;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,5 +32,21 @@ class LegalDocumentActionJpaAdapter implements LegalDocumentActionRepository {
         return legalDocumentActionJpaRepository
                 .findLatestByUserIdAndLegalDocumentId(userId, legalDocumentId)
                 .map(LegalDocumentActionEntity::to);
+    }
+
+    @Override
+    public List<LegalDocumentAction> findAllLatestByUserIdAndLegalDocumentIdIn(
+            Long userId,
+            Collection<Long> legalDocumentIds
+    ) {
+        if (legalDocumentIds.isEmpty()) {
+            return List.of();
+        }
+
+        return legalDocumentActionJpaRepository
+                .findAllLatestByUserIdAndLegalDocumentIdIn(userId, legalDocumentIds)
+                .stream()
+                .map(LegalDocumentActionEntity::to)
+                .toList();
     }
 }

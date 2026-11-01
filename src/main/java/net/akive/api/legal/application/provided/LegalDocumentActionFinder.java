@@ -1,9 +1,14 @@
 package net.akive.api.legal.application.provided;
 
-import net.akive.api.common.exception.business.ResourceNotFoundException;
-import net.akive.api.legal.domain.LegalDocumentAction;
+import net.akive.api.legal.application.provided.dto.LegalDocumentActionStatusResult;
+import net.akive.api.legal.domain.LegalDocumentActionContext;
+
+import java.util.List;
 
 public interface LegalDocumentActionFinder {
 
-    LegalDocumentAction findCurrentOrThrow(Long userId, Long legalDocumentId) throws ResourceNotFoundException;
+    List<LegalDocumentActionStatusResult> findAllCurrentByContext(
+            Long userId,
+            LegalDocumentActionContext actionContext
+    );
 }

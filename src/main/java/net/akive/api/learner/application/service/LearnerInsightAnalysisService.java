@@ -12,6 +12,7 @@ import net.akive.api.learner.application.required.data.LearnerInsightAnalysisReq
 import net.akive.api.learner.application.required.data.LearnerInsightAnalysisResultData;
 import net.akive.api.learner.domain.InsightStatus;
 import net.akive.api.learner.domain.LearnerInsight;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +24,7 @@ import static net.akive.api.learner.application.provided.dto.AnalysisMaterialRol
 import static net.akive.api.learner.domain.InsightStatus.ACTIVE;
 import static net.akive.api.learner.domain.InsightStatus.CANDIDATE;
 import static net.akive.api.learner.domain.LearnerPolicy.ANALYSIS_TARGET_MAX_COUNT;
+import static net.akive.api.legal.domain.LegalRequirementScope.AI_FEATURE;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ class LearnerInsightAnalysisService implements LearnerInsightAnalyzer {
 
     private final LearnerInsightFinder learnerInsightFinder;
     private final EventProcessingTracker eventProcessingTracker;
+    private final LegalRequirementChecker legalRequirementChecker;
     private final LearnerInsightLlm learnerInsightLlm;
 
     private final LearnerInsightSuggestionService learnerInsightSuggestionService;
@@ -39,6 +42,11 @@ class LearnerInsightAnalysisService implements LearnerInsightAnalyzer {
     @Override
     public void analyze(LearnerInsightAnalysisCommand command) {
         if (eventProcessingTracker.isProcessed(command.eventId(), LEARNER_INSIGHT)) {
+            return;
+        }
+
+        if (!legalRequirementChecker.check(command.userId(), AI_FEATURE).satisfied()) {
+            eventProcessingTracker.markProcessed(command.eventId(), command.eventType(), LEARNER_INSIGHT);
             return;
         }
 

@@ -19,6 +19,7 @@ import net.akive.api.legal.adapter.webapi.LegalDocumentApi;
 import net.akive.api.legal.application.provided.LegalDocumentActionFinder;
 import net.akive.api.legal.application.provided.LegalDocumentActionRecorder;
 import net.akive.api.legal.application.provided.LegalDocumentFinder;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
 import net.akive.api.legal.domain.LegalDocument;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -108,6 +109,9 @@ class SecurityConfigTest {
     @MockitoBean
     LegalDocumentFinder legalDocumentFinder;
 
+    @MockitoBean
+    LegalRequirementChecker legalRequirementChecker;
+
     @Test
     void 퍼블릭_엔드포인트는_Authorization_헤더가_있어도_액세스_토큰을_검증하지_않는다() throws JsonProcessingException {
         LoginByEmailRequest request = createLoginByEmailRequest();
@@ -145,9 +149,9 @@ class SecurityConfigTest {
     }
 
     @Test
-    void 회원의_현재_약관_및_정책_문서_응답_조회_API는_액세스_토큰이_필요하다() {
+    void 응답_컨텍스트별_현행_약관_및_정책_문서_응답_상태_조회_API는_액세스_토큰이_필요하다() {
         mvcTester.get()
-                .uri("/legal-documents/1/actions/current")
+                .uri("/legal-documents/action-contexts/CONSENT_MANAGEMENT/current/action-statuses")
                 .assertThat()
                 .hasStatus(UNAUTHORIZED);
     }
@@ -155,7 +159,7 @@ class SecurityConfigTest {
     @Test
     void 약관_및_정책_문서에_대한_회원_응답_기록_API는_액세스_토큰이_필요하다() {
         mvcTester.post()
-                .uri("/legal-documents/actions")
+                .uri("/legal-documents/action-contexts/CONSENT_MANAGEMENT/actions")
                 .assertThat()
                 .hasStatus(UNAUTHORIZED);
     }
@@ -164,7 +168,7 @@ class SecurityConfigTest {
     @ValueSource(strings = {
             "/legal-documents/1",
             "/legal-documents/types/SERVICE_TERMS/history/headers",
-            "/legal-documents/types/SERVICE_TERMS/current/id",
+            "/legal-documents/types/SERVICE_TERMS/current",
             "/legal-documents/action-contexts/SIGN_UP/current/headers"
     })
     void 약관_및_정책_문서_조회_API는_액세스_토큰이_필요하지_않다(String url) {
@@ -292,8 +296,8 @@ class SecurityConfigTest {
         given(legalDocumentFinder.findOrThrow(LEGAL_DOCUMENT_ID)).willReturn(legalDocument);
         given(legalDocumentFinder.findAllHistoryByDocumentType(SERVICE_TERMS))
                 .willReturn(List.of(legalDocument));
-        given(legalDocumentFinder.findCurrentIdByDocumentType(SERVICE_TERMS))
-                .willReturn(LEGAL_DOCUMENT_ID);
+        given(legalDocumentFinder.findCurrentByDocumentType(SERVICE_TERMS))
+                .willReturn(legalDocument);
         given(legalDocumentFinder.findAllCurrentByContext(SIGN_UP))
                 .willReturn(List.of(legalDocument));
     }

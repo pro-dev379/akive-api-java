@@ -2,6 +2,8 @@ package net.akive.api.legal.application.required;
 
 import net.akive.api.legal.domain.LegalDocumentAction;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,4 +14,9 @@ public interface LegalDocumentActionRepository {
     Optional<LegalDocumentAction> findByRequestId(UUID requestId);
 
     Optional<LegalDocumentAction> findLatestByUserIdAndLegalDocumentId(Long userId, Long legalDocumentId);
+
+    List<LegalDocumentAction> findAllLatestByUserIdAndLegalDocumentIdIn(
+            Long userId,
+            Collection<Long> legalDocumentIds
+    );
 }

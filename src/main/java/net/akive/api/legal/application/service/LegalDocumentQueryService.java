@@ -36,6 +36,27 @@ class LegalDocumentQueryService implements LegalDocumentFinder {
     }
 
     @Override
+    public LegalDocument findCurrentByDocumentType(LegalDocumentType documentType) throws ResourceNotFoundException {
+        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
+        List<LegalDocument> legalDocuments = legalDocumentRepository.findAllCurrentByDocumentTypeIn(
+                List.of(documentType),
+                currentDate
+        );
+
+        if (legalDocuments.isEmpty()) {
+            throw new ResourceNotFoundException(CURRENT_LEGAL_DOCUMENT_NOT_FOUND);
+        }
+
+        if (legalDocuments.size() > 1) {
+            throw new IllegalStateException(
+                    "Multiple current legal documents found for type: " + documentType
+            );
+        }
+
+        return legalDocuments.getFirst();
+    }
+
+    @Override
     public List<LegalDocument> findAllCurrentByContext(LegalDocumentActionContext context) {
         List<LegalDocumentType> documentTypes = LegalPolicy.documentTypesFor(context);
         LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
@@ -59,27 +80,6 @@ class LegalDocumentQueryService implements LegalDocumentFinder {
                 documentType,
                 currentDate
         );
-    }
-
-    @Override
-    public Long findCurrentIdByDocumentType(LegalDocumentType documentType) throws ResourceNotFoundException {
-        LocalDate currentDate = toKoreanDate(currentTimeProvider.now());
-        List<Long> legalDocumentIds = legalDocumentRepository.findAllCurrentIdsByDocumentType(
-                documentType,
-                currentDate
-        );
-
-        if (legalDocumentIds.isEmpty()) {
-            throw new ResourceNotFoundException(CURRENT_LEGAL_DOCUMENT_NOT_FOUND);
-        }
-
-        if (legalDocumentIds.size() > 1) {
-            throw new IllegalStateException(
-                    "Multiple current legal documents found for type: " + documentType
-            );
-        }
-
-        return legalDocumentIds.getFirst();
     }
 
     private Map<LegalDocumentType, LegalDocument> toDocumentByType(List<LegalDocument> legalDocuments) {

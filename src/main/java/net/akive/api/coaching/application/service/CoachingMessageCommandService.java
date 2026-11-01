@@ -20,8 +20,10 @@ import net.akive.api.coaching.domain.CoachingConversation;
 import net.akive.api.coaching.domain.CoachingMessage;
 import net.akive.api.coaching.domain.MessageCompletionStatus;
 import net.akive.api.common.exception.business.ResourceConflictException;
+import net.akive.api.common.exception.business.AuthorizationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.id.UuidGenerator;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
 import net.akive.api.llmusage.application.provided.LlmUsageQuotaChecker;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +33,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import static net.akive.api.coaching.domain.MessageCompletionStatus.TRUNCATED;
+import static net.akive.api.common.exception.business.AuthorizationError.AI_FEATURE_LEGAL_REQUIREMENTS_NOT_SATISFIED;
 import static net.akive.api.common.exception.business.ResourceConflictError.COACHING_RESPONSE_ALREADY_IN_PROGRESS;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.COACHING_CONVERSATION_NOT_FOUND;
+import static net.akive.api.legal.domain.LegalRequirementScope.AI_FEATURE;
 
 @Service
 @Slf4j
@@ -40,6 +44,7 @@ import static net.akive.api.common.exception.business.ResourceNotFoundError.COAC
 class CoachingMessageCommandService implements CoachingMessageSender {
 
     private final LlmUsageQuotaChecker llmUsageQuotaChecker;
+    private final LegalRequirementChecker legalRequirementChecker;
 
     private final CoachingLlm coachingLlm;
     private final CoachingConversationRepository coachingConversationRepository;
@@ -59,6 +64,7 @@ class CoachingMessageCommandService implements CoachingMessageSender {
         CoachingConversation coachingConversation;
         try {
             coachingConversation = findCoachingConversationOrThrow(command);
+            validateAiFeatureRequirements(command.userId());
             llmUsageQuotaChecker.checkUserDailyQuota(command.userId());
             recoverPendingResponse(coachingConversation);
         } catch (RuntimeException e) {
@@ -88,6 +94,12 @@ class CoachingMessageCommandService implements CoachingMessageSender {
         } catch (RuntimeException e) {
             releaseAfterTitleCompletion(conversationTitle, lease);
             throw e;
+        }
+    }
+
+    private void validateAiFeatureRequirements(Long userId) {
+        if (!legalRequirementChecker.check(userId, AI_FEATURE).satisfied()) {
+            throw new AuthorizationException(AI_FEATURE_LEGAL_REQUIREMENTS_NOT_SATISFIED);
         }
     }
 

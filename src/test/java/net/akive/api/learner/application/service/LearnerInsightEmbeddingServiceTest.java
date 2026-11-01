@@ -7,16 +7,22 @@ import net.akive.api.learner.application.required.LearnerInsightVectorStore;
 import net.akive.api.learner.application.required.TextEmbeddingModel;
 import net.akive.api.learner.application.required.data.LearnerInsightVectorData;
 import net.akive.api.learner.application.required.data.TextEmbeddingRequestData;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
+import net.akive.api.legal.application.provided.dto.LegalRequirementCheckResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Set;
+
 import static net.akive.api.eventprocessing.domain.EventConsumer.INSIGHT_EMBEDDING;
 import static net.akive.api.learner.application.fixture.LearnerInsightEventFixture.createLearnerInsightChangedEvent;
 import static net.akive.api.learner.application.fixture.TextEmbeddingFixture.EMBEDDING_VALUES;
 import static net.akive.api.learner.application.required.data.TextEmbeddingRequestData.forLearnerInsightStorage;
+import static net.akive.api.legal.domain.LegalDocumentType.AI_PERSONAL_DATA;
+import static net.akive.api.legal.domain.LegalRequirementScope.AI_FEATURE;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
@@ -27,6 +33,9 @@ class LearnerInsightEmbeddingServiceTest {
 
     @Mock
     EventProcessingTracker eventProcessingTracker;
+
+    @Mock
+    LegalRequirementChecker legalRequirementChecker;
 
     @Mock
     TextEmbeddingModel textEmbeddingModel;
@@ -47,6 +56,7 @@ class LearnerInsightEmbeddingServiceTest {
                 event.status()
         );
         given(eventProcessingTracker.isProcessed(event.eventId(), INSIGHT_EMBEDDING)).willReturn(false);
+        givenAiFeatureRequirementsSatisfied(event);
         given(textEmbeddingModel.embed(embeddingRequest)).willReturn(EMBEDDING_VALUES);
 
         learnerInsightEmbeddingService.update(event);
@@ -72,12 +82,31 @@ class LearnerInsightEmbeddingServiceTest {
     }
 
     @Test
+    void AI_기능_이용_요건을_충족하지_않으면_학습자_인사이트를_임베딩하지_않는다() {
+        LearnerInsightChangedEvent event = createLearnerInsightChangedEvent();
+        given(eventProcessingTracker.isProcessed(event.eventId(), INSIGHT_EMBEDDING)).willReturn(false);
+        given(legalRequirementChecker.check(event.userId(), AI_FEATURE))
+                .willReturn(LegalRequirementCheckResult.withUnsatisfiedDocuments(Set.of(AI_PERSONAL_DATA)));
+
+        learnerInsightEmbeddingService.update(event);
+
+        then(eventProcessingTracker).should().markProcessed(
+                event.eventId(),
+                event.eventType(),
+                INSIGHT_EMBEDDING
+        );
+        then(textEmbeddingModel).shouldHaveNoInteractions();
+        then(learnerInsightVectorStore).shouldHaveNoInteractions();
+    }
+
+    @Test
     void 학습자_인사이트_내용을_임베딩하지_못하면_예외를_던진다() {
         LearnerInsightChangedEvent event = createLearnerInsightChangedEvent();
         TextEmbeddingRequestData embeddingRequest = forLearnerInsightStorage(event.content());
         LearnerInsightEmbeddingException embeddingException =
                 new LearnerInsightEmbeddingException("Failed to create an embedding.");
         given(eventProcessingTracker.isProcessed(event.eventId(), INSIGHT_EMBEDDING)).willReturn(false);
+        givenAiFeatureRequirementsSatisfied(event);
         given(textEmbeddingModel.embed(embeddingRequest)).willThrow(embeddingException);
 
         assertThatExceptionOfType(LearnerInsightEmbeddingException.class)
@@ -100,6 +129,7 @@ class LearnerInsightEmbeddingServiceTest {
         LearnerInsightEmbeddingException embeddingException =
                 new LearnerInsightEmbeddingException("Failed to save an embedding.");
         given(eventProcessingTracker.isProcessed(event.eventId(), INSIGHT_EMBEDDING)).willReturn(false);
+        givenAiFeatureRequirementsSatisfied(event);
         given(textEmbeddingModel.embed(embeddingRequest)).willReturn(EMBEDDING_VALUES);
         willThrow(embeddingException)
                 .given(learnerInsightVectorStore)
@@ -110,5 +140,10 @@ class LearnerInsightEmbeddingServiceTest {
                 .isSameAs(embeddingException);
 
         then(eventProcessingTracker).should(never()).markProcessed(any(), any(), any());
+    }
+
+    private void givenAiFeatureRequirementsSatisfied(LearnerInsightChangedEvent event) {
+        given(legalRequirementChecker.check(event.userId(), AI_FEATURE))
+                .willReturn(LegalRequirementCheckResult.allSatisfied());
     }
 }

@@ -9,14 +9,13 @@ import net.akive.api.legal.domain.LegalDocumentActionContext;
 import java.util.List;
 
 public record LegalDocumentActionsRecordRequest(
-        @NotNull LegalDocumentActionContext actionContext,
         @NotEmpty List<@NotNull @Valid LegalDocumentActionRecordRequest> actions
 ) {
 
-    public LegalDocumentActionsRecordCommand to(Long userId) {
+    public LegalDocumentActionsRecordCommand to(Long userId, LegalDocumentActionContext actionContext) {
         return new LegalDocumentActionsRecordCommand(
                 userId,
-                this.actionContext,
+                actionContext,
                 this.actions.stream().map(LegalDocumentActionRecordRequest::to).toList()
         );
     }

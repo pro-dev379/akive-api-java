@@ -1,6 +1,7 @@
 package net.akive.api.legal.adapter.user;
 
 import net.akive.api.legal.application.provided.LegalDocumentActionRecorder;
+import net.akive.api.legal.application.provided.dto.LegalDocumentActionRecordItem;
 import net.akive.api.legal.application.provided.dto.LegalDocumentActionsRecordCommand;
 import net.akive.api.legal.domain.LegalDocumentActionType;
 import net.akive.api.user.application.required.data.SignUpLegalDocumentActionData;
@@ -31,7 +32,7 @@ class SignUpLegalDocumentActionRecorderAdapterTest {
     LegalDocumentActionRecorder legalDocumentActionRecorder;
 
     @InjectMocks
-    SignUpLegalDocumentActionRecorderAdapter adapter;
+    SignUpLegalDocumentActionRecorderAdapter signUpLegalDocumentActionRecorderAdapter;
 
     @ParameterizedTest
     @MethodSource("actionTypeMappings")
@@ -45,7 +46,7 @@ class SignUpLegalDocumentActionRecorderAdapterTest {
                 actionType
         );
 
-        adapter.record(USER_ID, List.of(legalDocumentAction));
+        signUpLegalDocumentActionRecorderAdapter.record(USER_ID, List.of(legalDocumentAction));
 
         ArgumentCaptor<LegalDocumentActionsRecordCommand> commandCaptor =
                 ArgumentCaptor.forClass(LegalDocumentActionsRecordCommand.class);
@@ -54,11 +55,13 @@ class SignUpLegalDocumentActionRecorderAdapterTest {
         LegalDocumentActionsRecordCommand command = commandCaptor.getValue();
         assertThat(command.userId()).isEqualTo(USER_ID);
         assertThat(command.actionContext()).isEqualTo(SIGN_UP);
-        assertThat(command.actionRecordItems()).singleElement().satisfies(actionRecordItem -> {
-            assertThat(actionRecordItem.requestId()).isEqualTo(REQUEST_ID);
-            assertThat(actionRecordItem.legalDocumentId()).isEqualTo(LEGAL_DOCUMENT_ID);
-            assertThat(actionRecordItem.actionType()).isEqualTo(expectedActionType);
-        });
+        assertThat(command.actionRecordItems()).containsExactly(
+                new LegalDocumentActionRecordItem(
+                        REQUEST_ID,
+                        LEGAL_DOCUMENT_ID,
+                        expectedActionType
+                )
+        );
     }
 
     private static Stream<Arguments> actionTypeMappings() {

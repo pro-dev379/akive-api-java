@@ -46,13 +46,27 @@ public final class LegalDocumentActionFixture {
             LegalInteractionType interactionType,
             LegalDocumentActionType actionType
     ) {
+        return reconstructLegalDocumentAction(
+                legalDocumentActionId,
+                reconstructLegalDocument(interactionType),
+                actionType,
+                REQUEST_ID
+        );
+    }
+
+    public static LegalDocumentAction reconstructLegalDocumentAction(
+            Long legalDocumentActionId,
+            LegalDocument legalDocument,
+            LegalDocumentActionType actionType,
+            UUID requestId
+    ) {
         return LegalDocumentAction.reconstruct(
                 legalDocumentActionId,
                 createReconstructedUser(),
-                reconstructLegalDocument(interactionType),
+                legalDocument,
                 actionType,
                 SIGN_UP,
-                REQUEST_ID,
+                requestId,
                 ACTED_AT,
                 CREATED_AT
         );

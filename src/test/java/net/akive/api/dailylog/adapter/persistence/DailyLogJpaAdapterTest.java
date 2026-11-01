@@ -79,7 +79,7 @@ class DailyLogJpaAdapterTest extends RepositoryTestSupport {
                         savedUser.getUserId(),
                         PageCondition.of(0, 10, "unknownProperty", DESC)
                 ))
-                .withMessageContaining("Unsupported daily log sort property: unknownProperty")
+                .withMessage("Unsupported daily log sort property: unknownProperty")
                 .withCauseInstanceOf(IllegalArgumentException.class);
     }
 

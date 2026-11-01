@@ -37,7 +37,6 @@ public enum ResourceNotFoundError implements ApplicationError {
 
     LEGAL_DOCUMENT_NOT_FOUND("Legal document not found."),
     CURRENT_LEGAL_DOCUMENT_NOT_FOUND("Current legal document not found."),
-    LEGAL_DOCUMENT_ACTION_NOT_FOUND("Legal document action not found."),
     ;
 
     private final String message;

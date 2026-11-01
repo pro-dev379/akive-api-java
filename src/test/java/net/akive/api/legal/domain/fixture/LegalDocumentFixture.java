@@ -90,6 +90,20 @@ public final class LegalDocumentFixture {
         );
     }
 
+    public static LegalDocument reconstructLegalDocument(
+            Long legalDocumentId,
+            LegalDocumentType documentType,
+            LegalInteractionType interactionType
+    ) {
+        return reconstructLegalDocument(
+                legalDocumentId,
+                documentType,
+                documentType.name(),
+                interactionType,
+                null
+        );
+    }
+
     public static LegalDocument reconstructExpiredLegalDocument() {
         return reconstructLegalDocument(
                 LEGAL_DOCUMENT_ID,

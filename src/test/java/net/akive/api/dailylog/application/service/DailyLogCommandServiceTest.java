@@ -11,7 +11,6 @@ import net.akive.api.dailylog.domain.ActivityTime;
 import net.akive.api.dailylog.domain.DailyLog;
 import net.akive.api.user.application.provided.UserFinder;
 import net.akive.api.user.domain.User;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -34,7 +33,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class DailyLogCommandServiceTest {
@@ -51,11 +49,6 @@ class DailyLogCommandServiceTest {
     @InjectMocks
     DailyLogCommandService dailyLogCommandService;
 
-    @BeforeEach
-    void setUp() {
-        lenient().when(currentTimeProvider.now()).thenReturn(CURRENT_INSTANT);
-    }
-
     @Test
     void 일일_로그를_생성한다() {
         User user = createReconstructedUser(USER_ID);
@@ -71,6 +64,7 @@ class DailyLogCommandServiceTest {
                 CURRENT_KOREAN_DATE
         );
 
+        givenCurrentTime();
         given(userFinder.find(command.userId())).willReturn(Optional.of(user));
         given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTime(command.userId(), activityTime))
                 .willReturn(false);
@@ -97,6 +91,7 @@ class DailyLogCommandServiceTest {
     @Test
     void 회원이_없으면_일일_로그를_생성할_수_없다() {
         DailyLogCreateCommand command = createDailyLogCreateCommand(UNKNOWN_USER_ID);
+        givenCurrentTime();
         given(userFinder.find(command.userId())).willReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -115,6 +110,7 @@ class DailyLogCommandServiceTest {
         DailyLogCreateCommand command = createDailyLogCreateCommand();
         ActivityTime activityTime = command.activityTime().to(CURRENT_INSTANT);
 
+        givenCurrentTime();
         given(userFinder.find(command.userId())).willReturn(Optional.of(user));
         given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTime(command.userId(), activityTime))
                 .willReturn(true);
@@ -137,6 +133,7 @@ class DailyLogCommandServiceTest {
         DailyLogUpdateCommand command = createDailyLogUpdateCommand();
         ActivityTime targetActivityTime = command.targetActivityTime().to(CURRENT_INSTANT);
 
+        givenCurrentTime();
         given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
                 .willReturn(Optional.of(dailyLog));
         given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(
@@ -165,6 +162,7 @@ class DailyLogCommandServiceTest {
     void 일일_로그_수정_시_수정할_일일_로그가_없으면_예외를_던진다() {
         DailyLogUpdateCommand command = createDailyLogUpdateCommand();
 
+        givenCurrentTime();
         given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
                 .willReturn(Optional.empty());
 
@@ -186,6 +184,7 @@ class DailyLogCommandServiceTest {
         DailyLogUpdateCommand command = createDailyLogUpdateCommand();
         ActivityTime targetActivityTime = command.targetActivityTime().to(CURRENT_INSTANT);
 
+        givenCurrentTime();
         given(dailyLogRepository.findByDailyLogIdAndUserId(command.dailyLogId(), command.userId()))
                 .willReturn(Optional.of(dailyLog));
         given(dailyLogRepository.existsOverlappingTimeByUserIdAndActivityTimeAndDailyLogIdNot(
@@ -237,5 +236,9 @@ class DailyLogCommandServiceTest {
 
         then(dailyLogRepository).should().findByDailyLogIdAndUserId(command.dailyLogId(), command.userId());
         then(dailyLogRepository).should(never()).delete(any());
+    }
+
+    private void givenCurrentTime() {
+        given(currentTimeProvider.now()).willReturn(CURRENT_INSTANT);
     }
 }

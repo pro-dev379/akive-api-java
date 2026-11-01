@@ -2,10 +2,18 @@ package net.akive.api.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.akive.api.common.exception.ApplicationError;
+import net.akive.api.legal.application.provided.LegalRequirementChecker;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 
+import static net.akive.api.legal.application.provided.dto.LegalRequirementCheckResult.allSatisfied;
+import static net.akive.api.legal.domain.LegalRequirementScope.CORE_SERVICE;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
@@ -16,6 +24,14 @@ public abstract class PrivateApiTestSupport {
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @MockitoBean
+    protected LegalRequirementChecker legalRequirementChecker;
+
+    @BeforeEach
+    void setUpCoreServiceLegalRequirements() {
+        given(legalRequirementChecker.check(anyLong(), eq(CORE_SERVICE))).willReturn(allSatisfied());
+    }
 
     protected MvcTestResultAssert get(String uri, Long userId, Object... uriVariables) {
         return mvcTester.get()
