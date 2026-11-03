@@ -82,8 +82,7 @@ class LearnerInsightSuggestionService {
     private User findUserOrThrow(Long userId) {
         return userFinder.find(userId)
                 .orElseThrow(() -> new LearnerInsightAnalysisException(
-                        "Failed to apply learner insight suggestions because the user could not be found. "
-                                + "userId=" + userId
+                        "Failed to apply learner insight suggestions because the user could not be found."
                 ));
     }
 

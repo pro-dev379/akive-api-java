@@ -164,7 +164,7 @@ class CoachingMessageCommandService implements CoachingMessageSender {
             Throwable error
     ) {
         log.warn(
-                "Failed to generate a coaching conversation conversationTitle: coachingConversationId={}",
+                "Failed to generate a coaching conversation title: coachingConversationId={}",
                 coachingConversation.getCoachingConversationId(),
                 error
         );

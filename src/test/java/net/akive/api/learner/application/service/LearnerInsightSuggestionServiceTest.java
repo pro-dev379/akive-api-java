@@ -287,8 +287,7 @@ class LearnerInsightSuggestionServiceTest {
 
         assertThatExceptionOfType(LearnerInsightAnalysisException.class)
                 .isThrownBy(() -> learnerInsightSuggestionService.apply(command, analysisResult))
-                .withMessage("Failed to apply learner insight suggestions because the user could not be found. "
-                        + "userId=" + command.userId());
+                .withMessage("Failed to apply learner insight suggestions because the user could not be found.");
 
         then(eventProcessingTracker).should(never()).markProcessed(any(), any(), any());
     }

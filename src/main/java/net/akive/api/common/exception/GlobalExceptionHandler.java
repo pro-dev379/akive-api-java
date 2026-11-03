@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     ResponseEntity<ApiErrorResponse> handleBusinessException(HttpServletRequest request, BusinessException e) {
         ApplicationError error = e.getError();
-        logWarn(request, "[BusinessException]", e, "code=" + error.getCode() + ", detail=" + e.getDetail());
+        logWarn(request, "[BusinessException]", "code=" + error.getCode());
 
         return createErrorResponse(error);
     }
@@ -86,7 +86,7 @@ public class GlobalExceptionHandler {
     })
     ResponseEntity<ApiErrorResponse> handleInvalidInputException(HttpServletRequest request, Exception e) {
         List<FieldErrorDetail> fieldErrors = resolveInvalidInputFieldErrors(e);
-        logWarn(request, "[InvalidInputException]", e, "type=" + e.getClass().getSimpleName());
+        logWarn(request, "[InvalidInputException]", "type=" + e.getClass().getSimpleName());
 
         if (fieldErrors.isEmpty()) {
             return createErrorResponse(INVALID_INPUT_VALUE);
@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     ResponseEntity<ApiErrorResponse> handleNoResourceFoundException(HttpServletRequest request) {
-        logWarn(request, "[NoResourceFoundException]", null, null);
+        logWarn(request, "[NoResourceFoundException]", null);
 
         return createErrorResponse(ENDPOINT_NOT_FOUND);
     }
@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request,
             HttpRequestMethodNotSupportedException e
     ) {
-        logWarn(request, "[InvalidInputException]", e, "supportedMethods=" + e.getSupportedHttpMethods());
+        logWarn(request, "[InvalidInputException]", "supportedMethods=" + e.getSupportedHttpMethods());
 
         return createErrorResponse(METHOD_NOT_ALLOWED);
     }
@@ -233,7 +233,7 @@ public class GlobalExceptionHandler {
         return "Invalid value. Allowed values: " + allowedValues + ".";
     }
 
-    private void logWarn(HttpServletRequest request, String tag, Exception e, String extraMessage) {
+    private void logWarn(HttpServletRequest request, String tag, String extraMessage) {
         String message = String.format("%s uri=%s, method=%s%s",
                 tag,
                 request.getRequestURI(),
@@ -241,11 +241,7 @@ public class GlobalExceptionHandler {
                 extraMessage != null ? ", " + extraMessage : ""
         );
 
-        if (e != null) {
-            log.warn(message, e);
-        } else {
-            log.warn(message);
-        }
+        log.warn(message);
     }
 
     private void logInfo(HttpServletRequest request, String tag, String extraMessage) {

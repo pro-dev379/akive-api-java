@@ -58,7 +58,7 @@ class LearnerInsightQueryService implements LearnerInsightFinder {
                     .filter(java.util.Objects::nonNull)
                     .toList();
         } catch (RuntimeException e) {
-            log.warn("Failed to find relevant learner insights. Falling back to the database: userId={}", userId, e);
+            log.warn("Failed to find relevant learner insights. Falling back to the database.", e);
 
             return findFallbackInsights(userId, statuses, limit);
         }

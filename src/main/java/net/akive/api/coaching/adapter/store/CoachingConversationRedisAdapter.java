@@ -35,7 +35,7 @@ class CoachingConversationRedisAdapter implements CoachingConversationLock, Coac
             return Optional.empty();
         }
 
-        return Optional.of(() -> release(key, token));
+        return Optional.of(() -> release(key, token, coachingConversationId));
     }
 
     @Override
@@ -60,11 +60,15 @@ class CoachingConversationRedisAdapter implements CoachingConversationLock, Coac
         redisTemplateClient.delete(pendingCoachingResponse(coachingConversationId));
     }
 
-    private void release(String key, String token) {
+    private void release(String key, String token, Long coachingConversationId) {
         try {
             redisTemplateClient.compareAndDelete(key, token);
         } catch (RuntimeException e) {
-            log.error("Failed to release coaching conversation lock: key={}", key, e);
+            log.error(
+                    "Failed to release coaching conversation lock: coachingConversationId={}",
+                    coachingConversationId,
+                    e
+            );
         }
     }
 }
