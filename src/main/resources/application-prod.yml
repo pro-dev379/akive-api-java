@@ -19,6 +19,14 @@ spring:
     redis:
       host: master.akive-redis-prod.3ay8cv.apn2.cache.amazonaws.com
 
+logging:
+  structured:
+    format:
+      console: ecs
+    ecs:
+      service:
+        environment: production
+
 auth:
   jwt:
     access-token:

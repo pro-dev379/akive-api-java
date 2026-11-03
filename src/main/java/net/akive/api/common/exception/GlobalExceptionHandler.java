@@ -6,8 +6,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import net.akive.api.common.exception.business.BusinessException;
+import net.akive.api.common.logging.SecurityEventType;
 import net.akive.api.common.response.ApiErrorResponse;
 import net.akive.api.common.response.FieldErrorDetail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -23,20 +26,31 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.akive.api.common.exception.ApplicationErrorHttpStatusMapper.toHttpStatus;
+import static net.akive.api.common.exception.ApplicationErrorType.AUTHENTICATION_ERROR;
+import static net.akive.api.common.exception.ApplicationErrorType.RATE_LIMIT_EXCEEDED;
 import static net.akive.api.common.exception.business.BusinessRuleViolationError.INVALID_INPUT_VALUE;
 import static net.akive.api.common.exception.business.ResourceNotFoundError.ENDPOINT_NOT_FOUND;
 import static net.akive.api.common.exception.internal.UnexpectedServerError.INTERNAL_SERVER_ERROR;
 import static net.akive.api.common.exception.web.HttpRequestError.METHOD_NOT_ALLOWED;
+import static net.akive.api.common.logging.SecurityEventOutcome.DENIED;
+import static net.akive.api.common.logging.SecurityEventType.AUTHENTICATION_FAILED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger SECURITY_LOG = LoggerFactory.getLogger("SECURITY_EVENT");
+
     @ExceptionHandler(BusinessException.class)
     ResponseEntity<ApiErrorResponse> handleBusinessException(HttpServletRequest request, BusinessException e) {
         ApplicationError error = e.getError();
-        logWarn(request, "[BusinessException]", "code=" + error.getCode());
+
+        if (error.getType() == AUTHENTICATION_ERROR || error.getType() == RATE_LIMIT_EXCEEDED) {
+            logSecurityFailure(request, error);
+        } else {
+            logWarn(request, "[BusinessException]", "code=" + error.getCode());
+        }
 
         return createErrorResponse(error);
     }
@@ -119,6 +133,60 @@ public class GlobalExceptionHandler {
         return createErrorResponse(INTERNAL_SERVER_ERROR);
     }
 
+    private void logSecurityFailure(HttpServletRequest request, ApplicationError error) {
+        SECURITY_LOG.atWarn()
+                .addKeyValue("eventType", error.getType() == RATE_LIMIT_EXCEEDED
+                        ? SecurityEventType.RATE_LIMIT_EXCEEDED.name()
+                        : AUTHENTICATION_FAILED.name())
+                .addKeyValue("outcome", DENIED.name())
+                .addKeyValue("errorCode", error.getCode())
+                .addKeyValue("httpMethod", request.getMethod())
+                .addKeyValue("requestPath", request.getRequestURI())
+                .log("Security request rejected.");
+    }
+
+    private void logWarn(HttpServletRequest request, String tag, String extraMessage) {
+        String message = String.format("%s uri=%s, method=%s%s",
+                tag,
+                request.getRequestURI(),
+                request.getMethod(),
+                extraMessage != null ? ", " + extraMessage : ""
+        );
+
+        log.warn(message);
+    }
+
+    private ResponseEntity<ApiErrorResponse> createErrorResponse(ApplicationError error) {
+        return ResponseEntity
+                .status(toHttpStatus(error))
+                .contentType(APPLICATION_JSON)
+                .body(ApiErrorResponse.of(error));
+    }
+
+    private void logInfo(HttpServletRequest request, String tag, String extraMessage) {
+        log.info("{} uri={}, method={}, {}", tag, request.getRequestURI(), request.getMethod(), extraMessage);
+    }
+
+    private ResponseEntity<ApiErrorResponse> createErrorResponse(
+            ApplicationError error,
+            List<FieldErrorDetail> fieldErrorDetails
+    ) {
+        return ResponseEntity
+                .status(toHttpStatus(error))
+                .contentType(APPLICATION_JSON)
+                .body(ApiErrorResponse.of(error, fieldErrorDetails));
+    }
+
+    private String resolveConstraintViolationFieldName(String propertyPath) {
+        int lastDotIndex = propertyPath.lastIndexOf('.');
+
+        if (lastDotIndex == -1) {
+            return propertyPath;
+        }
+
+        return propertyPath.substring(lastDotIndex + 1);
+    }
+
     private List<FieldErrorDetail> resolveInvalidInputFieldErrors(Exception e) {
         if (e instanceof IllegalArgumentException illegalArgumentException) {
             return resolveIllegalArgumentFieldErrors(illegalArgumentException);
@@ -152,63 +220,6 @@ public class GlobalExceptionHandler {
         return List.of(new FieldErrorDetail(e.getName(), resolveInvalidFormatMessage(e.getRequiredType())));
     }
 
-    private List<FieldErrorDetail> resolveMessageNotReadableFieldErrors(HttpMessageNotReadableException e) {
-        if (!(e.getCause() instanceof InvalidFormatException invalidFormatException)) {
-            return List.of();
-        }
-
-        return List.of(new FieldErrorDetail(
-                        resolveFieldName(invalidFormatException),
-                        resolveInvalidFormatMessage(invalidFormatException)
-                ));
-    }
-
-    private List<FieldErrorDetail> resolveMissingRequestValueFieldErrors(MissingRequestValueException e) {
-        return List.of(new FieldErrorDetail(resolveMissingRequestValueFieldName(e), "Required value is missing."));
-    }
-
-    private String resolveConstraintViolationFieldName(String propertyPath) {
-        int lastDotIndex = propertyPath.lastIndexOf('.');
-
-        if (lastDotIndex == -1) {
-            return propertyPath;
-        }
-
-        return propertyPath.substring(lastDotIndex + 1);
-    }
-
-    private String resolveMissingRequestValueFieldName(MissingRequestValueException e) {
-        if (e instanceof MissingServletRequestParameterException missingParameterException) {
-            return missingParameterException.getParameterName();
-        }
-
-        if (e instanceof MissingPathVariableException missingPathVariableException) {
-            return missingPathVariableException.getVariableName();
-        }
-
-        if (e instanceof MissingRequestHeaderException missingRequestHeaderException) {
-            return missingRequestHeaderException.getHeaderName();
-        }
-
-        if (e instanceof MissingRequestCookieException missingRequestCookieException) {
-            return missingRequestCookieException.getCookieName();
-        }
-
-        return "request";
-    }
-
-    private String resolveFieldName(JsonMappingException e) {
-        return e.getPath()
-                .stream()
-                .map(JsonMappingException.Reference::getFieldName)
-                .filter(fieldName -> fieldName != null && !fieldName.isBlank())
-                .collect(Collectors.joining("."));
-    }
-
-    private String resolveInvalidFormatMessage(InvalidFormatException e) {
-        return resolveInvalidFormatMessage(e.getTargetType());
-    }
-
     private String resolveInvalidFormatMessage(Class<?> targetType) {
         if (targetType == null) {
             return "Invalid value.";
@@ -233,35 +244,50 @@ public class GlobalExceptionHandler {
         return "Invalid value. Allowed values: " + allowedValues + ".";
     }
 
-    private void logWarn(HttpServletRequest request, String tag, String extraMessage) {
-        String message = String.format("%s uri=%s, method=%s%s",
-                tag,
-                request.getRequestURI(),
-                request.getMethod(),
-                extraMessage != null ? ", " + extraMessage : ""
-        );
+    private List<FieldErrorDetail> resolveMessageNotReadableFieldErrors(HttpMessageNotReadableException e) {
+        if (!(e.getCause() instanceof InvalidFormatException invalidFormatException)) {
+            return List.of();
+        }
 
-        log.warn(message);
+        return List.of(new FieldErrorDetail(
+                        resolveFieldName(invalidFormatException),
+                        resolveInvalidFormatMessage(invalidFormatException)
+                ));
     }
 
-    private void logInfo(HttpServletRequest request, String tag, String extraMessage) {
-        log.info("{} uri={}, method={}, {}", tag, request.getRequestURI(), request.getMethod(), extraMessage);
+    private String resolveFieldName(JsonMappingException e) {
+        return e.getPath()
+                .stream()
+                .map(JsonMappingException.Reference::getFieldName)
+                .filter(fieldName -> fieldName != null && !fieldName.isBlank())
+                .collect(Collectors.joining("."));
     }
 
-    private ResponseEntity<ApiErrorResponse> createErrorResponse(ApplicationError error) {
-        return ResponseEntity
-                .status(toHttpStatus(error))
-                .contentType(APPLICATION_JSON)
-                .body(ApiErrorResponse.of(error));
+    private String resolveInvalidFormatMessage(InvalidFormatException e) {
+        return resolveInvalidFormatMessage(e.getTargetType());
     }
 
-    private ResponseEntity<ApiErrorResponse> createErrorResponse(
-            ApplicationError error,
-            List<FieldErrorDetail> fieldErrorDetails
-    ) {
-        return ResponseEntity
-                .status(toHttpStatus(error))
-                .contentType(APPLICATION_JSON)
-                .body(ApiErrorResponse.of(error, fieldErrorDetails));
+    private List<FieldErrorDetail> resolveMissingRequestValueFieldErrors(MissingRequestValueException e) {
+        return List.of(new FieldErrorDetail(resolveMissingRequestValueFieldName(e), "Required value is missing."));
+    }
+
+    private String resolveMissingRequestValueFieldName(MissingRequestValueException e) {
+        if (e instanceof MissingServletRequestParameterException missingParameterException) {
+            return missingParameterException.getParameterName();
+        }
+
+        if (e instanceof MissingPathVariableException missingPathVariableException) {
+            return missingPathVariableException.getVariableName();
+        }
+
+        if (e instanceof MissingRequestHeaderException missingRequestHeaderException) {
+            return missingRequestHeaderException.getHeaderName();
+        }
+
+        if (e instanceof MissingRequestCookieException missingRequestCookieException) {
+            return missingRequestCookieException.getCookieName();
+        }
+
+        return "request";
     }
 }

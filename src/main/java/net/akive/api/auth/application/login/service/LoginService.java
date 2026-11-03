@@ -1,6 +1,7 @@
 package net.akive.api.auth.application.login.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.akive.api.auth.application.login.provided.LoginProcessor;
 import net.akive.api.auth.application.login.provided.dto.LoginByEmailCommand;
 import net.akive.api.auth.application.login.required.LegacyUserPasswordRepository;
@@ -17,9 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_EMAIL_OR_PASSWORD;
+import static net.akive.api.common.logging.SecurityEventOutcome.SUCCEEDED;
+import static net.akive.api.common.logging.SecurityEventType.AUTHENTICATION_SUCCEEDED;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j(topic = "SECURITY_EVENT")
 class LoginService implements LoginProcessor {
 
     private final UserFinder userFinder;
@@ -40,11 +44,19 @@ class LoginService implements LoginProcessor {
             migratePassword(user, command.password());
         }
 
-        return tokenIssuer.issue(new TokenIssueCommand(
+        IssuedToken issuedToken = tokenIssuer.issue(new TokenIssueCommand(
                 user.getUserId(),
                 command.clientInstanceId(),
                 user.getRole()
         ));
+
+        log.atInfo()
+                .addKeyValue("eventType", AUTHENTICATION_SUCCEEDED.name())
+                .addKeyValue("outcome", SUCCEEDED.name())
+                .addKeyValue("userId", user.getUserId())
+                .log("Member authenticated.");
+
+        return issuedToken;
     }
 
     private boolean authenticateAndCheckLegacyPasswordUsed(User user, String rawPassword) {

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.akive.api.common.exception.business.AuthenticationError;
+import net.akive.api.common.logging.SecurityEventType;
 import net.akive.api.common.response.ApiErrorResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -17,10 +19,13 @@ import java.util.Locale;
 import static net.akive.api.common.exception.ApplicationErrorHttpStatusMapper.toHttpStatus;
 import static net.akive.api.common.exception.business.AuthenticationError.ACCESS_TOKEN_EXPIRED;
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_ACCESS_TOKEN;
+import static net.akive.api.common.logging.SecurityEventOutcome.DENIED;
+import static net.akive.api.common.logging.SecurityEventType.AUTHENTICATION_FAILED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j(topic = "SECURITY_EVENT")
 public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
@@ -32,12 +37,27 @@ public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
             AuthenticationException authException
     ) throws IOException {
         AuthenticationError errorCode = resolveUnauthorizedErrorCode(authException);
+        logAuthenticationFailure(request, errorCode);
 
         response.setStatus(toHttpStatus(errorCode).value());
         response.setContentType(APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         objectMapper.writeValue(response.getWriter(), ApiErrorResponse.of(errorCode));
+    }
+
+    private void logAuthenticationFailure(HttpServletRequest request, AuthenticationError error) {
+        SecurityEventType eventType = error == ACCESS_TOKEN_EXPIRED
+                ? SecurityEventType.ACCESS_TOKEN_EXPIRED
+                : AUTHENTICATION_FAILED;
+
+        log.atWarn()
+                .addKeyValue("eventType", eventType.name())
+                .addKeyValue("outcome", DENIED.name())
+                .addKeyValue("errorCode", error.getCode())
+                .addKeyValue("httpMethod", request.getMethod())
+                .addKeyValue("requestPath", request.getRequestURI())
+                .log("Authentication request rejected.");
     }
 
     private AuthenticationError resolveUnauthorizedErrorCode(AuthenticationException authException) {

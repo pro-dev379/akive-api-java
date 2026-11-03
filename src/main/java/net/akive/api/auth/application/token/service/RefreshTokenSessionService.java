@@ -1,6 +1,7 @@
 package net.akive.api.auth.application.token.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.akive.api.auth.application.token.provided.RefreshTokenSessionManager;
 import net.akive.api.auth.application.token.required.RefreshTokenCreator;
 import net.akive.api.auth.application.token.required.RefreshTokenParser;
@@ -17,10 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 import static net.akive.api.common.exception.business.AuthenticationError.INVALID_REFRESH_TOKEN;
+import static net.akive.api.common.logging.SecurityEventOutcome.SUCCEEDED;
+import static net.akive.api.common.logging.SecurityEventType.SESSION_REVOKED;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j(topic = "SECURITY_EVENT")
 class RefreshTokenSessionService implements RefreshTokenSessionManager {
 
     private final RefreshTokenCreator refreshTokenCreator;
@@ -88,6 +92,8 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
         if (!deleted) {
             throw new AuthenticationException(INVALID_REFRESH_TOKEN);
         }
+
+        logSessionRevoked(payload.userId(), "CURRENT");
     }
 
     @Override
@@ -97,11 +103,22 @@ class RefreshTokenSessionService implements RefreshTokenSessionManager {
         validateCurrent(payload.userId(), payload.clientInstanceId(), refreshToken);
 
         refreshTokenStore.deleteByUserId(payload.userId());
+        logSessionRevoked(payload.userId(), "ALL");
     }
 
     @Override
     public void revokeAllByUserId(Long userId) {
         refreshTokenStore.deleteByUserId(userId);
+        logSessionRevoked(userId, "ALL");
+    }
+
+    private void logSessionRevoked(Long userId, String scope) {
+        log.atInfo()
+                .addKeyValue("eventType", SESSION_REVOKED.name())
+                .addKeyValue("outcome", SUCCEEDED.name())
+                .addKeyValue("userId", userId)
+                .addKeyValue("scope", scope)
+                .log("Member session revoked.");
     }
 
     private void validateCurrent(Long userId, ClientInstanceId clientInstanceId, RefreshToken refreshToken) {

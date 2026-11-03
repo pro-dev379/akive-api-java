@@ -1,0 +1,12 @@
+package net.akive.api.common.logging;
+
+public enum SecurityEventType {
+    AUTHENTICATION_SUCCEEDED,
+    AUTHENTICATION_FAILED,
+    ACCESS_TOKEN_EXPIRED,
+    PASSWORD_CHANGED,
+    PASSWORD_RESET,
+    SESSION_REVOKED,
+    CSRF_PROTECTION_REJECTED,
+    RATE_LIMIT_EXCEEDED
+}

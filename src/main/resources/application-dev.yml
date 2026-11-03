@@ -23,6 +23,12 @@ spring:
       host: master.akive-redis-dev.3ay8cv.apn2.cache.amazonaws.com
 
 logging:
+  structured:
+    format:
+      console: ecs
+    ecs:
+      service:
+        environment: development
   level:
     org.hibernate.SQL: debug
     org.springframework.jdbc.core.JdbcTemplate: debug

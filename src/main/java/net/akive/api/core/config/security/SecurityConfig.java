@@ -22,6 +22,7 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.List;
 
 import static net.akive.api.core.config.security.CookieRequestProtectionFilter.CSRF_PROTECTION_HEADER_NAME;
+import static net.akive.api.core.config.logging.RequestCorrelationFilter.REQUEST_ID_HEADER_NAME;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -110,6 +111,7 @@ public class SecurityConfig {
                 "X-Client-Instance-Id",
                 CSRF_PROTECTION_HEADER_NAME
         ));
+        corsConfiguration.setExposedHeaders(List.of(REQUEST_ID_HEADER_NAME));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
