@@ -41,6 +41,18 @@ management:
       export:
         enabled: ${OTEL_TRACING_EXPORT_ENABLED:false}
 
+logging:
+  file:
+    name: /var/log/akive/security/security.log
+  structured:
+    format:
+      file: ecs
+  logback:
+    rollingpolicy:
+      max-file-size: 50MB
+      max-history: 2
+      total-size-cap: 200MB
+
 auth:
   jwt:
     issuer: akive

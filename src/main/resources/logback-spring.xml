@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+  <springProfile name="dev | prod">
+    <include resource="org/springframework/boot/logging/logback/structured-console-appender.xml"/>
+    <include resource="org/springframework/boot/logging/logback/structured-file-appender.xml"/>
+
+    <logger name="SECURITY_EVENT" level="INFO" additivity="false">
+      <appender-ref ref="FILE"/>
+    </logger>
+
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
+    </root>
+  </springProfile>
+
+  <springProfile name="!dev &amp; !prod">
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
+    </root>
+  </springProfile>
+</configuration>
