@@ -30,6 +30,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
 	implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+	implementation 'io.opentelemetry.instrumentation:opentelemetry-grpc-1.6:2.15.0-alpha'
 
 	// security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -39,6 +40,9 @@ dependencies {
 	// persistence
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation platform('net.ttddyy.observation:datasource-micrometer-bom:1.4.1')
+	implementation 'net.ttddyy.observation:datasource-micrometer-spring-boot'
+	implementation 'net.ttddyy.observation:datasource-micrometer-opentelemetry'
 	implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.4.0'
 	annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.4.0:jpa'
 

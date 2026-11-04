@@ -6,6 +6,8 @@ spring:
     aws:
       region:
         static: ap-northeast-2
+      sqs:
+        observation-enabled: true
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,6 +25,17 @@ spring:
       connect-timeout: 3s
       repositories:
         enabled: false
+
+jdbc:
+  datasource-proxy:
+    include-parameter-values: false
+    query:
+      enable-logging: false
+  includes: QUERY
+  opentelemetry:
+    analysis:
+      sanitize:
+        enabled: true
 
 management:
   endpoints:
