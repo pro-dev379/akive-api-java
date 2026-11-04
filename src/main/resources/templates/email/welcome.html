@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>akive와 함께 학습의 모든 순간을 이어가세요</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #F5F7FB; font-family: Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; color: #111B40; word-break: keep-all;">
-<!-- 메일 목록에 표시되는 미리보기 문구 -->
+<body
+    style="margin: 0; padding: 0; background-color: #F5F7FB;
+        font-family: Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+        color: #111B40; word-break: keep-all;"
+>
 <div style="display: none; max-height: 0; overflow: hidden; opacity: 0; color: transparent;">
     akive에 오신 것을 환영해요. 지금 나만의 학습을 시작해 보세요.
 </div>
@@ -27,36 +30,47 @@
                 cellpadding="0"
                 border="0"
                 width="100%"
-                style="width: 100%; max-width: 600px; overflow: hidden; background-color: #FFFFFF; border: 1px solid #E2E6EE; border-radius: 18px;"
+                style="width: 100%; max-width: 600px; overflow: hidden; background-color: #FFFFFF;
+                    border: 1px solid #E2E6EE; border-radius: 18px;"
             >
-                <!-- 브랜드 헤더 -->
                 <tr>
                     <td style="padding: 34px 36px 30px; background-color: #111B40;">
-                        <div style="font-size: 26px; font-weight: 800; line-height: 1.2; letter-spacing: -0.8px; color: #FFFFFF;">
+                        <div
+                            style="font-size: 26px; font-weight: 800; line-height: 1.2;
+                                letter-spacing: -0.8px; color: #FFFFFF;"
+                        >
                             akive
                         </div>
 
-                        <div style="margin-top: 10px; font-size: 13px; font-weight: 500; line-height: 1.5; letter-spacing: -0.2px; color: #C8D1E5;">
+                        <div
+                            style="margin-top: 10px; font-size: 13px; font-weight: 500; line-height: 1.5;
+                                letter-spacing: -0.2px; color: #C8D1E5;"
+                        >
                             학습의 모든 순간을 하나로
                         </div>
                     </td>
                 </tr>
 
-                <!-- 본문 -->
                 <tr>
                     <td style="padding: 40px 36px 36px;">
-                        <p style="margin: 0 0 10px; font-size: 12px; font-weight: 700; line-height: 1.5; letter-spacing: 0.8px; color: #6179AD;">
+                        <p
+                            style="margin: 0 0 10px; font-size: 12px; font-weight: 700; line-height: 1.5;
+                                letter-spacing: 0.8px; color: #6179AD;"
+                        >
                             WELCOME TO AKIVE
                         </p>
 
-                        <h1 style="margin: 0 0 28px; font-size: 27px; font-weight: 800; line-height: 1.35; letter-spacing: -0.9px; color: #111B40;">
+                        <h1
+                            style="margin: 0 0 28px; font-size: 27px; font-weight: 800; line-height: 1.35;
+                                letter-spacing: -0.9px; color: #111B40;"
+                        >
                             가입을 환영해요
                         </h1>
 
-                        <!-- 닉네임이 있는 경우 -->
                         <p
                             th:if="${nickname != null and !nickname.trim().isEmpty()}"
-                            style="margin: 0 0 18px; font-size: 15px; line-height: 1.8; letter-spacing: -0.2px; color: #374151;"
+                            style="margin: 0 0 18px; font-size: 15px; line-height: 1.8;
+                                letter-spacing: -0.2px; color: #374151;"
                         >
                             안녕하세요,
                             <strong
@@ -68,22 +82,26 @@
                             akive에 오신 것을 환영해요.
                         </p>
 
-                        <!-- 닉네임이 없는 경우 -->
                         <p
                             th:unless="${nickname != null and !nickname.trim().isEmpty()}"
-                            style="margin: 0 0 18px; font-size: 15px; line-height: 1.8; letter-spacing: -0.2px; color: #374151;"
+                            style="margin: 0 0 18px; font-size: 15px; line-height: 1.8;
+                                letter-spacing: -0.2px; color: #374151;"
                         >
                             안녕하세요.<br/>
                             akive에 오신 것을 환영해요.
                         </p>
 
-                        <p style="margin: 0 0 28px; font-size: 15px; line-height: 1.85; letter-spacing: -0.2px; color: #596579;">
+                        <p
+                            style="margin: 0 0 28px; font-size: 15px; line-height: 1.85;
+                                letter-spacing: -0.2px; color: #596579;"
+                        >
                             아직 목표가 막연하고 무엇부터 시작해야 할지 몰라도 괜찮아요.
-                            akive에서 목표와 계획을 하나씩 구체화하고, 실행한 내용을 기록하며 돌아보세요.
-                            나의 학습 상태를 이해하고 다음 방향을 스스로 결정할 수 있을 거예요.
+                            akive에서 목표와 계획을 하나씩 구체화하고,
+                            실행한 내용을 기록하며 돌아보세요.
+                            나의 학습 상태를 이해하고
+                            다음 방향을 스스로 결정할 수 있을 거예요.
                         </p>
 
-                        <!-- 브랜드 메시지 -->
                         <table
                             role="presentation"
                             cellspacing="0"
@@ -93,8 +111,15 @@
                             style="width: 100%; margin: 0 0 30px;"
                         >
                             <tr>
-                                <td style="padding: 20px 22px; background-color: #F1F4FA; border: 1px solid #DCE3F0; border-left: 3px solid #6179AD; border-radius: 0 12px 12px 0;">
-                                    <p style="margin: 0; font-size: 15px; font-weight: 700; line-height: 1.75; letter-spacing: -0.3px; color: #111B40;">
+                                <td
+                                    style="padding: 20px 22px; background-color: #F1F4FA;
+                                        border: 1px solid #DCE3F0; border-left: 3px solid #6179AD;
+                                        border-radius: 0 12px 12px 0;"
+                                >
+                                    <p
+                                        style="margin: 0; font-size: 15px; font-weight: 700;
+                                            line-height: 1.75; letter-spacing: -0.3px; color: #111B40;"
+                                    >
                                         계획을 세우는 순간부터<br/>
                                         다음 학습을 준비하는 순간까지,<br/>
                                         akive가 함께할게요.
@@ -103,7 +128,6 @@
                             </tr>
                         </table>
 
-                        <!-- 시작 버튼 -->
                         <table
                             role="presentation"
                             cellspacing="0"
@@ -128,7 +152,10 @@
                                                 <a
                                                     href="https://www.akive.net"
                                                     target="_blank"
-                                                    style="display: inline-block; padding: 15px 30px; font-size: 14px; font-weight: 700; line-height: 1.4; letter-spacing: -0.2px; color: #FFFFFF; text-decoration: none; border-radius: 12px;"
+                                                    style="display: inline-block; padding: 15px 30px;
+                                                        font-size: 14px; font-weight: 700; line-height: 1.4;
+                                                        letter-spacing: -0.2px; color: #FFFFFF;
+                                                        text-decoration: none; border-radius: 12px;"
                                                 >
                                                     내 학습 시작하기
                                                 </a>
@@ -141,7 +168,6 @@
                     </td>
                 </tr>
 
-                <!-- 푸터 -->
                 <tr>
                     <td style="padding: 24px 36px 30px; border-top: 1px solid #E9EDF4; background-color: #FAFBFD;">
                         <p style="margin: 0 0 8px; font-size: 12px; line-height: 1.6; color: #8A94A6;">
