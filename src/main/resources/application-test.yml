@@ -18,6 +18,14 @@ spring:
     redis:
       host: localhost
 
+jdbc:
+  datasource-proxy:
+    enabled: false
+
+management:
+  tracing:
+    enabled: false
+
 auth:
   jwt:
     access-token:

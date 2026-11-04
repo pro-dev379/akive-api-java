@@ -18,6 +18,27 @@ spring:
     redis:
       host: master.akive-redis-prod.3ay8cv.apn2.cache.amazonaws.com
 
+jdbc:
+  datasource-proxy:
+    include-parameter-values: false
+    query:
+      enable-logging: false
+  includes: QUERY
+  opentelemetry:
+    analysis:
+      sanitize:
+        enabled: true
+
+management:
+  tracing:
+    sampling:
+      probability: 0.05
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+      export:
+        enabled: ${OTEL_TRACING_EXPORT_ENABLED}
+
 logging:
   structured:
     format:

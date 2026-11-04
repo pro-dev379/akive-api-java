@@ -23,6 +23,14 @@ spring:
     redis:
       host: localhost
 
+jdbc:
+  datasource-proxy:
+    enabled: false
+
+management:
+  tracing:
+    enabled: false
+
 logging:
   level:
     org.hibernate.SQL: debug

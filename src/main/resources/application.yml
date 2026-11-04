@@ -26,17 +26,6 @@ spring:
       repositories:
         enabled: false
 
-jdbc:
-  datasource-proxy:
-    include-parameter-values: false
-    query:
-      enable-logging: false
-  includes: QUERY
-  opentelemetry:
-    analysis:
-      sanitize:
-        enabled: true
-
 management:
   endpoints:
     web:
@@ -45,14 +34,6 @@ management:
   endpoint:
     health:
       show-details: never
-  tracing:
-    sampling:
-      probability: 0.05
-  otlp:
-    tracing:
-      endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
-      export:
-        enabled: ${OTEL_TRACING_EXPORT_ENABLED:false}
 
 logging:
   file:
