@@ -42,9 +42,9 @@ management:
       probability: 0.1
   otlp:
     tracing:
-      endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+      endpoint: http://172.17.0.1:4318/v1/traces
       export:
-        enabled: ${OTEL_TRACING_EXPORT_ENABLED}
+        enabled: true
 
 observability:
   remote-service-naming:
