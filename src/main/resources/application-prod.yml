@@ -30,6 +30,10 @@ jdbc:
         enabled: true
 
 management:
+  opentelemetry:
+    resource-attributes:
+      service.name: akive-api-java-prod
+      deployment.environment.name: production
   tracing:
     sampling:
       probability: 0.05
@@ -38,6 +42,12 @@ management:
       endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
       export:
         enabled: ${OTEL_TRACING_EXPORT_ENABLED}
+
+observability:
+  remote-service-naming:
+    database: akive-rds-prod
+    redis: akive-redis-prod
+    qdrant: akive-qdrant-prod
 
 logging:
   structured:

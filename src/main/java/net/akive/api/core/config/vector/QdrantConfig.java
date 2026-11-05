@@ -6,6 +6,7 @@ import io.qdrant.client.QdrantClient;
 import io.qdrant.client.QdrantGrpcClient;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.instrumentation.grpc.v1_6.GrpcTelemetry;
+import net.akive.api.core.config.observability.RemoteServiceNamingProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,14 +14,22 @@ import org.springframework.context.annotation.Configuration;
 public class QdrantConfig {
 
     @Bean(destroyMethod = "close")
-    public QdrantClient qdrantClient(QdrantProperties qdrantProperties, OpenTelemetry openTelemetry) {
-        ManagedChannel channel = createChannel(qdrantProperties, openTelemetry);
+    public QdrantClient qdrantClient(
+            QdrantProperties qdrantProperties,
+            OpenTelemetry openTelemetry,
+            RemoteServiceNamingProperties remoteServiceNamingProperties
+    ) {
+        ManagedChannel channel = createChannel(qdrantProperties, openTelemetry, remoteServiceNamingProperties);
         QdrantGrpcClient grpcClient = QdrantGrpcClient.newBuilder(channel, true).build();
 
         return new QdrantClient(grpcClient);
     }
 
-    private ManagedChannel createChannel(QdrantProperties qdrantProperties, OpenTelemetry openTelemetry) {
+    private ManagedChannel createChannel(
+            QdrantProperties qdrantProperties,
+            OpenTelemetry openTelemetry,
+            RemoteServiceNamingProperties remoteServiceNamingProperties
+    ) {
         ManagedChannelBuilder<?> channelBuilder = ManagedChannelBuilder.forAddress(
                 qdrantProperties.host(),
                 qdrantProperties.grpcPort()
@@ -33,7 +42,10 @@ public class QdrantConfig {
         }
 
         return channelBuilder
-                .intercept(GrpcTelemetry.create(openTelemetry).newClientInterceptor())
+                .intercept(GrpcTelemetry.builder(openTelemetry)
+                        .setPeerService(remoteServiceNamingProperties.qdrant())
+                        .build()
+                        .newClientInterceptor())
                 .build();
     }
 }

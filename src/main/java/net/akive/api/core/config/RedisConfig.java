@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.lettuce.core.tracing.MicrometerTracing;
 import io.micrometer.observation.ObservationRegistry;
+import net.akive.api.core.config.observability.RemoteServiceNamingProperties;
 import org.springframework.boot.autoconfigure.data.redis.ClientResourcesBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +22,14 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Bean
-    public ClientResourcesBuilderCustomizer lettuceTracingCustomizer(ObservationRegistry observationRegistry) {
-        return builder -> builder.tracing(new MicrometerTracing(observationRegistry, "Redis"));
+    public ClientResourcesBuilderCustomizer lettuceTracingCustomizer(
+            ObservationRegistry observationRegistry,
+            RemoteServiceNamingProperties remoteServiceNamingProperties
+    ) {
+        return builder -> builder.tracing(new MicrometerTracing(
+                observationRegistry,
+                remoteServiceNamingProperties.redis()
+        ));
     }
 
     @Bean
