@@ -1,6 +1,7 @@
 package net.akive.api.plan.adapter.webapi.sessionalplan;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanCreateRequest;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.request.SessionalPlanUpdateRequest;
@@ -16,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.SESSIONAL_PLANS;
+import static net.akive.api.common.cache.CacheKeyProvider.sessionalPlanAnalyticsPattern;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -26,6 +28,7 @@ public class SessionalPlanApi {
 
     private final SessionalPlanFinder sessionalPlanFinder;
     private final SessionalPlanCreator sessionalPlanCreator;
+    private final ResponseCache responseCache;
 
     @GetMapping
     public SessionalPlansFindResponse findAll(@AuthenticatedUserId Long userId) {
@@ -61,11 +64,13 @@ public class SessionalPlanApi {
             @Validated @RequestBody SessionalPlanUpdateRequest request
     ) {
         sessionalPlanCreator.update(request.to(sessionalPlanId, userId));
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
     }
 
     @DeleteMapping("/{sessionalPlanId}")
     @ResponseStatus(NO_CONTENT)
     public void delete(@AuthenticatedUserId Long userId, @PathVariable Long sessionalPlanId) {
         sessionalPlanCreator.delete(new SessionalPlanDeleteCommand(userId, sessionalPlanId));
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
     }
 }

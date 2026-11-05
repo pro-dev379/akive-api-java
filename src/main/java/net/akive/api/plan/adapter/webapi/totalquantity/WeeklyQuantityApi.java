@@ -1,6 +1,7 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.WeeklyAmountDelayRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.WeeklyQuantityAmountUpdateRequest;
@@ -15,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.WEEKLY_QUANTITY;
+import static net.akive.api.common.cache.CacheKeyProvider.sessionalPlanAnalyticsPattern;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
@@ -24,6 +26,7 @@ public class WeeklyQuantityApi {
 
     private final WeeklyQuantityFinder weeklyQuantityFinder;
     private final TotalQuantityModifier totalQuantityModifier;
+    private final ResponseCache responseCache;
 
     @GetMapping
     public WeeklyPlanFindResponse.WeeklyQuantityResponse find(
@@ -63,6 +66,7 @@ public class WeeklyQuantityApi {
         );
 
         totalQuantityModifier.updateWeeklyQuantityAmount(command);
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
     }
 
     @PatchMapping("/delays")
@@ -84,5 +88,6 @@ public class WeeklyQuantityApi {
         );
 
         totalQuantityModifier.delayWeeklyAmountTo(command);
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
     }
 }

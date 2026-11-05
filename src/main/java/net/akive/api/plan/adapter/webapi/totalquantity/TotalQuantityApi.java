@@ -1,6 +1,7 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.adapter.webapi.sessionalplan.dto.response.SessionalPlanDetailFindResponse;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.TotalQuantityCreateRequest;
@@ -16,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.TOTAL_QUANTITIES;
+import static net.akive.api.common.cache.CacheKeyProvider.sessionalPlanAnalyticsPattern;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -27,6 +29,7 @@ public class TotalQuantityApi {
     private final TotalQuantityCreator totalQuantityCreator;
     private final TotalQuantityFinder totalQuantityFinder;
     private final TotalQuantityModifier totalQuantityModifier;
+    private final ResponseCache responseCache;
 
     @PostMapping
     @ResponseStatus(CREATED)
@@ -35,7 +38,11 @@ public class TotalQuantityApi {
             @PathVariable Long sessionalPlanId,
             @Validated @RequestBody TotalQuantityCreateRequest request
     ) {
-        return new TotalQuantityCreateResponse(totalQuantityCreator.create(request.to(userId, sessionalPlanId)));
+        TotalQuantityCreateResponse response =
+                new TotalQuantityCreateResponse(totalQuantityCreator.create(request.to(userId, sessionalPlanId)));
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
+
+        return response;
     }
 
     @GetMapping("/{totalQuantityId}")
@@ -64,6 +71,7 @@ public class TotalQuantityApi {
             @Validated @RequestBody TotalQuantityUpdateRequest request
     ) {
         totalQuantityModifier.update(request.to(userId, sessionalPlanId, totalQuantityId));
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
     }
 
     @DeleteMapping("/{totalQuantityId}")
@@ -74,5 +82,6 @@ public class TotalQuantityApi {
             @PathVariable Long totalQuantityId
     ) {
         totalQuantityModifier.delete(new TotalQuantityDeleteCommand(sessionalPlanId, userId, totalQuantityId));
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
     }
 }

@@ -1,5 +1,6 @@
 package net.akive.api.dailylog.adapter.webapi;
 
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.dailylog.application.provided.DailyLogFinder;
 import net.akive.api.dailylog.application.provided.dto.FocusMetricsFindQuery;
 import net.akive.api.dailylog.application.provided.dto.FocusMetricsSeriesFindQuery;
@@ -35,6 +36,9 @@ class DailyLogAnalyticsApiTest extends PrivateApiTestSupport {
 
     @MockitoBean
     DailyLogFinder dailyLogFinder;
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     @Test
     void 조회_기간_전체의_일일_로그_타입별_시간_사용률을_조회한다() {

@@ -1,5 +1,6 @@
 package net.akive.api.user.adapter.webapi;
 
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
@@ -63,6 +64,9 @@ import static org.springframework.http.HttpStatus.*;
 
 @WebMvcTest(MemberPrivateApi.class)
 class MemberPrivateApiTest extends PrivateApiTestSupport {
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     private static final String MEMBER_ME_URL = "/members/me";
     private static final String MEMBER_WITHDRAW_URL = "/members/me/withdraw";

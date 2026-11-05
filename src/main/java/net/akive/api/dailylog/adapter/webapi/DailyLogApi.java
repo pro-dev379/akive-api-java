@@ -1,6 +1,7 @@
 package net.akive.api.dailylog.adapter.webapi;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.common.pagination.PageCondition;
 import net.akive.api.common.pagination.PageResult;
 import net.akive.api.core.config.security.AuthenticatedUserId;
@@ -20,6 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 import static net.akive.api.common.pagination.SortDirection.DESC;
+import static net.akive.api.common.cache.CacheKeyProvider.dailyLogAnalyticsPattern;
+import static net.akive.api.common.cache.CacheKeyProvider.dailyLogTypes;
+import static net.akive.api.common.cache.ResponseCacheTtl.COMMON_CODE_LIST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -30,6 +34,7 @@ public class DailyLogApi {
 
     private final DailyLogFinder dailyLogFinder;
     private final DailyLogCreator dailyLogCreator;
+    private final ResponseCache responseCache;
 
     @GetMapping
     public DailyLogsFindResponse findAll(@AuthenticatedUserId Long userId, @RequestParam LocalDate logOn) {
@@ -44,7 +49,10 @@ public class DailyLogApi {
     ) {
         DailyLogCreateCommand command = request.to(userId);
 
-        return new DailyLogCreateResponse(dailyLogCreator.create(command));
+        DailyLogCreateResponse response = new DailyLogCreateResponse(dailyLogCreator.create(command));
+        responseCache.evictByPattern(dailyLogAnalyticsPattern(userId));
+
+        return response;
     }
 
     @PutMapping("/{dailyLogId}")
@@ -55,12 +63,14 @@ public class DailyLogApi {
             @Validated @RequestBody DailyLogUpdateRequest request
     ) {
         dailyLogCreator.update(request.to(dailyLogId, userId));
+        responseCache.evictByPattern(dailyLogAnalyticsPattern(userId));
     }
 
     @DeleteMapping("/{dailyLogId}")
     @ResponseStatus(NO_CONTENT)
     public void delete(@AuthenticatedUserId Long userId, @PathVariable Long dailyLogId) {
         dailyLogCreator.delete(new DailyLogDeleteCommand(dailyLogId, userId));
+        responseCache.evictByPattern(dailyLogAnalyticsPattern(userId));
     }
 
     @GetMapping("/log-ons")
@@ -77,6 +87,15 @@ public class DailyLogApi {
 
     @GetMapping("/types")
     public DailyLogTypesFindResponse findDailyLogTypes() {
-        return DailyLogTypesFindResponse.from(dailyLogFinder.findDailyLogTypes());
+        String cacheKey = dailyLogTypes();
+
+        return responseCache.get(cacheKey, DailyLogTypesFindResponse.class)
+                .orElseGet(() -> {
+                    DailyLogTypesFindResponse response =
+                            DailyLogTypesFindResponse.from(dailyLogFinder.findDailyLogTypes());
+                    responseCache.put(cacheKey, response, COMMON_CODE_LIST);
+
+                    return response;
+                });
     }
 }

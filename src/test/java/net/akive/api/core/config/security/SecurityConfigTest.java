@@ -14,6 +14,7 @@ import net.akive.api.auth.application.token.provided.TokenIssuer;
 import net.akive.api.auth.application.token.provided.dto.TokenReissueCommand;
 import net.akive.api.auth.domain.token.RefreshToken;
 import net.akive.api.common.exception.ApplicationError;
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.legal.adapter.webapi.LegalDocumentActionApi;
 import net.akive.api.legal.adapter.webapi.LegalDocumentApi;
 import net.akive.api.legal.application.provided.LegalDocumentActionFinder;
@@ -87,6 +88,9 @@ class SecurityConfigTest {
 
     @MockitoBean
     JwtDecoder accessTokenJwtDecoder;
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     @MockitoBean
     LoginProcessor loginProcessor;

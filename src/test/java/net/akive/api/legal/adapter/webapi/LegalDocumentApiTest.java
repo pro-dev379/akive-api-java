@@ -1,5 +1,6 @@
 package net.akive.api.legal.adapter.webapi;
 
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.legal.application.provided.LegalDocumentFinder;
 import net.akive.api.legal.domain.LegalDocument;
@@ -35,6 +36,9 @@ class LegalDocumentApiTest extends PublicApiTestSupport {
 
     @MockitoBean
     LegalDocumentFinder legalDocumentFinder;
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     @Test
     void 약관_및_정책_문서_상세를_조회한다() {

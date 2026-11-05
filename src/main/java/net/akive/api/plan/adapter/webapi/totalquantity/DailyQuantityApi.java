@@ -1,6 +1,7 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.DailyAmountDelayRequest;
 import net.akive.api.plan.adapter.webapi.totalquantity.dto.request.DailyAmountUpdateRequest;
@@ -13,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import static net.akive.api.plan.adapter.webapi.common.PlanApiPath.DAILY_QUANTITY;
+import static net.akive.api.common.cache.CacheKeyProvider.sessionalPlanAnalyticsPattern;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
@@ -21,6 +23,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 public class DailyQuantityApi {
 
     public final TotalQuantityModifier totalQuantityModifier;
+    private final ResponseCache responseCache;
 
     @PatchMapping
     @ResponseStatus(NO_CONTENT)
@@ -43,6 +46,7 @@ public class DailyQuantityApi {
         );
 
         totalQuantityModifier.updateDailyAmount(command);
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
     }
 
     @PatchMapping("/completed-quantities")
@@ -65,6 +69,7 @@ public class DailyQuantityApi {
         );
 
         totalQuantityModifier.updateDailyCompletedAmount(command);
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
     }
 
     @PatchMapping("/delays")
@@ -88,5 +93,6 @@ public class DailyQuantityApi {
         );
 
         totalQuantityModifier.delayDailyAmountTo(command);
+        responseCache.evictByPattern(sessionalPlanAnalyticsPattern(userId));
     }
 }

@@ -1,5 +1,6 @@
 package net.akive.api.plan.adapter.webapi.sessionalplan;
 
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
@@ -49,6 +50,9 @@ import static org.springframework.http.HttpStatus.*;
 
 @WebMvcTest(SessionalPlanApi.class)
 class SessionalPlanApiTest extends PrivateApiTestSupport {
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     @MockitoBean
     SessionalPlanCreator sessionalPlanCreator;

@@ -1,5 +1,6 @@
 package net.akive.api.user.adapter.webapi;
 
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.support.PrivateApiTestSupport;
@@ -41,6 +42,9 @@ class MemberGoalApiTest extends PrivateApiTestSupport {
 
     @MockitoBean
     GoalFinder goalFinder;
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     @Test
     void 최신_목표를_추가한다() {

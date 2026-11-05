@@ -1,5 +1,6 @@
 package net.akive.api.plan.adapter.webapi.sessionalplan;
 
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.plan.application.provided.sessionalplan.SessionalPlanFinder;
 import net.akive.api.plan.application.provided.sessionalplan.dto.CompletionRateFindQuery;
 import net.akive.api.plan.application.provided.sessionalplan.dto.CompletionRateSeriesFindQuery;
@@ -31,6 +32,9 @@ class SessionalPlanAnalyticsApiTest extends PrivateApiTestSupport {
     private static final String COMPLETION_RATE_SERIES_URL = "/sessional-plans/analytics/completion-rates/series";
     @MockitoBean
     SessionalPlanFinder sessionalPlanFinder;
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     @Test
     void 조회_기간의_달성률을_조회한다() {

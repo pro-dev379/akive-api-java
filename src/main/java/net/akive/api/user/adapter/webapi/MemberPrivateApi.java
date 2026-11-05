@@ -2,6 +2,7 @@ package net.akive.api.user.adapter.webapi;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.core.config.security.AuthenticatedUserId;
 import net.akive.api.core.config.security.RefreshTokenCookieExpirer;
@@ -27,6 +28,8 @@ import java.net.URI;
 import java.util.UUID;
 
 import static net.akive.api.common.exception.business.ResourceNotFoundError.IMAGE_ASSET_NOT_FOUND;
+import static net.akive.api.common.cache.CacheKeyProvider.withdrawalReasons;
+import static net.akive.api.common.cache.ResponseCacheTtl.COMMON_CODE_LIST;
 import static net.akive.api.image.domain.VariantType.DETAIL;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -44,6 +47,7 @@ public class MemberPrivateApi {
 
     private final ImageResponseMapper imageResponseMapper;
     private final RefreshTokenCookieExpirer refreshTokenCookieExpirer;
+    private final ResponseCache responseCache;
 
     @GetMapping
     public UserFindResponse find(@AuthenticatedUserId Long userId) {
@@ -73,7 +77,16 @@ public class MemberPrivateApi {
 
     @GetMapping("/withdrawal-reasons")
     public WithdrawalReasonsFindResponse findWithdrawalReasons() {
-        return WithdrawalReasonsFindResponse.from(userFinder.findWithdrawalReasons());
+        String cacheKey = withdrawalReasons();
+
+        return responseCache.get(cacheKey, WithdrawalReasonsFindResponse.class)
+                .orElseGet(() -> {
+                    WithdrawalReasonsFindResponse response =
+                            WithdrawalReasonsFindResponse.from(userFinder.findWithdrawalReasons());
+                    responseCache.put(cacheKey, response, COMMON_CODE_LIST);
+
+                    return response;
+                });
     }
 
     @PostMapping("/withdraw")

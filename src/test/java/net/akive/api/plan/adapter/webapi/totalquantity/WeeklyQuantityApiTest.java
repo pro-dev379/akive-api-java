@@ -1,5 +1,6 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.plan.adapter.webapi.common.PlanApiPath;
@@ -43,6 +44,9 @@ import static org.springframework.http.HttpStatus.*;
 
 @WebMvcTest(WeeklyQuantityApi.class)
 class WeeklyQuantityApiTest extends PrivateApiTestSupport {
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     @MockitoBean
     WeeklyQuantityFinder weeklyQuantityFinder;

@@ -1,5 +1,6 @@
 package net.akive.api.plan.adapter.webapi.totalquantity;
 
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
@@ -46,6 +47,9 @@ import static org.springframework.http.HttpStatus.*;
 
 @WebMvcTest(TotalQuantityApi.class)
 class TotalQuantityApiTest extends PrivateApiTestSupport {
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     @MockitoBean
     TotalQuantityCreator totalQuantityCreator;

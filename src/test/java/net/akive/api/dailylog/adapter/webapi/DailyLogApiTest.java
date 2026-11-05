@@ -1,6 +1,7 @@
 package net.akive.api.dailylog.adapter.webapi;
 
 import net.akive.api.common.exception.business.BusinessRuleViolationException;
+import net.akive.api.common.cache.ResponseCache;
 import net.akive.api.common.exception.business.ResourceConflictException;
 import net.akive.api.common.exception.business.ResourceNotFoundException;
 import net.akive.api.common.pagination.PageCondition;
@@ -60,6 +61,9 @@ class DailyLogApiTest extends PrivateApiTestSupport {
 
     @MockitoBean
     DailyLogCreator dailyLogCreator;
+
+    @MockitoBean
+    ResponseCache responseCache;
 
     @Test
     void 일일_로그를_생성한다() {
