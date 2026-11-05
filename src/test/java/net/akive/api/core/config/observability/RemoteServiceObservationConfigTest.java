@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RemoteServiceObservationConfigTest {
 
+    private static final String AWS_REMOTE_SERVICE_ATTRIBUTE = "aws.remote.service";
     private static final String DATABASE_SERVICE_NAME = "akive-rds-dev";
     private static final String REDIS_SERVICE_NAME = "akive-redis-dev";
     private static final String QDRANT_SERVICE_NAME = "akive-qdrant-dev";
@@ -32,6 +33,8 @@ class RemoteServiceObservationConfigTest {
         remoteServiceObservationFilter.map(queryContext);
 
         assertThat(queryContext.getRemoteServiceName()).isEqualTo(DATABASE_SERVICE_NAME);
+        assertThat(queryContext.getLowCardinalityKeyValue(AWS_REMOTE_SERVICE_ATTRIBUTE).getValue())
+                .isEqualTo(DATABASE_SERVICE_NAME);
     }
 
     @Test
@@ -42,6 +45,7 @@ class RemoteServiceObservationConfigTest {
         remoteServiceObservationFilter.map(context);
 
         assertThat(context.getRemoteServiceName()).isEqualTo(QUEUE_NAME);
+        assertThat(context.getLowCardinalityKeyValue(AWS_REMOTE_SERVICE_ATTRIBUTE).getValue()).isEqualTo(QUEUE_NAME);
     }
 
     @Test
@@ -54,5 +58,6 @@ class RemoteServiceObservationConfigTest {
         remoteServiceObservationFilter.map(context);
 
         assertThat(context.getRemoteServiceName()).isEqualTo(QUEUE_NAME);
+        assertThat(context.getLowCardinalityKeyValue(AWS_REMOTE_SERVICE_ATTRIBUTE).getValue()).isEqualTo(QUEUE_NAME);
     }
 }
