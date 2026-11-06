@@ -57,7 +57,7 @@ interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Long> {
     );
 
     @Query("""
-        select count(d.activityTime) > 0
+        select count(d.dailyLogId) > 0
         from DailyLogEntity d
         where d.user.userId = :userId
           and d.activityTime.startOn < :endOn
@@ -66,7 +66,7 @@ interface DailyLogJpaRepository extends JpaRepository<DailyLogEntity, Long> {
     boolean existsOverlappingTimeByUserIdAndActivityTime(Long userId, LocalDateTime startOn, LocalDateTime endOn);
 
     @Query("""
-        select count(d.activityTime) > 0
+        select count(d.dailyLogId) > 0
         from DailyLogEntity d
         where d.user.userId = :userId
           and d.dailyLogId <> :excludedDailyLogId
