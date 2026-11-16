@@ -231,11 +231,10 @@ AWS CodePipeline
 
 ## 문제 해결
 
-### Secrets Manager 설정을 가져오지 못하는 경우
+### Secrets Manager 시크릿 조회에 실패하는 경우
 
 - 로컬 환경에 AWS 자격 증명이 설정되어 있는지 확인합니다.
-- 해당 자격 증명이 사용하는 IAM 사용자 또는 역할에 Secrets Manager의 시크릿 값을
-  조회할 권한(`secretsmanager:GetSecretValue`)이 있는지 확인합니다.
+- 해당 IAM 사용자 또는 역할에 시크릿 값을 조회할 권한(`secretsmanager:GetSecretValue`)이 있는지 확인합니다.
 
 ### MySQL 연결에 실패하는 경우
 
