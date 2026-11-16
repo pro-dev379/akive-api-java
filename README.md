@@ -128,8 +128,8 @@ curl http://localhost:8080/actuator/health
 
 | 프로필 | 용도 | 주요 특성 |
 | --- | --- | --- |
-| 공통 | 모든 환경 | MySQL 드라이버, UTC 저장, Redis 타임아웃, 보안, AI 및 이미지 기본값 |
-| `local` | 로컬 개발 | MySQL `ddl-auto=update`, SQL 로그 활성화, SQS 및 트레이싱 비활성화 |
+| 공통 | 모든 환경 | MySQL 드라이버, `ddl-auto=validate`, UTC 저장, Redis 타임아웃, 보안, AI 및 이미지 기본값 |
+| `local` | 로컬 개발 | SQL 로그 활성화, SQS 및 트레이싱 비활성화 |
 | `test` | 자동화 테스트 | H2 MySQL 호환 모드, `ddl-auto=create-drop`, SQS 및 트레이싱 비활성화 |
 | `dev` | 개발 서버 | 개발 인프라 연결, SQL 로그 활성화, 트레이스 샘플링 비율 10% |
 | `prod` | 운영 서버 | 운영 인프라 연결, SQL 로그 비활성화, 트레이스 샘플링 비율 5% |
